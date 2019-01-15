@@ -1,0 +1,55 @@
+.Browse-files-page {
+    width: 90%;
+    margin: auto;
+    padding: 20px;
+    background-color: #ecf0f1;
+}
+
+.File-filter {
+    border: 2px solid #239f85;
+    border-radius: 5px;
+}
+
+.File-filter-toolbar {
+    justify-content: center;
+    background-color: #239f85;
+    min-height: 40px !important;
+}
+
+.File-filter-toolbar-text {
+    color: white !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+}
+
+.File-filter-checkboxes {
+    padding-left: 10px;
+    max-height: 200px;
+    overflow: auto;
+}
+
+.File-filter-checkbox {
+    padding: 8px !important;
+}
+
+.File-table {
+    border: 1px solid #cfd0d0;
+}
+
+.File-search {
+    background-color: white;
+    margin-top: 0 !important;
+}
+
+.File-search-input {
+    height: 42px;
+}
+
+.File-search-label {
+    font-size: 14px !important;
+    line-height: 10% !important;
+}
+
+.File-search-border fieldset {
+    border-radius: 0;
+}
