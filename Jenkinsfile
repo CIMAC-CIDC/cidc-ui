@@ -56,7 +56,12 @@ spec:
     stage("Docker build") {
         steps {
             container('dockernpm') {
+                // load the appropriate configuration into the .env file
+                sh '([[ $GIT_BRANCH = staging ]] && cp .env.staging .env) || :'
+                sh '([[ $GIT_BRANCH = prod ]] && cp .env.prod .env) || :'
+                
                 sh 'npm run build'
+
                 dir('build') {
                     sh 'docker build -t nginx-website -f ../nginx/Dockerfile .'
                 }

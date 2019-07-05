@@ -4,7 +4,8 @@ import autobind from "autobind-decorator";
 import { getAccountInfo } from "../api/api";
 import nanoid from "nanoid";
 
-const CLIENT_ID: string = "Yjlt8LT5vXFJw1Z8m8eaB5aZO26uPyeD";
+const CLIENT_ID: string = process.env.REACT_APP_AUTH0_CLIENT_ID!;
+const DOMAIN: string = process.env.REACT_APP_AUTH0_DOMAIN!;
 
 export default class Auth {
     private accessToken!: string | undefined;
@@ -25,7 +26,7 @@ export default class Auth {
     }
 
     auth0 = new auth0.WebAuth({
-        domain: "cidc-test.auth0.com",
+        domain: DOMAIN,
         clientID: CLIENT_ID,
         redirectUri: window.location.origin + "/callback",
         responseType: "token id_token",
