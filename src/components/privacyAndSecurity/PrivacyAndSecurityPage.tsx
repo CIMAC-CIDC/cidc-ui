@@ -8,7 +8,7 @@ export default class PrivacyAndSecurityPage extends React.Component<any, {}> {
         }
 
         return (
-            <div className="Content">
+            <div>
                 <Typography
                     variant="h5"
                     gutterBottom={true}

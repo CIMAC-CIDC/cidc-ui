@@ -3,7 +3,7 @@
     align-items: center;
     justify-content: center;
     color: white;
-    background-color: #643bc6;
+    background-color: var(--cidc-purple);
     height: 48px;
     font-size: 24px;
 }

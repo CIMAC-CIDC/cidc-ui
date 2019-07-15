@@ -1,5 +1,5 @@
 .User-account-toolbar {
-    background-color: #239f85;
+    background-color: var(--bright-green);
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
 }
@@ -11,7 +11,7 @@
 }
 
 .User-account-paper {
-    background-color: #ecf0f1 !important;
+    background-color: var(--light-grey) !important;
 }
 
 .User-details {
