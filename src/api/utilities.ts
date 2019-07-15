@@ -1,7 +1,8 @@
 import { UriOptions } from "request";
 import request from "request-promise-native";
 
-const currentUrl: string = window.location.origin + "/api";
+const currentUrl: string =
+    process.env.REACT_APP_API_URL || window.location.origin + "/api";
 
 export interface IAPIHelperOptions {
     endpoint: string;
