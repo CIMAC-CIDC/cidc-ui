@@ -1,6 +1,8 @@
 .App {
     min-width: 1280px !important;
-    background-color: #ecf0f1;
+    --light-grey: #ecf0f1;
+    --bright-green: #239f85;
+    --cidc-purple: #643bc6;
 }
 
 .Markdown-width {
@@ -9,6 +11,7 @@
 }
 
 .Content {
-    margin: auto;
-    width: 90%;
+    padding: 3em;
+    background-color: var(--light-grey);
+    min-height: 960px; /* totally arbitrary */
 }

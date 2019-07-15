@@ -9,7 +9,7 @@ export default class HomePage extends React.Component<any, {}> {
         }
 
         return (
-            <div className="Content">
+            <div>
                 <Typography variant="h4" gutterBottom={true}>
                     Welcome to the CIMAC-CIDC Data Portal
                 </Typography>

@@ -67,7 +67,7 @@ export default class UserAccountPage extends React.Component<
         }
 
         return (
-            <div className="Content">
+            <div>
                 <Paper className="User-account-paper">
                     <Toolbar className="User-account-toolbar">
                         <Typography className="User-account-toolbar-text">

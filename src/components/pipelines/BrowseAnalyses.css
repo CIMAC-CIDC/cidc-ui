@@ -1,17 +1,17 @@
 .Browse-analyses-page {
     margin: auto;
     padding: 20px;
-    background-color: #ecf0f1;
+    background-color: var(--light-grey);
 }
 
 .Analysis-filter {
-    border: 2px solid #239f85;
+    border: 2px solid black;
     border-radius: 5px;
 }
 
 .Analysis-filter-toolbar {
     justify-content: center;
-    background-color: #239f85;
+    background-color: var(--bright-green);
     min-height: 40px !important;
 }
 
