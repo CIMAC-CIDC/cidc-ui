@@ -8,7 +8,7 @@
 # Configure the environment based on the branch
 if [ "$TRAVIS_BRANCH" = production ]; then
     cat .env.prod > .env
-else
+elif [ "$TRAVIS_BRANCH" = master ]; then
     cat .env.staging > .env
 fi
 
