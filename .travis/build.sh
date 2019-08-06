@@ -5,4 +5,11 @@
 # TODO: generate up-to-date shipping manifest templates 
 # and move these into public/static before running build
 
+# Configure the environment based on the branch
+if [ "$TRAVIS_BRANCH" = production ]; then
+    cat .env.prod > .env
+else
+    cat .env.staging > .env
+fi
+
 npm build

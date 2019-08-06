@@ -15,11 +15,9 @@ source $HOME/google-cloud-sdk/path.bash.inc
 if [ "$TRAVIS_BRANCH" = production ]; then
     gcloud config set project $GCLOUD_PROJECT_ID_PROD;
     export GCLOUD_SERVICE_ACCOUNT_JSON="$GCLOUD_SERVICE_ACCOUNT_JSON_PROD";
-    cat .env.prod > .env;
 else
     gcloud config set project $GCLOUD_PROJECT_ID_STAGING;
     export GCLOUD_SERVICE_ACCOUNT_JSON="$GCLOUD_SERVICE_ACCOUNT_JSON_STAGING";
-    cat .env.staging > .env;
 fi
 echo "$GCLOUD_SERVICE_ACCOUNT_JSON" | base64 --decode > $GOOGLE_APPLICATION_CREDENTIALS
 gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
