@@ -1,7 +1,8 @@
-| Branch | Coverage | Travis |
-| --- | --- | --- |
-| Master | [![codecov](https://codecov.io/gh/CIMAC-CIDC/cidc-front-end/branch/master/graph/badge.svg)](https://codecov.io/gh/CIMAC-CIDC/cidc-front-end/branch/master/) | ![travis](https://img.shields.io/travis/CIMAC-CIDC/cidc-ui/master.svg)
-| Staging | [![codecov](https://codecov.io/gh/CIMAC-CIDC/cidc-front-end/branch/staging/graph/badge.svg)](https://codecov.io/gh/CIMAC-CIDC/cidc-front-end/branch/staging/) | ![travis](https://img.shields.io/travis/CIMAC-CIDC/cidc-ui/staging.svg)
+| Environment | Branch                                                              | Status                                                                                                                      |
+| ----------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| production  | [production](https://github.com/CIMAC-CIDC/cidc-ui/tree/production) | [![Build Status](https://travis-ci.org/CIMAC-CIDC/cidc-ui.svg?branch=production)](https://travis-ci.org/CIMAC-CIDC/cidc-ui) |
+| staging     | [master](https://github.com/CIMAC-CIDC/cidc-ui)                     | [![Build Status](https://travis-ci.org/CIMAC-CIDC/cidc-ui.svg?branch=master)](https://travis-ci.org/CIMAC-CIDC/cidc-ui)     |
+
 ## CIDC UI Readme
 
 
@@ -19,16 +20,12 @@ To create a new deployment bundle, run `npm run build`
 To run unit tests, run: `npm run test`. This should generate code coverage files and an `lcov.info` file that is compatible with most code-coverage highlighting plugins.
 
 ### Deploy
-The contents of the "build" folder can be used with virtually any hosting solution. The one used for this project is an NGINX instance running on kubernetes. To build the image for this service:
+The CIDC leverages GCS's static site-hosting capabilities for serving the Portal UI. Although it's recommended that you rely on the Travis CI pipeline for deployment to staging and production, should you need to deploy by hand, run:
+```bash
+sh .travis/build.sh
+sh .travis/deploy.sh gs://$YOUR_GCS_BUCKET
+```
+This will create a production-ready build of the site using whatever configuration is present in your `.env` file, upload the build files to `$YOUR_GCS_BUCKET`, and make those files publicly readable.
 
-Run the the script `copybuild.sh` in the root of the project directory. This should create and upload a Docker image for the service, as well as use helm to upgrade or install the existing deployment. For people not using the CIDC development settings the steps will be the following:
-
-From the `/build` directory, run
-
-~~~~
-docker build -f ../nginx/Dockerfile .
-~~~~
-
-Which will create an image of an NGINX server with the build files hosted on it. You may then run the image on whatever setup you are currently using. See the helm chart used for kubernetes [here](https://github.com/CIMAC-CIDC/tree/master/kubernetes/helm/nginx)
 ### Developer mode:
 To test React components without trying to contact the back-end, start the application in "dev mode", with `npm run start-dev`
