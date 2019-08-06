@@ -40,7 +40,11 @@ class Header extends React.Component<any, {}> {
 
         return (
             <div style={{ backgroundColor: "var(--light-grey)" }}>
-                <img src={logo} className="Logo" />
+                <img
+                    src={logo}
+                    className="Logo"
+                    alt="The Cancer Immunologic Data Commons"
+                />
                 <Tabs
                     value={selectedTab}
                     onChange={this.handleChange}

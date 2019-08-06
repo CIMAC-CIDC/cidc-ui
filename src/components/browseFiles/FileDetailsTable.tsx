@@ -4,7 +4,6 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import filesize from "filesize";
-import _ from "lodash";
 import * as React from "react";
 import { File } from "../../model/file";
 import { LOCALE, DATE_OPTIONS } from "../../util/constants";

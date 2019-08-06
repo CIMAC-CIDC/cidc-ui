@@ -196,7 +196,7 @@ export default class AnalysisTable extends React.Component<
                                                 ? "inherit"
                                                 : "pointer"
                                         }}
-                                        onMouseOver={() =>
+                                        onMouseOver={event =>
                                             this.handlePopoverOpen(
                                                 event,
                                                 isLocked
