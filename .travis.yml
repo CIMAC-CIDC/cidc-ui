@@ -20,9 +20,11 @@ before_deploy:
 deploy:
   - provider: script
     script: sh .travis/deploy.sh gs://cidc-ui-staging
+    skip_cleanup: true
     on:
       branch: master
   - provider: script
     script: sh .travis/deploy.sh gs://cidc-ui-prod
+    skip_cleanup: true
     on:
       branch: production
