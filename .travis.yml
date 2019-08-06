@@ -16,15 +16,15 @@ jobs:
     - stage: install
       script: npm install
     - stage: test
-      script: .travis/test.sh
+      script: sh .travis/test.sh
     - stage: build
-      script: .travis/build.sh
+      script: sh .travis/build.sh
     - stage: install gcloud
       script: source .travis/install_gcloud.sh
     - stage: deploy staging
-      script: .travis/deploy.sh gs://cidc-ui-staging
+      script: sh .travis/deploy.sh gs://cidc-ui-staging
     - stage: deploy prod
-      script: .travis/deploy.sh gs://cidc-ui-prod
+      script: sh .travis/deploy.sh gs://cidc-ui-prod
 stages:
   - install
   - test
