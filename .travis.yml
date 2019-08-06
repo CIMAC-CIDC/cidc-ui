@@ -1,7 +1,38 @@
 language: node_js
 node_js:
   - node
-script:
-  - npm run lint
-  - npm run build
-  - npm test
+cache:
+  directories:
+    - $HOME/google-cloud-sdk/
+env:
+  global:
+    - PYTHONPATH=$PYTHONPATH:$(pwd)/cidc_api
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+    - GOOGLE_APPLICATION_CREDENTIALS=$HOME/credentials.json
+    - GCLOUD_PROJECT_ID_STAGING=cidc-dfci-staging
+    - GCLOUD_PROJECT_ID_PROD=cidc-dfci
+jobs:
+  include:
+    - stage: install
+      script: npm install
+    - stage: test
+      script: .travis/test.sh
+    - stage: build
+      script: .travis/build.sh
+    - stage: install gcloud
+      script: source .travis/install_gcloud.sh
+    - stage: deploy staging
+      script: .travis/deploy.sh gs://cidc-ui-staging
+    - stage: deploy prod
+      script: .travis/deploy.sh gs://cidc-ui-prod
+stages:
+  - install
+  - test
+  - name: build
+    if: branch = master OR branch = production
+  - name: install gcloud
+    if: branch = master OR branch = production
+  - name: deploy staging
+    if: branch = master
+  - name: deploy prod
+    if: branch = prod
