@@ -12,4 +12,5 @@ else
     cat .env.staging > .env
 fi
 
-npm build
+# Compile the application
+npm run build
