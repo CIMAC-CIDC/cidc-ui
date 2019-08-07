@@ -1,25 +1,30 @@
 language: node_js
 node_js:
   - node
+cache:
+  directories:
+    - $HOME/google-cloud-sdk/
+env:
+  global:
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+    - GOOGLE_APPLICATION_CREDENTIALS=$HOME/credentials.json
+    - GCLOUD_PROJECT_ID_STAGING=cidc-dfci-staging
+    - GCLOUD_PROJECT_ID_PROD=cidc-dfci
 install:
   - npm install
 script:
   - sh .travis/test.sh
   - sh .travis/build.sh
+before_deploy:
+  - source .travis/install_gcloud.sh
 deploy:
-  - provider: gcs
-    bucket: cidc-ui-staging
-    access_key_id: $GCS_ACCESS_KEY_ID
-    secret_access_key: $GCS_SECRET_ACCESS_KEY
+  - provider: script
+    script: sh .travis/deploy.sh gs://cidc-ui-staging
     skip_cleanup: true
-    acl: public-read
     on:
       branch: master
-  - provider: gcs
-    bucket: cidc-ui-prod
-    access_key_id: $GCS_ACCESS_KEY_ID
-    secret_access_key: $GCS_SECRET_ACCESS_KEY
+  - provider: script
+    script: sh .travis/deploy.sh gs://cidc-ui-prod
     skip_cleanup: true
-    acl: public-read
     on:
       branch: production
