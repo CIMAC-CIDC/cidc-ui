@@ -12,5 +12,9 @@ elif [ "$TRAVIS_BRANCH" = master ]; then
     cat .env.staging > .env
 fi
 
+# Build the metadata / manifest templates from cidc-schemas
+pip install cidc-schemas==0.1.2
+cidc_schemas generate_all_templates --out_dir public/static/xlsx || exit 1
+
 # Compile the application
 npm run build

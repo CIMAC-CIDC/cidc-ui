@@ -9,6 +9,9 @@
 # production
 /build
 
+# metadata / manifest templates
+public/static/xlsx/*
+
 # misc
 .DS_Store
 .env.local
@@ -20,3 +23,5 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+env
