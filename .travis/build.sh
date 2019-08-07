@@ -12,8 +12,11 @@ elif [ "$TRAVIS_BRANCH" = master ]; then
     cat .env.staging > .env
 fi
 
+# If running in Travis, we need to install some cidc_schemas dependencies
+[ "$TRAVIS" == true ] || pip3 install setuptools wheel
+
 # Build the metadata / manifest templates from cidc-schemas
-pip install cidc-schemas==0.1.2
+python3.6 -m pip install cidc-schemas==0.1.2
 cidc_schemas generate_all_templates --out_dir public/static/xlsx || exit 1
 
 # Compile the application
