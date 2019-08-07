@@ -13,11 +13,11 @@ elif [ "$TRAVIS_BRANCH" = master ]; then
 fi
 
 # If running in Travis, we need to install some cidc_schemas dependencies
-[ "$TRAVIS" == true ] || pip3 install setuptools wheel
+[ -z $TRAVIS_BRANCH ] || pip3 install setuptools wheel
 
 # Build the metadata / manifest templates from cidc-schemas
-python3.6 -m pip install cidc-schemas==0.1.2
-cidc_schemas generate_all_templates --out_dir public/static/xlsx || exit 1
+pip3 install cidc-schemas==0.1.2
+python3.6 -m cidc_schemas.cli generate_all_templates --out_dir public/static/xlsx || exit 1
 
 # Compile the application
 npm run build
