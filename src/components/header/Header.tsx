@@ -30,6 +30,8 @@ class Header extends React.Component<any, {}> {
             selectedTab = "/browse-files";
         } else if (selectedTab.startsWith("/pipeline-details")) {
             selectedTab = "/pipelines";
+        } else if (selectedTab.startsWith("/templates")) {
+            selectedTab = "/templates";
         } else if (selectedTab === "/register") {
             return null;
         }
@@ -80,6 +82,14 @@ class Header extends React.Component<any, {}> {
                         style={{ minWidth: 100 }}
                         label={
                             <span className="Header-tab-label">Pipelines</span>
+                        }
+                    />
+                    <Tab
+                        disableRipple={true}
+                        value="/templates"
+                        style={{ minWidth: 100 }}
+                        label={
+                            <span className="Header-tab-label">Templates</span>
                         }
                     />
                     <Tab

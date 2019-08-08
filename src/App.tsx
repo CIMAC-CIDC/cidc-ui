@@ -10,6 +10,7 @@ import Footer from "./components/footer/Footer";
 import HomePage from "./components/home/HomePage";
 import TransferDataPage from "./components/transferData/TransferDataPage";
 import CliInstructions from "./components/transferData/CliInstructions";
+import Templates from "./components/templates/Templates";
 import PipelinesPage from "./components/pipelines/PipelinesPage";
 import AnalysisDetailsPage from "./components/pipelines/AnalysisDetailsPage";
 import PrivacyAndSecurityPage from "./components/privacyAndSecurity/PrivacyAndSecurityPage";
@@ -141,6 +142,11 @@ class App extends React.Component<any, any> {
                                         {...props}
                                     />
                                 )}
+                            />
+                            <Route
+                                path="/templates"
+                                // tslint:disable-next-line:jsx-no-lambda
+                                component={Templates}
                             />
                             <Route
                                 path="/privacy-security"

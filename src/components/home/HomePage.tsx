@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Typography } from "@material-ui/core";
+import { Typography, Button } from "@material-ui/core";
 import { Link } from "react-router-dom";
 
 export default class HomePage extends React.Component<any, {}> {

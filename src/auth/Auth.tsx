@@ -7,6 +7,11 @@ import nanoid from "nanoid";
 const CLIENT_ID: string = process.env.REACT_APP_AUTH0_CLIENT_ID!;
 const DOMAIN: string = process.env.REACT_APP_AUTH0_DOMAIN!;
 
+// Disable authentication if config calls for it AND we're running locally.
+const NO_AUTH: boolean =
+    process.env.REACT_APP_NO_AUTH! === "true" &&
+    window.location.hostname === "localhost";
+
 export default class Auth {
     private accessToken!: string | undefined;
     private idToken!: string | undefined;
@@ -126,6 +131,9 @@ export default class Auth {
 
     @autobind
     isAuthenticated() {
+        if (NO_AUTH) {
+            return true;
+        }
         const expiresAt = this.expiresAt;
         return new Date().getTime() < expiresAt;
     }
