@@ -76,14 +76,6 @@ export default class Auth {
 
     @autobind
     getExpiresAt() {
-        if (!this.expiresAt) {
-            const cachedExpiresAt = localStorage.getItem("expiresAt");
-            if (!cachedExpiresAt) {
-                this.expiresAt = 0;
-            } else {
-                this.expiresAt = parseInt(cachedExpiresAt, 10);
-            }
-        }
         return this.expiresAt;
     }
 
