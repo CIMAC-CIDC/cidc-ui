@@ -2,7 +2,6 @@ import * as React from "react";
 import "./App.css";
 import BrowseFilesPage from "./components/browseFiles/BrowseFilesPage";
 import FileDetailsPage from "./components/browseFiles/FileDetailsPage";
-import WholeExomeSequencingPipelineMarkdown from "./components/pipelines/WholeExomeSequencingPipelineMarkdown";
 import WholeExomeSequencingUploadMarkdown from "./components/transferData/WholeExomeSequencingUploadMarkdown";
 import { Router, Switch, Route } from "react-router-dom";
 import Header from "./components/header/Header";
@@ -11,7 +10,6 @@ import HomePage from "./components/home/HomePage";
 import TransferDataPage from "./components/transferData/TransferDataPage";
 import CliInstructions from "./components/transferData/CliInstructions";
 import Templates from "./components/templates/Templates";
-import PipelinesPage from "./components/pipelines/PipelinesPage";
 import AnalysisDetailsPage from "./components/pipelines/AnalysisDetailsPage";
 import PrivacyAndSecurityPage from "./components/privacyAndSecurity/PrivacyAndSecurityPage";
 import UserAccountPage from "./components/userAccount/UserAccountPage";
@@ -103,31 +101,10 @@ class App extends React.Component<any, any> {
                                 )}
                             />
                             <Route
-                                path="/pipelines"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <PipelinesPage
-                                        auth={this.auth}
-                                        token={this.state.token}
-                                        {...props}
-                                    />
-                                )}
-                            />
-                            <Route
                                 path="/cli-instructions"
                                 // tslint:disable-next-line:jsx-no-lambda
                                 render={props => (
                                     <CliInstructions
-                                        auth={this.auth}
-                                        {...props}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path="/wes-pipeline"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <WholeExomeSequencingPipelineMarkdown
                                         auth={this.auth}
                                         {...props}
                                     />

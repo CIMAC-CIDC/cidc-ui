@@ -28,8 +28,6 @@ class Header extends React.Component<any, {}> {
             return null;
         } else if (selectedTab.startsWith("/file-details")) {
             selectedTab = "/browse-files";
-        } else if (selectedTab.startsWith("/pipeline-details")) {
-            selectedTab = "/pipelines";
         } else if (selectedTab.startsWith("/templates")) {
             selectedTab = "/templates";
         } else if (selectedTab === "/register") {
@@ -74,14 +72,6 @@ class Header extends React.Component<any, {}> {
                             <span className="Header-tab-label">
                                 Browse Files
                             </span>
-                        }
-                    />
-                    <Tab
-                        disableRipple={true}
-                        value="/pipelines"
-                        style={{ minWidth: 100 }}
-                        label={
-                            <span className="Header-tab-label">Pipelines</span>
                         }
                     />
                     <Tab
