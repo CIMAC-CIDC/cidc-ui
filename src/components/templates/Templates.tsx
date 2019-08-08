@@ -1,8 +1,16 @@
 import * as React from "react";
-import Select from "@material-ui/core/Select";
-import Button from "@material-ui/core/Button";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
+import { makeStyles } from "@material-ui/styles";
+import {
+    FormControl,
+    MenuItem,
+    InputLabel,
+    Button,
+    Select,
+    Grid,
+    Card,
+    CardContent,
+    Typography
+} from "@material-ui/core";
 
 // Is there a smarter way to go about this than hardcoding?
 // Can we list the contents of the static folder?
@@ -20,7 +28,23 @@ function nameToURL(type: string, name: string) {
     }/static/xlsx/${type}/${fmtedName}_template.xlsx`;
 }
 
+const useStyles = makeStyles({
+    card: {
+        width: "80%",
+        margin: "auto"
+    },
+    form: {
+        width: "100%",
+        marginTop: 10
+    },
+    formControl: {
+        width: "100%"
+    }
+});
+
 const Templates: React.FunctionComponent<{}> = props => {
+    const classes = useStyles();
+
     function onValueChange(setState: (v: string | undefined) => void) {
         return (e: React.ChangeEvent<HTMLSelectElement>) =>
             setState(e.target.value);
@@ -38,39 +62,79 @@ const Templates: React.FunctionComponent<{}> = props => {
         templateType && templateName && nameToURL(templateType, templateName);
 
     return (
-        <div>
-            <form method="get" action={templateURL}>
-                <InputLabel htmlFor="templateType">
-                    Select Template Type
-                </InputLabel>
-                <Select
-                    id="templateType"
-                    value={templateType || ""}
-                    onChange={onValueChange(setTemplateType)}
+        <Card className={classes.card}>
+            <CardContent>
+                <Typography variant="body1">Download a template</Typography>
+                <form
+                    className={classes.form}
+                    method="get"
+                    action={templateURL}
                 >
-                    <MenuItem value="manifests">
-                        Shipping/Receiving Manifest
-                    </MenuItem>
-                    <MenuItem value="metadata">Assay Metadata</MenuItem>
-                </Select>
-                <InputLabel htmlFor="templateName">Select Template</InputLabel>
-                <Select
-                    id="templateName"
-                    value={templateName || ""}
-                    onChange={onValueChange(setTemplateName)}
-                    disabled={!templateNames.length}
-                >
-                    {templateNames.map(name => (
-                        <MenuItem key={name} value={name}>
-                            {name}
-                        </MenuItem>
-                    ))}
-                </Select>
-                <Button type="submit" disabled={!templateURL}>
-                    Download
-                </Button>
-            </form>
-        </div>
+                    <Grid
+                        container
+                        direction="row"
+                        justify="space-evenly"
+                        alignItems="center"
+                    >
+                        <Grid item xs={3}>
+                            <FormControl className={classes.formControl}>
+                                <InputLabel htmlFor="templateType">
+                                    Template Type
+                                </InputLabel>
+                                <Select
+                                    inputProps={{
+                                        id: "templateType",
+                                        name: "type"
+                                    }}
+                                    value={templateType || ""}
+                                    onChange={onValueChange(setTemplateType)}
+                                >
+                                    <MenuItem value="manifests">
+                                        Shipping/Receiving Manifest
+                                    </MenuItem>
+                                    <MenuItem value="metadata">
+                                        Assay Metadata
+                                    </MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <FormControl className={classes.formControl}>
+                                <InputLabel htmlFor="templateName">
+                                    Template
+                                </InputLabel>
+                                <Select
+                                    id="templateName"
+                                    inputProps={{
+                                        id: "templateName",
+                                        name: "name"
+                                    }}
+                                    value={templateName || ""}
+                                    onChange={onValueChange(setTemplateName)}
+                                    disabled={!templateNames.length}
+                                >
+                                    {templateNames.map(name => (
+                                        <MenuItem key={name} value={name}>
+                                            {name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={1}>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                disabled={!templateURL}
+                            >
+                                Download
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </form>
+            </CardContent>
+        </Card>
     );
 };
 
