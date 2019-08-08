@@ -1,5 +1,4 @@
 import * as React from "react";
-import { makeStyles } from "@material-ui/styles";
 import {
     FormControl,
     MenuItem,
@@ -28,23 +27,7 @@ function nameToURL(type: string, name: string) {
     }/static/xlsx/${type}/${fmtedName}_template.xlsx`;
 }
 
-const useStyles = makeStyles({
-    card: {
-        width: "80%",
-        margin: "auto"
-    },
-    form: {
-        width: "100%",
-        marginTop: 10
-    },
-    formControl: {
-        width: "100%"
-    }
-});
-
 const Templates: React.FunctionComponent<{}> = props => {
-    const classes = useStyles();
-
     function onValueChange(setState: (v: string | undefined) => void) {
         return (e: React.ChangeEvent<HTMLSelectElement>) =>
             setState(e.target.value);
@@ -61,12 +44,14 @@ const Templates: React.FunctionComponent<{}> = props => {
     const templateURL =
         templateType && templateName && nameToURL(templateType, templateName);
 
+    const formControlStyle = { width: "100%" };
+
     return (
-        <Card className={classes.card}>
+        <Card style={{ width: "80%", margin: "auto" }}>
             <CardContent>
                 <Typography variant="body1">Download a template</Typography>
                 <form
-                    className={classes.form}
+                    style={{ width: "100%", marginTop: 10 }}
                     method="get"
                     action={templateURL}
                 >
@@ -77,7 +62,7 @@ const Templates: React.FunctionComponent<{}> = props => {
                         alignItems="center"
                     >
                         <Grid item xs={3}>
-                            <FormControl className={classes.formControl}>
+                            <FormControl style={formControlStyle}>
                                 <InputLabel htmlFor="templateType">
                                     Template Type
                                 </InputLabel>
@@ -99,7 +84,7 @@ const Templates: React.FunctionComponent<{}> = props => {
                             </FormControl>
                         </Grid>
                         <Grid item xs={3}>
-                            <FormControl className={classes.formControl}>
+                            <FormControl style={formControlStyle}>
                                 <InputLabel htmlFor="templateName">
                                     Template
                                 </InputLabel>
