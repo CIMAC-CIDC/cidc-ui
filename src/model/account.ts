@@ -1,15 +1,26 @@
+type Role =
+    | "cidc-admin"
+    | "cidc-biofx-user"
+    | "cimac-biofx-user"
+    | "cimac-user"
+    | "developer"
+    | "devops"
+    | "nci-biobank-user";
+
+type Organization = "CIDC" | "DFCI" | "ICAHN" | "STANFORD" | "ANDERSON";
+
 // tslint:disable-next-line:interface-name
 export interface Account {
-    _id: string;
     _etag: string;
-    username: string;
+    _created: string;
+    _updated: string;
+    id: number;
     email: string;
-    role: string;
+    first_n?: string;
+    last_n?: string;
     approved: boolean;
-    last_access: string;
-    first_n: string;
-    last_n: string;
-    organization: string;
-    position_description: string;
-    account_create_date: string;
+    disabled: boolean;
+    role?: Role;
+    last_access?: string;
+    organization: Organization;
 }
