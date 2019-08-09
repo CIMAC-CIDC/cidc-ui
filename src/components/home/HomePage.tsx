@@ -26,13 +26,6 @@ export default class HomePage extends React.Component<any, {}> {
                         <Link to="/browse-files">uploaded data.</Link>
                     </li>
                     <li>
-                        Read documentation on our{" "}
-                        <Link to="/pipelines">bioinformatics pipelines.</Link>
-                    </li>
-                    <li>
-                        Browse <Link to="/pipelines">completed pipelines.</Link>
-                    </li>
-                    <li>
                         Read out{" "}
                         <Link to="/privacy-security">
                             Privacy and Security notice.

@@ -22,8 +22,6 @@ class Header extends React.Component<any, {}> {
             selectedTab === "/cli-instructions"
         ) {
             selectedTab = "/transfer-data";
-        } else if (selectedTab === "/wes-pipeline") {
-            selectedTab = "/pipelines";
         } else if (selectedTab === "/callback") {
             return null;
         } else if (selectedTab.startsWith("/file-details")) {
