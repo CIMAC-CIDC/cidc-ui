@@ -44,7 +44,7 @@ export default class Register extends React.Component<any, {}> {
                 this.setState({ token: authResult.idToken });
                 getAccountInfo(authResult.idToken)
                     .then(results => {
-                        if (results![0].approved) {
+                        if (results![0].approval_date) {
                             this.props.history.replace("/");
                         } else {
                             this.setState({ unactivated: true });
@@ -109,10 +109,10 @@ export default class Register extends React.Component<any, {}> {
             !preferredContactEmailError
         ) {
             const newUser = {
+                email: this.state.email,
                 first_n: this.state.first_n,
                 last_n: this.state.last_n,
-                organization: this.state.organization,
-                preferred_contact_email: this.state.preferred_contact_email
+                organization: this.state.organization
             };
 
             createUser(this.state.token!, newUser).then((result: any) => {

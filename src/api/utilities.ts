@@ -1,9 +1,6 @@
 import { UriOptions } from "request";
 import request from "request-promise-native";
 
-const currentUrl: string =
-    process.env.REACT_APP_API_URL || window.location.origin + "/api";
-
 export interface IAPIHelperOptions {
     endpoint: string;
     etag?: string;
@@ -36,6 +33,7 @@ interface IAPIOptions {
 }
 
 const generateOptions = (
+    url: string,
     opts: IAPIHelperOptions,
     method: string
 ): IAPIOptions => {
@@ -47,18 +45,16 @@ const generateOptions = (
         json: true,
         method,
         qs: opts.parameters,
-        uri: `${currentUrl}/${opts.endpoint}${
-            opts.itemID ? `/${opts.itemID}` : ""
-        }`
+        uri: `${url}/${opts.endpoint}${opts.itemID ? `/${opts.itemID}` : ""}`
     };
 };
 
-const createAPIHelper = (): IAPIHelper => {
+const createAPIHelper = (url: string): IAPIHelper => {
     const get = <T>(opts: IAPIHelperOptions): Promise<T | undefined> => {
-        return makeRequest<T | undefined>(generateOptions(opts, "GET"));
+        return makeRequest<T | undefined>(generateOptions(url, opts, "GET"));
     };
     const patch = <T>(opts: IAPIHelperOptions): Promise<T | undefined> => {
-        const optid: IAPIOptions = generateOptions(opts, "POST");
+        const optid: IAPIOptions = generateOptions(url, opts, "POST");
         optid.headers["X-HTTP-METHOD-OVERRIDE"] = "PATCH";
         if (opts.etag) {
             optid.headers["If-Match"] = opts.etag;
@@ -66,10 +62,10 @@ const createAPIHelper = (): IAPIHelper => {
         return makeRequest<T | undefined>(optid);
     };
     const post = <T>(opts: IAPIHelperOptions): Promise<T | undefined> => {
-        return makeRequest<T | undefined>(generateOptions(opts, "POST"));
+        return makeRequest<T | undefined>(generateOptions(url, opts, "POST"));
     };
     const delF = <T>(opts: IAPIHelperOptions): Promise<T | undefined> => {
-        const optid: IAPIOptions = generateOptions(opts, "DELETE");
+        const optid: IAPIOptions = generateOptions(url, opts, "DELETE");
         if (opts.etag) {
             optid.headers["If-Match"] = opts.etag;
         }

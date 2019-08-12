@@ -5,7 +5,8 @@ type Role =
     | "cimac-user"
     | "developer"
     | "devops"
-    | "nci-biobank-user";
+    | "nci-biobank-user"
+    | "system";
 
 type Organization = "CIDC" | "DFCI" | "ICAHN" | "STANFORD" | "ANDERSON";
 
@@ -18,7 +19,7 @@ export interface Account {
     email: string;
     first_n?: string;
     last_n?: string;
-    approved: boolean;
+    approval_date: string;
     disabled: boolean;
     role?: Role;
     last_access?: string;

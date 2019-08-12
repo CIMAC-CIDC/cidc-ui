@@ -34,7 +34,7 @@ export default class AdminMenu extends React.Component<any, {}> {
                 accounts: results!.filter(
                     account =>
                         account.role !== "system" &&
-                        account._id !== this.props.userId
+                        account.id !== this.props.userId
                 )
             });
         });
@@ -129,7 +129,7 @@ export default class AdminMenu extends React.Component<any, {}> {
                                         )
                                         .map((account: Account) => {
                                             return (
-                                                <TableRow key={account._id}>
+                                                <TableRow key={account.id}>
                                                     <UserTableRow
                                                         token={this.props.token}
                                                         account={account}
