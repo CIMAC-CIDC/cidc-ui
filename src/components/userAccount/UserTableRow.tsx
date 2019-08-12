@@ -15,7 +15,7 @@ import autobind from "autobind-decorator";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import UserTrialsDialog from "./UserTrialsDialog";
-import { ORGANIZATION_NAME_MAP } from "../../util/constants";
+import { ORGANIZATION_NAME_MAP, ROLES } from "../../util/constants";
 import "./UserAccount.css";
 import { updateRole, deleteUser, getUserEtag } from "../../api/api";
 
@@ -38,10 +38,10 @@ export default class UserTableRow extends React.Component<any, {}> {
     @autobind
     private handleRoleChange(event: React.ChangeEvent<HTMLSelectElement>) {
         this.setState({ role: event.target.value, roleDisabled: true });
-        getUserEtag(this.props.token, this.props.account._id).then(results => {
+        getUserEtag(this.props.token, this.props.account.id).then(results => {
             updateRole(
                 this.props.token,
-                this.props.account._id,
+                this.props.account.id,
                 results!,
                 event.target.value
             ).then((result: any) => {
@@ -63,8 +63,8 @@ export default class UserTableRow extends React.Component<any, {}> {
 
     @autobind
     private handleDeleteUser() {
-        getUserEtag(this.props.token, this.props.account._id).then(results => {
-            deleteUser(this.props.token, this.props.account._id, results!).then(
+        getUserEtag(this.props.token, this.props.account.id).then(results => {
+            deleteUser(this.props.token, this.props.account.id, results!).then(
                 result => {
                     this.props.reloadUsers();
                 }
@@ -93,12 +93,11 @@ export default class UserTableRow extends React.Component<any, {}> {
                             value={this.state.role}
                             onChange={this.handleRoleChange}
                         >
-                            <MenuItem value="reader">Reader</MenuItem>
-                            <MenuItem value="uploader">Uploader</MenuItem>
-                            <MenuItem value="lead">Lead</MenuItem>
-                            <MenuItem value="admin">Admin</MenuItem>
-                            <MenuItem value="developer">Developer</MenuItem>
-                            <MenuItem value="disabled">Disabled</MenuItem>
+                            {ROLES.map(role => (
+                                <MenuItem value={role} key={role}>
+                                    {role}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
                 </TableCell>

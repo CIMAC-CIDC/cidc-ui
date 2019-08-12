@@ -3,6 +3,7 @@ import { File } from "../model/file";
 import { Account } from "../model/account";
 import { Trial } from "../model/trial";
 import { Analysis } from "../model/analysis";
+import { decode } from "jsonwebtoken";
 
 // While we transition from the old API to the new API,
 // both will be in partial use here.
@@ -50,14 +51,17 @@ async function getSingleFile(
 }
 
 async function getAccountInfo(token: string): Promise<Account[] | undefined> {
+    const decodedToken = decode(token) as any;
+    const email = decodedToken!.email;
+
     const options = {
         endpoint: "users",
         json: true,
+        parameters: { where: JSON.stringify({ email }) },
         token
     };
 
     const result = await newAPI.get<{ _items: Account[] }>(options);
-    // const result = await oldAPI.get<{ _items: Account[] }>(options);
 
     if (!result) {
         return;
@@ -128,7 +132,7 @@ async function updateRole(
         endpoint: "users",
         json: true,
         token,
-        body: { role }, // TODO: approve this user if they aren't approved already
+        body: { role },
         itemID,
         etag
     };
@@ -218,7 +222,7 @@ async function getUserEtag(
         token
     };
 
-    const result = await oldAPI.get<{ _etag: string }>(options);
+    const result = await newAPI.get<{ _etag: string }>(options);
 
     if (!result) {
         return;

@@ -19,7 +19,7 @@ export interface Account {
     email: string;
     first_n?: string;
     last_n?: string;
-    approval_date: string;
+    approval_date?: string;
     disabled: boolean;
     role?: Role;
     last_access?: string;

@@ -9,6 +9,16 @@ export const ORGANIZATION_NAME_MAP = {
     ANDERSON: "MD Anderson Cancer Center (CIMAC)"
 };
 
+export const ROLES = [
+    "cidc-admin",
+    "cidc-biofx-user",
+    "cimac-biofx-user",
+    "cimac-user",
+    "developer",
+    "devops",
+    "nci-biobank-user"
+];
+
 export const DATE_OPTIONS = {
     year: "numeric",
     month: "short",
