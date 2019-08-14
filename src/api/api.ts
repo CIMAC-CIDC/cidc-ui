@@ -8,8 +8,7 @@ import { decode } from "jsonwebtoken";
 // While we transition from the old API to the new API,
 // both will be in partial use here.
 const newURL: string = process.env.REACT_APP_API_URL!;
-const oldURL: string =
-    process.env.REACT_APP_OLD_API_URL || window.location.origin + "/api";
+const oldURL: string = process.env.REACT_APP_OLD_API_URL!;
 
 const oldAPI = createAPIHelper(oldURL);
 const newAPI = createAPIHelper(newURL);
