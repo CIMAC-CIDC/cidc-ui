@@ -4,7 +4,6 @@ import { getSingleFile } from "../../api/api";
 import { File } from "../../model/file";
 import { Typography, CircularProgress, Grid, Button } from "@material-ui/core";
 import FileDetailsTable from "./FileDetailsTable";
-import FastqDetailsTable from "./FastqDetailsTable";
 
 export interface IFileDetailsPageState {
     file: File | undefined;
