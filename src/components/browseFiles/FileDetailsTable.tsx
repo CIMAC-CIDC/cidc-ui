@@ -63,14 +63,6 @@ export default class FileDetailsTable extends React.Component<
                                 {this.props.file.assay_category}
                             </TableCell>
                         </TableRow>
-                        {/* <TableRow>
-                            <TableCell className="File-table-row-cell">
-                                Number of Samples
-                            </TableCell>
-                            <TableCell className="File-table-row-cell">
-                                {this.props.file.number_of_samples}
-                            </TableCell>
-                        </TableRow> */}
                         <TableRow>
                             <TableCell className="File-table-row-cell">
                                 Data Format

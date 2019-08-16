@@ -208,9 +208,6 @@ export default class FileTable extends React.Component<
                                         <TableCell className="File-table-row-cell">
                                             {file.assay_category}
                                         </TableCell>
-                                        {/* <TableCell className="File-table-row-cell">
-                                            {file.number_of_samples}
-                                        </TableCell> */}
                                         <TableCell className="File-table-row-cell">
                                             {file.file_type}
                                         </TableCell>
