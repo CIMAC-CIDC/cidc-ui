@@ -107,7 +107,7 @@ export default class UserTrialsDialog extends React.Component<
         if (this.state.trials) {
             this.state.trials.forEach(trial => {
                 if (trial.collaborators.includes(this.props.account.email)) {
-                    selectedTrialIds.push(trial.trial_name);
+                    selectedTrialIds.push(trial.trial_id);
                 }
             });
         }
@@ -147,12 +147,12 @@ export default class UserTrialsDialog extends React.Component<
                                                             <FormControlLabel
                                                                 key={trial._id}
                                                                 label={
-                                                                    trial.trial_name
+                                                                    trial.trial_id
                                                                 }
                                                                 control={
                                                                     <Checkbox
                                                                         checked={selectedTrialIds.includes(
-                                                                            trial.trial_name
+                                                                            trial.trial_id
                                                                         )}
                                                                         value={
                                                                             trial._id

@@ -102,7 +102,7 @@ export default class AnalysisDetailsPage extends React.Component<
                                                 <TableCell className="Analysis-table-row-cell">
                                                     {
                                                         this.state.analysis
-                                                            .trial_name
+                                                            .trial_id
                                                     }
                                                 </TableCell>
                                             </TableRow>
@@ -116,13 +116,13 @@ export default class AnalysisDetailsPage extends React.Component<
                                                             EXPERIMENTAL_STRATEGY_MAP[
                                                                 this.state
                                                                     .analysis
-                                                                    .experimental_strategy
+                                                                    .assay_category
                                                             ]
                                                         }
                                                     >
                                                         {
                                                             this.state.analysis
-                                                                .experimental_strategy
+                                                                .assay_category
                                                         }
                                                     </Link>
                                                 </TableCell>

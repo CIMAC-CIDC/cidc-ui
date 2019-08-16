@@ -15,12 +15,12 @@ const newAPI = createAPIHelper(newURL);
 
 async function getFiles(token: string): Promise<File[] | undefined> {
     const options = {
-        endpoint: "data",
+        endpoint: "downloadable_files",
         json: true,
         token
     };
 
-    const result = await oldAPI.get<{ _items: File[] }>(options);
+    const result = await newAPI.get<{ _items: File[] }>(options);
 
     if (!result) {
         return;
@@ -34,13 +34,13 @@ async function getSingleFile(
     itemID: string
 ): Promise<File | undefined> {
     const options = {
-        endpoint: "data",
+        endpoint: "downloadable_files",
         json: true,
         itemID,
         token
     };
 
-    const result = await oldAPI.get<File>(options);
+    const result = await newAPI.get<File>(options);
 
     if (!result) {
         return;
@@ -71,12 +71,12 @@ async function getAccountInfo(token: string): Promise<Account[] | undefined> {
 
 async function getTrials(token: string): Promise<Trial[] | undefined> {
     const options = {
-        endpoint: "trials",
+        endpoint: "trial_metadata",
         json: true,
         token
     };
 
-    const result = await oldAPI.get<{ _items: Trial[] }>(options);
+    const result = await newAPI.get<{ _items: Trial[] }>(options);
 
     if (!result) {
         return;

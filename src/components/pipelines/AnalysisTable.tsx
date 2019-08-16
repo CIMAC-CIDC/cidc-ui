@@ -17,8 +17,8 @@ import { LOCALE, DATE_OPTIONS } from "../../util/constants";
 import { Trial } from "../../model/trial";
 
 const ID_KEY = "_id";
-const TRIAL_ID_KEY = "trial_name";
-const EXPERIMENTAL_STRATEGY_KEY = "experimental_strategy";
+const TRIAL_ID_KEY = "trial_id";
+const EXPERIMENTAL_STRATEGY_KEY = "assay_category";
 const START_DATE_KEY = "start_date";
 const END_DATE_KEY = "end_date";
 const STATUS_KEY = "status";
@@ -174,10 +174,9 @@ export default class AnalysisTable extends React.Component<
                                     this.state.rowsPerPage
                             )
                             .map((analysis: Analysis) => {
-                                const isLocked = this.props.trials.filter(
-                                    trial =>
-                                        analysis.trial_name === trial.trial_name
-                                )[0].locked;
+                                // NOTE: remove the concept of "locked" trials for now,
+                                // but evaluate adding it back as necessary.
+                                const isLocked = false;
                                 return (
                                     <TableRow
                                         key={analysis._id}
@@ -207,10 +206,10 @@ export default class AnalysisTable extends React.Component<
                                         }
                                     >
                                         <TableCell className="Analysis-table-row-cell">
-                                            {analysis.trial_name}
+                                            {analysis.trial_id}
                                         </TableCell>
                                         <TableCell className="Analysis-table-row-cell">
-                                            {analysis.experimental_strategy}
+                                            {analysis.assay_category}
                                         </TableCell>
                                         <TableCell className="Analysis-table-row-cell">
                                             {new Date(

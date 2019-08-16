@@ -124,7 +124,7 @@ export default class UserAccountPage extends React.Component<
                                                     color="secondary"
                                                     key={trial._id}
                                                 >
-                                                    <li>{trial.trial_name}</li>
+                                                    <li>{trial.trial_id}</li>
                                                 </Typography>
                                             );
                                         })}

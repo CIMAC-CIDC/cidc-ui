@@ -11,11 +11,11 @@ export function filterAnalyses(
         let isExperimentalStrategyMatch = true;
         let isStatusMatch = true;
         if (selectedTrialIds.length > 0) {
-            isTrialIdMatch = selectedTrialIds.includes(analysis.trial_name);
+            isTrialIdMatch = selectedTrialIds.includes(analysis.trial_id);
         }
         if (selectedExperimentalStrategies.length > 0) {
             isExperimentalStrategyMatch = selectedExperimentalStrategies.includes(
-                analysis.experimental_strategy
+                analysis.assay_category
             );
         }
         if (selectedStatuses.length > 0) {

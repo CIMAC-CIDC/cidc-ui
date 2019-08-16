@@ -13,15 +13,15 @@ export function filterFiles(
         let isDataFormatMatch = true;
         let isSearchFilterMatch = true;
         if (selectedTrialIds.length > 0) {
-            isTrialIdMatch = selectedTrialIds.includes(file.trial_name);
+            isTrialIdMatch = selectedTrialIds.includes(file.trial);
         }
         if (selectedExperimentalStrategies.length > 0) {
             isExperimentalStrategyMatch = selectedExperimentalStrategies.includes(
-                file.experimental_strategy
+                file.assay_category
             );
         }
         if (selectedDataFormats.length > 0) {
-            isDataFormatMatch = selectedDataFormats.includes(file.data_format);
+            isDataFormatMatch = selectedDataFormats.includes(file.file_type);
         }
         if (searchFilter.length > 0) {
             isSearchFilterMatch = file.file_name

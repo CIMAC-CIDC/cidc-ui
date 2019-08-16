@@ -44,7 +44,7 @@ export default class FileDetailsTable extends React.Component<
                                 File ID
                             </TableCell>
                             <TableCell className="File-table-row-cell">
-                                {this.props.file._id}
+                                {this.props.file.id}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -52,7 +52,7 @@ export default class FileDetailsTable extends React.Component<
                                 Trial Name
                             </TableCell>
                             <TableCell className="File-table-row-cell">
-                                {this.props.file.trial_name}
+                                {this.props.file.trial}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -60,23 +60,23 @@ export default class FileDetailsTable extends React.Component<
                                 Experimental Strategy
                             </TableCell>
                             <TableCell className="File-table-row-cell">
-                                {this.props.file.experimental_strategy}
+                                {this.props.file.assay_category}
                             </TableCell>
                         </TableRow>
-                        <TableRow>
+                        {/* <TableRow>
                             <TableCell className="File-table-row-cell">
                                 Number of Samples
                             </TableCell>
                             <TableCell className="File-table-row-cell">
                                 {this.props.file.number_of_samples}
                             </TableCell>
-                        </TableRow>
+                        </TableRow> */}
                         <TableRow>
                             <TableCell className="File-table-row-cell">
                                 Data Format
                             </TableCell>
                             <TableCell className="File-table-row-cell">
-                                {this.props.file.data_format}
+                                {this.props.file.file_type}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -84,7 +84,7 @@ export default class FileDetailsTable extends React.Component<
                                 File Size
                             </TableCell>
                             <TableCell className="File-table-row-cell">
-                                {filesize(this.props.file.file_size)}
+                                {filesize(this.props.file.file_size_bytes)}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -93,7 +93,7 @@ export default class FileDetailsTable extends React.Component<
                             </TableCell>
                             <TableCell className="File-table-row-cell">
                                 {new Date(
-                                    this.props.file.date_created
+                                    this.props.file.uploaded_timestamp
                                 ).toLocaleString(LOCALE, DATE_OPTIONS)}
                             </TableCell>
                         </TableRow>

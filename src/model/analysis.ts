@@ -3,8 +3,8 @@ export interface Analysis {
     _id: string;
     start_date: string;
     end_date: string;
-    experimental_strategy: string;
-    trial_name: string;
+    assay_category: string;
+    trial_id: string;
     status: string;
     files_used: any[];
     files_generated: any[];

@@ -99,13 +99,10 @@ export default class BrowseAnalysesPage extends React.Component<
                         <Grid item={true} xs={2}>
                             <AnalysisFilter
                                 trialIds={_.uniq(
-                                    _.map(this.state.analyses, "trial_name")
+                                    _.map(this.state.analyses, "trial_id")
                                 )}
                                 experimentalStrategies={_.uniq(
-                                    _.map(
-                                        this.state.analyses,
-                                        "experimental_strategy"
-                                    )
+                                    _.map(this.state.analyses, "assay_category")
                                 )}
                                 statuses={_.uniq(
                                     _.map(this.state.analyses, "status")

@@ -1,16 +1,13 @@
-import { FastqProperties } from "./fastqProperties";
-
 // tslint:disable-next-line:interface-name
 export interface File {
-    _id: string;
+    id: number;
+    trial: string;
     file_name: string;
-    trial_name: string;
-    experimental_strategy: string;
-    number_of_samples: number;
-    data_format: string;
-    file_size: number;
-    date_created: string;
-    gs_uri: string;
-    download_link: string;
-    fastq_properties: FastqProperties;
+    object_url: string;
+    uploaded_timestamp: Date;
+    file_size_bytes: number;
+    artifact_category: string;
+    assay_category: string;
+    file_type: string;
+    download_link?: string;
 }

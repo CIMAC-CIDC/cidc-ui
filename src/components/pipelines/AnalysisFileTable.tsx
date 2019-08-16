@@ -35,7 +35,7 @@ export default class AnalysisFileTable extends React.Component<any, {}> {
                                         </Link>
                                     </TableCell>
                                     <TableCell className="Analysis-table-row-cell">
-                                        {file.data_format}
+                                        {file.file_type}
                                     </TableCell>
                                 </TableRow>
                             );

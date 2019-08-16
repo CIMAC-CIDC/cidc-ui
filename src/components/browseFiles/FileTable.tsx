@@ -16,12 +16,11 @@ import * as React from "react";
 import { File } from "../../model/file";
 import { Trial } from "../../model/trial";
 
-const NAME_KEY = "file_name";
-const TRIAL_ID_KEY = "trial_name";
-const EXPERIMENTAL_STRATEGY_KEY = "experimental_strategy";
-const NUMBER_OF_CASES_KEY = "number_of_samples";
-const DATA_FORMAT_KEY = "data_format";
-const SIZE_KEY = "file_size";
+const NAME_KEY = "object_url";
+const TRIAL_ID_KEY = "trial_id";
+const ASSAY_TYPE_KEY = "assay_category";
+const FILE_TYPE_KEY = "file_type";
+const SIZE_KEY = "file_size_bytes";
 
 export interface IFileTableProps {
     files: File[];
@@ -58,7 +57,7 @@ export default class FileTable extends React.Component<
     }
 
     @autobind
-    private handleClick(fileId: string) {
+    private handleClick(fileId: number) {
         this.props.history.push("/file-details/" + fileId);
     }
 
@@ -120,15 +119,12 @@ export default class FileTable extends React.Component<
                             <TableCell className="File-table-header-cell">
                                 <TableSortLabel
                                     active={
-                                        this.state.sortBy ===
-                                        EXPERIMENTAL_STRATEGY_KEY
+                                        this.state.sortBy === ASSAY_TYPE_KEY
                                     }
                                     direction={this.state.sortDirection}
                                     // tslint:disable-next-line:jsx-no-lambda
                                     onClick={() =>
-                                        this.handleChangeSorting(
-                                            EXPERIMENTAL_STRATEGY_KEY
-                                        )
+                                        this.handleChangeSorting(ASSAY_TYPE_KEY)
                                     }
                                 >
                                     Experimental Strategy
@@ -136,32 +132,11 @@ export default class FileTable extends React.Component<
                             </TableCell>
                             <TableCell className="File-table-header-cell">
                                 <TableSortLabel
-                                    active={
-                                        this.state.sortBy ===
-                                        NUMBER_OF_CASES_KEY
-                                    }
+                                    active={this.state.sortBy === FILE_TYPE_KEY}
                                     direction={this.state.sortDirection}
                                     // tslint:disable-next-line:jsx-no-lambda
                                     onClick={() =>
-                                        this.handleChangeSorting(
-                                            NUMBER_OF_CASES_KEY
-                                        )
-                                    }
-                                >
-                                    # of Samples
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell className="File-table-header-cell">
-                                <TableSortLabel
-                                    active={
-                                        this.state.sortBy === DATA_FORMAT_KEY
-                                    }
-                                    direction={this.state.sortDirection}
-                                    // tslint:disable-next-line:jsx-no-lambda
-                                    onClick={() =>
-                                        this.handleChangeSorting(
-                                            DATA_FORMAT_KEY
-                                        )
+                                        this.handleChangeSorting(FILE_TYPE_KEY)
                                     }
                                 >
                                     Data Format
@@ -193,19 +168,18 @@ export default class FileTable extends React.Component<
                                     this.state.rowsPerPage
                             )
                             .map((file: File) => {
-                                const isLocked = this.props.trials.filter(
-                                    trial =>
-                                        file.trial_name === trial.trial_name
-                                )[0].locked;
+                                // NOTE: remove the concept of "locked" trials for now,
+                                // but evaluate adding it back as necessary.
+                                const isLocked = false;
                                 return (
                                     <TableRow
-                                        key={file._id}
+                                        key={file.id}
                                         hover={!isLocked}
                                         // tslint:disable-next-line:jsx-no-lambda
                                         onClick={() =>
                                             isLocked
                                                 ? null
-                                                : this.handleClick(file._id)
+                                                : this.handleClick(file.id)
                                         }
                                         style={{
                                             backgroundColor: isLocked
@@ -226,22 +200,22 @@ export default class FileTable extends React.Component<
                                         }
                                     >
                                         <TableCell className="File-table-row-cell">
-                                            {file.file_name}
+                                            {file.object_url}
                                         </TableCell>
                                         <TableCell className="File-table-row-cell">
-                                            {file.trial_name}
+                                            {file.trial}
                                         </TableCell>
                                         <TableCell className="File-table-row-cell">
-                                            {file.experimental_strategy}
+                                            {file.assay_category}
                                         </TableCell>
-                                        <TableCell className="File-table-row-cell">
+                                        {/* <TableCell className="File-table-row-cell">
                                             {file.number_of_samples}
+                                        </TableCell> */}
+                                        <TableCell className="File-table-row-cell">
+                                            {file.file_type}
                                         </TableCell>
                                         <TableCell className="File-table-row-cell">
-                                            {file.data_format}
-                                        </TableCell>
-                                        <TableCell className="File-table-row-cell">
-                                            {filesize(file.file_size)}
+                                            {filesize(file.file_size_bytes)}
                                         </TableCell>
                                     </TableRow>
                                 );
