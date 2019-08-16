@@ -8,11 +8,10 @@ const files = [
         file_name: "cimac-6521-001.fa",
         number_of_samples: 1,
         file_size_bytes: 234,
-        trialid: "DFCI-1234",
+        trial: "DFCI-1234",
         uploaded_timestamp: "2019-01-17T21:27:53.175496",
         object_url: "test_uri",
-        download_link: "download_url",
-        fastq_properties: null
+        download_link: "download_url"
     },
     {
         id: "2",
@@ -21,11 +20,10 @@ const files = [
         file_name: "cimac-6521-002.fa",
         number_of_samples: 1,
         file_size_bytes: 21,
-        trialid: "DFCI-1234",
+        trial: "DFCI-1234",
         uploaded_timestamp: "2019-01-17T21:27:53.175496",
         object_url: "test_uri",
-        download_link: "download_url",
-        fastq_properties: null
+        download_link: "download_url"
     },
     {
         id: "3",
@@ -34,11 +32,10 @@ const files = [
         file_name: "cimac-6521-003.fa",
         number_of_samples: 1,
         file_size_bytes: 22345,
-        trialid: "DFCI-1234",
+        trial: "DFCI-1234",
         uploaded_timestamp: "2019-01-17T21:27:53.175496",
         object_url: "test_uri",
-        download_link: "download_url",
-        fastq_properties: null
+        download_link: "download_url"
     },
     {
         id: "4",
@@ -47,11 +44,10 @@ const files = [
         file_name: "cimac-6521-004.fa",
         number_of_samples: 1,
         file_size_bytes: 12345545,
-        trialid: "DFCI-1234",
+        trial: "DFCI-1234",
         uploaded_timestamp: "2019-01-17T21:27:53.175496",
         object_url: "test_uri",
-        download_link: "download_url",
-        fastq_properties: null
+        download_link: "download_url"
     },
     {
         id: "5",
@@ -60,11 +56,10 @@ const files = [
         file_name: "cimac-6521.vcf",
         number_of_samples: 1,
         file_size_bytes: 7654645,
-        trialid: "DFCI-9999",
+        trial: "DFCI-9999",
         uploaded_timestamp: "2019-01-17T21:27:53.175496",
         object_url: "test_uri",
-        download_link: "download_url",
-        fastq_properties: null
+        download_link: "download_url"
     },
     {
         id: "6",
@@ -73,11 +68,10 @@ const files = [
         file_name: "dfci-9999.maf",
         number_of_samples: 276,
         file_size_bytes: 1234567,
-        trialid: "DFCI-9999",
+        trial: "DFCI-9999",
         uploaded_timestamp: "2019-01-17T21:27:53.175496",
         object_url: "test_uri",
-        download_link: "download_url",
-        fastq_properties: null
+        download_link: "download_url"
     }
 ];
 
@@ -96,11 +90,10 @@ test("Filters it correctly", () => {
             file_name: "dfci-9999.maf",
             number_of_samples: 276,
             file_size_bytes: 1234567,
-            trialid: "DFCI-9999",
+            trial: "DFCI-9999",
             uploaded_timestamp: "2019-01-17T21:27:53.175496",
             object_url: "test_uri",
-            download_link: "download_url",
-            fastq_properties: null
+            download_link: "download_url"
         }
     ]);
 });
