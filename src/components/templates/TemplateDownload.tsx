@@ -10,7 +10,6 @@ import {
     CardContent,
     Typography
 } from "@material-ui/core";
-import { CloudDownload } from "@material-ui/icons";
 import { ITemplateCardProps } from "./TemplatesPage";
 import { allNames, onValueChange } from "./utils";
 
@@ -102,7 +101,6 @@ const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
                                 disabled={!templateURL}
                             >
                                 Download
-                                <CloudDownload />
                             </Button>
                         </Grid>
                     </Grid>
