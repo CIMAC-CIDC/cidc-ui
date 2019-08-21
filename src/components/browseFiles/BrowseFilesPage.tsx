@@ -7,7 +7,7 @@ import {
 import autobind from "autobind-decorator";
 import _ from "lodash";
 import * as React from "react";
-import { File } from "../../model/file";
+import { DataFile } from "../../model/file";
 import "./BrowseFiles.css";
 import { changeOption, filterFiles } from "./browseFilesUtil";
 import FileFilter from "./FileFilter";
@@ -16,7 +16,7 @@ import { getFiles, getTrials } from "../../api/api";
 import { Trial } from "../../model/trial";
 
 export interface IBrowseFilesPageState {
-    files: File[] | undefined;
+    files: DataFile[] | undefined;
     trials: Trial[] | undefined;
     selectedTrialIds: string[];
     selectedExperimentalStrategies: string[];

@@ -1,13 +1,13 @@
-import { File } from "../../model/file";
+import { DataFile } from "../../model/file";
 
 export function filterFiles(
-    files: File[],
+    files: DataFile[],
     selectedTrialIds: string[],
     selectedExperimentalStrategies: string[],
     selectedDataFormats: string[],
     searchFilter: string
-): File[] {
-    return files.filter((file: File) => {
+): DataFile[] {
+    return files.filter((file: DataFile) => {
         let isTrialIdMatch = true;
         let isExperimentalStrategyMatch = true;
         let isDataFormatMatch = true;

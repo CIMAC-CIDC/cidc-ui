@@ -1,12 +1,12 @@
 import * as React from "react";
 import autobind from "autobind-decorator";
 import { getSingleFile } from "../../api/api";
-import { File } from "../../model/file";
+import { DataFile } from "../../model/file";
 import { Typography, CircularProgress, Grid, Button } from "@material-ui/core";
 import FileDetailsTable from "./FileDetailsTable";
 
 export interface IFileDetailsPageState {
-    file: File | undefined;
+    file: DataFile | undefined;
 }
 
 export default class FileDetailsPage extends React.Component<

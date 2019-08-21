@@ -1,5 +1,5 @@
 // tslint:disable-next-line:interface-name
-export interface File {
+export interface DataFile {
     id: number;
     trial: string;
     file_name: string;

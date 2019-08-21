@@ -5,11 +5,11 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import filesize from "filesize";
 import * as React from "react";
-import { File } from "../../model/file";
+import { DataFile } from "../../model/file";
 import { LOCALE, DATE_OPTIONS } from "../../util/constants";
 
 export interface IFileDetailsTableProps {
-    file: File;
+    file: DataFile;
 }
 
 export default class FileDetailsTable extends React.Component<

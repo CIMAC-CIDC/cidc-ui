@@ -13,7 +13,7 @@ import autobind from "autobind-decorator";
 import filesize from "filesize";
 import _ from "lodash";
 import * as React from "react";
-import { File } from "../../model/file";
+import { DataFile } from "../../model/file";
 import { Trial } from "../../model/trial";
 
 const NAME_KEY = "object_url";
@@ -23,7 +23,7 @@ const FILE_TYPE_KEY = "file_type";
 const SIZE_KEY = "file_size_bytes";
 
 export interface IFileTableProps {
-    files: File[];
+    files: DataFile[];
     trials: Trial[];
     history: any;
 }
@@ -167,7 +167,7 @@ export default class FileTable extends React.Component<
                                 this.state.page * this.state.rowsPerPage +
                                     this.state.rowsPerPage
                             )
-                            .map((file: File) => {
+                            .map((file: DataFile) => {
                                 // NOTE: remove the concept of "locked" trials for now,
                                 // but evaluate adding it back as necessary.
                                 const isLocked = false;
