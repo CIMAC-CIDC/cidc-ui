@@ -115,14 +115,6 @@ async function getUserEtag(token: string, itemID: string): Promise<string> {
 
 // ----------- Old API methods (not currently supported) ----------- //
 
-async function getSingleAnalysis(
-    token: string,
-    itemID: string
-): Promise<Analysis | undefined> {
-    console.error("not currently supported");
-    return;
-}
-
 async function deleteUser(
     token: string,
     itemID: string,
@@ -142,11 +134,6 @@ async function updateTrial(
     return;
 }
 
-async function getAnalyses(token: string): Promise<Analysis[] | undefined> {
-    console.error("not currently supported");
-    return;
-}
-
 export {
     getFiles,
     getSingleFile,
@@ -157,8 +144,6 @@ export {
     updateRole,
     deleteUser,
     updateTrial,
-    getAnalyses,
     getUserEtag,
-    getSingleAnalysis,
     getManifestValidationErrors
 };
