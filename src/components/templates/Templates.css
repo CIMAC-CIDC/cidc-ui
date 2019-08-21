@@ -1,0 +1,9 @@
+.Templates-card {
+    width: 80%;
+    margin: auto;
+    margin-top: 1.5em;
+}
+
+.Templates-card form {
+    margin: 1em;
+}

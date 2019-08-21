@@ -9,12 +9,12 @@ import Footer from "./components/footer/Footer";
 import HomePage from "./components/home/HomePage";
 import TransferDataPage from "./components/transferData/TransferDataPage";
 import CliInstructions from "./components/transferData/CliInstructions";
-import Templates from "./components/templates/Templates";
+import TemplatesPage from "./components/templates/TemplatesPage";
 import AnalysisDetailsPage from "./components/pipelines/AnalysisDetailsPage";
 import PrivacyAndSecurityPage from "./components/privacyAndSecurity/PrivacyAndSecurityPage";
 import UserAccountPage from "./components/userAccount/UserAccountPage";
 import Register from "./auth/Register";
-import Auth from "./auth/Auth";
+import Auth, { AuthContext } from "./auth/Auth";
 import history from "./auth/History";
 import autobind from "autobind-decorator";
 import IdleTimer from "react-idle-timer";
@@ -61,133 +61,137 @@ class App extends React.Component<any, any> {
 
     public render() {
         return (
-            <Router history={history}>
-                <div className="App">
-                    <IdleTimer
-                        ref={() => null}
-                        onIdle={this.handleIdle}
-                        timeout={IDLE_TIMEOUT}
-                    />
-                    <Header auth={this.auth} email={this.state.email} />
-                    <div className="Content">
-                        <Switch>
-                            <Route
-                                path="/"
-                                exact={true}
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <HomePage auth={this.auth} {...props} />
-                                )}
-                            />
-                            <Route
-                                path="/transfer-data"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <TransferDataPage
-                                        auth={this.auth}
-                                        {...props}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path="/browse-files"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <BrowseFilesPage
-                                        auth={this.auth}
-                                        token={this.state.token}
-                                        {...props}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path="/cli-instructions"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <CliInstructions
-                                        auth={this.auth}
-                                        {...props}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path="/wes-upload"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <WholeExomeSequencingUploadMarkdown
-                                        auth={this.auth}
-                                        {...props}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path="/templates"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                component={Templates}
-                            />
-                            <Route
-                                path="/privacy-security"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <PrivacyAndSecurityPage
-                                        auth={this.auth}
-                                        {...props}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path="/user-account"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <UserAccountPage
-                                        auth={this.auth}
-                                        token={this.state.token}
-                                        {...props}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path="/file-details/:fileId"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <FileDetailsPage
-                                        auth={this.auth}
-                                        token={this.state.token}
-                                        {...props}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path="/pipeline-details/:analysisId"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <AnalysisDetailsPage
-                                        auth={this.auth}
-                                        token={this.state.token}
-                                        {...props}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path="/register"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => (
-                                    <Register auth={this.auth} {...props} />
-                                )}
-                            />
-                            <Route
-                                path="/callback"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                render={props => {
-                                    this.handleAuthentication(props);
-                                    return null;
-                                }}
-                            />
-                        </Switch>
+            <AuthContext.Provider value={this.auth}>
+                <Router history={history}>
+                    <div className="App">
+                        <IdleTimer
+                            ref={() => null}
+                            onIdle={this.handleIdle}
+                            timeout={IDLE_TIMEOUT}
+                        />
+                        <Header auth={this.auth} email={this.state.email} />
+                        <div className="Content">
+                            <Switch>
+                                <Route
+                                    path="/"
+                                    exact={true}
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <HomePage auth={this.auth} {...props} />
+                                    )}
+                                />
+                                <Route
+                                    path="/transfer-data"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <TransferDataPage
+                                            auth={this.auth}
+                                            {...props}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path="/browse-files"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <BrowseFilesPage
+                                            auth={this.auth}
+                                            token={this.state.token}
+                                            {...props}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path="/cli-instructions"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <CliInstructions
+                                            auth={this.auth}
+                                            {...props}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path="/wes-upload"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <WholeExomeSequencingUploadMarkdown
+                                            auth={this.auth}
+                                            {...props}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path="/templates"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <TemplatesPage {...props} />
+                                    )}
+                                />
+                                <Route
+                                    path="/privacy-security"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <PrivacyAndSecurityPage
+                                            auth={this.auth}
+                                            {...props}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path="/user-account"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <UserAccountPage
+                                            auth={this.auth}
+                                            token={this.state.token}
+                                            {...props}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path="/file-details/:fileId"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <FileDetailsPage
+                                            auth={this.auth}
+                                            token={this.state.token}
+                                            {...props}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path="/pipeline-details/:analysisId"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <AnalysisDetailsPage
+                                            auth={this.auth}
+                                            token={this.state.token}
+                                            {...props}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path="/register"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => (
+                                        <Register auth={this.auth} {...props} />
+                                    )}
+                                />
+                                <Route
+                                    path="/callback"
+                                    // tslint:disable-next-line:jsx-no-lambda
+                                    render={props => {
+                                        this.handleAuthentication(props);
+                                        return null;
+                                    }}
+                                />
+                            </Switch>
+                        </div>
+                        <Footer />
                     </div>
-                    <Footer />
-                </div>
-            </Router>
+                </Router>
+            </AuthContext.Provider>
         );
     }
 }

@@ -10,13 +10,9 @@ import {
     CardContent,
     Typography
 } from "@material-ui/core";
-
-// Is there a smarter way to go about this than hardcoding?
-// Can we list the contents of the static folder?
-const allNames = {
-    manifests: ["PBMC", "Plasma", "Analyte", "HnE", "Whole Blood"],
-    metadata: ["CyTOF", "MIF", "MICSSS", "Olink", "RNA Expression", "WES"]
-};
+import { CloudDownload } from "@material-ui/icons";
+import { ITemplateCardProps } from "./TemplatesPage";
+import { allNames, onValueChange } from "./utils";
 
 // Given a template type and name, get the path to the corresponding
 // xlsx file in the static/ folder.
@@ -27,12 +23,9 @@ function nameToURL(type: string, name: string) {
     }/static/xlsx/${type}/${fmtedName}_template.xlsx`;
 }
 
-const Templates: React.FunctionComponent<{}> = props => {
-    function onValueChange(setState: (v: string | undefined) => void) {
-        return (e: React.ChangeEvent<HTMLSelectElement>) =>
-            setState(e.target.value);
-    }
-
+const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
+    props: ITemplateCardProps
+) => {
     const [templateType, setTemplateType] = React.useState<string | undefined>(
         undefined
     );
@@ -44,17 +37,11 @@ const Templates: React.FunctionComponent<{}> = props => {
     const templateURL =
         templateType && templateName && nameToURL(templateType, templateName);
 
-    const formControlStyle = { width: "100%" };
-
     return (
-        <Card style={{ width: "80%", margin: "auto" }}>
+        <Card className={props.cardClass}>
             <CardContent>
                 <Typography variant="body1">Download a template</Typography>
-                <form
-                    style={{ width: "100%", marginTop: 10 }}
-                    method="get"
-                    action={templateURL}
-                >
+                <form method="get" action={templateURL}>
                     <Grid
                         container
                         direction="row"
@@ -62,7 +49,7 @@ const Templates: React.FunctionComponent<{}> = props => {
                         alignItems="center"
                     >
                         <Grid item xs={3}>
-                            <FormControl style={formControlStyle}>
+                            <FormControl fullWidth>
                                 <InputLabel htmlFor="templateType">
                                     Template Type
                                 </InputLabel>
@@ -84,7 +71,7 @@ const Templates: React.FunctionComponent<{}> = props => {
                             </FormControl>
                         </Grid>
                         <Grid item xs={3}>
-                            <FormControl style={formControlStyle}>
+                            <FormControl fullWidth>
                                 <InputLabel htmlFor="templateName">
                                     Template
                                 </InputLabel>
@@ -106,14 +93,16 @@ const Templates: React.FunctionComponent<{}> = props => {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid item xs={2}>
                             <Button
+                                fullWidth
                                 type="submit"
                                 variant="contained"
                                 color="primary"
                                 disabled={!templateURL}
                             >
                                 Download
+                                <CloudDownload />
                             </Button>
                         </Grid>
                     </Grid>
@@ -123,4 +112,4 @@ const Templates: React.FunctionComponent<{}> = props => {
     );
 };
 
-export default Templates;
+export default TemplateDownload;

@@ -1,124 +1,82 @@
-import { createAPIHelper } from "./utilities";
-import { File } from "../model/file";
 import { Account } from "../model/account";
 import { Trial } from "../model/trial";
 import { Analysis } from "../model/analysis";
 import { decode } from "jsonwebtoken";
+import { DataFile } from "../model/file";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 
-// While we transition from the old API to the new API,
-// both will be in partial use here.
-const newURL: string = process.env.REACT_APP_API_URL!;
-const oldURL: string = process.env.REACT_APP_OLD_API_URL!;
+const URL: string = process.env.REACT_APP_API_URL!;
 
-const oldAPI = createAPIHelper(oldURL);
-const newAPI = createAPIHelper(newURL);
+function getApiClient(token: string): AxiosInstance {
+    return axios.create({
+        headers: { Authorization: `Bearer ${token}` },
+        baseURL: URL
+    });
+}
 
-async function getFiles(token: string): Promise<File[] | undefined> {
-    const options = {
-        endpoint: "downloadable_files",
-        json: true,
-        token
-    };
+function itemURL(endpoint: string, itemID: string): string {
+    return `${endpoint}/${itemID}`;
+}
 
-    const result = await newAPI.get<{ _items: File[] }>(options);
+function extractItem<T>(response: AxiosResponse<T>): T {
+    return response.data;
+}
 
-    if (!result) {
-        return;
-    }
+function extractItems<T extends { _items: any[] }>(
+    response: AxiosResponse<T>
+): T["_items"] {
+    return extractItem(response)._items;
+}
 
-    return result._items;
+function getItem<T>(
+    token: string,
+    endpoint: string,
+    itemID: string
+): Promise<T> {
+    return getApiClient(token)
+        .get(itemURL(endpoint, itemID))
+        .then(extractItem);
+}
+
+function getItems<T>(token: string, endpoint: string): Promise<T> {
+    return getApiClient(token)
+        .get(endpoint)
+        .then(extractItems);
+}
+
+function getFiles(token: string): Promise<DataFile[]> {
+    return getItems(token, "downloadable_files");
 }
 
 async function getSingleFile(
     token: string,
     itemID: string
-): Promise<File | undefined> {
-    const options = {
-        endpoint: "downloadable_files",
-        json: true,
-        itemID,
-        token
-    };
-
-    const result = await newAPI.get<File>(options);
-
-    if (!result) {
-        return;
-    }
-
-    return result;
+): Promise<DataFile | undefined> {
+    return getItem(token, "downloadable_files", itemID);
 }
 
-async function getAccountInfo(token: string): Promise<Account[] | undefined> {
+async function getAccountInfo(token: string): Promise<Account[]> {
     const decodedToken = decode(token) as any;
     const email = decodedToken!.email;
 
-    const options = {
-        endpoint: "users",
-        json: true,
-        parameters: { where: JSON.stringify({ email }) },
-        token
-    };
-
-    const result = await newAPI.get<{ _items: Account[] }>(options);
-
-    if (!result) {
-        return;
-    }
-
-    return result._items;
+    return getApiClient(token)
+        .get("users", { params: { email } })
+        .then(extractItems);
 }
 
-async function getTrials(token: string): Promise<Trial[] | undefined> {
-    const options = {
-        endpoint: "trial_metadata",
-        json: true,
-        token
-    };
-
-    const result = await newAPI.get<{ _items: Trial[] }>(options);
-
-    if (!result) {
-        return;
-    }
-
-    return result._items;
+async function getTrials(token: string): Promise<Trial[]> {
+    return getItems(token, "trial_metadata");
 }
 
 async function createUser(
     token: string,
     newUser: any
 ): Promise<Account | undefined> {
-    const options = {
-        endpoint: "new_users",
-        json: true,
-        token,
-        body: newUser
-    };
-
-    const result = await newAPI.post<Account>(options);
-
-    if (!result) {
-        return;
-    }
-
-    return result;
+    return getApiClient(token).post("new_users", newUser);
 }
 
-async function getAllAccounts(token: string): Promise<Account[] | undefined> {
-    const options = {
-        endpoint: "users",
-        json: true,
-        token
-    };
-
-    const result = await newAPI.get<{ _items: Account[] }>(options);
-
-    if (!result) {
-        return;
-    }
-
-    return result._items;
+async function getAllAccounts(token: string): Promise<Account[]> {
+    return getItems(token, "users");
 }
 
 async function updateRole(
@@ -126,23 +84,43 @@ async function updateRole(
     itemID: string,
     etag: string,
     role: string
-): Promise<Account | undefined> {
-    const options = {
-        endpoint: "users",
-        json: true,
-        token,
-        body: { role },
-        itemID,
-        etag
-    };
+): Promise<Account> {
+    return getApiClient(token)
+        .patch(
+            itemURL("users", itemID),
+            { role },
+            { headers: { "if-match": etag } }
+        )
+        .then(extractItem);
+}
 
-    const result = await newAPI.patch<Account>(options);
+async function getManifestValidationErrors(
+    token: string,
+    form: { schema: string; template: File }
+): Promise<string[] | undefined> {
+    const formData = new FormData();
+    formData.append("schema", form.schema.toLowerCase());
+    formData.append("template", form.template);
 
-    if (!result) {
-        return;
-    }
+    return getApiClient(token)
+        .post("ingestion/validate", formData, {
+            headers: { "content-type": "multipart/form" }
+        })
+        .then(res => extractItem(res).errors);
+}
 
-    return result;
+async function getUserEtag(token: string, itemID: string): Promise<string> {
+    return getItem<Account>(token, "users", itemID).then(user => user._etag);
+}
+
+// ----------- Old API methods (not currently supported) ----------- //
+
+async function getSingleAnalysis(
+    token: string,
+    itemID: string
+): Promise<Analysis | undefined> {
+    console.error("not currently supported");
+    return;
 }
 
 async function deleteUser(
@@ -150,24 +128,8 @@ async function deleteUser(
     itemID: string,
     etag: string
 ): Promise<Account | undefined> {
-    console.error("user deletion not currently supported");
+    console.error("not currently supported");
     return;
-
-    // const options = {
-    //     endpoint: "accounts",
-    //     json: true,
-    //     token,
-    //     itemID,
-    //     etag
-    // };
-
-    // const result = await oldAPI.delete<Account>(options);
-
-    // if (!result) {
-    //     return;
-    // }
-
-    // return result;
 }
 
 async function updateTrial(
@@ -176,78 +138,13 @@ async function updateTrial(
     etag: string,
     collaborators: any
 ): Promise<Trial | undefined> {
-    const options = {
-        endpoint: "trials",
-        json: true,
-        token,
-        body: { collaborators },
-        itemID,
-        etag
-    };
-
-    const result = await oldAPI.patch<Trial>(options);
-
-    if (!result) {
-        return;
-    }
-
-    return result;
+    console.error("not currently supported");
+    return;
 }
 
 async function getAnalyses(token: string): Promise<Analysis[] | undefined> {
-    const options = {
-        endpoint: "analysis",
-        json: true,
-        token
-    };
-
-    const result = await oldAPI.get<{ _items: Analysis[] }>(options);
-
-    if (!result) {
-        return;
-    }
-
-    return result._items;
-}
-
-async function getUserEtag(
-    token: string,
-    itemID: string
-): Promise<string | undefined> {
-    const options = {
-        endpoint: "users",
-        json: true,
-        itemID,
-        token
-    };
-
-    const result = await newAPI.get<{ _etag: string }>(options);
-
-    if (!result) {
-        return;
-    }
-
-    return result._etag;
-}
-
-async function getSingleAnalysis(
-    token: string,
-    itemID: string
-): Promise<Analysis | undefined> {
-    const options = {
-        endpoint: "analysis",
-        json: true,
-        itemID,
-        token
-    };
-
-    const result = await oldAPI.get<Analysis>(options);
-
-    if (!result) {
-        return;
-    }
-
-    return result;
+    console.error("not currently supported");
+    return;
 }
 
 export {
@@ -262,5 +159,6 @@ export {
     updateTrial,
     getAnalyses,
     getUserEtag,
-    getSingleAnalysis
+    getSingleAnalysis,
+    getManifestValidationErrors
 };

@@ -1,3 +1,4 @@
+import * as React from "react";
 import auth0, { Auth0DecodedHash, Auth0UserProfile } from "auth0-js";
 import history from "./History";
 import autobind from "autobind-decorator";
@@ -145,3 +146,5 @@ export default class Auth {
         return true;
     }
 }
+
+export const AuthContext = React.createContext<Auth | undefined>(undefined);
