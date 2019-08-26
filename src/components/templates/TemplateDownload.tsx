@@ -39,7 +39,7 @@ const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
     return (
         <Card className={props.cardClass}>
             <CardContent>
-                <Typography variant="body1">Download a template</Typography>
+                <Typography variant="title">Download a template</Typography>
                 <form method="get" action={templateURL}>
                     <Grid
                         container

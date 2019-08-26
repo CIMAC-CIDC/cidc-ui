@@ -53,7 +53,9 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     return (
         <Card className={props.cardClass}>
             <CardContent>
-                <Typography>Upload a shipping / receiving manifest</Typography>
+                <Typography variant="title">
+                    Upload a shipping / receiving manifest
+                </Typography>
                 <form onSubmit={onSubmit}>
                     <Grid
                         container
