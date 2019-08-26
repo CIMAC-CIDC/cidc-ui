@@ -44,11 +44,17 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     // The file is valid if it has been validated and there are no errors
     const fileValid = errors instanceof Array && errors.length === 0;
 
+    const onSubmit = (e: React.SyntheticEvent) => {
+        e.preventDefault();
+        // TODO: enable manifest uploads once the API supports it
+        window.alert("Manifest uploads are not yet supported.");
+    };
+
     return (
         <Card className={props.cardClass}>
             <CardContent>
                 <Typography>Upload a shipping / receiving manifest</Typography>
-                <form onSubmit={e => e.preventDefault()}>
+                <form onSubmit={onSubmit}>
                     <Grid
                         container
                         direction="row"
