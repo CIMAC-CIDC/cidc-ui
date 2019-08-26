@@ -47,14 +47,14 @@ function getFiles(token: string): Promise<DataFile[]> {
     return getItems(token, "downloadable_files");
 }
 
-async function getSingleFile(
+function getSingleFile(
     token: string,
     itemID: string
 ): Promise<DataFile | undefined> {
     return getItem(token, "downloadable_files", itemID);
 }
 
-async function getAccountInfo(token: string): Promise<Account[]> {
+function getAccountInfo(token: string): Promise<Account[]> {
     const decodedToken = decode(token) as any;
     const email = decodedToken!.email;
 
@@ -63,22 +63,19 @@ async function getAccountInfo(token: string): Promise<Account[]> {
         .then(extractItems);
 }
 
-async function getTrials(token: string): Promise<Trial[]> {
+function getTrials(token: string): Promise<Trial[]> {
     return getItems(token, "trial_metadata");
 }
 
-async function createUser(
-    token: string,
-    newUser: any
-): Promise<Account | undefined> {
+function createUser(token: string, newUser: any): Promise<Account | undefined> {
     return getApiClient(token).post("new_users", newUser);
 }
 
-async function getAllAccounts(token: string): Promise<Account[]> {
+function getAllAccounts(token: string): Promise<Account[]> {
     return getItems(token, "users");
 }
 
-async function updateRole(
+function updateRole(
     token: string,
     itemID: string,
     etag: string,
@@ -93,7 +90,7 @@ async function updateRole(
         .then(extractItem);
 }
 
-async function getManifestValidationErrors(
+function getManifestValidationErrors(
     token: string,
     form: { schema: string; template: File }
 ): Promise<string[] | undefined> {
@@ -108,7 +105,7 @@ async function getManifestValidationErrors(
         .then(res => extractItem(res).errors);
 }
 
-async function getUserEtag(token: string, itemID: string): Promise<string> {
+function getUserEtag(token: string, itemID: string): Promise<string> {
     return getItem<Account>(token, "users", itemID).then(user => user._etag);
 }
 
