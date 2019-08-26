@@ -13,13 +13,14 @@ import {
     List,
     ListItem,
     ListItemText,
-    ListItemAvatar
+    ListItemAvatar,
+    Divider
 } from "@material-ui/core";
 import { ITemplateCardProps } from "./TemplatesPage";
 import { allNames, onValueChange } from "./utils";
 import { getManifestValidationErrors } from "../../api/api";
 import { AuthContext } from "../../auth/Auth";
-import { WarningRounded, Check } from "@material-ui/icons";
+import { WarningRounded, CheckBoxRounded } from "@material-ui/icons";
 
 const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     props: ITemplateCardProps
@@ -109,38 +110,51 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                                 type="submit"
                                 variant="contained"
                                 color="primary"
-                                disabled={!fileValid && !manifestType}
+                                disabled={!fileValid}
                             >
                                 Upload
                             </Button>
                         </Grid>
                     </Grid>
                 </form>
-                <Grid container direction="row">
-                    <Grid item>
+                <Divider />
+                <div
+                    style={{
+                        margin: "1em",
+                        maxHeight: "15em",
+                        overflowY: "scroll"
+                    }}
+                >
+                    <Grid container direction="row" alignItems="center">
                         {errors === undefined ? (
-                            <Typography>
-                                Choose a manifest to view validations.
+                            <Typography color="textSecondary">
+                                Select a manifest to view validations.
                             </Typography>
-                        ) : errors.length === 0 ? (
-                            <>
-                                <Typography>Your manifest is valid</Typography>
-                                <Check />
-                            </>
                         ) : (
                             <List dense>
-                                {errors.map(error => (
-                                    <ListItem key={error}>
+                                {errors.length === 0 ? (
+                                    <ListItem>
                                         <ListItemAvatar>
-                                            <WarningRounded color="error" />
+                                            <CheckBoxRounded color="primary" />
                                         </ListItemAvatar>
-                                        <ListItemText>{error}</ListItemText>
+                                        <ListItemText>
+                                            Manifest is valid.
+                                        </ListItemText>
                                     </ListItem>
-                                ))}
+                                ) : (
+                                    errors.map(error => (
+                                        <ListItem key={error}>
+                                            <ListItemAvatar>
+                                                <WarningRounded color="error" />
+                                            </ListItemAvatar>
+                                            <ListItemText>{error}</ListItemText>
+                                        </ListItem>
+                                    ))
+                                )}
                             </List>
                         )}
                     </Grid>
-                </Grid>
+                </div>
             </CardContent>
         </Card>
     );
