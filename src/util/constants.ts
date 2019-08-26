@@ -32,3 +32,6 @@ export const LOCALE = "en-US";
 export const EXPERIMENTAL_STRATEGY_MAP = {
     WES: "/wes-pipeline"
 };
+
+export const XLSX_MIMETYPE =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

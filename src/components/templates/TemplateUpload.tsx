@@ -21,6 +21,7 @@ import { allNames, onValueChange } from "./utils";
 import { getManifestValidationErrors } from "../../api/api";
 import { AuthContext } from "../../auth/Auth";
 import { WarningRounded, CheckBoxRounded } from "@material-ui/icons";
+import { XLSX_MIMETYPE } from "../../util/constants";
 
 const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     props: ITemplateCardProps
@@ -105,8 +106,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                                     }}
                                     inputProps={{
                                         ref: fileInput,
-                                        accept:
-                                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                        accept: XLSX_MIMETYPE
                                     }}
                                     type="file"
                                 />

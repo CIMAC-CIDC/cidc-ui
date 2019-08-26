@@ -13,58 +13,61 @@ function getApiClient(token: string): AxiosInstance {
     });
 }
 
-function itemURL(endpoint: string, itemID: string): string {
+function _itemURL(endpoint: string, itemID: string): string {
     return `${endpoint}/${itemID}`;
 }
 
-function extractItem<T>(response: AxiosResponse<T>): T {
+function _extractItem<T>(response: AxiosResponse<T>): T {
     return response.data;
 }
 
-function extractItems<T extends { _items: any[] }>(
+function _extractItems<T extends { _items: any[] }>(
     response: AxiosResponse<T>
 ): T["_items"] {
-    return extractItem(response)._items;
+    return _extractItem(response)._items;
 }
 
-function getItem<T>(
+function _getItem<T>(
     token: string,
     endpoint: string,
     itemID: string
 ): Promise<T> {
     return getApiClient(token)
-        .get(itemURL(endpoint, itemID))
-        .then(extractItem);
+        .get(_itemURL(endpoint, itemID))
+        .then(_extractItem);
 }
 
-function getItems<T>(token: string, endpoint: string): Promise<T> {
+function _getItems<T>(token: string, endpoint: string): Promise<T> {
     return getApiClient(token)
         .get(endpoint)
-        .then(extractItems);
+        .then(_extractItems);
 }
 
 function getFiles(token: string): Promise<DataFile[]> {
-    return getItems(token, "downloadable_files");
+    return _getItems(token, "downloadable_files");
 }
 
 function getSingleFile(
     token: string,
     itemID: string
 ): Promise<DataFile | undefined> {
-    return getItem(token, "downloadable_files", itemID);
+    return _getItem(token, "downloadable_files", itemID);
 }
 
-function getAccountInfo(token: string): Promise<Account[]> {
+function getAccountInfo(token: string): Promise<Account | undefined> {
     const decodedToken = decode(token) as any;
     const email = decodedToken!.email;
 
     return getApiClient(token)
         .get("users", { params: { email } })
-        .then(extractItems);
+        .then(res => {
+            const users = _extractItems(res);
+            return users ? users[0] : undefined;
+        });
 }
 
 function getTrials(token: string): Promise<Trial[]> {
-    return getItems(token, "trial_metadata");
+    return _getItems(token, "trial_metadata");
 }
 
 function createUser(token: string, newUser: any): Promise<Account | undefined> {
@@ -72,7 +75,7 @@ function createUser(token: string, newUser: any): Promise<Account | undefined> {
 }
 
 function getAllAccounts(token: string): Promise<Account[]> {
-    return getItems(token, "users");
+    return _getItems(token, "users");
 }
 
 function updateRole(
@@ -83,11 +86,11 @@ function updateRole(
 ): Promise<Account> {
     return getApiClient(token)
         .patch(
-            itemURL("users", itemID),
+            _itemURL("users", itemID),
             { role },
             { headers: { "if-match": etag } }
         )
-        .then(extractItem);
+        .then(_extractItem);
 }
 
 function getManifestValidationErrors(
@@ -102,11 +105,11 @@ function getManifestValidationErrors(
         .post("ingestion/validate", formData, {
             headers: { "content-type": "multipart/form" }
         })
-        .then(res => extractItem(res).errors);
+        .then(res => _extractItem(res).errors);
 }
 
 function getUserEtag(token: string, itemID: string): Promise<string> {
-    return getItem<Account>(token, "users", itemID).then(user => user._etag);
+    return _getItem<Account>(token, "users", itemID).then(user => user._etag);
 }
 
 // ----------- Old API methods (not currently supported) ----------- //
@@ -131,6 +134,8 @@ async function updateTrial(
 }
 
 export {
+    _getItem,
+    _getItems,
     getFiles,
     getSingleFile,
     getAccountInfo,

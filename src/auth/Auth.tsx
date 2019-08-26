@@ -44,8 +44,8 @@ export default class Auth {
         this.auth0.parseHash((err, authResult) => {
             if (authResult && authResult.accessToken && authResult.idToken) {
                 getAccountInfo(authResult.idToken)
-                    .then(results => {
-                        if (results![0].approval_date) {
+                    .then(user => {
+                        if (user && user.approval_date) {
                             this.setSession(authResult, "/");
                         } else {
                             history.replace("/register?unactivated=true");
