@@ -1,6 +1,5 @@
 import { Account } from "../model/account";
 import { Trial } from "../model/trial";
-import { Analysis } from "../model/analysis";
 import { decode } from "jsonwebtoken";
 import { DataFile } from "../model/file";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
