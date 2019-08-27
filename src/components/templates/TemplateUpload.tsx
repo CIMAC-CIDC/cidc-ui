@@ -22,6 +22,7 @@ import { getManifestValidationErrors } from "../../api/api";
 import { AuthContext } from "../../auth/Auth";
 import { WarningRounded, CheckBoxRounded } from "@material-ui/icons";
 import { XLSX_MIMETYPE } from "../../util/constants";
+import Loader from "../generic/Loader";
 
 const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     props: ITemplateCardProps
@@ -29,16 +30,22 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     const auth = React.useContext(AuthContext)!;
 
     const fileInput = React.useRef<HTMLInputElement>(null);
+
     const [manifestType, setManifestType] = React.useState<string | undefined>(
         undefined
     );
+    const [isValidating, setIsValidating] = React.useState<boolean>(false);
     const [errors, setErrors] = React.useState<string[] | undefined>(undefined);
+
     const getValidations = (file: File) => {
         if (manifestType) {
+            setIsValidating(true);
             getManifestValidationErrors(auth.getIdToken()!, {
                 schema: manifestType,
                 template: file
-            }).then(setErrors);
+            })
+                .then(setErrors)
+                .then(() => setIsValidating(false));
         }
     };
 
@@ -134,7 +141,9 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                     }}
                 >
                     <Grid container direction="row" alignItems="center">
-                        {errors === undefined ? (
+                        {isValidating ? (
+                            <Loader size={32} />
+                        ) : errors === undefined ? (
                             <Typography color="textSecondary">
                                 Select a manifest to view validations.
                             </Typography>

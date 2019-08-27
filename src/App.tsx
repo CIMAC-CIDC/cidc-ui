@@ -17,6 +17,7 @@ import Auth, { AuthContext } from "./auth/Auth";
 import history from "./auth/History";
 import autobind from "autobind-decorator";
 import IdleTimer from "react-idle-timer";
+import Loader from "./components/generic/Loader";
 
 const IDLE_TIMEOUT: number = 1000 * 60 * 15;
 
@@ -171,7 +172,7 @@ class App extends React.Component<any, any> {
                                     // tslint:disable-next-line:jsx-no-lambda
                                     render={props => {
                                         this.handleAuthentication(props);
-                                        return null;
+                                        return <Loader />;
                                     }}
                                 />
                             </Switch>
