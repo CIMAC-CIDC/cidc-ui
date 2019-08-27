@@ -1,9 +1,4 @@
-import {
-    Grid,
-    TextField,
-    CircularProgress,
-    Typography
-} from "@material-ui/core";
+import { Grid, TextField, Typography } from "@material-ui/core";
 import autobind from "autobind-decorator";
 import _ from "lodash";
 import * as React from "react";
