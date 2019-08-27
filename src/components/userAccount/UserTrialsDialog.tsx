@@ -15,7 +15,7 @@ import {
     TablePagination
 } from "@material-ui/core";
 import autobind from "autobind-decorator";
-import { getTrials, updateTrial } from "../../api/api";
+import { getTrials } from "../../api/api";
 import { Trial } from "../../model/trial";
 
 export interface IUserTrialsDialogState {
@@ -48,19 +48,6 @@ export default class UserTrialsDialog extends React.Component<
         const newTrials: Trial[] = JSON.parse(
             JSON.stringify(this.state.trials)
         );
-        newTrials.forEach((trial: Trial) => {
-            if (trial._id === event.target.value) {
-                if (trial.collaborators.includes(this.props.account.email)) {
-                    trial.collaborators.splice(
-                        trial.collaborators.indexOf(this.props.account.email),
-                        1
-                    );
-                } else {
-                    trial.collaborators.push(this.props.account.email);
-                }
-            }
-        });
-
         this.setState({ trials: newTrials });
     }
 
@@ -71,20 +58,9 @@ export default class UserTrialsDialog extends React.Component<
 
     @autobind
     private handleSave() {
-        let updatedTrialCount: number = 0;
-        this.state.trials!.forEach((trial: Trial) => {
-            updateTrial(
-                this.props.token,
-                trial._id,
-                trial._etag,
-                trial.collaborators
-            ).then(results => {
-                updatedTrialCount++;
-                if (this.state.trials!.length === updatedTrialCount) {
-                    this.props.onCancel();
-                }
-            });
-        });
+        window.alert(
+            "Trial access controls are not yet supported in the new API."
+        );
     }
 
     @autobind
@@ -103,14 +79,9 @@ export default class UserTrialsDialog extends React.Component<
     }
 
     public render() {
-        const selectedTrialIds: string[] = [];
-        if (this.state.trials) {
-            this.state.trials.forEach(trial => {
-                if (trial.collaborators.includes(this.props.account.email)) {
-                    selectedTrialIds.push(trial.trial_id);
-                }
-            });
-        }
+        const selectedTrialIds: string[] = this.state.trials
+            ? this.state.trials.map(t => t.trial_id)
+            : [];
 
         return (
             <>

@@ -37,7 +37,7 @@ function _getItem<T>(
         .then(_extractItem);
 }
 
-function _getItems<T>(token: string, endpoint: string): Promise<T> {
+function _getItems<T>(token: string, endpoint: string): Promise<T[]> {
     return getApiClient(token)
         .get(endpoint)
         .then(_extractItems);
@@ -123,16 +123,6 @@ async function deleteUser(
     return;
 }
 
-async function updateTrial(
-    token: string,
-    itemID: string,
-    etag: string,
-    collaborators: any
-): Promise<Trial | undefined> {
-    console.error("not currently supported");
-    return;
-}
-
 export {
     _getItem,
     _getItems,
@@ -144,7 +134,6 @@ export {
     getAllAccounts,
     updateRole,
     deleteUser,
-    updateTrial,
     getUserEtag,
     getManifestValidationErrors
 };

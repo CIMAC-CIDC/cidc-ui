@@ -106,7 +106,7 @@ export default class UserTableRow extends React.Component<any, {}> {
                         size="small"
                         variant="outlined"
                         color="primary"
-                        disabled={!this.props.account.approved}
+                        disabled={!this.props.account.approval_date}
                         // tslint:disable-next-line:jsx-no-lambda
                         onClick={() => this.openTrials()}
                     >
