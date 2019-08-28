@@ -59,7 +59,7 @@ function getAccountInfo(token: string): Promise<Account | undefined> {
     const email = decodedToken!.email;
 
     return getApiClient(token)
-        .get("users", { params: { email } })
+        .get("users", { params: { where: { email } } })
         .then(res => {
             const users = _extractItems(res);
             return users ? users[0] : undefined;

@@ -58,6 +58,8 @@ export default class UserAccountPage extends React.Component<
             return null;
         }
 
+        console.log(this.state.accountInfo);
+
         return (
             <div>
                 <Paper className="User-account-paper">

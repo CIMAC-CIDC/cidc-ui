@@ -20,7 +20,7 @@ const ENDPOINT = "some/route";
 
 beforeEach(() => axiosMock.reset());
 
-function respondsWith404(p: AxiosPromise) {
+function respondsWith404(p: Promise<any>) {
     return p.catch(({ response }) => {
         expect(response.status).toBe(404);
     });
@@ -63,8 +63,8 @@ test("getAccountInfo", done => {
     const payload = { _items: [OBJECT] };
 
     axiosMock.onGet("users").reply(config => {
-        expect(config.params.email).toBeDefined();
-        expect(config.params.email).toBe(EMAIL);
+        expect(config.params.where).toBeDefined();
+        expect(config.params.where).toEqual({ email: EMAIL });
         return [200, payload];
     });
 
