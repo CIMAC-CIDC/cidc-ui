@@ -16,7 +16,7 @@ fi
 [ -z $TRAVIS_BRANCH ] || pip3 install setuptools wheel
 
 # Build the metadata / manifest templates from cidc-schemas
-pip3 install cidc-schemas==0.1.4
+pip3 install --upgrade cidc-schemas
 python3.6 -m cidc_schemas.cli generate_all_templates --out_dir public/static/xlsx || exit 1
 
 # Compile the application
