@@ -36,18 +36,23 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     );
     const [isValidating, setIsValidating] = React.useState<boolean>(false);
     const [errors, setErrors] = React.useState<string[] | undefined>(undefined);
+    const [file, setFile] = React.useState<File | undefined>(undefined);
 
-    const getValidations = (file: File) => {
-        if (manifestType) {
+    // When the manifest file or manifest type changes, run validations
+    React.useEffect(() => {
+        if (file && manifestType) {
             setIsValidating(true);
             getManifestValidationErrors(auth.getIdToken()!, {
                 schema: manifestType,
                 template: file
-            })
-                .then(setErrors)
-                .then(() => setIsValidating(false));
+            }).then(errs => {
+                // Check that validations weren't canceled partway through
+                // the request.
+                setErrors(errs);
+                setIsValidating(false);
+            });
         }
-    };
+    }, [file, manifestType, auth]);
 
     // The file is valid if it has been validated and there are no errors
     const fileValid = errors instanceof Array && errors.length === 0;
@@ -107,7 +112,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                                             const files =
                                                 fileInput.current.files;
                                             if (files && files.length > 0) {
-                                                getValidations(files[0]);
+                                                setFile(files[0]);
                                             }
                                         }
                                     }}
