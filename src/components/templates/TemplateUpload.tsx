@@ -46,8 +46,6 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                 schema: manifestType,
                 template: file
             }).then(errs => {
-                // Check that validations weren't canceled partway through
-                // the request.
                 setErrors(errs);
                 setIsValidating(false);
             });
