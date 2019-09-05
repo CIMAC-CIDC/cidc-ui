@@ -57,10 +57,10 @@ export default class FileDetailsTable extends React.Component<
                         </TableRow>
                         <TableRow>
                             <TableCell className="File-table-row-cell">
-                                Experimental Strategy
+                                Assay Type
                             </TableCell>
                             <TableCell className="File-table-row-cell">
-                                {this.props.file.assay_category}
+                                {this.props.file.assay_type}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -68,7 +68,7 @@ export default class FileDetailsTable extends React.Component<
                                 Data Format
                             </TableCell>
                             <TableCell className="File-table-row-cell">
-                                {this.props.file.file_type}
+                                {this.props.file.data_format}
                             </TableCell>
                         </TableRow>
                         <TableRow>

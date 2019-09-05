@@ -7,7 +7,7 @@ export interface DataFile {
     uploaded_timestamp: Date;
     file_size_bytes: number;
     artifact_category: string;
-    assay_category: string;
-    file_type: string;
+    assay_type: string;
+    data_format: string;
     download_link?: string;
 }

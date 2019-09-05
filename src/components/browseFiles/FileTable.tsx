@@ -18,7 +18,7 @@ import { Trial } from "../../model/trial";
 
 const NAME_KEY = "object_url";
 const TRIAL_ID_KEY = "trial_id";
-const ASSAY_TYPE_KEY = "assay_category";
+const ASSAY_TYPE_KEY = "assay_type";
 const FILE_TYPE_KEY = "file_type";
 const SIZE_KEY = "file_size_bytes";
 
@@ -127,7 +127,7 @@ export default class FileTable extends React.Component<
                                         this.handleChangeSorting(ASSAY_TYPE_KEY)
                                     }
                                 >
-                                    Experimental Strategy
+                                    Assay Type
                                 </TableSortLabel>
                             </TableCell>
                             <TableCell className="File-table-header-cell">
@@ -206,10 +206,10 @@ export default class FileTable extends React.Component<
                                             {file.trial}
                                         </TableCell>
                                         <TableCell className="File-table-row-cell">
-                                            {file.assay_category}
+                                            {file.assay_type}
                                         </TableCell>
                                         <TableCell className="File-table-row-cell">
-                                            {file.file_type}
+                                            {file.data_format}
                                         </TableCell>
                                         <TableCell className="File-table-row-cell">
                                             {filesize(file.file_size_bytes)}

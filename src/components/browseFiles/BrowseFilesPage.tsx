@@ -111,7 +111,7 @@ export default class BrowseFilesPage extends React.Component<
                                     _.map(this.state.files, "trial")
                                 )}
                                 experimentalStrategies={_.uniq(
-                                    _.map(this.state.files, "assay_category")
+                                    _.map(this.state.files, "assay_type")
                                 )}
                                 dataFormats={_.uniq(
                                     _.map(this.state.files, "file_type")

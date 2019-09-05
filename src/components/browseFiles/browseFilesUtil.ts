@@ -17,11 +17,11 @@ export function filterFiles(
         }
         if (selectedExperimentalStrategies.length > 0) {
             isExperimentalStrategyMatch = selectedExperimentalStrategies.includes(
-                file.assay_category
+                file.assay_type
             );
         }
         if (selectedDataFormats.length > 0) {
-            isDataFormatMatch = selectedDataFormats.includes(file.file_type);
+            isDataFormatMatch = selectedDataFormats.includes(file.data_format);
         }
         if (searchFilter.length > 0) {
             isSearchFilterMatch = file.file_name
