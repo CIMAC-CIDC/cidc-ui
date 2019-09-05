@@ -49,7 +49,7 @@ export default class FileDetailsTable extends React.Component<
                         </TableRow>
                         <TableRow>
                             <TableCell className="File-table-row-cell">
-                                Trial Name
+                                Lead Organization Study ID
                             </TableCell>
                             <TableCell className="File-table-row-cell">
                                 {this.props.file.trial}
