@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import "./TransferData.css";
 import CopyToClipboard from "react-copy-to-clipboard";
-import RemoteMarkdown from "./RemoteMarkdown";
+import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
 
 export interface ICliInstructionsState {
     tokenVisible: boolean;
@@ -34,7 +34,7 @@ export default class CliInstructions extends React.Component<
 
         return (
             <div className="Markdown-width">
-                <RemoteMarkdown
+                <CIDCGithubMarkdown
                     path="cidc-cli/master/README.md"
                     trimStartLines={4}
                 />

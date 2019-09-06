@@ -1,14 +1,17 @@
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import "github-markdown-css/github-markdown.css";
-import { MARKDOWN_BASE_URL } from "../../util/constants";
 
-export interface IRemoteMarkdownProps {
+export interface ICIDCGithubMarkdownProps {
     path: string;
     trimStartLines?: number;
 }
 
-const RemoteMarkdown: React.FunctionComponent<IRemoteMarkdownProps> = props => {
+const MARKDOWN_BASE_URL = "https://raw.githubusercontent.com/CIMAC-CIDC/";
+
+const CIDCGithubMarkdown: React.FunctionComponent<
+    ICIDCGithubMarkdownProps
+> = props => {
     const [markdown, setMarkdown] = React.useState<string | undefined>(
         undefined
     );
@@ -39,4 +42,4 @@ const RemoteMarkdown: React.FunctionComponent<IRemoteMarkdownProps> = props => {
     );
 };
 
-export default RemoteMarkdown;
+export default CIDCGithubMarkdown;

@@ -1,6 +1,3 @@
-export const MARKDOWN_BASE_URL: string =
-    "https://raw.githubusercontent.com/CIMAC-CIDC/";
-
 export const ORGANIZATION_NAME_MAP = {
     DFCI: "Dana-Farber Cancer Institute (CIMAC)",
     CIDC: "Dana-Farber Cancer Institute (CIDC)",

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
-import RemoteMarkdown from "./RemoteMarkdown";
+import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
 
 const AssayInstructions: React.FunctionComponent<
     RouteComponentProps<{ assay: string }>
@@ -9,7 +9,7 @@ const AssayInstructions: React.FunctionComponent<
         props.match.params.assay
     }.md`;
 
-    return <RemoteMarkdown path={path} />;
+    return <CIDCGithubMarkdown path={path} />;
 };
 
 export default AssayInstructions;
