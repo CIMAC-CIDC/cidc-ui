@@ -19,7 +19,7 @@ import { Trial } from "../../model/trial";
 const NAME_KEY = "object_url";
 const TRIAL_ID_KEY = "trial_id";
 const ASSAY_TYPE_KEY = "assay_type";
-const FILE_TYPE_KEY = "file_type";
+const FILE_TYPE_KEY = "data_format";
 const SIZE_KEY = "file_size_bytes";
 
 export interface IFileTableProps {
