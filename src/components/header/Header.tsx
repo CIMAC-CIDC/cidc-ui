@@ -17,10 +17,7 @@ class Header extends React.Component<any, {}> {
 
     public render() {
         let selectedTab = this.props.location.pathname;
-        if (
-            selectedTab === "/wes-upload" ||
-            selectedTab === "/cli-instructions"
-        ) {
+        if (selectedTab.startsWith("/transfer-data")) {
             selectedTab = "/transfer-data";
         } else if (selectedTab === "/callback") {
             return null;

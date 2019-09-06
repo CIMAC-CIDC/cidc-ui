@@ -1,4 +1,4 @@
-export const MARKDOWN_FOLDER_PATH: string =
+export const MARKDOWN_BASE_URL: string =
     "https://raw.githubusercontent.com/CIMAC-CIDC/";
 
 export const ORGANIZATION_NAME_MAP = {

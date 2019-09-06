@@ -1,7 +1,4 @@
 import * as React from "react";
-import ReactMarkdown from "react-markdown";
-import "github-markdown-css/github-markdown.css";
-import { MARKDOWN_FOLDER_PATH } from "../../util/constants";
 import {
     Paper,
     Toolbar,
@@ -12,34 +9,19 @@ import {
 } from "@material-ui/core";
 import "./TransferData.css";
 import CopyToClipboard from "react-copy-to-clipboard";
+import RemoteMarkdown from "./RemoteMarkdown";
 
 export interface ICliInstructionsState {
-    markdown: string;
     tokenVisible: boolean;
 }
-
-const MARKDOWN_FILE_NAME: string = "cidc-cli/master/README.md";
-const NUMBER_OF_LINES_TO_REMOVE = 4;
 
 export default class CliInstructions extends React.Component<
     any,
     ICliInstructionsState
 > {
     state: ICliInstructionsState = {
-        markdown: "",
         tokenVisible: false
     };
-
-    componentWillMount() {
-        fetch(MARKDOWN_FOLDER_PATH + MARKDOWN_FILE_NAME)
-            .then(response => response.text())
-            .then(text => {
-                const filteredText: string[] = text
-                    .split("\n")
-                    .slice(NUMBER_OF_LINES_TO_REMOVE);
-                this.setState({ markdown: filteredText.join("\n") });
-            });
-    }
 
     private handleClick() {
         this.setState({ tokenVisible: !this.state.tokenVisible });
@@ -52,9 +34,9 @@ export default class CliInstructions extends React.Component<
 
         return (
             <div className="Markdown-width">
-                <ReactMarkdown
-                    source={this.state.markdown}
-                    className="markdown-body"
+                <RemoteMarkdown
+                    path="cidc-cli/master/README.md"
+                    trimStartLines={4}
                 />
                 <Paper className="User-account-paper" style={{ marginTop: 20 }}>
                     <Toolbar className="User-account-toolbar">

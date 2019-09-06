@@ -2,7 +2,6 @@ import * as React from "react";
 import "./App.css";
 import BrowseFilesPage from "./components/browseFiles/BrowseFilesPage";
 import FileDetailsPage from "./components/browseFiles/FileDetailsPage";
-import WholeExomeSequencingUploadMarkdown from "./components/transferData/WholeExomeSequencingUploadMarkdown";
 import { Router, Switch, Route } from "react-router-dom";
 import Header from "./components/header/Header";
 import Footer from "./components/footer/Footer";
@@ -18,6 +17,7 @@ import history from "./auth/History";
 import autobind from "autobind-decorator";
 import IdleTimer from "react-idle-timer";
 import Loader from "./components/generic/Loader";
+import AssayInstructions from "./components/transferData/AssayInstructions";
 
 const IDLE_TIMEOUT: number = 1000 * 60 * 15;
 
@@ -89,20 +89,10 @@ class App extends React.Component<any, any> {
                                             {...props}
                                         />
                                     )}
+                                    exact
                                 />
                                 <Route
-                                    path="/browse-files"
-                                    // tslint:disable-next-line:jsx-no-lambda
-                                    render={props => (
-                                        <BrowseFilesPage
-                                            auth={this.auth}
-                                            token={this.state.token}
-                                            {...props}
-                                        />
-                                    )}
-                                />
-                                <Route
-                                    path="/cli-instructions"
+                                    path="/transfer-data/cli-instructions"
                                     // tslint:disable-next-line:jsx-no-lambda
                                     render={props => (
                                         <CliInstructions
@@ -112,11 +102,16 @@ class App extends React.Component<any, any> {
                                     )}
                                 />
                                 <Route
-                                    path="/wes-upload"
+                                    path="/transfer-data/:assay"
+                                    component={AssayInstructions}
+                                />
+                                <Route
+                                    path="/browse-files"
                                     // tslint:disable-next-line:jsx-no-lambda
                                     render={props => (
-                                        <WholeExomeSequencingUploadMarkdown
+                                        <BrowseFilesPage
                                             auth={this.auth}
+                                            token={this.state.token}
                                             {...props}
                                         />
                                     )}
