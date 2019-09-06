@@ -102,6 +102,14 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                                 </InputLabel>
                                 <Input
                                     id="uploadInput"
+                                    onClick={() => {
+                                        // Clear the file input onClick to ensure onChange
+                                        // fires on every selection, even if the same file
+                                        // is selected twice.
+                                        if (fileInput.current) {
+                                            fileInput.current.value = "";
+                                        }
+                                    }}
                                     disabled={
                                         !manifestType || manifestType === ""
                                     }
