@@ -18,7 +18,7 @@ import {
 } from "@material-ui/core";
 import { ITemplateCardProps } from "./TemplatesPage";
 import { allNames, onValueChange } from "./utils";
-import { getManifestValidationErrors } from "../../api/api";
+import { getManifestValidationErrors, uploadManifest } from "../../api/api";
 import { AuthContext } from "../../auth/Auth";
 import { WarningRounded, CheckBoxRounded } from "@material-ui/icons";
 import { XLSX_MIMETYPE } from "../../util/constants";
@@ -35,6 +35,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
         undefined
     );
     const [isValidating, setIsValidating] = React.useState<boolean>(false);
+    const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
     const [errors, setErrors] = React.useState<string[] | undefined>(undefined);
     const [file, setFile] = React.useState<File | undefined>(undefined);
 
@@ -57,8 +58,18 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
 
     const onSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault();
-        // TODO: enable manifest uploads once the API supports it
-        window.alert("Manifest uploads are not yet supported.");
+        if (manifestType && file) {
+            setIsSubmitting(true);
+            uploadManifest(auth.getIdToken()!, {
+                schema: manifestType,
+                template: file
+            })
+                .then(() => setIsSubmitting(false))
+                .catch(err => {
+                    setErrors([`Upload failed: ${err.toString()}`]);
+                    setIsSubmitting(false);
+                });
+        }
     };
 
     return (
@@ -152,7 +163,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                     }}
                 >
                     <Grid container direction="row" alignItems="center">
-                        {isValidating ? (
+                        {isValidating || isSubmitting ? (
                             <Loader size={32} />
                         ) : errors === undefined ? (
                             <Typography color="textSecondary">

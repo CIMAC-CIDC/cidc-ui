@@ -93,19 +93,39 @@ function updateRole(
         .then(_extractItem);
 }
 
-function getManifestValidationErrors(
+interface IManifestForm {
+    schema: string;
+    template: File;
+}
+
+function _makeManifestRequest<T>(
+    endpoint: string,
     token: string,
-    form: { schema: string; template: File }
-): Promise<string[] | undefined> {
+    form: IManifestForm
+): Promise<AxiosResponse<T>> {
     const formData = new FormData();
     formData.append("schema", form.schema.toLowerCase());
     formData.append("template", form.template);
 
-    return getApiClient(token)
-        .post("ingestion/validate", formData, {
-            headers: { "content-type": "multipart/form" }
-        })
-        .then(res => _extractItem(res).errors);
+    return getApiClient(token).post(endpoint, formData, {
+        headers: { "content-type": "multipart/form" }
+    });
+}
+
+// TODO: determine the appropriate return type for this function based on API implementation.
+function uploadManifest(token: string, form: IManifestForm): Promise<any> {
+    return _makeManifestRequest("ingestion/upload_manifest", token, form);
+}
+
+function getManifestValidationErrors(
+    token: string,
+    form: IManifestForm
+): Promise<string[] | undefined> {
+    return _makeManifestRequest<{ errors: string[] }>(
+        "ingestion/validate",
+        token,
+        form
+    ).then(res => _extractItem(res).errors);
 }
 
 function getUserEtag(token: string, itemID: string): Promise<string> {
@@ -135,5 +155,6 @@ export {
     updateRole,
     deleteUser,
     getUserEtag,
+    uploadManifest,
     getManifestValidationErrors
 };
