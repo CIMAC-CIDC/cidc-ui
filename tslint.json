@@ -15,6 +15,7 @@
     "no-console": false,
     "trailing-comma": false,
     "arrow-parens": false,
-    "quotemark": false
+    "quotemark": false,
+    "object-literal-key-quotes": [true, "as-needed"]
   }
 }

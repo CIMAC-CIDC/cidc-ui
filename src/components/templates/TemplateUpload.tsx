@@ -8,13 +8,13 @@ import {
     Grid,
     Input,
     InputLabel,
-    MenuItem,
     Select,
     List,
     ListItem,
     ListItemText,
-    ListItemAvatar,
-    Divider
+    Divider,
+    MenuItem,
+    ListItemIcon
 } from "@material-ui/core";
 import { ITemplateCardProps } from "./TemplatesPage";
 import { allNames, onValueChange } from "./utils";
@@ -93,7 +93,8 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                                 <Select
                                     inputProps={{
                                         id: "manifestType",
-                                        name: "type"
+                                        name: "type",
+                                        "data-testid": "manifest-type-select"
                                     }}
                                     value={manifestType || ""}
                                     onChange={onValueChange(setManifestType)}
@@ -135,7 +136,8 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                                     }}
                                     inputProps={{
                                         ref: fileInput,
-                                        accept: XLSX_MIMETYPE
+                                        accept: XLSX_MIMETYPE,
+                                        "data-testid": "manifest-file-input"
                                     }}
                                     type="file"
                                 />
@@ -148,6 +150,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                                 variant="contained"
                                 color="primary"
                                 disabled={!fileValid}
+                                data-testid="submit-button"
                             >
                                 Upload
                             </Button>
@@ -166,30 +169,33 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                         {isValidating || isSubmitting ? (
                             <Loader size={32} />
                         ) : errors === undefined ? (
-                            <Typography color="textSecondary">
+                            <Typography
+                                color="textSecondary"
+                                data-testid="no-selection"
+                            >
                                 Select a manifest to view validations.
                             </Typography>
+                        ) : errors.length === 0 ? (
+                            <List dense data-testid="valid-manifest">
+                                <ListItem>
+                                    <ListItemIcon>
+                                        <CheckBoxRounded color="primary" />
+                                    </ListItemIcon>
+                                    <ListItemText>
+                                        Manifest is valid.
+                                    </ListItemText>
+                                </ListItem>
+                            </List>
                         ) : (
-                            <List dense>
-                                {errors.length === 0 ? (
-                                    <ListItem>
-                                        <ListItemAvatar>
-                                            <CheckBoxRounded color="primary" />
-                                        </ListItemAvatar>
-                                        <ListItemText>
-                                            Manifest is valid.
-                                        </ListItemText>
+                            <List data-testid="errors">
+                                {errors.map(error => (
+                                    <ListItem key={error}>
+                                        <ListItemIcon>
+                                            <WarningRounded color="error" />
+                                        </ListItemIcon>
+                                        <ListItemText>{error}</ListItemText>
                                     </ListItem>
-                                ) : (
-                                    errors.map(error => (
-                                        <ListItem key={error}>
-                                            <ListItemAvatar>
-                                                <WarningRounded color="error" />
-                                            </ListItemAvatar>
-                                            <ListItemText>{error}</ListItemText>
-                                        </ListItem>
-                                    ))
-                                )}
+                                ))}
                             </List>
                         )}
                     </Grid>

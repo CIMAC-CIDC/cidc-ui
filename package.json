@@ -65,6 +65,8 @@
     "lint": "tslint -p tsconfig.json"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^4.1.0",
+    "@testing-library/react": "^9.1.4",
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.2",
     "@types/react": "^16.7.18",
