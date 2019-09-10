@@ -3,6 +3,8 @@ import MockAdapter from "axios-mock-adapter";
 import {
     _getItem,
     _getItems,
+    _extractErrorMessage,
+    getApiClient,
     getAccountInfo,
     getManifestValidationErrors,
     updateRole
@@ -56,6 +58,47 @@ describe("_getItems", () => {
 
     it("bubbles up a 404 on non-existent items", done => {
         respondsWith404(_getItems(TOKEN, ENDPOINT)).then(done);
+    });
+});
+
+describe("_extractErrorMessage", () => {
+    const endpoint = "foo";
+    const client = getApiClient(TOKEN);
+
+    it("handles non-Eve-style error messages", done => {
+        const message = "an error message";
+        axiosMock.onGet(endpoint).reply(() => [401, message]);
+        client
+            .get(endpoint)
+            .catch(_extractErrorMessage)
+            .catch(err => expect(err).toBe(message))
+            .then(done);
+    });
+
+    it("handles Eve-style error messages", done => {
+        const eveError = {
+            _status: "ERR",
+            _error: { message: "blah" }
+        };
+        axiosMock.onGet(endpoint).reply(() => [401, eveError]);
+        client
+            .get(endpoint)
+            .catch(_extractErrorMessage)
+            .catch(err => expect(err).toBe(eveError._error.message))
+            .then(done);
+    });
+
+    it("handles empty error messages", done => {
+        axiosMock.onGet(endpoint).reply(() => [401, undefined]);
+        client
+            .get(endpoint)
+            .catch(_extractErrorMessage)
+            .catch(err => {
+                console.log(err);
+                throw err;
+            })
+            .catch(err => expect(err.includes("401")).toBeTruthy())
+            .then(done);
     });
 });
 
