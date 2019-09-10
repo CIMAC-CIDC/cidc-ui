@@ -24,6 +24,14 @@ import { WarningRounded, CheckBoxRounded } from "@material-ui/icons";
 import { XLSX_MIMETYPE } from "../../util/constants";
 import Loader from "../generic/Loader";
 
+type Status =
+    | "loading"
+    | "unset"
+    | "validationErrors"
+    | "validationSuccess"
+    | "uploadErrors"
+    | "uploadSuccess";
+
 const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     props: ITemplateCardProps
 ) => {
@@ -34,21 +42,24 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     const [manifestType, setManifestType] = React.useState<string | undefined>(
         undefined
     );
-    const [isValidating, setIsValidating] = React.useState<boolean>(false);
-    const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
+    const [status, setStatus] = React.useState<Status>("unset");
     const [errors, setErrors] = React.useState<string[] | undefined>(undefined);
     const [file, setFile] = React.useState<File | undefined>(undefined);
 
     // When the manifest file or manifest type changes, run validations
     React.useEffect(() => {
         if (file && manifestType) {
-            setIsValidating(true);
+            setStatus("loading");
             getManifestValidationErrors(auth.getIdToken()!, {
                 schema: manifestType,
                 template: file
             }).then(errs => {
                 setErrors(errs);
-                setIsValidating(false);
+                if (errs) {
+                    setStatus(
+                        errs.length ? "validationErrors" : "validationSuccess"
+                    );
+                }
             });
         }
     }, [file, manifestType, auth]);
@@ -59,17 +70,64 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     const onSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (manifestType && file) {
-            setIsSubmitting(true);
+            setStatus("loading");
             uploadManifest(auth.getIdToken()!, {
                 schema: manifestType,
                 template: file
             })
-                .then(() => setIsSubmitting(false))
+                .then(() => {
+                    setStatus("uploadSuccess");
+                })
                 .catch(err => {
                     setErrors([`Upload failed: ${err.toString()}`]);
-                    setIsSubmitting(false);
+                    setStatus("uploadErrors");
                 });
         }
+    };
+
+    const feedbackDisplay: { [k in Status]: React.ReactElement } = {
+        unset: (
+            <Typography color="textSecondary" data-testid="no-selection">
+                Select a manifest to view validations.
+            </Typography>
+        ),
+        loading: <Loader size={32} />,
+        validationErrors: (
+            <List data-testid="errors">
+                {errors &&
+                    errors.map(error => (
+                        <ListItem key={error}>
+                            <ListItemIcon>
+                                <WarningRounded color="error" />
+                            </ListItemIcon>
+                            <ListItemText>{error}</ListItemText>
+                        </ListItem>
+                    ))}
+            </List>
+        ),
+        validationSuccess: (
+            <List dense data-testid="valid-manifest">
+                <ListItem>
+                    <ListItemIcon>
+                        <CheckBoxRounded color="primary" />
+                    </ListItemIcon>
+                    <ListItemText>Manifest is valid.</ListItemText>
+                </ListItem>
+            </List>
+        ),
+        uploadErrors: "oopsies",
+        uploadSuccess: (
+            <List dense data-testid="upload-success">
+                <ListItem>
+                    <ListItemIcon>
+                        <CheckBoxRounded color="primary" />
+                    </ListItemIcon>
+                    <ListItemText>
+                        Successfully uploaded {manifestType} manifest.
+                    </ListItemText>
+                </ListItem>
+            </List>
+        )
     };
 
     return (
@@ -166,38 +224,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                     }}
                 >
                     <Grid container direction="row" alignItems="center">
-                        {isValidating || isSubmitting ? (
-                            <Loader size={32} />
-                        ) : errors === undefined ? (
-                            <Typography
-                                color="textSecondary"
-                                data-testid="no-selection"
-                            >
-                                Select a manifest to view validations.
-                            </Typography>
-                        ) : errors.length === 0 ? (
-                            <List dense data-testid="valid-manifest">
-                                <ListItem>
-                                    <ListItemIcon>
-                                        <CheckBoxRounded color="primary" />
-                                    </ListItemIcon>
-                                    <ListItemText>
-                                        Manifest is valid.
-                                    </ListItemText>
-                                </ListItem>
-                            </List>
-                        ) : (
-                            <List data-testid="errors">
-                                {errors.map(error => (
-                                    <ListItem key={error}>
-                                        <ListItemIcon>
-                                            <WarningRounded color="error" />
-                                        </ListItemIcon>
-                                        <ListItemText>{error}</ListItemText>
-                                    </ListItem>
-                                ))}
-                            </List>
-                        )}
+                        {feedbackDisplay[status]}
                     </Grid>
                 </div>
             </CardContent>

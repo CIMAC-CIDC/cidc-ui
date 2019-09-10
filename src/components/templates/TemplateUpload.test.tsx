@@ -51,8 +51,8 @@ test("manifest validation", async () => {
 
     function expectNoValidationsDisplayed() {
         expect(queryByTestId("no-selection")).toBeInTheDocument();
-        expect(queryByTestId("valid-manifest")).toBeNull();
-        expect(queryByTestId("errors")).toBeNull();
+        expect(queryByTestId("valid-manifest")).not.toBeInTheDocument();
+        expect(queryByTestId("errors")).not.toBeInTheDocument();
     }
 
     // Defaults on first render to no validations, disabled submit
@@ -81,26 +81,26 @@ test("manifest validation", async () => {
         expect(submitButton).toHaveAttribute("disabled");
 
         await waitForElement(() => queryByTestId(element)!);
-        expect(queryByTestId("no-selection")).toBeNull();
+        expect(queryByTestId("no-selection")).not.toBeInTheDocument();
     }
 
     // Check that validation errors show up and submit button is still disabled
     const errs = ["a", "b", "c"];
     await doValidationRequest(errs, "errors");
     errs.map(e => expect(getByText(e)).toBeInTheDocument());
-    expect(queryByTestId("valid-manifest")).toBeNull();
+    expect(queryByTestId("valid-manifest")).not.toBeInTheDocument();
     expect(submitButton).toHaveAttribute("disabled");
 
     // Check that valid message shows up and submit button is enabled
     await doValidationRequest([], "valid-manifest");
     expect(queryByTestId("valid-manifest")).toBeInTheDocument();
-    expect(queryByTestId("errors")).toBeNull();
+    expect(queryByTestId("errors")).not.toBeInTheDocument();
     expect(submitButton).not.toHaveAttribute("disabled");
 });
 
 test("manifest submission", async () => {
     const renderResult = renderWithMockedAuthContext();
-    const { getByTestId, getByText } = renderResult;
+    const { getByTestId, queryByTestId } = renderResult;
     const manifestTypeSelect = getByTestId("manifest-type-select");
     const manifestFileInput = getByTestId("manifest-file-input");
     const submitButton = getByTestId("submit-button");
@@ -124,4 +124,7 @@ test("manifest submission", async () => {
         metadata_json_patch: { lead_organization_study_id: "CIMAC-12345" }
     });
     fireEvent.click(submitButton);
+    expect(queryByTestId("upload-success")).not.toBeInTheDocument();
+    const result = await waitForElement(() => getByTestId("upload-success"));
+    expect(result).toBeInTheDocument();
 });
