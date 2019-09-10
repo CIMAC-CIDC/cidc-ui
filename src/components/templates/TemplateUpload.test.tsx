@@ -50,9 +50,9 @@ test("manifest validation", async () => {
     const submitButton = getByTestId("submit-button");
 
     function expectNoValidationsDisplayed() {
-        expect(queryByTestId("no-selection")).toBeInTheDocument();
-        expect(queryByTestId("valid-manifest")).not.toBeInTheDocument();
-        expect(queryByTestId("errors")).not.toBeInTheDocument();
+        expect(queryByTestId("unset")).toBeInTheDocument();
+        expect(queryByTestId("validationSuccess")).not.toBeInTheDocument();
+        expect(queryByTestId("validationErrors")).not.toBeInTheDocument();
     }
 
     // Defaults on first render to no validations, disabled submit
@@ -81,20 +81,20 @@ test("manifest validation", async () => {
         expect(submitButton).toHaveAttribute("disabled");
 
         await waitForElement(() => queryByTestId(element)!);
-        expect(queryByTestId("no-selection")).not.toBeInTheDocument();
+        expect(queryByTestId("unset")).not.toBeInTheDocument();
     }
 
     // Check that validation errors show up and submit button is still disabled
     const errs = ["a", "b", "c"];
-    await doValidationRequest(errs, "errors");
+    await doValidationRequest(errs, "validationErrors");
     errs.map(e => expect(getByText(e)).toBeInTheDocument());
-    expect(queryByTestId("valid-manifest")).not.toBeInTheDocument();
+    expect(queryByTestId("validationSuccess")).not.toBeInTheDocument();
     expect(submitButton).toHaveAttribute("disabled");
 
     // Check that valid message shows up and submit button is enabled
-    await doValidationRequest([], "valid-manifest");
-    expect(queryByTestId("valid-manifest")).toBeInTheDocument();
-    expect(queryByTestId("errors")).not.toBeInTheDocument();
+    await doValidationRequest([], "validationSuccess");
+    expect(queryByTestId("validationSuccess")).toBeInTheDocument();
+    expect(queryByTestId("validationErrors")).not.toBeInTheDocument();
     expect(submitButton).not.toHaveAttribute("disabled");
 });
 
@@ -117,14 +117,14 @@ test("manifest submission", async () => {
     fireEvent.change(manifestFileInput, {
         target: { files: [fakePBMCFile] }
     });
-    await waitForElement(() => getByTestId("valid-manifest")!);
+    await waitForElement(() => getByTestId("validationSuccess")!);
 
     // Submit the manifest
     uploadManifest.mockResolvedValue({
         metadata_json_patch: { lead_organization_study_id: "CIMAC-12345" }
     });
     fireEvent.click(submitButton);
-    expect(queryByTestId("upload-success")).not.toBeInTheDocument();
-    const result = await waitForElement(() => getByTestId("upload-success"));
+    expect(queryByTestId("uploadSuccess")).not.toBeInTheDocument();
+    const result = await waitForElement(() => getByTestId("uploadSuccess"));
     expect(result).toBeInTheDocument();
 });

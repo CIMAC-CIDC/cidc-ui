@@ -85,47 +85,47 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
         }
     };
 
+    const errorList =
+        errors &&
+        errors.map(error => (
+            <ListItem key={error}>
+                <ListItemIcon>
+                    <WarningRounded color="error" />
+                </ListItemIcon>
+                <ListItemText>{error}</ListItemText>
+            </ListItem>
+        ));
+
+    const successMessage = (message: string) => (
+        <ListItem>
+            <ListItemIcon>
+                <CheckBoxRounded color="primary" />
+            </ListItemIcon>
+            <ListItemText>{message}</ListItemText>
+        </ListItem>
+    );
+
     const feedbackDisplay: { [k in Status]: React.ReactElement } = {
         unset: (
-            <Typography color="textSecondary" data-testid="no-selection">
+            <Typography color="textSecondary" data-testid="unset">
                 Select a manifest to view validations.
             </Typography>
         ),
         loading: <Loader size={32} />,
         validationErrors: (
-            <List data-testid="errors">
-                {errors &&
-                    errors.map(error => (
-                        <ListItem key={error}>
-                            <ListItemIcon>
-                                <WarningRounded color="error" />
-                            </ListItemIcon>
-                            <ListItemText>{error}</ListItemText>
-                        </ListItem>
-                    ))}
-            </List>
+            <List data-testid="validationErrors">{errorList}</List>
         ),
         validationSuccess: (
-            <List dense data-testid="valid-manifest">
-                <ListItem>
-                    <ListItemIcon>
-                        <CheckBoxRounded color="primary" />
-                    </ListItemIcon>
-                    <ListItemText>Manifest is valid.</ListItemText>
-                </ListItem>
+            <List dense data-testid="validationSuccess">
+                {successMessage("Manifest is valid.")}
             </List>
         ),
-        uploadErrors: "oopsies",
+        uploadErrors: <List data-testid="uploadErrors">{errorList}</List>,
         uploadSuccess: (
-            <List dense data-testid="upload-success">
-                <ListItem>
-                    <ListItemIcon>
-                        <CheckBoxRounded color="primary" />
-                    </ListItemIcon>
-                    <ListItemText>
-                        Successfully uploaded {manifestType} manifest.
-                    </ListItemText>
-                </ListItem>
+            <List dense data-testid="uploadSuccess">
+                {successMessage(
+                    "Successfully uploaded {manifestType} manifest."
+                )}
             </List>
         )
     };
