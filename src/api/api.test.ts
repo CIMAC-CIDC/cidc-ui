@@ -93,10 +93,6 @@ describe("_extractErrorMessage", () => {
         client
             .get(endpoint)
             .catch(_extractErrorMessage)
-            .catch(err => {
-                console.log(err);
-                throw err;
-            })
             .catch(err => expect(err.includes("401")).toBeTruthy())
             .then(done);
     });

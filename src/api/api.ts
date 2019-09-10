@@ -126,9 +126,18 @@ function _makeManifestRequest<T>(
         .catch(_extractErrorMessage);
 }
 
-// TODO: determine the appropriate return type for this function based on API implementation.
-function uploadManifest(token: string, form: IManifestForm): Promise<any> {
-    return _makeManifestRequest("ingestion/upload_manifest", token, form);
+interface IManifestUploadResponse {
+    metadata_json_patch: { lead_organization_study_id: string };
+}
+function uploadManifest(
+    token: string,
+    form: IManifestForm
+): Promise<IManifestUploadResponse> {
+    return _makeManifestRequest<IManifestUploadResponse>(
+        "ingestion/upload_manifest",
+        token,
+        form
+    ).then(_extractItem);
 }
 
 function getManifestValidationErrors(

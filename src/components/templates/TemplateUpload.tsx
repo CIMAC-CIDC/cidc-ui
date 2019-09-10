@@ -45,6 +45,9 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     const [status, setStatus] = React.useState<Status>("unset");
     const [errors, setErrors] = React.useState<string[] | undefined>(undefined);
     const [file, setFile] = React.useState<File | undefined>(undefined);
+    const [targetTrial, setTargetTrial] = React.useState<string | undefined>(
+        undefined
+    );
 
     // When the manifest file or manifest type changes, run validations
     React.useEffect(() => {
@@ -75,8 +78,11 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                 schema: manifestType,
                 template: file
             })
-                .then(() => {
+                .then(({ metadata_json_patch }) => {
                     setStatus("uploadSuccess");
+                    setTargetTrial(
+                        metadata_json_patch.lead_organization_study_id
+                    );
                 })
                 .catch(err => {
                     setErrors([`Upload failed: ${err.toString()}`]);
@@ -124,7 +130,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
         uploadSuccess: (
             <List dense data-testid="uploadSuccess">
                 {successMessage(
-                    "Successfully uploaded {manifestType} manifest."
+                    `Successfully uploaded ${manifestType} manifest to ${targetTrial}.`
                 )}
             </List>
         )
