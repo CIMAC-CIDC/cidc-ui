@@ -27,7 +27,6 @@ export function filterFiles(
             isSearchFilterMatch = file.object_url
                 .toLowerCase()
                 .includes(searchFilter.toLowerCase());
-            console.log(isSearchFilterMatch);
         }
         return (
             isTrialIdMatch &&
