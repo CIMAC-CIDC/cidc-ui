@@ -105,7 +105,7 @@ export default class BrowseFilesPage extends React.Component<
                 )}
                 {this.state.files && this.state.files.length > 0 && (
                     <Grid container={true} spacing={32}>
-                        <Grid item={true} xs={2}>
+                        <Grid item={true} xs={3}>
                             <FileFilter
                                 trialIds={_.uniq(
                                     _.map(this.state.files, "trial")
@@ -123,7 +123,7 @@ export default class BrowseFilesPage extends React.Component<
                                 onDataFormatChange={this.handleDataFormatChange}
                             />
                         </Grid>
-                        <Grid item={true} xs={10}>
+                        <Grid item={true} xs={9}>
                             <div className="File-search-border">
                                 <TextField
                                     label="Search by file name"

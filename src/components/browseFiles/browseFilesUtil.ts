@@ -24,9 +24,10 @@ export function filterFiles(
             isDataFormatMatch = selectedDataFormats.includes(file.data_format);
         }
         if (searchFilter.length > 0) {
-            isSearchFilterMatch = file.file_name
+            isSearchFilterMatch = file.object_url
                 .toLowerCase()
                 .includes(searchFilter.toLowerCase());
+            console.log(isSearchFilterMatch);
         }
         return (
             isTrialIdMatch &&
