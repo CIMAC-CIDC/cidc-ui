@@ -18,21 +18,21 @@ export default class FileFilter extends React.Component<IFileFilterProps, {}> {
                 <Grid container={true}>
                     <Grid item={true} xs={12}>
                         <FileFilterCheckboxGroup
-                            title="Lead Organization Study ID"
+                            title="Study ID"
                             options={this.props.trialIds}
                             onChange={this.props.onTrialIdChange}
                         />
                     </Grid>
                     <Grid item={true} xs={12}>
                         <FileFilterCheckboxGroup
-                            title="Assay Type"
+                            title="Type"
                             options={this.props.experimentalStrategies}
                             onChange={this.props.onExperimentalStrategyChange}
                         />
                     </Grid>
                     <Grid item={true} xs={12}>
                         <FileFilterCheckboxGroup
-                            title="Data Format"
+                            title="Format"
                             options={this.props.dataFormats}
                             onChange={this.props.onDataFormatChange}
                         />

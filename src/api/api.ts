@@ -55,15 +55,23 @@ function _getItems<T>(token: string, endpoint: string): Promise<T[]> {
         .then(_extractItems);
 }
 
+function _transformFile(file: DataFile): DataFile {
+    return { ...file, data_format: file.data_format.toLowerCase() };
+}
+
 function getFiles(token: string): Promise<DataFile[]> {
-    return _getItems(token, "downloadable_files");
+    return _getItems<DataFile>(token, "downloadable_files").then(trials =>
+        trials.map(_transformFile)
+    );
 }
 
 function getSingleFile(
     token: string,
     itemID: string
 ): Promise<DataFile | undefined> {
-    return _getItem(token, "downloadable_files", itemID);
+    return _getItem<DataFile>(token, "downloadable_files", itemID).then(
+        _transformFile
+    );
 }
 
 function getAccountInfo(token: string): Promise<Account | undefined> {

@@ -41,7 +41,7 @@ export default class FileDetailsTable extends React.Component<
                         </TableRow>
                         <TableRow>
                             <TableCell className="File-table-row-cell">
-                                Lead Organization Study ID
+                                Study ID
                             </TableCell>
                             <TableCell className="File-table-row-cell">
                                 {this.props.file.trial}
@@ -49,7 +49,7 @@ export default class FileDetailsTable extends React.Component<
                         </TableRow>
                         <TableRow>
                             <TableCell className="File-table-row-cell">
-                                Assay Type
+                                Type
                             </TableCell>
                             <TableCell className="File-table-row-cell">
                                 {this.props.file.assay_type}
@@ -57,7 +57,7 @@ export default class FileDetailsTable extends React.Component<
                         </TableRow>
                         <TableRow>
                             <TableCell className="File-table-row-cell">
-                                Data Format
+                                Format
                             </TableCell>
                             <TableCell className="File-table-row-cell">
                                 {this.props.file.data_format}

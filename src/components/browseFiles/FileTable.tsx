@@ -101,7 +101,7 @@ export default class FileTable extends React.Component<
                                         this.handleChangeSorting(TRIAL_ID_KEY)
                                     }
                                 >
-                                    Lead Organization Study ID
+                                    Study ID
                                 </TableSortLabel>
                             </TableCell>
                             <TableCell className="File-table-header-cell">
@@ -115,7 +115,7 @@ export default class FileTable extends React.Component<
                                         this.handleChangeSorting(ASSAY_TYPE_KEY)
                                     }
                                 >
-                                    Assay Type
+                                    Type
                                 </TableSortLabel>
                             </TableCell>
                             <TableCell className="File-table-header-cell">
@@ -127,7 +127,7 @@ export default class FileTable extends React.Component<
                                         this.handleChangeSorting(FILE_TYPE_KEY)
                                     }
                                 >
-                                    Data Format
+                                    Format
                                 </TableSortLabel>
                             </TableCell>
                             <TableCell className="File-table-header-cell">
