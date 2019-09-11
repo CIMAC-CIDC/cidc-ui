@@ -4,9 +4,6 @@ import {
     Typography,
     Paper,
     CircularProgress,
-    List,
-    ListItemText,
-    ListItem,
     Chip,
     Grid
 } from "@material-ui/core";
