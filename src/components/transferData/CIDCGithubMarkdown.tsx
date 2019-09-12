@@ -5,6 +5,7 @@ import "github-markdown-css/github-markdown.css";
 export interface ICIDCGithubMarkdownProps {
     path: string;
     trimStartLines?: number;
+    authToken?: string;
 }
 
 const MARKDOWN_BASE_URL = "https://raw.githubusercontent.com/CIMAC-CIDC/";
@@ -22,15 +23,21 @@ const CIDCGithubMarkdown: React.FunctionComponent<
         fetch(fullURL)
             .then(response => response.text())
             .then(text => {
-                const cleanText = props.trimStartLines
+                const trimmedText = props.trimStartLines
                     ? text
                           .split("\n")
                           .slice(props.trimStartLines)
                           .join("\n")
                     : text;
-                setMarkdown(cleanText);
+                const finalText = props.authToken
+                    ? trimmedText.replace(
+                          /cidc login \[token\]/g,
+                          "cidc login " + props.authToken
+                      )
+                    : trimmedText;
+                setMarkdown(finalText);
             });
-    }, [fullURL, props.trimStartLines]);
+    }, [fullURL, props.trimStartLines, props.authToken]);
 
     return (
         <div>

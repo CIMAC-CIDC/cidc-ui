@@ -103,7 +103,12 @@ class App extends React.Component<any, any> {
                                 />
                                 <Route
                                     path="/transfer-data/:assay"
-                                    component={AssayInstructions}
+                                    render={props => (
+                                        <AssayInstructions
+                                            token={this.auth.getIdToken()}
+                                            {...props}
+                                        />
+                                    )}
                                 />
                                 <Route
                                     path="/browse-files"
