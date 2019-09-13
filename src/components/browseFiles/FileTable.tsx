@@ -14,7 +14,6 @@ import filesize from "filesize";
 import _ from "lodash";
 import * as React from "react";
 import { DataFile } from "../../model/file";
-import { Trial } from "../../model/trial";
 
 const NAME_KEY = "object_url";
 const TRIAL_ID_KEY = "trial_id";
@@ -24,7 +23,7 @@ const SIZE_KEY = "file_size_bytes";
 
 export interface IFileTableProps {
     files: DataFile[];
-    trials: Trial[];
+    trials: string[];
     history: any;
 }
 

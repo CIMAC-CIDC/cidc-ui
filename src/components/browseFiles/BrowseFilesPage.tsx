@@ -7,13 +7,12 @@ import "./BrowseFiles.css";
 import { changeOption, filterFiles } from "./browseFilesUtil";
 import FileFilter from "./FileFilter";
 import FileTable from "./FileTable";
-import { getFiles, getTrials } from "../../api/api";
-import { Trial } from "../../model/trial";
+import { getFiles } from "../../api/api";
 import Loader from "../generic/Loader";
 
 export interface IBrowseFilesPageState {
     files: DataFile[] | undefined;
-    trials: Trial[] | undefined;
+    trials: string[] | undefined;
     selectedTrialIds: string[];
     selectedExperimentalStrategies: string[];
     selectedDataFormats: string[];
@@ -47,10 +46,9 @@ export default class BrowseFilesPage extends React.Component<
 
     @autobind
     private getFiles() {
-        getFiles(this.props.token).then(results => {
-            getTrials(this.props.token).then(result => {
-                this.setState({ files: results, trials: result });
-            });
+        getFiles(this.props.token).then(files => {
+            const trials = _.uniq(files.map(file => file.trial));
+            this.setState({ files, trials });
         });
     }
 

@@ -109,14 +109,14 @@ export default class UserTrialsDialog extends React.Component<
                                             )
                                             .map((trial: Trial) => {
                                                 return (
-                                                    <TableRow key={trial._id}>
+                                                    <TableRow key={trial.id}>
                                                         <TableCell
                                                             style={{
                                                                 fontSize: 18
                                                             }}
                                                         >
                                                             <FormControlLabel
-                                                                key={trial._id}
+                                                                key={trial.id}
                                                                 label={
                                                                     trial.trial_id
                                                                 }
@@ -126,7 +126,7 @@ export default class UserTrialsDialog extends React.Component<
                                                                             trial.trial_id
                                                                         )}
                                                                         value={
-                                                                            trial._id
+                                                                            trial.id
                                                                         }
                                                                         onChange={
                                                                             this
