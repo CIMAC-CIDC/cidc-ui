@@ -1,6 +1,5 @@
 import { Account } from "../model/account";
 import { Trial } from "../model/trial";
-import { decode } from "jsonwebtoken";
 import { DataFile } from "../model/file";
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
 import Permission from "../model/permission";
@@ -76,15 +75,9 @@ function getSingleFile(
 }
 
 function getAccountInfo(token: string): Promise<Account | undefined> {
-    const decodedToken = decode(token) as any;
-    const email = decodedToken!.email;
-
     return getApiClient(token)
-        .get("users", { params: { where: { email } } })
-        .then(res => {
-            const users = _extractItems(res);
-            return users ? users[0] : undefined;
-        });
+        .get("users/self")
+        .then(_extractItem);
 }
 
 function getTrials(token: string): Promise<Trial[]> {
