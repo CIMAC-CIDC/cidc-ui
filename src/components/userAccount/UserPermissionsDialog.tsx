@@ -26,6 +26,7 @@ import { Trial } from "../../model/trial";
 import { Account } from "../../model/account";
 import Permission from "../../model/permission";
 
+// The sorts of data that users can be granted permission to view
 const SUPPORTED_TYPES = ["WES", "Olink", "CyTOF", "Plasma", "PBMC"];
 
 export interface IUserPermissionsDialogProps {
