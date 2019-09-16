@@ -32,3 +32,8 @@ export const EXPERIMENTAL_STRATEGY_MAP = {
 
 export const XLSX_MIMETYPE =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+export const ALL_TEMPLATE_NAMES = {
+    manifests: ["PBMC", "Plasma", "Analyte", "HnE", "Whole Blood"],
+    metadata: ["CyTOF", "MIF", "MICSSS", "Olink", "RNA Expression", "WES"]
+};

@@ -17,11 +17,11 @@ import {
     ListItemIcon
 } from "@material-ui/core";
 import { ITemplateCardProps } from "./TemplatesPage";
-import { allNames, onValueChange } from "./utils";
+import { onValueChange } from "./utils";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
 import { AuthContext } from "../../auth/Auth";
 import { WarningRounded, CheckBoxRounded } from "@material-ui/icons";
-import { XLSX_MIMETYPE } from "../../util/constants";
+import { XLSX_MIMETYPE, ALL_TEMPLATE_NAMES } from "../../util/constants";
 import Loader from "../generic/Loader";
 
 type Status =
@@ -163,7 +163,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                                     value={manifestType || ""}
                                     onChange={onValueChange(setManifestType)}
                                 >
-                                    {allNames.manifests.map(name => (
+                                    {ALL_TEMPLATE_NAMES.manifests.map(name => (
                                         <MenuItem key={name} value={name}>
                                             {name}
                                         </MenuItem>

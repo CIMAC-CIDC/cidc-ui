@@ -14,7 +14,7 @@ import {
 import autobind from "autobind-decorator";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
-import UserTrialsDialog from "./UserTrialsDialog";
+import UserPermissionsDialog from "./UserPermissionsDialog";
 import { ORGANIZATION_NAME_MAP, ROLES } from "../../util/constants";
 import "./UserAccount.css";
 import { updateRole, deleteUser, getUserEtag } from "../../api/api";
@@ -110,12 +110,12 @@ export default class UserTableRow extends React.Component<any, {}> {
                         // tslint:disable-next-line:jsx-no-lambda
                         onClick={() => this.openTrials()}
                     >
-                        Edit Trials
+                        Edit Data Access
                         <EditIcon style={{ marginLeft: 10 }} />
                     </Button>
-                    <UserTrialsDialog
+                    <UserPermissionsDialog
                         open={this.state.trialsDialogOpen}
-                        account={this.props.account}
+                        user={this.props.account}
                         token={this.props.token}
                         onCancel={this.handleTrialCancel}
                     />

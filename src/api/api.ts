@@ -3,6 +3,7 @@ import { Trial } from "../model/trial";
 import { decode } from "jsonwebtoken";
 import { DataFile } from "../model/file";
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
+import Permission from "../model/permission";
 
 const URL: string = process.env.REACT_APP_API_URL!;
 
@@ -42,10 +43,10 @@ function _extractErrorMessage(error: AxiosError): never {
 function _getItem<T>(
     token: string,
     endpoint: string,
-    itemID: string
+    itemID: string | number
 ): Promise<T> {
     return getApiClient(token)
-        .get(_itemURL(endpoint, itemID))
+        .get(_itemURL(endpoint, itemID.toString()))
         .then(_extractItem);
 }
 
@@ -161,8 +162,41 @@ function getManifestValidationErrors(
         .catch(error => [error.toString()]);
 }
 
-function getUserEtag(token: string, itemID: string): Promise<string> {
-    return _getItem<Account>(token, "users", itemID).then(user => user._etag);
+function _getEtag<T extends { _etag: string }>(
+    token: string,
+    endpoint: string,
+    itemID: number
+) {
+    return _getItem<T>(token, endpoint, itemID).then(item => item._etag);
+}
+
+function getUserEtag(token: string, userID: number): Promise<string> {
+    return _getEtag<Account>(token, "users", userID);
+}
+
+function getPermissions(token: string): Promise<Permission[] | undefined> {
+    return _getItems<Permission>(token, "permissions");
+}
+
+function grantPermission(
+    token: string,
+    user: Account,
+    trial: string,
+    assay: string
+): Promise<any> {
+    return getApiClient(token).post("permissions", {
+        to_user: user.id,
+        trial,
+        assay_type: assay
+    });
+}
+
+function revokePermission(token: string, permissionID: number): Promise<any> {
+    return _getEtag<Permission>(token, "permissions", permissionID).then(etag =>
+        getApiClient(token).delete(`permissions/${permissionID}`, {
+            headers: { "if-match": etag }
+        })
+    );
 }
 
 // ----------- Old API methods (not currently supported) ----------- //
@@ -191,5 +225,8 @@ export {
     deleteUser,
     getUserEtag,
     uploadManifest,
-    getManifestValidationErrors
+    getManifestValidationErrors,
+    getPermissions,
+    grantPermission,
+    revokePermission
 };

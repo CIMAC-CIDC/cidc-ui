@@ -11,7 +11,8 @@ import {
     Typography
 } from "@material-ui/core";
 import { ITemplateCardProps } from "./TemplatesPage";
-import { allNames, onValueChange } from "./utils";
+import { onValueChange } from "./utils";
+import { ALL_TEMPLATE_NAMES } from "../../util/constants";
 
 // Given a template type and name, get the path to the corresponding
 // xlsx file in the static/ folder.
@@ -32,7 +33,9 @@ const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
         undefined
     );
 
-    const templateNames: string[] = templateType ? allNames[templateType] : [];
+    const templateNames: string[] = templateType
+        ? ALL_TEMPLATE_NAMES[templateType]
+        : [];
     const templateURL =
         templateType && templateName && nameToURL(templateType, templateName);
 
