@@ -53,13 +53,20 @@ export default class UserPermissionsDialog extends React.Component<
         rowsPerPage: 10
     };
 
-    componentDidUpdate(prevProps: any) {
-        if (this.props.open && !prevProps.open) {
+    @autobind
+    componentDidMount() {
+        if (this.props.open) {
             this.setState({ trials: undefined });
             getTrials(this.props.token).then(trials =>
                 this.setState({ trials })
             );
             this.refreshPermissions();
+        }
+    }
+
+    componentDidUpdate(prevProps: any) {
+        if (!prevProps.open) {
+            this.componentDidMount();
         }
     }
 
@@ -143,8 +150,6 @@ export default class UserPermissionsDialog extends React.Component<
                 )
         );
 
-        console.log(permissionsMap);
-
         return (
             <>
                 <Dialog open={this.props.open} onClose={this.handleCancel}>
@@ -180,7 +185,7 @@ export default class UserPermissionsDialog extends React.Component<
                                                     this.state.rowsPerPage
                                             )
                                             .map((trial: Trial) => (
-                                                <TableRow key={trial.id}>
+                                                <TableRow key={trial.trial_id}>
                                                     <TableCell>
                                                         {trial.trial_id}
                                                     </TableCell>
