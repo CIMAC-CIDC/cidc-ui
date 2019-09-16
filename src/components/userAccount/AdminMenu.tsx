@@ -116,14 +116,6 @@ export default class AdminMenu extends React.Component<any, {}> {
                                     }}
                                     onChange={this.handleSearchFilterChange}
                                 />
-                                <Typography color="error">
-                                    Warning! Trial access control is not
-                                    currently supported in the new API. All
-                                    users added to the system have access to all
-                                    trials. Until trial access control is
-                                    supported, only add members of the core CIDC
-                                    development team.
-                                </Typography>
                             </div>
                             <Table>
                                 <TableBody>
