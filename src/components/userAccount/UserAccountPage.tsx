@@ -9,8 +9,7 @@ import {
 } from "@material-ui/core";
 import "./UserAccount.css";
 import { Account } from "../../model/account";
-import { Trial } from "../../model/trial";
-import { getAccountInfo, getTrials } from "../../api/api";
+import { getAccountInfo, getPermissions } from "../../api/api";
 import autobind from "autobind-decorator";
 import AdminMenu from "./AdminMenu";
 import {
@@ -18,19 +17,27 @@ import {
     DATE_OPTIONS,
     ORGANIZATION_NAME_MAP
 } from "../../util/constants";
+import Permission from "../../model/permission";
+import Auth from "../../auth/Auth";
+import { RouteComponentProps } from "react-router";
 
 export interface IUserAccountPageState {
     accountInfo: Account | undefined;
-    trials: Trial[] | undefined;
+    permissions: Permission[] | undefined;
+}
+
+export interface IUserAccountPageProps extends RouteComponentProps {
+    token: string;
+    auth: Auth;
 }
 
 export default class UserAccountPage extends React.Component<
-    any,
+    IUserAccountPageProps,
     IUserAccountPageState
 > {
     state: IUserAccountPageState = {
         accountInfo: undefined,
-        trials: undefined
+        permissions: undefined
     };
 
     componentDidMount() {
@@ -48,9 +55,8 @@ export default class UserAccountPage extends React.Component<
     @autobind
     private getUserData() {
         getAccountInfo(this.props.token).then(accountInfo => {
-            this.setState({ accountInfo });
-            getTrials(this.props.token).then(trials => {
-                this.setState({ trials });
+            getPermissions(this.props.token).then(permissions => {
+                this.setState({ accountInfo, permissions });
             });
         });
     }
@@ -59,6 +65,12 @@ export default class UserAccountPage extends React.Component<
         if (!this.props.auth.checkAuth(this.props.location.pathname)) {
             return null;
         }
+
+        const isAdmin =
+            this.state.accountInfo &&
+            this.state.accountInfo.role === "cidc-admin";
+        const hasPerms =
+            this.state.permissions && this.state.permissions.length > 0;
 
         return (
             <div>
@@ -69,7 +81,7 @@ export default class UserAccountPage extends React.Component<
                         </Typography>
                     </Toolbar>
                     <div className="User-details">
-                        {!this.state.accountInfo && !this.state.trials && (
+                        {!this.state.accountInfo && !this.state.permissions && (
                             <div className="User-account-progress">
                                 <CircularProgress />
                             </div>
@@ -104,36 +116,60 @@ export default class UserAccountPage extends React.Component<
                                 </Typography>
                             </div>
                         )}
-                        {this.state.trials && (
+                        {this.state.permissions && (
                             <div>
-                                {this.state.trials.length > 0 && (
-                                    <div>
-                                        <Typography variant="h5">
-                                            Trials you are assigned to:
-                                        </Typography>
-                                        <Grid container spacing={8}>
-                                            {this.state.trials.map(trial => {
+                                <div>
+                                    <Typography variant="h5">
+                                        Dataset Access:
+                                    </Typography>
+                                    <Grid container spacing={8}>
+                                        {isAdmin ? (
+                                            <Grid item>
+                                                <Typography
+                                                    variant="h5"
+                                                    color="textSecondary"
+                                                    paragraph
+                                                >
+                                                    As an admin, you have access
+                                                    to all datasets.
+                                                </Typography>
+                                            </Grid>
+                                        ) : hasPerms ? (
+                                            this.state.permissions.map(perm => {
                                                 return (
                                                     <Grid
                                                         item
-                                                        key={trial.trial_id}
+                                                        key={
+                                                            perm.trial +
+                                                            perm.assay_type
+                                                        }
                                                     >
                                                         <Chip
-                                                            label={
-                                                                trial.trial_id
-                                                            }
+                                                            label={`${
+                                                                perm.trial
+                                                            }: ${
+                                                                perm.assay_type
+                                                            }`}
                                                         />
                                                     </Grid>
                                                 );
-                                            })}
-                                        </Grid>
-                                    </div>
-                                )}
-                                {this.state.trials.length === 0 && (
-                                    <Typography variant="h5">
-                                        You are not assigned to any trials.
-                                    </Typography>
-                                )}
+                                            })
+                                        ) : (
+                                            <Grid item>
+                                                <Typography
+                                                    variant="h5"
+                                                    color="textSecondary"
+                                                    paragraph
+                                                >
+                                                    You do not have access to
+                                                    any datasets. Contact a CIDC
+                                                    Administrator if you believe
+                                                    this is incorrect.
+                                                </Typography>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </div>
                             </div>
                         )}
                     </div>
