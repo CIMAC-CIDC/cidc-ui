@@ -98,20 +98,6 @@ describe("_extractErrorMessage", () => {
     });
 });
 
-test("getAccountInfo", done => {
-    const payload = { _items: [OBJECT] };
-
-    axiosMock.onGet("users").reply(config => {
-        expect(config.params.where).toBeDefined();
-        expect(config.params.where).toEqual({ email: EMAIL });
-        return [200, payload];
-    });
-
-    getAccountInfo(TOKEN)
-        .then(user => expect(user).toEqual(OBJECT))
-        .then(done);
-});
-
 test("updateRole", done => {
     const itemID = "1";
     const etag = "asdf";
