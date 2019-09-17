@@ -9,7 +9,7 @@ export default class TransferDataPage extends React.Component<any, {}> {
         }
 
         return (
-            <div className="Content">
+            <div>
                 <Typography
                     variant="h6"
                     gutterBottom={true}
