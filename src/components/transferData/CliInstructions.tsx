@@ -18,7 +18,7 @@ export default class CliInstructions extends React.Component<any> {
         }
 
         const token = this.props.auth.getIdToken();
-        const truncToken = token.slice(0, 20);
+        const truncToken = token && token.slice(0, 20);
 
         return (
             <div className="Markdown-width">
@@ -73,8 +73,7 @@ export default class CliInstructions extends React.Component<any> {
                                                     style={{
                                                         backgroundColor:
                                                             "white",
-                                                        pointerEvents: "none",
-                                                        textOverflow: "ellipsis"
+                                                        pointerEvents: "none"
                                                     }}
                                                 />
                                             </div>
