@@ -37,3 +37,5 @@ export const ALL_TEMPLATE_NAMES = {
     manifests: ["PBMC", "Plasma", "Analyte", "HnE", "Whole Blood"],
     metadata: ["CyTOF", "MIF", "MICSSS", "Olink", "RNA Expression", "WES"]
 };
+
+export const ADMIN_EMAIL = "cidc@jimmy.harvard.edu";

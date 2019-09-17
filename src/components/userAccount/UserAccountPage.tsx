@@ -20,6 +20,7 @@ import {
 import Permission from "../../model/permission";
 import Auth from "../../auth/Auth";
 import { RouteComponentProps } from "react-router";
+import ContactAnAdmin from "../generic/ContactAnAdmin";
 
 export interface IUserAccountPageState {
     accountInfo: Account | undefined;
@@ -162,9 +163,9 @@ export default class UserAccountPage extends React.Component<
                                                     paragraph
                                                 >
                                                     You do not have access to
-                                                    any datasets. Contact a CIDC
-                                                    Administrator if you believe
-                                                    this is incorrect.
+                                                    any datasets.{" "}
+                                                    <ContactAnAdmin /> if you
+                                                    believe this is a mistake.
                                                 </Typography>
                                             </Grid>
                                         )}
