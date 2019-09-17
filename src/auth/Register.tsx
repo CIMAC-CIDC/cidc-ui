@@ -160,8 +160,8 @@ export default class Register extends React.Component<any, {}> {
                     <Typography
                         style={{ fontSize: 18, width: "100%", margin: "auto" }}
                     >
-                        You are not registered to CIMAC-CIDC Data Portal. Please
-                        register below:
+                        Please complete your CIMAC-CIDC Data Portal registration
+                        request below.
                     </Typography>
                     <Grid container={true} spacing={16}>
                         <Grid item={true} xs={12}>
