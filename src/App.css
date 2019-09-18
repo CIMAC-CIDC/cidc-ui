@@ -3,6 +3,8 @@
     --light-grey: #ecf0f1;
     --bright-green: #031729a9;
     --cidc-blue: #004581b4;
+    background: var(--light-grey);
+    height: 100vh;
 }
 
 .Markdown-width {

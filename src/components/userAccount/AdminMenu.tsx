@@ -15,7 +15,12 @@ import autobind from "autobind-decorator";
 import { Account } from "../../model/account";
 import UserTableRow from "./UserTableRow";
 
-export default class AdminMenu extends React.Component<any, {}> {
+export interface IAdminMenuProps {
+    token: string;
+    userId: number;
+}
+
+export default class AdminMenu extends React.Component<IAdminMenuProps, {}> {
     state = {
         accounts: undefined,
         page: 0,

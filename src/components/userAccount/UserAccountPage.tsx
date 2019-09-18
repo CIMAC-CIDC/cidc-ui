@@ -8,9 +8,7 @@ import {
     Grid
 } from "@material-ui/core";
 import "./UserAccount.css";
-import { Account } from "../../model/account";
-import { getAccountInfo, getPermissions } from "../../api/api";
-import autobind from "autobind-decorator";
+import { getPermissions } from "../../api/api";
 import AdminMenu from "./AdminMenu";
 import {
     LOCALE,
@@ -18,76 +16,40 @@ import {
     ORGANIZATION_NAME_MAP
 } from "../../util/constants";
 import Permission from "../../model/permission";
-import Auth from "../../auth/Auth";
-import { RouteComponentProps } from "react-router";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
+import { useAuthContext } from "../../auth/AuthProvider";
 
-export interface IUserAccountPageState {
-    accountInfo: Account | undefined;
-    permissions: Permission[] | undefined;
-}
+export default function UserAccountPage() {
+    const { userAccount, authData } = useAuthContext();
 
-export interface IUserAccountPageProps extends RouteComponentProps {
-    token: string;
-    auth: Auth;
-}
+    const [permissions, setPermissions] = React.useState<
+        Permission[] | undefined
+    >(undefined);
 
-export default class UserAccountPage extends React.Component<
-    IUserAccountPageProps,
-    IUserAccountPageState
-> {
-    state: IUserAccountPageState = {
-        accountInfo: undefined,
-        permissions: undefined
-    };
-
-    componentDidMount() {
-        if (this.props.token) {
-            this.getUserData();
+    React.useEffect(() => {
+        if (authData && authData.idToken) {
+            getPermissions(authData.idToken).then(setPermissions);
         }
-    }
+    }, [authData]);
 
-    componentDidUpdate(prevProps: any) {
-        if (this.props.token !== prevProps.token) {
-            this.getUserData();
-        }
-    }
+    const isAdmin = userAccount && userAccount.role === "cidc-admin";
+    const hasPerms = permissions && permissions.length > 0;
 
-    @autobind
-    private getUserData() {
-        getAccountInfo(this.props.token).then(accountInfo => {
-            getPermissions(this.props.token).then(permissions => {
-                this.setState({ accountInfo, permissions });
-            });
-        });
-    }
-
-    public render() {
-        if (!this.props.auth.checkAuth(this.props.location.pathname)) {
-            return null;
-        }
-
-        const isAdmin =
-            this.state.accountInfo &&
-            this.state.accountInfo.role === "cidc-admin";
-        const hasPerms =
-            this.state.permissions && this.state.permissions.length > 0;
-
-        return (
-            <div>
-                <Paper className="User-account-paper">
-                    <Toolbar className="User-account-toolbar">
-                        <Typography className="User-account-toolbar-text">
-                            User Account
-                        </Typography>
-                    </Toolbar>
-                    <div className="User-details">
-                        {!this.state.accountInfo && !this.state.permissions && (
-                            <div className="User-account-progress">
-                                <CircularProgress />
-                            </div>
-                        )}
-                        {this.state.accountInfo && (
+    return (
+        <div>
+            <Paper className="User-account-paper">
+                <Toolbar className="User-account-toolbar">
+                    <Typography className="User-account-toolbar-text">
+                        User Account
+                    </Typography>
+                </Toolbar>
+                <div className="User-details">
+                    {!userAccount || !permissions ? (
+                        <div className="User-account-progress">
+                            <CircularProgress />
+                        </div>
+                    ) : (
+                        <>
                             <div>
                                 <Typography variant="h5">
                                     Registration Form and Code of Conduct:
@@ -98,7 +60,7 @@ export default class UserAccountPage extends React.Component<
                                     paragraph
                                 >
                                     {new Date(
-                                        this.state.accountInfo._created
+                                        userAccount._created
                                     ).toLocaleString(LOCALE, DATE_OPTIONS)}
                                 </Typography>
                                 <Typography variant="h5">
@@ -111,13 +73,11 @@ export default class UserAccountPage extends React.Component<
                                 >
                                     {
                                         ORGANIZATION_NAME_MAP[
-                                            this.state.accountInfo.organization
+                                            userAccount.organization
                                         ]
                                     }
                                 </Typography>
                             </div>
-                        )}
-                        {this.state.permissions && (
                             <div>
                                 <div>
                                     <Typography variant="h5">
@@ -136,7 +96,7 @@ export default class UserAccountPage extends React.Component<
                                                 </Typography>
                                             </Grid>
                                         ) : hasPerms ? (
-                                            this.state.permissions.map(perm => {
+                                            permissions.map(perm => {
                                                 return (
                                                     <Grid
                                                         item
@@ -172,17 +132,13 @@ export default class UserAccountPage extends React.Component<
                                     </Grid>
                                 </div>
                             </div>
-                        )}
-                    </div>
-                </Paper>
-                {this.state.accountInfo &&
-                    this.state.accountInfo.role === "cidc-admin" && (
-                        <AdminMenu
-                            token={this.props.token}
-                            userId={this.state.accountInfo.id}
-                        />
+                        </>
                     )}
-            </div>
-        );
-    }
+                </div>
+            </Paper>
+            {userAccount && authData && userAccount.role === "cidc-admin" && (
+                <AdminMenu token={authData.idToken} userId={userAccount.id} />
+            )}
+        </div>
+    );
 }

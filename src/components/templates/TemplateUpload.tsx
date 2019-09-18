@@ -19,10 +19,10 @@ import {
 import { ITemplateCardProps } from "./TemplatesPage";
 import { onValueChange } from "./utils";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
-import { AuthContext } from "../../auth/Auth";
 import { WarningRounded, CheckBoxRounded } from "@material-ui/icons";
 import { XLSX_MIMETYPE, ALL_TEMPLATE_NAMES } from "../../util/constants";
 import Loader from "../generic/Loader";
+import { useAuthContext } from "../../auth/AuthProvider";
 
 type Status =
     | "loading"
@@ -35,7 +35,7 @@ type Status =
 const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     props: ITemplateCardProps
 ) => {
-    const auth = React.useContext(AuthContext)!;
+    const { authData } = useAuthContext();
 
     const fileInput = React.useRef<HTMLInputElement>(null);
 
@@ -51,9 +51,9 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
 
     // When the manifest file or manifest type changes, run validations
     React.useEffect(() => {
-        if (file && manifestType) {
+        if (file && manifestType && authData) {
             setStatus("loading");
-            getManifestValidationErrors(auth.getIdToken()!, {
+            getManifestValidationErrors(authData.idToken, {
                 schema: manifestType,
                 template: file
             }).then(errs => {
@@ -65,7 +65,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                 }
             });
         }
-    }, [file, manifestType, auth]);
+    }, [file, manifestType, authData]);
 
     // The file is valid if it has been validated and there are no errors
     const fileValid = errors instanceof Array && errors.length === 0;
@@ -74,7 +74,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
         e.preventDefault();
         if (manifestType && file) {
             setStatus("loading");
-            uploadManifest(auth.getIdToken()!, {
+            uploadManifest(authData!.idToken, {
                 schema: manifestType,
                 template: file
             })

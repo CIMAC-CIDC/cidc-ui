@@ -11,14 +11,18 @@ type Role =
 type Organization = "CIDC" | "DFCI" | "ICAHN" | "STANFORD" | "ANDERSON";
 
 // tslint:disable-next-line:interface-name
-export interface Account {
+export interface UnregisteredAccount {
+    email: string;
+    first_n?: string;
+    last_n?: string;
+}
+
+// tslint:disable-next-line:interface-name
+export interface Account extends UnregisteredAccount {
     _etag: string;
     _created: string;
     _updated: string;
     id: number;
-    email: string;
-    first_n?: string;
-    last_n?: string;
     approval_date?: string;
     disabled: boolean;
     role?: Role;

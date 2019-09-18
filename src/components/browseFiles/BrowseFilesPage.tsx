@@ -87,17 +87,13 @@ export default class BrowseFilesPage extends React.Component<
     }
 
     public render() {
-        if (!this.props.auth.checkAuth(this.props.location.pathname)) {
-            return null;
-        }
-
         return (
             <div className="Browse-files-page">
                 {!this.state.files && <Loader />}
                 {this.state.files && this.state.files.length === 0 && (
                     <div className="Browse-files-progress">
                         <Typography style={{ fontSize: 18 }}>
-                            No files found
+                            No files found.
                         </Typography>
                     </div>
                 )}
