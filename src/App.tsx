@@ -17,14 +17,17 @@ import history from "./auth/History";
 import Loader from "./components/generic/Loader";
 import AssayInstructions from "./components/transferData/AssayInstructions";
 import AuthProvider, { AuthContext } from "./auth/AuthProvider";
+import NetworkErrorGaurd from "./components/errors/NetworkErrorGuard";
 
 export default function App() {
     return (
         <Router history={history}>
             <div className="App">
-                <AuthProvider>
-                    <AppBody />
-                </AuthProvider>
+                <NetworkErrorGaurd>
+                    <AuthProvider>
+                        <AppBody />
+                    </AuthProvider>
+                </NetworkErrorGaurd>
             </div>
         </Router>
     );
