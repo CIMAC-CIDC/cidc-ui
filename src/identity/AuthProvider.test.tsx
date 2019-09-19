@@ -101,7 +101,8 @@ test("session setter", () => {
     // Mock out a test sessionSetter
     const setAuthData = jest.fn();
     const onComplete = jest.fn();
-    const sessionSetter = setSession(setAuthData, onComplete);
+    const setError = jest.fn();
+    const sessionSetter = setSession(setAuthData, onComplete, setError);
 
     const targetRoute = "/test-route";
 
@@ -127,13 +128,13 @@ test("session setter", () => {
         user: expectedUser
     });
     expect(history.location.pathname).toEqual(targetRoute);
+    expect(setError).not.toHaveBeenCalled();
 
     // Reset
     history.replace("/");
-    onComplete.mockClear();
+    jest.clearAllMocks();
 
     // Input with missing scopes
-    console.error = jest.fn();
     const decodedHashWithMissingScopes = {
         idTokenPayload: {
             email: "a",
@@ -142,27 +143,28 @@ test("session setter", () => {
         idToken: "foobar"
     };
     sessionSetter(decodedHashWithMissingScopes, targetRoute);
-    expect(console.error).toHaveBeenCalledWith(
-        "userinfo missing required scope(s)"
-    );
-    expect(history.location.pathname).toEqual("/error");
+    expect(setError).toHaveBeenCalledWith({
+        type: "Login Error",
+        message: "userinfo missing required scope(s)"
+    });
     expect(onComplete).not.toHaveBeenCalled();
 
     // Reset
     history.replace("/");
+    jest.clearAllMocks();
 
     // Hash with missing fields
     sessionSetter({}, targetRoute);
-    expect(console.error).toHaveBeenCalledWith(
-        "Cannot set session: missing id token"
-    );
-    expect(history.location.pathname).toBe("/error");
+    expect(setError).toHaveBeenCalledWith({
+        type: "Login Error",
+        message: "cannot set session: missing id token"
+    });
     expect(onComplete).not.toHaveBeenCalled();
 });
 
 test("handleAuthentication", () => {
     const sessionSetter = jest.fn();
-
+    const setError = jest.fn();
     const targetRoute = "/test-route";
 
     // Good inputs: complete auth result, and location with "next" param
@@ -174,25 +176,29 @@ test("handleAuthentication", () => {
         handler(undefined, authResult)
     );
     const location = { search: `?next=${targetRoute}` } as Location;
-    handleAuthentication(location, sessionSetter);
+    handleAuthentication(location, sessionSetter, setError);
     expect(auth0Client.parseHash).toHaveBeenCalled();
     expect(sessionSetter).toHaveBeenCalledWith(authResult, targetRoute);
+    expect(setError).not.toHaveBeenCalled();
 
     jest.clearAllMocks();
 
     // Missing "next" param on location
     const locationMissingNext = { search: "" } as Location;
-    handleAuthentication(locationMissingNext, sessionSetter);
+    handleAuthentication(locationMissingNext, sessionSetter, setError);
     expect(auth0Client.parseHash).toHaveBeenCalled();
     expect(sessionSetter).toHaveBeenCalledWith(authResult, "/");
+    expect(setError).not.toHaveBeenCalled();
 
     jest.clearAllMocks();
 
     // Missing fields in authResult
-    history.replace("/");
     auth0Client.parseHash = jest.fn((handler: any) => handler(undefined, {}));
-    handleAuthentication(location, sessionSetter);
+    handleAuthentication(location, sessionSetter, setError);
     expect(auth0Client.parseHash).toHaveBeenCalled();
     expect(sessionSetter).not.toHaveBeenCalled();
-    expect(history.location.pathname).toBe("/error");
+    expect(setError).toHaveBeenCalledWith({
+        type: "Login Error",
+        message: "authentication failed"
+    });
 });

@@ -6,12 +6,13 @@ import nanoid from "nanoid";
 import { RouteComponentProps, withRouter } from "react-router";
 import { Location } from "history";
 import IdleTimer from "react-idle-timer";
-import { IDLE_TIMEOUT, PUBLIC_PATHNAMES } from "../util/constants";
 import Loader from "../components/generic/Loader";
 import { Grid } from "@material-ui/core";
+import { IError, ErrorContext } from "../components/errors/ErrorGuard";
 
 const CLIENT_ID: string = process.env.REACT_APP_AUTH0_CLIENT_ID!;
 const DOMAIN: string = process.env.REACT_APP_AUTH0_DOMAIN!;
+const IDLE_TIMEOUT: number = 1000 * 60 * 15;
 
 export const auth0Client = new auth0.WebAuth({
     domain: DOMAIN,
@@ -47,7 +48,8 @@ export const handleAuthentication = (
     sessionSetter: (
         authResult: auth0.Auth0DecodedHash,
         targetRoute: string
-    ) => void
+    ) => void,
+    setError: (error: IError) => void
 ) => {
     auth0Client.parseHash((err, authResult) => {
         if (authResult && authResult.accessToken && authResult.idToken) {
@@ -60,14 +62,18 @@ export const handleAuthentication = (
             if (err) {
                 console.error(err);
             }
-            history.replace("/error?type=login");
+            setError({
+                type: "Login Error",
+                message: "authentication failed"
+            });
         }
     });
 };
 
 export const setSession = (
     setAuthData: React.Dispatch<React.SetStateAction<IAuthData | undefined>>,
-    onComplete: () => void
+    onComplete: () => void,
+    setError: (error: IError) => void
 ) => (
     { idTokenPayload: tokenInfo, idToken }: auth0.Auth0DecodedHash,
     targetRoute: string
@@ -78,8 +84,11 @@ export const setSession = (
             !tokenInfo.given_name ||
             !tokenInfo.family_name
         ) {
-            console.error("userinfo missing required scope(s)");
-            history.replace("/error?type=login");
+            setError({
+                type: "Login Error",
+                message: "userinfo missing required scope(s)"
+            });
+
             return;
         }
 
@@ -102,8 +111,10 @@ export const setSession = (
         history.replace(targetRoute);
         onComplete();
     } else {
-        console.error("Cannot set session: missing id token");
-        history.replace("/error?type=login");
+        setError({
+            type: "Login Error",
+            message: "cannot set session: missing id token"
+        });
     }
 };
 
@@ -135,12 +146,18 @@ export const AuthLoader = () => (
 );
 
 const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
+    const setError = React.useContext(ErrorContext);
+
     const [authData, setAuthData] = React.useState<IAuthData | undefined>(
         undefined
     );
     const [sessionIsSet, setSessionIsSet] = React.useState<boolean>(false);
 
-    const sessionSetter = setSession(setAuthData, () => setSessionIsSet(true));
+    const sessionSetter = setSession(
+        setAuthData,
+        () => setSessionIsSet(true),
+        setError
+    );
     const tokenDidExpire = isTokenExpired();
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     React.useEffect(() => {
@@ -165,20 +182,26 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
         }
     }, [tokenDidExpire, isLoggedIn, props.location, sessionSetter, authData]);
 
+    const isCallback = props.location.pathname === "/callback";
+
     // If the user is logged out, try to log them in, unless they
     // are trying to access a public path
-    if (!isLoggedIn && !PUBLIC_PATHNAMES.includes(props.location.pathname)) {
+    if (!isLoggedIn && !isCallback) {
         login();
         return null;
     }
 
     // Handle when the Auth0 authorization flow redirects to the callback endpoint
-    if (props.location.pathname === "/callback") {
+    if (isCallback) {
         return (
             <div data-testid="callback-loader">
                 <AuthCallback
                     onLoad={() =>
-                        handleAuthentication(props.location, sessionSetter)
+                        handleAuthentication(
+                            props.location,
+                            sessionSetter,
+                            setError
+                        )
                     }
                 />
             </div>

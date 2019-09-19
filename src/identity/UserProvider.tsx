@@ -4,7 +4,7 @@ import { Account } from "../model/account";
 import { RouteComponentProps, withRouter } from "react-router";
 import { getAccountInfo } from "../api/api";
 import history from "./History";
-import { PUBLIC_PATHNAMES } from "../util/constants";
+import { ErrorContext } from "../components/errors/ErrorGuard";
 
 export const UserContext = React.createContext<Account | undefined>(undefined);
 
@@ -14,10 +14,11 @@ export function useUserContext() {
     return user;
 }
 
-const UNACTIVATED_PATHS = [...PUBLIC_PATHNAMES, "/register", "/unactivated"];
+const UNACTIVATED_PATHS = ["/callback", "/register", "/unactivated"];
 
 const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
     const authData = React.useContext(AuthContext);
+    const setError = React.useCallback(React.useContext(ErrorContext), []);
 
     const [user, setUser] = React.useState<Account | undefined>(undefined);
 
@@ -37,13 +38,16 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                 })
                 .catch(error => {
                     if (error.response === undefined) {
-                        history.replace("/error?type=network");
+                        setError({
+                            type: "Network Error",
+                            message: "could not load user account information"
+                        });
                     } else {
                         history.replace("/register");
                     }
                 });
         }
-    }, [idToken]);
+    }, [idToken, setError]);
 
     const isUnactivatedPath = UNACTIVATED_PATHS.includes(
         props.location.pathname
