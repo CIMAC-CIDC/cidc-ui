@@ -141,9 +141,6 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
     const [sessionIsSet, setSessionIsSet] = React.useState<boolean>(false);
 
     const sessionSetter = setSession(setAuthData, () => setSessionIsSet(true));
-    const handleAuthCallback = (location: Location) =>
-        handleAuthentication(location, sessionSetter);
-
     const tokenDidExpire = isTokenExpired();
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     React.useEffect(() => {
@@ -177,10 +174,13 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
 
     // Handle when the Auth0 authorization flow redirects to the callback endpoint
     if (props.location.pathname === "/callback") {
-        handleAuthCallback(props.location);
         return (
             <div data-testid="callback-loader">
-                <AuthLoader />
+                <AuthCallback
+                    onLoad={() =>
+                        handleAuthentication(props.location, sessionSetter)
+                    }
+                />
             </div>
         );
     }
@@ -223,4 +223,11 @@ export function withIdToken(
 
         return <Component {...props} token={authData && authData.idToken} />;
     };
+}
+
+function AuthCallback(props: { onLoad: () => void }) {
+    const onLoad = React.useCallback(props.onLoad, []);
+    React.useEffect(onLoad, []);
+
+    return <AuthLoader />;
 }
