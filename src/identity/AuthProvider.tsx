@@ -13,7 +13,7 @@ import { Grid } from "@material-ui/core";
 const CLIENT_ID: string = process.env.REACT_APP_AUTH0_CLIENT_ID!;
 const DOMAIN: string = process.env.REACT_APP_AUTH0_DOMAIN!;
 
-const auth0Client = new auth0.WebAuth({
+export const auth0Client = new auth0.WebAuth({
     domain: DOMAIN,
     clientID: CLIENT_ID,
     redirectUri: window.location.origin + "/callback",
@@ -34,6 +34,9 @@ const login = () => {
 };
 
 const logout = () => {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("expiresAt");
+
     auth0Client.logout({
         returnTo: window.location.origin
     });
@@ -132,13 +135,6 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
     );
     const [sessionIsSet, setSessionIsSet] = React.useState<boolean>(false);
 
-    const clearDataAndLogout = () => {
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("expiresAt");
-
-        logout();
-    };
-
     const sessionSetter = setSession(setAuthData, () => setSessionIsSet(true));
     const handleAuthCallback = (location: Location) =>
         handleAuthentication(location, sessionSetter);
@@ -146,7 +142,8 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
     const tokenDidExpire = isTokenExpired();
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     React.useEffect(() => {
-        if (tokenDidExpire || !authData) {
+        const isLoggingOut = props.location.pathname === "/logout";
+        if ((tokenDidExpire || !authData) && !isLoggingOut) {
             if (isLoggedIn) {
                 auth0Client.checkSession({}, (err, authResult) => {
                     if (
@@ -156,7 +153,7 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
                     ) {
                         sessionSetter(authResult, props.location.pathname);
                     } else if (err) {
-                        clearDataAndLogout();
+                        logout();
                     }
                 });
             }
@@ -174,16 +171,9 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
     if (props.location.pathname === "/callback") {
         handleAuthCallback(props.location);
         return (
-            <Grid
-                container
-                justify="center"
-                alignItems="center"
-                style={{ height: "10vh" }}
-            >
-                <Grid item>
-                    <Loader />
-                </Grid>
-            </Grid>
+            <div data-testid="callback-loader">
+                <AuthLoader />
+            </div>
         );
     }
 
@@ -195,7 +185,11 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
 
     // Session setup still in progress
     if (!sessionIsSet) {
-        return <AuthLoader />;
+        return (
+            <div data-testid="session-loader">
+                <AuthLoader data-testid="session-loader" />
+            </div>
+        );
     }
 
     // The user is authenticated, so render the app
