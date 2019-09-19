@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Typography } from "@material-ui/core";
 import "./Register.css";
-import history from "../../auth/History";
-import { useUserContext } from "../../auth/UserProvider";
+import history from "./History";
+import { useUserContext } from "./UserProvider";
 
 export default function Unactivated() {
     const user = useUserContext();

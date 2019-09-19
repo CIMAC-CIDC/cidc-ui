@@ -12,10 +12,10 @@ import {
     CircularProgress
 } from "@material-ui/core";
 import "./Register.css";
-import { ORGANIZATION_NAME_MAP } from "../../util/constants";
-import { createUser } from "../../api/api";
-import { AuthContext } from "../../auth/AuthProvider";
-import history from "../../auth/History";
+import { ORGANIZATION_NAME_MAP } from "../util/constants";
+import { createUser } from "../api/api";
+import { AuthContext } from "./AuthProvider";
+import history from "./History";
 
 export default function Register() {
     const authData = React.useContext(AuthContext);
