@@ -9,8 +9,7 @@ import FileFilter from "./FileFilter";
 import FileTable from "./FileTable";
 import { getFiles } from "../../api/api";
 import Loader from "../generic/Loader";
-import { AuthContext } from "../../auth/AuthProvider";
-import { RouteComponentProps } from "react-router";
+import { withIdToken } from "../../auth/AuthProvider";
 
 export interface IBrowseFilesPageState {
     files: DataFile[] | undefined;
@@ -92,7 +91,7 @@ class BrowseFilesPage extends React.Component<any, IBrowseFilesPageState> {
                 {this.state.files && this.state.files.length === 0 && (
                     <div className="Browse-files-progress">
                         <Typography style={{ fontSize: 18 }}>
-                            No files found.
+                            No files found
                         </Typography>
                     </div>
                 )}
@@ -153,8 +152,4 @@ class BrowseFilesPage extends React.Component<any, IBrowseFilesPageState> {
     }
 }
 
-export default function FileBrowserWithAuth(props: RouteComponentProps) {
-    const authData = React.useContext(AuthContext);
-
-    return <BrowseFilesPage {...props} token={authData && authData.idToken} />;
-}
+export default withIdToken(BrowseFilesPage);

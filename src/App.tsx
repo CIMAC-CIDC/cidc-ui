@@ -32,18 +32,15 @@ export default function App() {
                                     <Route
                                         path="/"
                                         exact={true}
-                                        // tslint:disable-next-line:jsx-no-lambda
                                         component={HomePage}
                                     />
                                     <Route
                                         path="/transfer-data"
-                                        // tslint:disable-next-line:jsx-no-lambda
                                         component={TransferDataPage}
                                         exact
                                     />
                                     <Route
                                         path="/transfer-data/cli-instructions"
-                                        // tslint:disable-next-line:jsx-no-lambda
                                         component={CliInstructions}
                                     />
                                     <Route
@@ -52,37 +49,30 @@ export default function App() {
                                     />
                                     <Route
                                         path="/browse-files"
-                                        // tslint:disable-next-line:jsx-no-lambda
                                         component={BrowseFilesPage}
                                     />
                                     <Route
                                         path="/templates"
-                                        // tslint:disable-next-line:jsx-no-lambda
                                         component={TemplatesPage}
                                     />
                                     <Route
                                         path="/privacy-security"
-                                        // tslint:disable-next-line:jsx-no-lambda
                                         component={PrivacyAndSecurityPage}
                                     />
                                     <Route
                                         path="/user-account"
-                                        // tslint:disable-next-line:jsx-no-lambda
                                         component={UserAccountPage}
                                     />
                                     <Route
                                         path="/file-details/:fileId"
-                                        // tslint:disable-next-line:jsx-no-lambda
                                         component={FileDetailsPage}
                                     />
                                     <Route
                                         path="/register"
-                                        // tslint:disable-next-line:jsx-no-lambda
                                         component={Register}
                                     />
                                     <Route
                                         path="/unactivated"
-                                        // tslint:disable-next-line:jsx-no-lambda
                                         component={Unactivated}
                                     />
                                 </Switch>
