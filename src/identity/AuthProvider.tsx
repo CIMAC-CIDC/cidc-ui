@@ -56,13 +56,16 @@ const handleAuthentication = (
                     ? new URLSearchParams(location.search).get("next") || "/"
                     : "/";
             sessionSetter(authResult, targetRoute);
-        } else if (err) {
-            history.replace("/");
+        } else {
+            if (err) {
+                console.error(err);
+            }
+            history.replace("/error?type=login");
         }
     });
 };
 
-const setSession = (
+export const setSession = (
     setAuthData: React.Dispatch<React.SetStateAction<IAuthData | undefined>>,
     onComplete: () => void
 ) => (
@@ -75,7 +78,8 @@ const setSession = (
             !tokenInfo.given_name ||
             !tokenInfo.family_name
         ) {
-            console.error("userinfo missing required scope");
+            console.error("userinfo missing required scope(s)");
+            history.replace("/error?type=login");
             return;
         }
 
@@ -99,6 +103,7 @@ const setSession = (
         onComplete();
     } else {
         console.error("Cannot set session: missing id token");
+        history.replace("/error?type=login");
     }
 };
 
@@ -116,7 +121,7 @@ export const AuthContext = React.createContext<IAuthData | undefined>(
     undefined
 );
 
-const AuthLoader = () => (
+export const AuthLoader = () => (
     <Grid
         container
         justify="center"
@@ -152,7 +157,10 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
                         authResult.idToken
                     ) {
                         sessionSetter(authResult, props.location.pathname);
-                    } else if (err) {
+                    } else {
+                        if (err) {
+                            console.error(err);
+                        }
                         logout();
                     }
                 });

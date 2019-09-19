@@ -1,6 +1,6 @@
 import * as React from "react";
 import { render, waitForElement } from "@testing-library/react";
-import AuthProvider, { auth0Client } from "./AuthProvider";
+import AuthProvider, { auth0Client, setSession } from "./AuthProvider";
 import auth0 from "auth0-js";
 import { Router } from "react-router";
 import history from "./History";
@@ -90,4 +90,67 @@ it("handles silent auth as expected", () => {
     // User should be logged in explicitly, not silently
     expect(auth0Client.checkSession).not.toBeCalled();
     expect(auth0Client.authorize).toBeCalledTimes(1);
+});
+
+test("session setter", () => {
+    // Mock out a test sessionSetter
+    const setAuthData = jest.fn();
+    const onComplete = jest.fn();
+    const sessionSetter = setSession(setAuthData, onComplete);
+
+    const targetRoute = "/test-route";
+
+    // Well-behaved input
+    const decodedHash = {
+        idTokenPayload: {
+            email: "a",
+            given_name: "b",
+            family_name: "c",
+            exp: 1
+        },
+        idToken: "foobar"
+    };
+    sessionSetter(decodedHash, targetRoute);
+
+    const expectedUser = {
+        email: decodedHash.idTokenPayload.email,
+        first_n: decodedHash.idTokenPayload.given_name,
+        last_n: decodedHash.idTokenPayload.family_name
+    };
+    expect(setAuthData).toHaveBeenCalledWith({
+        idToken: decodedHash.idToken,
+        user: expectedUser
+    });
+    expect(history.location.pathname).toEqual(targetRoute);
+
+    // Reset
+    history.replace("/");
+    onComplete.mockClear();
+
+    // Input with missing scopes
+    console.error = jest.fn();
+    const decodedHashWithMissingScopes = {
+        idTokenPayload: {
+            email: "a",
+            exp: 1
+        },
+        idToken: "foobar"
+    };
+    sessionSetter(decodedHashWithMissingScopes, targetRoute);
+    expect(console.error).toHaveBeenCalledWith(
+        "userinfo missing required scope(s)"
+    );
+    expect(history.location.pathname).toEqual("/error");
+    expect(onComplete).not.toHaveBeenCalled();
+
+    // Reset
+    history.replace("/");
+
+    // Hash with missing fields
+    sessionSetter({}, targetRoute);
+    expect(console.error).toHaveBeenCalledWith(
+        "Cannot set session: missing id token"
+    );
+    expect(history.location.pathname).toBe("/error");
+    expect(onComplete).not.toHaveBeenCalled();
 });

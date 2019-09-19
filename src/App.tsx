@@ -17,13 +17,13 @@ import history from "./identity/History";
 import AssayInstructions from "./components/transferData/AssayInstructions";
 import AuthProvider from "./identity/AuthProvider";
 import UserProvider from "./identity/UserProvider";
-import NetworkErrorGaurd from "./components/errors/NetworkErrorGuard";
+import ErrorGuard from "./components/errors/ErrorGuard";
 
 export default function App() {
     return (
         <Router history={history}>
             <div className="App">
-                <NetworkErrorGaurd>
+                <ErrorGuard>
                     <AuthProvider>
                         <UserProvider>
                             <Header />
@@ -80,7 +80,7 @@ export default function App() {
                             <Footer />
                         </UserProvider>
                     </AuthProvider>
-                </NetworkErrorGaurd>
+                </ErrorGuard>
             </div>
         </Router>
     );

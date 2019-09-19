@@ -1,5 +1,5 @@
 import * as React from "react";
-import { AuthContext } from "./AuthProvider";
+import { AuthContext, AuthLoader } from "./AuthProvider";
 import { Account } from "../model/account";
 import { RouteComponentProps, withRouter } from "react-router";
 import { getAccountInfo } from "../api/api";
@@ -37,7 +37,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                 })
                 .catch(error => {
                     if (error.response === undefined) {
-                        history.replace("/network-error");
+                        history.replace("/error?type=network");
                     } else {
                         history.replace("/register");
                     }
@@ -51,7 +51,9 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
 
     return (
         <UserContext.Provider value={user}>
-            {((user || isUnactivatedPath) && <>{props.children}</>) || null}
+            {((user || isUnactivatedPath) && <>{props.children}</>) || (
+                <AuthLoader />
+            )}
         </UserContext.Provider>
     );
 };
