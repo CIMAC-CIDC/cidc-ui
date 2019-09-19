@@ -11,12 +11,12 @@ import CliInstructions from "./components/transferData/CliInstructions";
 import TemplatesPage from "./components/templates/TemplatesPage";
 import PrivacyAndSecurityPage from "./components/privacyAndSecurity/PrivacyAndSecurityPage";
 import UserAccountPage from "./components/userAccount/UserAccountPage";
-import Register from "./auth/Register";
-import Unactivated from "./auth/Unactivated";
-import history from "./auth/History";
+import Register from "./identity/Register";
+import Unactivated from "./identity/Unactivated";
+import history from "./identity/History";
 import AssayInstructions from "./components/transferData/AssayInstructions";
-import AuthProvider from "./auth/AuthProvider";
-import UserProvider from "./auth/UserProvider";
+import AuthProvider from "./identity/AuthProvider";
+import UserProvider from "./identity/UserProvider";
 import NetworkErrorGaurd from "./components/errors/NetworkErrorGuard";
 
 export default function App() {

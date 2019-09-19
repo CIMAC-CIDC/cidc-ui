@@ -9,7 +9,7 @@ import FileFilter from "./FileFilter";
 import FileTable from "./FileTable";
 import { getFiles } from "../../api/api";
 import Loader from "../generic/Loader";
-import { withIdToken } from "../../auth/AuthProvider";
+import { withIdToken } from "../../identity/AuthProvider";
 
 export interface IBrowseFilesPageState {
     files: DataFile[] | undefined;

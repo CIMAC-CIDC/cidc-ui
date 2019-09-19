@@ -3,7 +3,7 @@ import { Tabs, Tab } from "@material-ui/core";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 import "./Header.css";
 import logo from "../../logo.png";
-import { AuthContext } from "../../auth/AuthProvider";
+import { AuthContext } from "../../identity/AuthProvider";
 
 const Header: React.FunctionComponent<RouteComponentProps> = props => {
     const authData = React.useContext(AuthContext);

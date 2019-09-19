@@ -8,12 +8,17 @@ import {
 import TemplateUpload from "./TemplateUpload";
 import { XLSX_MIMETYPE } from "../../util/constants";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
+import { AuthContext } from "../../identity/AuthProvider";
 jest.mock("../../api/api");
 
 const TOKEN = "BLAH";
 
 function renderWithMockedAuthContext() {
-    return render(<TemplateUpload cardClass="foo" />);
+    return render(
+        <AuthContext.Provider value={{ idToken: TOKEN, user: { email: "" } }}>
+            <TemplateUpload cardClass="foo" />
+        </AuthContext.Provider>
+    );
 }
 
 /**

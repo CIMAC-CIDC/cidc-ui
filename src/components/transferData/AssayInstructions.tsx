@@ -1,7 +1,7 @@
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
 import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
-import { withIdToken } from "../../auth/AuthProvider";
+import { withIdToken } from "../../identity/AuthProvider";
 
 export interface IAssayInstructionsProps
     extends RouteComponentProps<{ assay: string }> {

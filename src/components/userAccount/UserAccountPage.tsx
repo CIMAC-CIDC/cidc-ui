@@ -17,8 +17,8 @@ import {
 } from "../../util/constants";
 import Permission from "../../model/permission";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
-import { AuthContext } from "../../auth/AuthProvider";
-import { useUserContext } from "../../auth/UserProvider";
+import { AuthContext } from "../../identity/AuthProvider";
+import { useUserContext } from "../../identity/UserProvider";
 
 export default function UserAccountPage() {
     const authData = React.useContext(AuthContext);

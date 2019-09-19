@@ -22,7 +22,7 @@ import { getManifestValidationErrors, uploadManifest } from "../../api/api";
 import { WarningRounded, CheckBoxRounded } from "@material-ui/icons";
 import { XLSX_MIMETYPE, ALL_TEMPLATE_NAMES } from "../../util/constants";
 import Loader from "../generic/Loader";
-import { AuthContext } from "../../auth/AuthProvider";
+import { AuthContext } from "../../identity/AuthProvider";
 
 type Status =
     | "loading"
