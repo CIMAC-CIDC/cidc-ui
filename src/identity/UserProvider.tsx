@@ -6,7 +6,7 @@ import { getAccountInfo } from "../api/api";
 import history from "./History";
 import { PUBLIC_PATHNAMES } from "../util/constants";
 
-const UserContext = React.createContext<Account | undefined>(undefined);
+export const UserContext = React.createContext<Account | undefined>(undefined);
 
 export function useUserContext() {
     const user = React.useContext(UserContext)!;

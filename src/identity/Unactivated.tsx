@@ -13,7 +13,7 @@ export default function Unactivated() {
     }
 
     return (
-        <>
+        <div data-testid="unactivated-message">
             <div className="Register-header">Registration</div>
             <Typography
                 style={{
@@ -27,6 +27,6 @@ export default function Unactivated() {
                 will email you when your authorization request has been
                 completed.
             </Typography>
-        </>
+        </div>
     );
 }
