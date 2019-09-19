@@ -20,8 +20,6 @@ import history from "./History";
 export default function Register() {
     const authData = React.useContext(AuthContext);
 
-    console.log("HEYo!");
-
     const [state, setEntireState] = React.useState({
         first_n: "",
         last_n: "",
