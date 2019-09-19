@@ -42,7 +42,7 @@ const logout = () => {
     });
 };
 
-const handleAuthentication = (
+export const handleAuthentication = (
     location: Location,
     sessionSetter: (
         authResult: auth0.Auth0DecodedHash,

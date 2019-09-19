@@ -1,9 +1,14 @@
 import * as React from "react";
 import { render, waitForElement } from "@testing-library/react";
-import AuthProvider, { auth0Client, setSession } from "./AuthProvider";
+import AuthProvider, {
+    auth0Client,
+    setSession,
+    handleAuthentication
+} from "./AuthProvider";
 import auth0 from "auth0-js";
 import { Router } from "react-router";
 import history from "./History";
+import { Location } from "history";
 jest.mock("auth0-js");
 
 auth0.WebAuth.mockImplementation(() => ({
@@ -153,4 +158,41 @@ test("session setter", () => {
     );
     expect(history.location.pathname).toBe("/error");
     expect(onComplete).not.toHaveBeenCalled();
+});
+
+test("handleAuthentication", () => {
+    const sessionSetter = jest.fn();
+
+    const targetRoute = "/test-route";
+
+    // Good inputs: complete auth result, and location with "next" param
+    const authResult = {
+        accessToken: "a",
+        idToken: "b"
+    };
+    auth0Client.parseHash = jest.fn((handler: any) =>
+        handler(undefined, authResult)
+    );
+    const location = { search: `?next=${targetRoute}` } as Location;
+    handleAuthentication(location, sessionSetter);
+    expect(auth0Client.parseHash).toHaveBeenCalled();
+    expect(sessionSetter).toHaveBeenCalledWith(authResult, targetRoute);
+
+    jest.clearAllMocks();
+
+    // Missing "next" param on location
+    const locationMissingNext = { search: "" } as Location;
+    handleAuthentication(locationMissingNext, sessionSetter);
+    expect(auth0Client.parseHash).toHaveBeenCalled();
+    expect(sessionSetter).toHaveBeenCalledWith(authResult, "/");
+
+    jest.clearAllMocks();
+
+    // Missing fields in authResult
+    history.replace("/");
+    auth0Client.parseHash = jest.fn((handler: any) => handler(undefined, {}));
+    handleAuthentication(location, sessionSetter);
+    expect(auth0Client.parseHash).toHaveBeenCalled();
+    expect(sessionSetter).not.toHaveBeenCalled();
+    expect(history.location.pathname).toBe("/error");
 });
