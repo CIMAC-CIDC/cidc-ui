@@ -6,7 +6,7 @@ import logo from "../../logo.png";
 import { AuthContext } from "../../auth/AuthProvider";
 
 const Header: React.FunctionComponent<RouteComponentProps> = props => {
-    const { authData } = React.useContext(AuthContext)!;
+    const authData = React.useContext(AuthContext);
 
     function handleChange(_: React.ChangeEvent<{}>, value: any) {
         props.history.push(value);

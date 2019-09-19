@@ -9,6 +9,8 @@ import FileFilter from "./FileFilter";
 import FileTable from "./FileTable";
 import { getFiles } from "../../api/api";
 import Loader from "../generic/Loader";
+import { AuthContext } from "../../auth/AuthProvider";
+import { RouteComponentProps } from "react-router";
 
 export interface IBrowseFilesPageState {
     files: DataFile[] | undefined;
@@ -19,10 +21,7 @@ export interface IBrowseFilesPageState {
     searchFilter: string;
 }
 
-export default class BrowseFilesPage extends React.Component<
-    any,
-    IBrowseFilesPageState
-> {
+class BrowseFilesPage extends React.Component<any, IBrowseFilesPageState> {
     state: IBrowseFilesPageState = {
         files: undefined,
         trials: undefined,
@@ -152,4 +151,10 @@ export default class BrowseFilesPage extends React.Component<
             </div>
         );
     }
+}
+
+export default function FileBrowserWithAuth(props: RouteComponentProps) {
+    const authData = React.useContext(AuthContext);
+
+    return <BrowseFilesPage {...props} token={authData && authData.idToken} />;
 }

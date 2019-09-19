@@ -22,7 +22,7 @@ import { getManifestValidationErrors, uploadManifest } from "../../api/api";
 import { WarningRounded, CheckBoxRounded } from "@material-ui/icons";
 import { XLSX_MIMETYPE, ALL_TEMPLATE_NAMES } from "../../util/constants";
 import Loader from "../generic/Loader";
-import { useAuthContext } from "../../auth/AuthProvider";
+import { AuthContext } from "../../auth/AuthProvider";
 
 type Status =
     | "loading"
@@ -35,7 +35,7 @@ type Status =
 const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     props: ITemplateCardProps
 ) => {
-    const { authData } = useAuthContext();
+    const authData = React.useContext(AuthContext);
 
     const fileInput = React.useRef<HTMLInputElement>(null);
 

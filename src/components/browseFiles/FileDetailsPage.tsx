@@ -11,7 +11,7 @@ type UIState = "loading" | "loaded" | "not found";
 export default function FileDetailsPage(
     props: RouteComponentProps<{ fileId: string }>
 ) {
-    const { authData } = React.useContext(AuthContext)!;
+    const authData = React.useContext(AuthContext);
 
     const [file, setFile] = React.useState<DataFile | undefined>(undefined);
     const [state, setState] = React.useState<UIState>("loading");

@@ -14,11 +14,13 @@ import {
 import "./Register.css";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
 import { createUser } from "../../api/api";
-import { useAuthContext } from "../../auth/AuthProvider";
+import { AuthContext } from "../../auth/AuthProvider";
 import history from "../../auth/History";
 
 export default function Register() {
-    const { authData } = useAuthContext();
+    const authData = React.useContext(AuthContext);
+
+    console.log("HEYo!");
 
     const [state, setEntireState] = React.useState({
         first_n: "",

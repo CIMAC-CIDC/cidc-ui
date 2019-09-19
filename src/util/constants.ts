@@ -41,3 +41,5 @@ export const ALL_TEMPLATE_NAMES = {
 export const ADMIN_EMAIL = "cidc@jimmy.harvard.edu";
 
 export const IDLE_TIMEOUT: number = 1000 * 60 * 15;
+
+export const PUBLIC_PATHNAMES = ["/callback", "/network-error"];

@@ -13,7 +13,7 @@ import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
 import { AuthContext } from "../../auth/AuthProvider";
 
 export default function CliInstructions() {
-    const { authData } = React.useContext(AuthContext)!;
+    const authData = React.useContext(AuthContext);
 
     const token = (authData && authData.idToken) || "";
     const truncToken = token.slice(0, 20);

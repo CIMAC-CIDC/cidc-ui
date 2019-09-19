@@ -1,14 +1,14 @@
 import * as React from "react";
-import { UnregisteredAccount, Account } from "../model/account";
+import { UnregisteredAccount } from "../model/account";
 import auth0 from "auth0-js";
 import history from "./History";
-import { getAccountInfo } from "../api/api";
 import nanoid from "nanoid";
 import { RouteComponentProps, withRouter } from "react-router";
 import { Location } from "history";
 import IdleTimer from "react-idle-timer";
-import { IDLE_TIMEOUT } from "../util/constants";
+import { IDLE_TIMEOUT, PUBLIC_PATHNAMES } from "../util/constants";
 import Loader from "../components/generic/Loader";
+import { Grid } from "@material-ui/core";
 
 const CLIENT_ID: string = process.env.REACT_APP_AUTH0_CLIENT_ID!;
 const DOMAIN: string = process.env.REACT_APP_AUTH0_DOMAIN!;
@@ -35,7 +35,6 @@ const login = () => {
 
 const logout = () => {
     auth0Client.logout({
-        clientID: CLIENT_ID,
         returnTo: window.location.origin
     });
 };
@@ -62,7 +61,6 @@ const handleAuthentication = (
 
 const setSession = (
     setAuthData: React.Dispatch<React.SetStateAction<IAuthData | undefined>>,
-    setUserAccount: React.Dispatch<React.SetStateAction<Account | undefined>>,
     onComplete: () => void
 ) => (
     { idTokenPayload: tokenInfo, idToken }: auth0.Auth0DecodedHash,
@@ -94,26 +92,8 @@ const setSession = (
             user
         });
 
-        getAccountInfo(idToken)
-            .then(userAccount => {
-                if (userAccount) {
-                    setUserAccount(userAccount);
-                    if (userAccount.approval_date) {
-                        history.replace(targetRoute);
-                    } else {
-                        history.replace("/unactivated");
-                    }
-                    onComplete();
-                }
-            })
-            .catch(error => {
-                if (error.response === undefined) {
-                    history.replace("/network-error");
-                } else {
-                    history.replace("/register");
-                }
-                onComplete();
-            });
+        history.replace(targetRoute);
+        onComplete();
     } else {
         console.error("Cannot set session: missing id token");
     }
@@ -129,34 +109,28 @@ export interface IAuthData {
     user: UnregisteredAccount;
 }
 
-export interface IAuth {
-    authData?: IAuthData;
-    userAccount?: Account;
-    handleAuthCallback: (location: Location) => void;
-    logout: () => void;
-}
+export const AuthContext = React.createContext<IAuthData | undefined>(
+    undefined
+);
 
-export const AuthContext = React.createContext<IAuth | undefined>(undefined);
+const AuthLoader = () => (
+    <Grid
+        container
+        justify="center"
+        alignItems="center"
+        style={{ height: "10vh" }}
+    >
+        <Grid item>
+            <Loader />
+        </Grid>
+    </Grid>
+);
 
-export function useAuthContext() {
-    return React.useContext(AuthContext)!;
-}
-
-type IAuthProviderProps = RouteComponentProps;
-
-const AuthProvider: React.FunctionComponent<IAuthProviderProps> = props => {
+const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
     const [authData, setAuthData] = React.useState<IAuthData | undefined>(
         undefined
     );
-    const [userAccount, setUserAccount] = React.useState<Account | undefined>(
-        undefined
-    );
-    const [isSettingSession, setIsSettingSession] = React.useState<boolean>(
-        true
-    );
-
-    const tokenDidExpire = isTokenExpired();
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const [sessionIsSet, setSessionIsSet] = React.useState<boolean>(false);
 
     const clearDataAndLogout = () => {
         localStorage.removeItem("isLoggedIn");
@@ -165,10 +139,12 @@ const AuthProvider: React.FunctionComponent<IAuthProviderProps> = props => {
         logout();
     };
 
-    const sessionSetter = setSession(setAuthData, setUserAccount, () =>
-        setIsSettingSession(false)
-    );
+    const sessionSetter = setSession(setAuthData, () => setSessionIsSet(true));
+    const handleAuthCallback = (location: Location) =>
+        handleAuthentication(location, sessionSetter);
 
+    const tokenDidExpire = isTokenExpired();
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     React.useEffect(() => {
         if (tokenDidExpire || !authData) {
             if (isLoggedIn) {
@@ -187,35 +163,50 @@ const AuthProvider: React.FunctionComponent<IAuthProviderProps> = props => {
         }
     }, [tokenDidExpire, isLoggedIn, props.location, sessionSetter, authData]);
 
-    const handleAuthCallback = (location: Location) =>
-        handleAuthentication(location, sessionSetter);
-
-    const auth = {
-        authData,
-        userAccount,
-        handleAuthCallback,
-        logout: clearDataAndLogout
-    };
-
-    if (
-        !isLoggedIn &&
-        !["/callback", "/network-error"].includes(props.location.pathname)
-    ) {
+    // If the user is logged out, try to log them in, unless they
+    // are trying to access a public path
+    if (!isLoggedIn && !PUBLIC_PATHNAMES.includes(props.location.pathname)) {
         login();
         return null;
     }
 
-    const renderApp =
-        isSettingSession && props.location.pathname !== "/callback";
+    // Handle when the Auth0 authorization flow redirects to the callback endpoint
+    if (props.location.pathname === "/callback") {
+        handleAuthCallback(props.location);
+        return (
+            <Grid
+                container
+                justify="center"
+                alignItems="center"
+                style={{ height: "10vh" }}
+            >
+                <Grid item>
+                    <Loader />
+                </Grid>
+            </Grid>
+        );
+    }
 
+    // Log the user out
+    if (props.location.pathname === "/logout") {
+        logout();
+        return null;
+    }
+
+    // Session setup still in progress
+    if (!sessionIsSet) {
+        return <AuthLoader />;
+    }
+
+    // The user is authenticated, so render the app
     return (
-        <AuthContext.Provider value={auth}>
+        <AuthContext.Provider value={authData}>
             <IdleTimer
                 ref={() => null}
                 onIdle={logout}
                 timeout={IDLE_TIMEOUT}
             />
-            {renderApp ? <Loader /> : props.children}
+            {props.children}
         </AuthContext.Provider>
     );
 };

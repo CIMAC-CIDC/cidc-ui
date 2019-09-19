@@ -14,9 +14,9 @@ import UserAccountPage from "./components/userAccount/UserAccountPage";
 import Register from "./components/register/Register";
 import Unactivated from "./components/register/Unactivated";
 import history from "./auth/History";
-import Loader from "./components/generic/Loader";
 import AssayInstructions from "./components/transferData/AssayInstructions";
-import AuthProvider, { AuthContext } from "./auth/AuthProvider";
+import AuthProvider from "./auth/AuthProvider";
+import UserProvider from "./auth/UserProvider";
 import NetworkErrorGaurd from "./components/errors/NetworkErrorGuard";
 
 export default function App() {
@@ -25,108 +25,73 @@ export default function App() {
             <div className="App">
                 <NetworkErrorGaurd>
                     <AuthProvider>
-                        <AppBody />
+                        <UserProvider>
+                            <Header />
+                            <div className="Content">
+                                <Switch>
+                                    <Route
+                                        path="/"
+                                        exact={true}
+                                        // tslint:disable-next-line:jsx-no-lambda
+                                        component={HomePage}
+                                    />
+                                    <Route
+                                        path="/transfer-data"
+                                        // tslint:disable-next-line:jsx-no-lambda
+                                        component={TransferDataPage}
+                                        exact
+                                    />
+                                    <Route
+                                        path="/transfer-data/cli-instructions"
+                                        // tslint:disable-next-line:jsx-no-lambda
+                                        component={CliInstructions}
+                                    />
+                                    <Route
+                                        path="/transfer-data/:assay"
+                                        component={AssayInstructions}
+                                    />
+                                    <Route
+                                        path="/browse-files"
+                                        // tslint:disable-next-line:jsx-no-lambda
+                                        component={BrowseFilesPage}
+                                    />
+                                    <Route
+                                        path="/templates"
+                                        // tslint:disable-next-line:jsx-no-lambda
+                                        component={TemplatesPage}
+                                    />
+                                    <Route
+                                        path="/privacy-security"
+                                        // tslint:disable-next-line:jsx-no-lambda
+                                        component={PrivacyAndSecurityPage}
+                                    />
+                                    <Route
+                                        path="/user-account"
+                                        // tslint:disable-next-line:jsx-no-lambda
+                                        component={UserAccountPage}
+                                    />
+                                    <Route
+                                        path="/file-details/:fileId"
+                                        // tslint:disable-next-line:jsx-no-lambda
+                                        component={FileDetailsPage}
+                                    />
+                                    <Route
+                                        path="/register"
+                                        // tslint:disable-next-line:jsx-no-lambda
+                                        component={Register}
+                                    />
+                                    <Route
+                                        path="/unactivated"
+                                        // tslint:disable-next-line:jsx-no-lambda
+                                        component={Unactivated}
+                                    />
+                                </Switch>
+                            </div>
+                            <Footer />
+                        </UserProvider>
                     </AuthProvider>
                 </NetworkErrorGaurd>
             </div>
         </Router>
-    );
-}
-
-function AppBody() {
-    const { handleAuthCallback, authData, logout } = React.useContext(
-        AuthContext
-    )!;
-
-    return (
-        <>
-            <Header />
-            <div className="Content">
-                <Switch>
-                    <Route
-                        path="/"
-                        exact={true}
-                        // tslint:disable-next-line:jsx-no-lambda
-                        component={HomePage}
-                    />
-                    <Route
-                        path="/transfer-data"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        component={TransferDataPage}
-                        exact
-                    />
-                    <Route
-                        path="/transfer-data/cli-instructions"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        component={CliInstructions}
-                    />
-                    <Route
-                        path="/transfer-data/:assay"
-                        component={AssayInstructions}
-                    />
-                    <Route
-                        path="/browse-files"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        render={props => {
-                            return (
-                                authData && (
-                                    <BrowseFilesPage
-                                        {...props}
-                                        token={authData.idToken}
-                                    />
-                                )
-                            );
-                        }}
-                    />
-                    <Route
-                        path="/templates"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        component={TemplatesPage}
-                    />
-                    <Route
-                        path="/privacy-security"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        component={PrivacyAndSecurityPage}
-                    />
-                    <Route
-                        path="/user-account"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        component={UserAccountPage}
-                    />
-                    <Route
-                        path="/file-details/:fileId"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        component={FileDetailsPage}
-                    />
-                    <Route
-                        path="/register"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        component={Register}
-                    />
-                    <Route
-                        path="/unactivated"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        component={Unactivated}
-                    />
-                    <Route
-                        path="/callback"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        render={props => {
-                            handleAuthCallback(props.location);
-                            return <Loader />;
-                        }}
-                    />
-                    <Route
-                        path="/logout"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        render={props => {
-                            logout();
-                            return null;
-                        }}
-                    />
-                </Switch>
-            </div>
-            <Footer />
-        </>
     );
 }

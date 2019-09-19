@@ -2,13 +2,13 @@ import * as React from "react";
 import { Typography } from "@material-ui/core";
 import "./Register.css";
 import history from "../../auth/History";
-import { useAuthContext } from "../../auth/AuthProvider";
+import { useUserContext } from "../../auth/UserProvider";
 
 export default function Unactivated() {
-    const { userAccount } = useAuthContext();
+    const user = useUserContext();
 
     // If the user is approved, they should be redirected home
-    if (userAccount && userAccount.approval_date) {
+    if (user && user.approval_date) {
         history.replace("/");
     }
 

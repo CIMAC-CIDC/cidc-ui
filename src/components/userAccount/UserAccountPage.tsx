@@ -17,10 +17,12 @@ import {
 } from "../../util/constants";
 import Permission from "../../model/permission";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
-import { useAuthContext } from "../../auth/AuthProvider";
+import { AuthContext } from "../../auth/AuthProvider";
+import { useUserContext } from "../../auth/UserProvider";
 
 export default function UserAccountPage() {
-    const { userAccount, authData } = useAuthContext();
+    const authData = React.useContext(AuthContext);
+    const userAccount = useUserContext();
 
     const [permissions, setPermissions] = React.useState<
         Permission[] | undefined
