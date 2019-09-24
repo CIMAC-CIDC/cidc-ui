@@ -6,9 +6,9 @@ import Permission from "../model/permission";
 
 const URL: string = process.env.REACT_APP_API_URL!;
 
-function getApiClient(token: string): AxiosInstance {
+function getApiClient(token?: string): AxiosInstance {
     return axios.create({
-        headers: { Authorization: `Bearer ${token}` },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
         baseURL: URL
     });
 }
@@ -192,6 +192,18 @@ function revokePermission(token: string, permissionID: number): Promise<any> {
     );
 }
 
+function getSupportedAssays(): Promise<string[]> {
+    return getApiClient()
+        .get("/info/assays")
+        .then(_extractItem);
+}
+
+function getSupportedManifests(): Promise<string[]> {
+    return getApiClient()
+        .get("/info/manifests")
+        .then(_extractItem);
+}
+
 // ----------- Old API methods (not currently supported) ----------- //
 
 async function deleteUser(
@@ -221,5 +233,7 @@ export {
     getManifestValidationErrors,
     getPermissions,
     grantPermission,
-    revokePermission
+    revokePermission,
+    getSupportedAssays,
+    getSupportedManifests
 };

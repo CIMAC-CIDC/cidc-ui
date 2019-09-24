@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import { ITemplateCardProps } from "./TemplatesPage";
 import { onValueChange } from "./utils";
-import { ALL_TEMPLATE_NAMES } from "../../util/constants";
+import { InfoContext } from "../info/InfoProvider";
 
 // Given a template type and name, get the path to the corresponding
 // xlsx file in the static/ folder.
@@ -26,6 +26,8 @@ function nameToURL(type: string, name: string) {
 const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
     props: ITemplateCardProps
 ) => {
+    const info = React.useContext(InfoContext);
+
     const [templateType, setTemplateType] = React.useState<string | undefined>(
         undefined
     );
@@ -33,9 +35,8 @@ const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
         undefined
     );
 
-    const templateNames: string[] = templateType
-        ? ALL_TEMPLATE_NAMES[templateType]
-        : [];
+    const templateNames: string[] =
+        templateType && info ? info.supportedTemplates[templateType] : [];
     const templateURL =
         templateType && templateName && nameToURL(templateType, templateName);
 
