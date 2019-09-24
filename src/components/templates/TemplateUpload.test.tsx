@@ -9,15 +9,23 @@ import TemplateUpload from "./TemplateUpload";
 import { XLSX_MIMETYPE } from "../../util/constants";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
 import { AuthContext } from "../../identity/AuthProvider";
+import { InfoContext } from "../info/InfoProvider";
 jest.mock("../../api/api");
 
 const TOKEN = "BLAH";
 
 function renderWithMockedAuthContext() {
+    const fakeInfo = {
+        supportedTemplates: { manifests: ["pbmc"], metadata: [] }
+    };
     return render(
-        <AuthContext.Provider value={{ idToken: TOKEN, user: { email: "" } }}>
-            <TemplateUpload cardClass="foo" />
-        </AuthContext.Provider>
+        <InfoContext.Provider value={fakeInfo}>
+            <AuthContext.Provider
+                value={{ idToken: TOKEN, user: { email: "" } }}
+            >
+                <TemplateUpload cardClass="foo" />
+            </AuthContext.Provider>
+        </InfoContext.Provider>
     );
 }
 
@@ -58,7 +66,7 @@ test("manifest validation", async () => {
     // Select a manifest type. Material UI components make this
     // difficult: we need to first click on the select component,
     // then click on the dropdown option that subsequently appears.
-    await selectValueMUI(renderResult, manifestTypeSelect, "PBMC");
+    await selectValueMUI(renderResult, manifestTypeSelect, "pbmc");
     expectNoValidationsDisplayed();
     expect(submitButton).toHaveAttribute("disabled");
 
@@ -102,7 +110,7 @@ test("manifest submission", async () => {
     const submitButton = getByTestId("submit-button");
 
     // Select a manifest type
-    selectValueMUI(renderResult, manifestTypeSelect, "PBMC");
+    selectValueMUI(renderResult, manifestTypeSelect, "pbmc");
 
     // Select a file to upload and wait for validations to complete
     getManifestValidationErrors.mockResolvedValue([]);
