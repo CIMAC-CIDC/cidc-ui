@@ -34,6 +34,10 @@ export default class TransferDataPage extends React.Component<any, {}> {
                         How to upload{" "}
                         <Link to="/transfer-data/olink">Olink data.</Link>
                     </li>
+                    <li>
+                        How to upload{" "}
+                        <Link to="/transfer-data/cytof">CyTOF data.</Link>
+                    </li>
                 </Typography>
             </div>
         );
