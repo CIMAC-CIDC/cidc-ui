@@ -129,7 +129,7 @@ function _makeManifestRequest<T>(
 }
 
 interface IManifestUploadResponse {
-    metadata_json_patch: { lead_organization_study_id: string };
+    metadata_json_patch: { protocol_id: string };
 }
 function uploadManifest(
     token: string,

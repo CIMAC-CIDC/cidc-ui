@@ -82,9 +82,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
             })
                 .then(({ metadata_json_patch }) => {
                     setStatus("uploadSuccess");
-                    setTargetTrial(
-                        metadata_json_patch.lead_organization_study_id
-                    );
+                    setTargetTrial(metadata_json_patch.protocol_id);
                 })
                 .catch(err => {
                     setErrors([`Upload failed: ${err.toString()}`]);

@@ -125,7 +125,7 @@ test("manifest submission", async () => {
 
     // Submit the manifest
     uploadManifest.mockResolvedValue({
-        metadata_json_patch: { lead_organization_study_id: "CIMAC-12345" }
+        metadata_json_patch: { protocol_id: "CIMAC-12345" }
     });
     fireEvent.click(submitButton);
     expect(queryByTestId("uploadSuccess")).not.toBeInTheDocument();
