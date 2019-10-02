@@ -129,7 +129,7 @@ function _makeManifestRequest<T>(
 }
 
 interface IManifestUploadResponse {
-    metadata_json_patch: { protocol_id: string };
+    metadata_json_patch: { protocol_identifier: string };
 }
 function uploadManifest(
     token: string,
