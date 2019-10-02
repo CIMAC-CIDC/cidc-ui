@@ -22,7 +22,7 @@ export default class HomePage extends React.Component<any, {}> {
                         <Link to="/browse-files">uploaded data.</Link>
                     </li>
                     <li>
-                        Read out{" "}
+                        Read our{" "}
                         <Link to="/privacy-security">
                             Privacy and Security notice.
                         </Link>

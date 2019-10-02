@@ -1,7 +1,6 @@
 .Browse-files-page {
     margin: auto;
     padding: 20px;
-    background-color: var(--light-grey);
 }
 
 .File-filter {
@@ -34,6 +33,7 @@
 .File-table {
     border: 1px solid #cfd0d0;
     border-radius: 5px;
+    border-collapse: separate !important;
 }
 
 .File-table-row {

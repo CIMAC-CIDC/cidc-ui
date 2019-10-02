@@ -75,8 +75,8 @@ export default class FileTable extends React.Component<
 
     public render() {
         return (
-            <div className="File-table">
-                <Table>
+            <div>
+                <Table className="File-table">
                     <TableHead>
                         <TableRow>
                             <TableCell className="File-table-header-cell">

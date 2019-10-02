@@ -1,8 +1,15 @@
-.Footer {
+.Footer-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    background-color: var(--cidc-blue);
+    color: grey;
+    background-color: var(--light-grey);
     height: 48px;
+}
+
+.Footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 550px;
 }

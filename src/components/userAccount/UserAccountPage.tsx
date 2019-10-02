@@ -43,6 +43,7 @@ export default function UserAccountPage() {
                 <Toolbar className="User-account-toolbar">
                     <Typography className="User-account-toolbar-text">
                         User Account
+                        {` - ${userAccount.first_n} ${userAccount.last_n}`}
                     </Typography>
                 </Toolbar>
                 <div className="User-details">
@@ -53,6 +54,14 @@ export default function UserAccountPage() {
                     ) : (
                         <>
                             <div>
+                                <Typography variant="h5">Email</Typography>
+                                <Typography
+                                    variant="h5"
+                                    color="textSecondary"
+                                    paragraph
+                                >
+                                    {userAccount.email}
+                                </Typography>
                                 <Typography variant="h5">
                                     Registration Form and Code of Conduct:
                                 </Typography>

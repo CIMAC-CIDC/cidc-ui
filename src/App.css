@@ -1,9 +1,8 @@
 .App {
-    min-width: 1280px !important;
+    min-width: 640px !important;
     --light-grey: #ecf0f1;
     --bright-green: #031729a9;
     --cidc-blue: #004581b4;
-    background: var(--light-grey);
     height: 100vh;
 }
 
@@ -14,6 +13,5 @@
 
 .Content {
     padding: 3em;
-    background-color: var(--light-grey);
     min-height: 960px; /* totally arbitrary */
 }
