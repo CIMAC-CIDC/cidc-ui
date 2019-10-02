@@ -18,7 +18,7 @@ export default class FileFilter extends React.Component<IFileFilterProps, {}> {
                 <Grid container={true}>
                     <Grid item={true} xs={12}>
                         <FileFilterCheckboxGroup
-                            title="Study ID"
+                            title="Protocol Identifier"
                             options={this.props.trialIds}
                             onChange={this.props.onTrialIdChange}
                         />

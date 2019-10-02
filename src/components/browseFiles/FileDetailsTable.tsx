@@ -41,7 +41,7 @@ export default class FileDetailsTable extends React.Component<
                         </TableRow>
                         <TableRow>
                             <TableCell className="File-table-row-cell">
-                                Study ID
+                                Protocol Identifier
                             </TableCell>
                             <TableCell className="File-table-row-cell">
                                 {this.props.file.trial}
