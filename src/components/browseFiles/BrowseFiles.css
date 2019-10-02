@@ -33,6 +33,7 @@
 
 .File-table {
     border: 1px solid #cfd0d0;
+    border-radius: 5px;
 }
 
 .File-table-row {
@@ -43,6 +44,10 @@
     font-size: 14px !important;
 }
 
+.filename {
+    word-break: break-word;
+}
+
 .File-table-header-cell {
     font-size: 13px !important;
 }
@@ -50,6 +55,7 @@
 .File-search {
     background-color: white;
     margin-top: 0 !important;
+    border-radius: 5px;
 }
 
 .File-search-input {
@@ -62,7 +68,7 @@
 }
 
 .File-search-border fieldset {
-    border-radius: 0;
+    border-radius: 5px;
 }
 
 .Browse-files-progress {
