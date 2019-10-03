@@ -219,7 +219,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                                 type="submit"
                                 variant="contained"
                                 color="primary"
-                                disabled={!fileValid}
+                                disabled={!fileValid || status === "loading"}
                                 data-testid="submit-button"
                             >
                                 Upload
