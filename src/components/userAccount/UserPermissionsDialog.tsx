@@ -25,9 +25,7 @@ import {
 import { Trial } from "../../model/trial";
 import { Account } from "../../model/account";
 import Permission from "../../model/permission";
-
-// The sorts of data that users can be granted permission to view
-const SUPPORTED_TYPES = ["WES", "Olink", "CyTOF", "Plasma", "PBMC"];
+import { InfoContext } from "../info/InfoProvider";
 
 export interface IUserPermissionsDialogProps {
     open: boolean;
@@ -43,8 +41,24 @@ export interface IUserPermissionsDialogState {
     rowsPerPage: number;
 }
 
-export default class UserPermissionsDialog extends React.Component<
-    IUserPermissionsDialogProps,
+const UserPermissionsDialogWithInfo: React.FunctionComponent<
+    IUserPermissionsDialogProps
+> = props => {
+    const { supportedTemplates, extraDataTypes } = React.useContext(
+        InfoContext
+    )!;
+
+    const supportedTypes = [
+        ...supportedTemplates.metadata,
+        ...supportedTemplates.manifests,
+        ...extraDataTypes
+    ];
+
+    return <UserPermissionsDialog {...props} supportedTypes={supportedTypes} />;
+};
+
+class UserPermissionsDialog extends React.Component<
+    IUserPermissionsDialogProps & { supportedTypes: string[] },
     IUserPermissionsDialogState
 > {
     state: IUserPermissionsDialogState = {
@@ -169,11 +183,13 @@ export default class UserPermissionsDialog extends React.Component<
                                     <TableHead>
                                         <TableRow>
                                             <TableCell>Trial</TableCell>
-                                            {SUPPORTED_TYPES.map(typ => (
-                                                <TableCell key={typ}>
-                                                    {typ}
-                                                </TableCell>
-                                            ))}
+                                            {this.props.supportedTypes.map(
+                                                typ => (
+                                                    <TableCell key={typ}>
+                                                        {typ}
+                                                    </TableCell>
+                                                )
+                                            )}
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -190,27 +206,26 @@ export default class UserPermissionsDialog extends React.Component<
                                                     <TableCell>
                                                         {trial.trial_id}
                                                     </TableCell>
-                                                    {SUPPORTED_TYPES.map(
-                                                        assayUppercase => {
-                                                            const assay = assayUppercase.toLowerCase();
+                                                    {this.props.supportedTypes.map(
+                                                        typ => {
                                                             return (
                                                                 <AssayCheckbox
                                                                     key={
-                                                                        assay +
+                                                                        typ +
                                                                         trial.trial_id
                                                                     }
                                                                     trialID={
                                                                         trial.trial_id
                                                                     }
                                                                     assayType={
-                                                                        assay
+                                                                        typ
                                                                     }
                                                                     permissionsMap={
                                                                         permissionsMap
                                                                     }
                                                                     onChange={this.makeHandleChange(
                                                                         trial.trial_id,
-                                                                        assay
+                                                                        typ
                                                                     )}
                                                                 />
                                                             );
@@ -270,3 +285,5 @@ const AssayCheckbox: React.FunctionComponent<{
         </TableCell>
     );
 };
+
+export default UserPermissionsDialogWithInfo;
