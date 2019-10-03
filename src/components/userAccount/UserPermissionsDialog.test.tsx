@@ -1,6 +1,5 @@
 import * as React from "react";
 import { render, fireEvent, waitForElement } from "@testing-library/react";
-import UserPermissionsDialog from "./UserPermissionsDialog";
 import {
     grantPermission,
     revokePermission,
@@ -9,6 +8,8 @@ import {
 } from "../../api/api";
 import { Account } from "../../model/account";
 import { Trial } from "../../model/trial";
+import { InfoContext } from "../info/InfoProvider";
+import UserPermissionsDialogWithInfo from "./UserPermissionsDialog";
 jest.mock("../../api/api");
 
 const TOKEN = "test-token";
@@ -30,13 +31,23 @@ getTrials.mockResolvedValue(TRIALS);
 getPermissions.mockResolvedValue(PERMISSIONS);
 
 function doRender() {
+    const infoContext = {
+        supportedTemplates: {
+            metadata: ["cytof", "wes", "olink"],
+            manifests: []
+        },
+        extraDataTypes: []
+    };
+
     return render(
-        <UserPermissionsDialog
-            token={TOKEN}
-            user={USER}
-            open={true}
-            onCancel={jest.fn()}
-        />
+        <InfoContext.Provider value={infoContext}>
+            <UserPermissionsDialogWithInfo
+                token={TOKEN}
+                user={USER}
+                open={true}
+                onCancel={jest.fn()}
+            />
+        </InfoContext.Provider>
     );
 }
 
