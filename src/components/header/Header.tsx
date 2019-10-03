@@ -1,9 +1,30 @@
 import * as React from "react";
-import { Tabs, Tab } from "@material-ui/core";
+import { Tabs, Tab, Card, Typography, Link } from "@material-ui/core";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 import "./Header.css";
 import logo from "../../logo.png";
 import { AuthContext } from "../../identity/AuthProvider";
+
+const ENV = process.env.REACT_APP_ENV;
+
+const EnvBanner: React.FunctionComponent = () =>
+    ENV !== "prod" ? (
+        <Card
+            style={{
+                background: "#ffcc00",
+                textAlign: "center"
+            }}
+        >
+            <Typography variant="overline">
+                Warning! You're accessing a development instance of the CIDC
+                portal. If this is a mistake, please navigate to{" "}
+                <Link href="https://portal.cimac-network.org">
+                    https://portal.cimac-network.org
+                </Link>
+                .
+            </Typography>
+        </Card>
+    ) : null;
 
 const Header: React.FunctionComponent<RouteComponentProps> = props => {
     const authData = React.useContext(AuthContext);
@@ -27,6 +48,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
 
     return (
         <div style={{ backgroundColor: "var(--light-grey)" }}>
+            <EnvBanner />
             <img
                 src={logo}
                 className="Logo"
