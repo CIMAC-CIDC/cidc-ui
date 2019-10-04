@@ -6,7 +6,8 @@ import {
     Typography,
     Link as MuiLink,
     Divider,
-    Grid
+    Grid,
+    withStyles
 } from "@material-ui/core";
 import {
     withRouter,
@@ -43,6 +44,26 @@ const EnvBanner: React.FunctionComponent = () =>
         </Card>
     ) : null;
 
+interface IStyledTabsProps {
+    value: string;
+    onChange: (event: React.ChangeEvent<{}>, newValue: string) => void;
+}
+
+const StyledTabs = withStyles({
+    indicator: {
+        display: "flex",
+        justifyContent: "center",
+        backgroundColor: "transparent",
+        "& > div": {
+            maxWidth: 60,
+            width: "100%",
+            backgroundColor: "black"
+        }
+    }
+})((props: IStyledTabsProps) => (
+    <Tabs {...props} TabIndicatorProps={{ children: <div /> }} />
+));
+
 const Header: React.FunctionComponent<RouteComponentProps> = props => {
     function handleChange(_: React.ChangeEvent<{}>, value: any) {
         props.history.push(value);
@@ -76,11 +97,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                         </RouterLink>
                     </Grid>
                     <Grid item>
-                        <Tabs
-                            value={selectedTab}
-                            onChange={handleChange}
-                            TabIndicatorProps={{ color: "rgba(0,0,0,0)" }}
-                        >
+                        <StyledTabs value={selectedTab} onChange={handleChange}>
                             <Tab
                                 disableRipple={true}
                                 value="/browse-files"
@@ -105,7 +122,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                 label="Profile"
                                 icon={<AccountCircle />}
                             />
-                        </Tabs>
+                        </StyledTabs>
                     </Grid>
                 </Grid>
             </div>

@@ -30,6 +30,11 @@ const theme = createMuiTheme({
                 borderRadius: 5,
                 overflowX: "scroll"
             }
+        },
+        MuiTab: {
+            selected: {
+                color: "black"
+            }
         }
     }
 });
