@@ -103,7 +103,7 @@ export default function Register() {
                     Please complete your CIMAC-CIDC Data Portal registration
                     request below.
                 </Typography>
-                <Grid container={true} spacing={16}>
+                <Grid container={true} spacing={24}>
                     <Grid item={true} xs={12}>
                         <TextField
                             label="Login Email"

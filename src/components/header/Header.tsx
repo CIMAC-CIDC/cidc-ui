@@ -67,9 +67,8 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
             <div className="Header-tabs">
                 <Grid
                     container
-                    alignItems="baseline"
-                    style={{ width: "100%" }}
-                    spacing={24}
+                    alignItems="center"
+                    style={{ width: "100%", paddingBottom: "0" }}
                 >
                     <Grid item>
                         <RouterLink to="/">
@@ -80,7 +79,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                         <Tabs
                             value={selectedTab}
                             onChange={handleChange}
-                            style={{ height: "100%" }}
+                            TabIndicatorProps={{ color: "rgba(0,0,0,0)" }}
                         >
                             <Tab
                                 disableRipple={true}

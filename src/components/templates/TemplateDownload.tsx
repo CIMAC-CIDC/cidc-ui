@@ -47,7 +47,7 @@ const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
             <CardHeader
                 avatar={<CloudDownload />}
                 title={
-                    <Typography variant="title">Download a template</Typography>
+                    <Typography variant="h6">Download a template</Typography>
                 }
             />
             <CardContent>

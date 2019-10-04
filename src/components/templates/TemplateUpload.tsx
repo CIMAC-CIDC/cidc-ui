@@ -146,7 +146,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
             <CardHeader
                 avatar={<CloudUpload />}
                 title={
-                    <Typography variant="title">
+                    <Typography variant="h6">
                         Upload a shipping / receiving manifest
                     </Typography>
                 }

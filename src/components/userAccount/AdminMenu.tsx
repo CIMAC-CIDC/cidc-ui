@@ -98,7 +98,7 @@ export default class AdminMenu extends React.Component<IAdminMenuProps, {}> {
                         <CardHeader
                             avatar={<List />}
                             title={
-                                <Typography variant="headline">
+                                <Typography variant="h6">
                                     Admin Tasks
                                 </Typography>
                             }

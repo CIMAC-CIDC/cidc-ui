@@ -48,7 +48,7 @@ export default function UserAccountPage() {
                             <CardHeader
                                 avatar={<AccountCircle />}
                                 title={
-                                    <Typography variant="headline">
+                                    <Typography variant="h6">
                                         Personal Info
                                     </Typography>
                                 }
@@ -113,7 +113,7 @@ export default function UserAccountPage() {
                             <CardHeader
                                 avatar={<FolderShared />}
                                 title={
-                                    <Typography variant="headline">
+                                    <Typography variant="h6">
                                         Dataset Access
                                     </Typography>
                                 }
