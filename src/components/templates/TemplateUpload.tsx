@@ -238,13 +238,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                     </Grid>
                 </form>
                 <Divider />
-                <div
-                    style={{
-                        margin: "1em",
-                        maxHeight: "15em",
-                        overflowY: "scroll"
-                    }}
-                >
+                <div style={{ margin: "1em" }}>
                     <Grid container direction="row" alignItems="center">
                         {feedbackDisplay[status]}
                     </Grid>
