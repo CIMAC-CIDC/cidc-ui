@@ -6,7 +6,8 @@ import {
     Grid,
     Card,
     CardHeader,
-    CardContent
+    CardContent,
+    Link
 } from "@material-ui/core";
 import "./UserAccount.css";
 import { getPermissions } from "../../api/api";
@@ -48,9 +49,16 @@ export default function UserAccountPage() {
                             <CardHeader
                                 avatar={<AccountCircle />}
                                 title={
-                                    <Typography variant="h6">
-                                        Personal Info
-                                    </Typography>
+                                    <Grid
+                                        container
+                                        justify="space-between"
+                                        alignItems="center"
+                                    >
+                                        <Typography variant="h6">
+                                            Personal Info
+                                        </Typography>
+                                        <Link href="/logout">Logout</Link>
+                                    </Grid>
                                 }
                             />
                             <CardContent>
