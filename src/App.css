@@ -1,10 +1,9 @@
 .App {
     min-width: 640px !important;
-    --light-grey: #ffffff;
-    --bright-green: #031729a9;
-    --cidc-blue: #004581b4;
+    --light-grey: white;
+    --bright-green: #3b4856;
+    --cidc-blue: #95cfff;
     height: 100vh;
-    background: var(--light-grey);
 }
 
 .Markdown-width {

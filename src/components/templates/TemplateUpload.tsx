@@ -14,12 +14,17 @@ import {
     ListItemText,
     Divider,
     MenuItem,
-    ListItemIcon
+    ListItemIcon,
+    CardHeader
 } from "@material-ui/core";
 import { ITemplateCardProps } from "./TemplatesPage";
 import { onValueChange } from "./utils";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
-import { WarningRounded, CheckBoxRounded } from "@material-ui/icons";
+import {
+    WarningRounded,
+    CheckBoxRounded,
+    CloudUpload
+} from "@material-ui/icons";
 import { XLSX_MIMETYPE } from "../../util/constants";
 import Loader from "../generic/Loader";
 import { AuthContext } from "../../identity/AuthProvider";
@@ -138,10 +143,15 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
 
     return (
         <Card className={props.cardClass}>
+            <CardHeader
+                avatar={<CloudUpload />}
+                title={
+                    <Typography variant="title">
+                        Upload a shipping / receiving manifest
+                    </Typography>
+                }
+            />
             <CardContent>
-                <Typography variant="title">
-                    Upload a shipping / receiving manifest
-                </Typography>
                 <form onSubmit={onSubmit}>
                     <Grid
                         container

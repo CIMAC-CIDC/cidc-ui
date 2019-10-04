@@ -1,13 +1,10 @@
 import * as React from "react";
 import {
-    Paper,
-    Toolbar,
     Typography,
     Table,
     TableBody,
     TableRow,
     TablePagination,
-    CircularProgress,
     TextField,
     Card,
     CardHeader,
@@ -17,6 +14,7 @@ import { getAllAccounts } from "../../api/api";
 import autobind from "autobind-decorator";
 import { Account } from "../../model/account";
 import UserTableRow from "./UserTableRow";
+import { List } from "@material-ui/icons";
 
 export interface IAdminMenuProps {
     token: string;
@@ -98,6 +96,7 @@ export default class AdminMenu extends React.Component<IAdminMenuProps, {}> {
                 {accounts && (
                     <Card>
                         <CardHeader
+                            avatar={<List />}
                             title={
                                 <Typography variant="headline">
                                     Admin Tasks
@@ -159,7 +158,6 @@ export default class AdminMenu extends React.Component<IAdminMenuProps, {}> {
                                 }
                             />
                         </CardContent>
-                        )}
                     </Card>
                 )}
             </div>

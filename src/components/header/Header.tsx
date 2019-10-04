@@ -5,7 +5,8 @@ import {
     Card,
     Typography,
     Link as MuiLink,
-    Divider
+    Divider,
+    Grid
 } from "@material-ui/core";
 import {
     withRouter,
@@ -61,42 +62,56 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
     }
 
     return (
-        <div style={{ backgroundColor: "var(--light-grey)" }}>
+        <div style={{ backgroundColor: "var(--light-grey-gradient)" }}>
             <EnvBanner />
-            <Tabs
-                className="Header-tabs"
-                value={selectedTab}
-                onChange={handleChange}
-            >
-                <RouterLink to="/">
-                    <img src={logo} className="Logo" alt="Home" />
-                </RouterLink>
-                <Tab
-                    disableRipple={true}
-                    value="/browse-files"
-                    label="Browse Files"
-                    icon={<Search />}
-                />
-                <Tab
-                    disableRipple={true}
-                    value="/transfer-data"
-                    label="Transfer Data"
-                    icon={<CloudUpload />}
-                />
-                <Tab
-                    disableRipple={true}
-                    value="/templates"
-                    label="Templates"
-                    icon={<TableChart />}
-                />
-                <Tab
-                    disableRipple={true}
-                    value="/user-account"
-                    label="Profile"
-                    icon={<AccountCircle />}
-                />
-            </Tabs>
-            <Divider />
+            <div className="Header-tabs">
+                <Grid
+                    container
+                    alignItems="baseline"
+                    style={{ width: "100%" }}
+                    spacing={24}
+                >
+                    <Grid item>
+                        <RouterLink to="/">
+                            <img src={logo} className="Logo" alt="Home" />
+                        </RouterLink>
+                    </Grid>
+                    <Grid item>
+                        <Tabs
+                            value={selectedTab}
+                            onChange={handleChange}
+                            style={{ height: "100%" }}
+                        >
+                            <Tab
+                                disableRipple={true}
+                                value="/browse-files"
+                                label="Browse Files"
+                                icon={<Search />}
+                            />
+                            <Tab
+                                disableRipple={true}
+                                value="/transfer-data"
+                                label="Transfer Data"
+                                icon={<CloudUpload />}
+                            />
+                            <Tab
+                                disableRipple={true}
+                                value="/templates"
+                                label="Templates"
+                                icon={<TableChart />}
+                            />
+                            <Tab
+                                disableRipple={true}
+                                value="/user-account"
+                                label="Profile"
+                                icon={<AccountCircle />}
+                            />
+                        </Tabs>
+                    </Grid>
+                </Grid>
+            </div>
+
+            <Divider light />
         </div>
     );
 };

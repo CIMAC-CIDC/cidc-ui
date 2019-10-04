@@ -1,10 +1,17 @@
 .Header-tabs {
-    background-image: linear-gradient(to right, #fffff0, var(--cidc-blue));
+    background: linear-gradient(
+        to right,
+        #ffffff,
+        var(--cidc-blue) 300px,
+        var(--cidc-blue)
+    );
+    width: 100%;
 }
 
 .Logo {
-    height: 87px;
+    height: 68px;
     padding: 5px;
+    align-self: baseline;
 }
 
 .Header-tab-label {

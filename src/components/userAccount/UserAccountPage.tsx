@@ -1,8 +1,6 @@
 import * as React from "react";
 import {
-    Toolbar,
     Typography,
-    Paper,
     CircularProgress,
     Chip,
     Grid,
@@ -13,11 +11,7 @@ import {
 import "./UserAccount.css";
 import { getPermissions } from "../../api/api";
 import AdminMenu from "./AdminMenu";
-import {
-    LOCALE,
-    DATE_OPTIONS,
-    ORGANIZATION_NAME_MAP
-} from "../../util/constants";
+import { ORGANIZATION_NAME_MAP } from "../../util/constants";
 import Permission from "../../model/permission";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
 import { AuthContext } from "../../identity/AuthProvider";

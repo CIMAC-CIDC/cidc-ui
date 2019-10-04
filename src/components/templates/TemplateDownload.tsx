@@ -8,11 +8,13 @@ import {
     Grid,
     Card,
     CardContent,
-    Typography
+    Typography,
+    CardHeader
 } from "@material-ui/core";
 import { ITemplateCardProps } from "./TemplatesPage";
 import { onValueChange } from "./utils";
 import { InfoContext } from "../info/InfoProvider";
+import { CloudDownload } from "@material-ui/icons";
 
 // Given a template type and name, get the path to the corresponding
 // xlsx file in the static/ folder.
@@ -42,8 +44,13 @@ const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
 
     return (
         <Card className={props.cardClass}>
+            <CardHeader
+                avatar={<CloudDownload />}
+                title={
+                    <Typography variant="title">Download a template</Typography>
+                }
+            />
             <CardContent>
-                <Typography variant="title">Download a template</Typography>
                 <form method="get" action={templateURL}>
                     <Grid
                         container
