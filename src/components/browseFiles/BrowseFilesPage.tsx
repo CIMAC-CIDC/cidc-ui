@@ -96,7 +96,7 @@ class BrowseFilesPage extends React.Component<any, IBrowseFilesPageState> {
                     </div>
                 )}
                 {this.state.files && this.state.files.length > 0 && (
-                    <Grid container={true} spacing={8}>
+                    <Grid container={true} spacing={32}>
                         <Grid item={true} xs={3}>
                             <FileFilter
                                 trialIds={_.uniq(
