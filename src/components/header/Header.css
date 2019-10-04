@@ -1,10 +1,9 @@
 .Header-tabs {
-    background-color: var(--cidc-blue);
-    color: white;
+    background-image: linear-gradient(to right, #fffff0, var(--cidc-blue));
 }
 
 .Logo {
-    height: 60px;
+    height: 87px;
     padding: 5px;
 }
 

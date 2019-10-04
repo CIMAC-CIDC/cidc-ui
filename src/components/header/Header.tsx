@@ -4,7 +4,8 @@ import {
     Tab,
     Card,
     Typography,
-    Link as MuiLink
+    Link as MuiLink,
+    Divider
 } from "@material-ui/core";
 import {
     withRouter,
@@ -14,7 +15,7 @@ import {
 import "./Header.css";
 import logo from "../../logo.png";
 import {
-    AccountBox,
+    AccountCircle,
     Search,
     TableChart,
     CloudUpload
@@ -62,7 +63,11 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
     return (
         <div style={{ backgroundColor: "var(--light-grey)" }}>
             <EnvBanner />
-            <Tabs value={selectedTab} onChange={handleChange}>
+            <Tabs
+                className="Header-tabs"
+                value={selectedTab}
+                onChange={handleChange}
+            >
                 <RouterLink to="/">
                     <img src={logo} className="Logo" alt="Home" />
                 </RouterLink>
@@ -88,9 +93,10 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                     disableRipple={true}
                     value="/user-account"
                     label="Profile"
-                    icon={<AccountBox />}
+                    icon={<AccountCircle />}
                 />
             </Tabs>
+            <Divider />
         </div>
     );
 };

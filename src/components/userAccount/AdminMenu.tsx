@@ -8,7 +8,10 @@ import {
     TableRow,
     TablePagination,
     CircularProgress,
-    TextField
+    TextField,
+    Card,
+    CardHeader,
+    CardContent
 } from "@material-ui/core";
 import { getAllAccounts } from "../../api/api";
 import autobind from "autobind-decorator";
@@ -92,19 +95,16 @@ export default class AdminMenu extends React.Component<IAdminMenuProps, {}> {
         );
         return (
             <div style={{ marginTop: 20 }}>
-                <Paper className="User-account-paper">
-                    <Toolbar className="User-account-toolbar">
-                        <Typography className="User-account-toolbar-text">
-                            Admin Tasks
-                        </Typography>
-                    </Toolbar>
-                    {!accounts && (
-                        <div className="User-account-progress">
-                            <CircularProgress />
-                        </div>
-                    )}
-                    {accounts && (
-                        <div>
+                {accounts && (
+                    <Card>
+                        <CardHeader
+                            title={
+                                <Typography variant="headline">
+                                    Admin Tasks
+                                </Typography>
+                            }
+                        />
+                        <CardContent>
                             <div className="Email-search">
                                 <TextField
                                     label="Search by email"
@@ -158,9 +158,10 @@ export default class AdminMenu extends React.Component<IAdminMenuProps, {}> {
                                     this.handleChangeRowsPerPage
                                 }
                             />
-                        </div>
-                    )}
-                </Paper>
+                        </CardContent>
+                        )}
+                    </Card>
+                )}
             </div>
         );
     }
