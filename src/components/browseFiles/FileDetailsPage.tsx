@@ -5,6 +5,7 @@ import { DataFile } from "../../model/file";
 import { Typography, CircularProgress, Grid, Button } from "@material-ui/core";
 import FileDetailsTable from "./FileDetailsTable";
 import { withIdToken } from "../../identity/AuthProvider";
+import AdditionalMetadataTable from "./AdditionalMetadataTable";
 
 export interface IFileDetailsPageState {
     file: DataFile | undefined;
@@ -45,7 +46,7 @@ class FileDetailsPage extends React.Component<any, IFileDetailsPageState> {
                     </div>
                 )}
                 {this.state.file && (
-                    <Grid container={true} spacing={40}>
+                    <Grid container={true} spacing={40} direction="column">
                         <Grid item={true} xs={6}>
                             <Grid
                                 container={true}
@@ -59,7 +60,7 @@ class FileDetailsPage extends React.Component<any, IFileDetailsPageState> {
                                         variant="h5"
                                         gutterBottom={true}
                                     >
-                                        Core File Properties:
+                                        Core File Properties
                                     </Typography>
                                 </Grid>
                                 <Grid item={true}>
@@ -75,6 +76,18 @@ class FileDetailsPage extends React.Component<any, IFileDetailsPageState> {
                             </Grid>
                             <FileDetailsTable file={this.state.file} />
                         </Grid>
+                        {this.state.file.additional_metadata && (
+                            <Grid item>
+                                <Typography variant="h5" gutterBottom={true}>
+                                    Additional Metadata
+                                </Typography>
+                                <AdditionalMetadataTable
+                                    metadata={
+                                        this.state.file.additional_metadata
+                                    }
+                                />
+                            </Grid>
+                        )}
                     </Grid>
                 )}
             </div>

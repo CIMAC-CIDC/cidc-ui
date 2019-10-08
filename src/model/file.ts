@@ -10,4 +10,7 @@ export interface DataFile {
     assay_type: string;
     data_format: string;
     download_link?: string;
+    additional_metadata?: {
+        [prop: string]: any;
+    };
 }
