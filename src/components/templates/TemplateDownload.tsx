@@ -69,7 +69,10 @@ const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
                                         name: "type"
                                     }}
                                     value={templateType || ""}
-                                    onChange={onValueChange(setTemplateType)}
+                                    onChange={onValueChange(value => {
+                                        setTemplateType(value);
+                                        setTemplateName(undefined);
+                                    })}
                                 >
                                     <MenuItem value="manifests">
                                         Shipping/Receiving Manifest
@@ -109,7 +112,7 @@ const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
                                 type="submit"
                                 variant="contained"
                                 color="primary"
-                                disabled={!templateURL}
+                                disabled={!templateName}
                             >
                                 Download
                             </Button>
