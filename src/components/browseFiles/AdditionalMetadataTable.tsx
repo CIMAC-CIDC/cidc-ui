@@ -15,6 +15,7 @@ export interface IFileDetailsTableProps {
 const AdditionalMetadataTable: React.FunctionComponent<
     IFileDetailsTableProps
 > = props => {
+    // Presentational formatting
     const processKey = (key: string) => key.replace("assays.", "");
     const processValue = (value: any) => {
         if (value instanceof Array) {
@@ -22,6 +23,16 @@ const AdditionalMetadataTable: React.FunctionComponent<
         }
         return value.toString();
     };
+
+    // For checking how nested in the data model a metadata key is
+    const countDots = (s: string) => (s.match(/\./g) || []).length;
+
+    // Format the metadata
+    const rows = map(props.metadata, (value, key) => ({
+        key: processKey(key),
+        value: processValue(value)
+    })).sort((a, b) => countDots(a.key) - countDots(b.key));
+
     return (
         <div className="File-table">
             <Table>
@@ -36,13 +47,13 @@ const AdditionalMetadataTable: React.FunctionComponent<
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {map(props.metadata, (value, key) => (
+                    {rows.map(({ key, value }) => (
                         <TableRow key={key}>
                             <TableCell className="File-table-row-cell">
-                                {processKey(key)}
+                                {key}
                             </TableCell>
                             <TableCell className="File-table-row-cell">
-                                {processValue(value)}
+                                {value}
                             </TableCell>
                         </TableRow>
                     ))}

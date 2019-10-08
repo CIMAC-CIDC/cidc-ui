@@ -46,8 +46,8 @@ class FileDetailsPage extends React.Component<any, IFileDetailsPageState> {
                     </div>
                 )}
                 {this.state.file && (
-                    <Grid container={true} spacing={40} direction="column">
-                        <Grid item={true} xs={6}>
+                    <Grid container spacing={40} direction="row">
+                        <Grid item>
                             <Grid
                                 container={true}
                                 alignItems="flex-start"
