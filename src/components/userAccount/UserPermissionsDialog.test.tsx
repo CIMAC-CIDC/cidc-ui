@@ -3,7 +3,7 @@ import { render, fireEvent, waitForElement } from "@testing-library/react";
 import {
     grantPermission,
     revokePermission,
-    getPermissions,
+    getPermissionsForUser,
     getTrials
 } from "../../api/api";
 import { Account } from "../../model/account";
@@ -24,13 +24,11 @@ const WES_PERMISSION = {
 };
 const PERMISSIONS = [
     WES_PERMISSION,
-    { to_user: USER.id, trial: TRIAL.trial_id, assay_type: "olink" },
-    // Another user's permission - should be filtered
-    { to_user: USER.id + 1, trial: TRIAL.trial_id, assay_type: "cytof" }
+    { to_user: USER.id, trial: TRIAL.trial_id, assay_type: "olink" }
 ];
 
 getTrials.mockResolvedValue(TRIALS);
-getPermissions.mockResolvedValue(PERMISSIONS);
+getPermissionsForUser.mockResolvedValue(PERMISSIONS);
 
 function doRender() {
     const infoContext = {
@@ -65,10 +63,7 @@ it("renders existing permissions", async () => {
         const testId = `checkbox-${perm.trial}-${perm.assay_type}`;
         const checkbox = await waitForElement(() => getByTestId(testId));
         expect(checkbox).toBeInTheDocument();
-        // Only `USER`s permissions should render as checked
-        expect(getNativeCheckbox(checkbox).checked).toBe(
-            perm.to_user === USER.id
-        );
+        expect(getNativeCheckbox(checkbox).checked).toBe(true);
     }
 });
 

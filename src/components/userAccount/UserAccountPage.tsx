@@ -10,7 +10,7 @@ import {
     Link
 } from "@material-ui/core";
 import "./UserAccount.css";
-import { getPermissions } from "../../api/api";
+import { getPermissionsForUser } from "../../api/api";
 import AdminMenu from "./AdminMenu";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
 import Permission from "../../model/permission";
@@ -29,7 +29,7 @@ export default function UserAccountPage() {
 
     React.useEffect(() => {
         if (authData && authData.idToken) {
-            getPermissions(authData.idToken, userAccount.id).then(
+            getPermissionsForUser(authData.idToken, userAccount.id).then(
                 setPermissions
             );
         }

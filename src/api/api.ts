@@ -167,7 +167,7 @@ function getUserEtag(token: string, userID: number): Promise<string> {
     return _getEtag<Account>(token, "users", userID);
 }
 
-function getPermissions(
+function getPermissionsForUser(
     token: string,
     userID: number
 ): Promise<Permission[] | undefined> {
@@ -244,7 +244,7 @@ export {
     getUserEtag,
     uploadManifest,
     getManifestValidationErrors,
-    getPermissions,
+    getPermissionsForUser,
     grantPermission,
     revokePermission,
     getSupportedAssays,

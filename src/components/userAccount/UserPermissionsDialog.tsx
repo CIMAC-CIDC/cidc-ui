@@ -18,7 +18,7 @@ import mapValues from "lodash/mapValues";
 import autobind from "autobind-decorator";
 import {
     getTrials,
-    getPermissions,
+    getPermissionsForUser,
     grantPermission,
     revokePermission
 } from "../../api/api";
@@ -86,15 +86,11 @@ class UserPermissionsDialog extends React.Component<
 
     @autobind
     refreshPermissions() {
-        getPermissions(this.props.token, this.props.user.id).then(
+        getPermissionsForUser(this.props.token, this.props.user.id).then(
             permissions => {
                 if (permissions) {
                     this.setState({
-                        // This filtering *should* be performed by `getPermissions`,
-                        // but let's be redundant for good measure.
-                        permissions: permissions.filter(
-                            p => p.to_user === this.props.user.id
-                        )
+                        permissions
                     });
                 }
             }
