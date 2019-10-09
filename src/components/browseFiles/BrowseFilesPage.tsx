@@ -10,24 +10,20 @@ import FileTable from "./FileTable";
 import { getFiles } from "../../api/api";
 import Loader from "../generic/Loader";
 import { withIdToken } from "../../identity/AuthProvider";
+import { RouteComponentProps } from "react-router";
 
 export interface IBrowseFilesPageState {
     files: DataFile[] | undefined;
     trials: string[] | undefined;
-    selectedTrialIds: string[];
-    selectedExperimentalStrategies: string[];
-    selectedDataFormats: string[];
-    searchFilter: string;
 }
 
-class BrowseFilesPage extends React.Component<any, IBrowseFilesPageState> {
+class BrowseFilesPage extends React.Component<
+    RouteComponentProps & { token: string },
+    IBrowseFilesPageState
+> {
     state: IBrowseFilesPageState = {
         files: undefined,
-        trials: undefined,
-        searchFilter: "",
-        selectedDataFormats: [],
-        selectedExperimentalStrategies: [],
-        selectedTrialIds: []
+        trials: undefined
     };
 
     componentDidMount() {
@@ -51,29 +47,24 @@ class BrowseFilesPage extends React.Component<any, IBrowseFilesPageState> {
     }
 
     @autobind
-    private handleTrialIdChange(trialId: string) {
-        this.setState({
-            selectedTrialIds: changeOption(this.state.selectedTrialIds, trialId)
-        });
-    }
+    private handleArrayParamChange(
+        param: "protocol_id" | "type" | "data_format",
+        value: string
+    ) {
+        const params = new URLSearchParams(this.props.location.search);
+        const valuesStr = params.get(param);
 
-    @autobind
-    private handleExperimentalStrategyChange(experimentalStrategy: string) {
-        this.setState({
-            selectedExperimentalStrategies: changeOption(
-                this.state.selectedExperimentalStrategies,
-                experimentalStrategy
-            )
-        });
-    }
+        if (valuesStr !== null) {
+            const values: string[] = JSON.parse(valuesStr);
+            const newValues = changeOption(values, value);
+            params.set(param, JSON.stringify(newValues));
+        } else {
+            params.set(param, JSON.stringify([value]));
+        }
 
-    @autobind
-    private handleDataFormatChange(dataFormat: string) {
-        this.setState({
-            selectedDataFormats: changeOption(
-                this.state.selectedDataFormats,
-                dataFormat
-            )
+        this.props.history.push({
+            ...this.props.location,
+            search: params.toString()
         });
     }
 
@@ -81,10 +72,23 @@ class BrowseFilesPage extends React.Component<any, IBrowseFilesPageState> {
     private handleSearchFilterChange(
         event: React.ChangeEvent<HTMLInputElement>
     ) {
-        this.setState({ searchFilter: event.target.value });
+        const params = new URLSearchParams(this.props.location.search);
+        params.set("search", event.target.value);
+        this.props.history.push({
+            ...this.props.location,
+            search: params.toString()
+        });
     }
 
     public render() {
+        const params = new URLSearchParams(this.props.location.search);
+        const searchFilter = params.get("search") || "";
+        const selectedTrialIds = JSON.parse(params.get("protocol_id") || "[]");
+        const selectedDataFormats = JSON.parse(
+            params.get("data_format") || "[]"
+        );
+        const selectedTypes = JSON.parse(params.get("type") || "[]");
+
         return (
             <div className="Browse-files-page">
                 {!this.state.files && <Loader />}
@@ -99,20 +103,39 @@ class BrowseFilesPage extends React.Component<any, IBrowseFilesPageState> {
                     <Grid container={true} spacing={3}>
                         <Grid item={true} xs={3}>
                             <FileFilter
-                                trialIds={_.uniq(
-                                    _.map(this.state.files, "trial")
-                                )}
-                                experimentalStrategies={_.uniq(
-                                    _.map(this.state.files, "assay_type")
-                                )}
-                                dataFormats={_.uniq(
-                                    _.map(this.state.files, "data_format")
-                                )}
-                                onTrialIdChange={this.handleTrialIdChange}
-                                onExperimentalStrategyChange={
-                                    this.handleExperimentalStrategyChange
+                                trialIds={{
+                                    options: _.uniq(
+                                        _.map(this.state.files, "trial")
+                                    ),
+                                    checked: selectedTrialIds
+                                }}
+                                experimentalStrategies={{
+                                    options: _.uniq(
+                                        _.map(this.state.files, "assay_type")
+                                    ),
+                                    checked: selectedTypes
+                                }}
+                                dataFormats={{
+                                    options: _.uniq(
+                                        _.map(this.state.files, "data_format")
+                                    ),
+                                    checked: selectedDataFormats
+                                }}
+                                onTrialIdChange={tid =>
+                                    this.handleArrayParamChange(
+                                        "protocol_id",
+                                        tid
+                                    )
                                 }
-                                onDataFormatChange={this.handleDataFormatChange}
+                                onExperimentalStrategyChange={typ =>
+                                    this.handleArrayParamChange("type", typ)
+                                }
+                                onDataFormatChange={dataFormat =>
+                                    this.handleArrayParamChange(
+                                        "data_format",
+                                        dataFormat
+                                    )
+                                }
                             />
                         </Grid>
                         <Grid item={true} xs={9}>
@@ -122,7 +145,7 @@ class BrowseFilesPage extends React.Component<any, IBrowseFilesPageState> {
                                     type="search"
                                     margin="normal"
                                     variant="outlined"
-                                    value={this.state.searchFilter}
+                                    value={searchFilter}
                                     className="File-search"
                                     InputProps={{
                                         className: "File-search-input"
@@ -137,10 +160,10 @@ class BrowseFilesPage extends React.Component<any, IBrowseFilesPageState> {
                                 history={this.props.history}
                                 files={filterFiles(
                                     this.state.files,
-                                    this.state.selectedTrialIds,
-                                    this.state.selectedExperimentalStrategies,
-                                    this.state.selectedDataFormats,
-                                    this.state.searchFilter
+                                    selectedTrialIds,
+                                    selectedTypes,
+                                    selectedDataFormats,
+                                    searchFilter
                                 )}
                                 trials={this.state.trials!}
                             />

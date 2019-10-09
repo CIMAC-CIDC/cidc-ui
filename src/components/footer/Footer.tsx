@@ -37,6 +37,14 @@ export default class Footer extends React.Component<{}, {}> {
                                 </MuiLink>
                             </RouterLink>
                         </div>
+                        <div>
+                            <MuiLink
+                                underline="none"
+                                href="https://github.com/cimac-cidc"
+                            >
+                                GitHub
+                            </MuiLink>
+                        </div>
                     </div>
                 </div>
             </div>

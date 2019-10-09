@@ -1,11 +1,13 @@
 import { Grid } from "@material-ui/core";
 import * as React from "react";
-import FileFilterCheckboxGroup from "./FileFilterCheckboxGroup";
+import FileFilterCheckboxGroup, {
+    IFilterConfig
+} from "./FileFilterCheckboxGroup";
 
 export interface IFileFilterProps {
-    trialIds: string[];
-    experimentalStrategies: string[];
-    dataFormats: string[];
+    trialIds: IFilterConfig;
+    experimentalStrategies: IFilterConfig;
+    dataFormats: IFilterConfig;
     onTrialIdChange: (trialId: string) => void;
     onExperimentalStrategyChange: (experimentalStrategy: string) => void;
     onDataFormatChange: (dataFormat: string) => void;
@@ -19,21 +21,21 @@ export default class FileFilter extends React.Component<IFileFilterProps, {}> {
                     <Grid item={true} xs={12}>
                         <FileFilterCheckboxGroup
                             title="Protocol Identifier"
-                            options={this.props.trialIds}
+                            config={this.props.trialIds}
                             onChange={this.props.onTrialIdChange}
                         />
                     </Grid>
                     <Grid item={true} xs={12}>
                         <FileFilterCheckboxGroup
                             title="Type"
-                            options={this.props.experimentalStrategies}
+                            config={this.props.experimentalStrategies}
                             onChange={this.props.onExperimentalStrategyChange}
                         />
                     </Grid>
                     <Grid item={true} xs={12}>
                         <FileFilterCheckboxGroup
                             title="Format"
-                            options={this.props.dataFormats}
+                            config={this.props.dataFormats}
                             onChange={this.props.onDataFormatChange}
                         />
                     </Grid>
