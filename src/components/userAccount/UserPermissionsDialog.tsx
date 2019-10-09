@@ -88,11 +88,7 @@ class UserPermissionsDialog extends React.Component<
     refreshPermissions() {
         getPermissionsForUser(this.props.token, this.props.user.id).then(
             permissions => {
-                if (permissions) {
-                    this.setState({
-                        permissions
-                    });
-                }
+                this.setState({ permissions });
             }
         );
     }
