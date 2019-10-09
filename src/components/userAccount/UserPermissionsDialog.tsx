@@ -86,15 +86,19 @@ class UserPermissionsDialog extends React.Component<
 
     @autobind
     refreshPermissions() {
-        getPermissions(this.props.token).then(permissions => {
-            if (permissions) {
-                this.setState({
-                    permissions: permissions.filter(
-                        p => p.to_user === this.props.user.id
-                    )
-                });
+        getPermissions(this.props.token, this.props.user.id).then(
+            permissions => {
+                if (permissions) {
+                    this.setState({
+                        // This filtering *should* be performed by `getPermissions`,
+                        // but let's be redundant for good measure.
+                        permissions: permissions.filter(
+                            p => p.to_user === this.props.user.id
+                        )
+                    });
+                }
             }
-        });
+        );
     }
 
     @autobind

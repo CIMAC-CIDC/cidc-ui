@@ -29,9 +29,11 @@ export default function UserAccountPage() {
 
     React.useEffect(() => {
         if (authData && authData.idToken) {
-            getPermissions(authData.idToken).then(setPermissions);
+            getPermissions(authData.idToken, userAccount.id).then(
+                setPermissions
+            );
         }
-    }, [authData]);
+    }, [authData, userAccount.id]);
 
     const isAdmin = userAccount && userAccount.role === "cidc-admin";
     const hasPerms = permissions && permissions.length > 0;

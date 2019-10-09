@@ -167,8 +167,15 @@ function getUserEtag(token: string, userID: number): Promise<string> {
     return _getEtag<Account>(token, "users", userID);
 }
 
-function getPermissions(token: string): Promise<Permission[] | undefined> {
-    return _getItems<Permission>(token, "permissions");
+function getPermissions(
+    token: string,
+    userID: number
+): Promise<Permission[] | undefined> {
+    return getApiClient(token)
+        .get("permissions", {
+            params: { where: { to_user: userID } }
+        })
+        .then(_extractItems);
 }
 
 function grantPermission(
