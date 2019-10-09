@@ -74,9 +74,6 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
         }
     }, [file, manifestType, authData]);
 
-    // The file is valid if it has been validated and there are no errors
-    const fileValid = errors instanceof Array && errors.length === 0;
-
     const onSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (manifestType && file) {
@@ -229,7 +226,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
                                 type="submit"
                                 variant="contained"
                                 color="primary"
-                                disabled={!fileValid || status === "loading"}
+                                disabled={status !== "validationSuccess"}
                                 data-testid="submit-button"
                             >
                                 Upload

@@ -131,4 +131,5 @@ test("manifest submission", async () => {
     expect(queryByTestId("uploadSuccess")).not.toBeInTheDocument();
     const result = await waitForElement(() => getByTestId("uploadSuccess"));
     expect(result).toBeInTheDocument();
+    expect(submitButton).toHaveAttribute("disabled");
 });
