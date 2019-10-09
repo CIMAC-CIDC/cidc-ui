@@ -48,19 +48,13 @@ class BrowseFilesPage extends React.Component<
 
     @autobind
     private handleArrayParamChange(
+        params: URLSearchParams,
+        values: string[],
         param: "protocol_id" | "type" | "data_format",
         value: string
     ) {
-        const params = new URLSearchParams(this.props.location.search);
-        const valuesStr = params.get(param);
-
-        if (valuesStr !== null) {
-            const values: string[] = JSON.parse(valuesStr);
-            const newValues = changeOption(values, value);
-            params.set(param, JSON.stringify(newValues));
-        } else {
-            params.set(param, JSON.stringify([value]));
-        }
+        const newValues = changeOption(values, value);
+        params.set(param, JSON.stringify(newValues));
 
         this.props.history.push({
             ...this.props.location,
@@ -70,9 +64,9 @@ class BrowseFilesPage extends React.Component<
 
     @autobind
     private handleSearchFilterChange(
-        event: React.ChangeEvent<HTMLInputElement>
+        event: React.ChangeEvent<HTMLInputElement>,
+        params: URLSearchParams
     ) {
-        const params = new URLSearchParams(this.props.location.search);
         params.set("search", event.target.value);
         this.props.history.push({
             ...this.props.location,
@@ -81,6 +75,7 @@ class BrowseFilesPage extends React.Component<
     }
 
     public render() {
+        // Extract current filter parameters from the URL
         const params = new URLSearchParams(this.props.location.search);
         const searchFilter = params.get("search") || "";
         const selectedTrialIds = JSON.parse(params.get("protocol_id") || "[]");
@@ -123,15 +118,24 @@ class BrowseFilesPage extends React.Component<
                                 }}
                                 onTrialIdChange={tid =>
                                     this.handleArrayParamChange(
+                                        params,
+                                        selectedTrialIds,
                                         "protocol_id",
                                         tid
                                     )
                                 }
                                 onExperimentalStrategyChange={typ =>
-                                    this.handleArrayParamChange("type", typ)
+                                    this.handleArrayParamChange(
+                                        params,
+                                        selectedTypes,
+                                        "type",
+                                        typ
+                                    )
                                 }
                                 onDataFormatChange={dataFormat =>
                                     this.handleArrayParamChange(
+                                        params,
+                                        selectedDataFormats,
                                         "data_format",
                                         dataFormat
                                     )
@@ -153,7 +157,11 @@ class BrowseFilesPage extends React.Component<
                                     InputLabelProps={{
                                         className: "File-search-label"
                                     }}
-                                    onChange={this.handleSearchFilterChange}
+                                    onChange={(
+                                        e: React.ChangeEvent<HTMLInputElement>
+                                    ) =>
+                                        this.handleSearchFilterChange(e, params)
+                                    }
                                 />
                             </div>
                             <FileTable
