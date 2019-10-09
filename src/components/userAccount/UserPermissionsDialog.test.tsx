@@ -24,7 +24,9 @@ const WES_PERMISSION = {
 };
 const PERMISSIONS = [
     WES_PERMISSION,
-    { to_user: USER.id, trial: "test-1", assay_type: "olink" }
+    { to_user: USER.id, trial: TRIAL.trial_id, assay_type: "olink" },
+    // Another user's permission - should be filtered
+    { to_user: USER.id + 1, trial: TRIAL.trial_id, assay_type: "cytof" }
 ];
 
 getTrials.mockResolvedValue(TRIALS);
@@ -63,7 +65,10 @@ it("renders existing permissions", async () => {
         const testId = `checkbox-${perm.trial}-${perm.assay_type}`;
         const checkbox = await waitForElement(() => getByTestId(testId));
         expect(checkbox).toBeInTheDocument();
-        expect(getNativeCheckbox(checkbox).checked).toBe(true);
+        // Only `USER`s permissions should render as checked
+        expect(getNativeCheckbox(checkbox).checked).toBe(
+            perm.to_user === USER.id
+        );
     }
 });
 
