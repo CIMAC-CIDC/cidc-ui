@@ -63,7 +63,10 @@ it("renders existing permissions", async () => {
         const testId = `checkbox-${perm.trial}-${perm.assay_type}`;
         const checkbox = await waitForElement(() => getByTestId(testId));
         expect(checkbox).toBeInTheDocument();
-        expect(getNativeCheckbox(checkbox).checked).toBe(true);
+        // Only `USER`s permissions should render as checked
+        expect(getNativeCheckbox(checkbox).checked).toBe(
+            perm.to_user === USER.id
+        );
     }
 });
 
