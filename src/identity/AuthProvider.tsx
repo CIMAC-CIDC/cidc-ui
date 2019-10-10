@@ -170,7 +170,10 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
                         authResult.accessToken &&
                         authResult.idToken
                     ) {
-                        sessionSetter(authResult, props.location.pathname);
+                        sessionSetter(
+                            authResult,
+                            props.location.pathname + props.location.search
+                        );
                     } else {
                         if (err) {
                             console.error(err);
