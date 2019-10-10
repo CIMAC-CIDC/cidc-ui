@@ -11,7 +11,8 @@ import {
     TablePagination,
     TableHead,
     FormControl,
-    Checkbox
+    Checkbox,
+    Grid
 } from "@material-ui/core";
 import groupBy from "lodash/groupBy";
 import mapValues from "lodash/mapValues";
@@ -26,6 +27,7 @@ import { Trial } from "../../model/trial";
 import { Account } from "../../model/account";
 import Permission from "../../model/permission";
 import { InfoContext } from "../info/InfoProvider";
+import Loader from "../generic/Loader";
 
 export interface IUserPermissionsDialogProps {
     open: boolean;
@@ -39,6 +41,7 @@ export interface IUserPermissionsDialogState {
     permissions?: Permission[];
     page: number;
     rowsPerPage: number;
+    isRefreshing: boolean;
 }
 
 const UserPermissionsDialogWithInfo: React.FunctionComponent<
@@ -65,7 +68,8 @@ class UserPermissionsDialog extends React.Component<
         trials: undefined,
         permissions: undefined,
         page: 0,
-        rowsPerPage: 10
+        rowsPerPage: 10,
+        isRefreshing: false
     };
 
     @autobind
@@ -86,9 +90,10 @@ class UserPermissionsDialog extends React.Component<
 
     @autobind
     refreshPermissions() {
+        this.setState({ isRefreshing: true });
         getPermissionsForUser(this.props.token, this.props.user.id).then(
             permissions => {
-                this.setState({ permissions });
+                this.setState({ permissions, isRefreshing: false });
             }
         );
     }
@@ -112,7 +117,7 @@ class UserPermissionsDialog extends React.Component<
                     this.props.user,
                     trial,
                     assay
-                );
+                ).then(() => this.refreshPermissions());
             } else if (!checked && deleteId) {
                 // Delete from local state
                 this.setState(({ permissions }) => ({
@@ -124,7 +129,9 @@ class UserPermissionsDialog extends React.Component<
                 }));
 
                 // Delete from API
-                revokePermission(this.props.token, deleteId);
+                revokePermission(this.props.token, deleteId).then(() =>
+                    this.refreshPermissions()
+                );
             }
         };
     }
@@ -168,7 +175,17 @@ class UserPermissionsDialog extends React.Component<
             <>
                 <Dialog open={this.props.open} onClose={this.handleCancel}>
                     <DialogTitle>
-                        Editing data access for <strong>{userName}</strong>
+                        <Grid container direction="row" justify="space-between">
+                            <Grid item>
+                                Editing data access for{" "}
+                                <strong>{userName}</strong>
+                            </Grid>
+                            <Grid item>
+                                {this.state.isRefreshing && (
+                                    <Loader size={25} />
+                                )}
+                            </Grid>
+                        </Grid>
                     </DialogTitle>
                     {!this.state.trials && (
                         <div className="User-account-progress">
@@ -226,6 +243,18 @@ class UserPermissionsDialog extends React.Component<
                                                                         trial.trial_id,
                                                                         typ
                                                                     )}
+                                                                    shouldRefresh={() =>
+                                                                        this.setState(
+                                                                            {
+                                                                                isRefreshing: true
+                                                                            }
+                                                                        )
+                                                                    }
+                                                                    isRefreshing={
+                                                                        this
+                                                                            .state
+                                                                            .isRefreshing
+                                                                    }
                                                                 />
                                                             );
                                                         }
@@ -264,7 +293,16 @@ const AssayCheckbox: React.FunctionComponent<{
         e: React.ChangeEvent<HTMLInputElement>,
         deleteId?: number
     ) => void;
-}> = ({ trialID, assayType, permissionsMap, onChange }) => {
+    shouldRefresh: () => void;
+    isRefreshing: boolean;
+}> = ({
+    trialID,
+    assayType,
+    permissionsMap,
+    onChange,
+    isRefreshing,
+    shouldRefresh
+}) => {
     const isChecked =
         trialID in permissionsMap && assayType in permissionsMap[trialID];
 
@@ -278,7 +316,11 @@ const AssayCheckbox: React.FunctionComponent<{
                 <Checkbox
                     data-testid={`checkbox-${trialID}-${assayType}`}
                     checked={isChecked}
-                    onChange={e => onChange(e, deleteId)}
+                    onChange={e => {
+                        shouldRefresh();
+                        onChange(e, deleteId);
+                    }}
+                    disabled={isRefreshing}
                 />
             </FormControl>
         </TableCell>
