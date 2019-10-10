@@ -50,12 +50,18 @@ class BrowseFilesPage extends React.Component<
     private handleArrayParamChange(
         params: URLSearchParams,
         values: string[],
-        param: "protocol_id" | "type" | "data_format",
+        paramKey: "protocol_id" | "type" | "data_format",
         value: string
     ) {
         const newValues = changeOption(values, value);
-        params.set(param, JSON.stringify(newValues));
 
+        // Clear all old values for this param then set new values
+        params.delete(paramKey);
+        for (const val of newValues) {
+            params.append(paramKey, val);
+        }
+
+        // Apply search string updates to the current location
         this.props.history.push({
             ...this.props.location,
             search: params.toString()
@@ -78,11 +84,9 @@ class BrowseFilesPage extends React.Component<
         // Extract current filter parameters from the URL
         const params = new URLSearchParams(this.props.location.search);
         const searchFilter = params.get("search") || "";
-        const selectedTrialIds = JSON.parse(params.get("protocol_id") || "[]");
-        const selectedDataFormats = JSON.parse(
-            params.get("data_format") || "[]"
-        );
-        const selectedTypes = JSON.parse(params.get("type") || "[]");
+        const selectedTrialIds = params.getAll("protocol_id");
+        const selectedDataFormats = params.getAll("data_format");
+        const selectedTypes = params.getAll("type");
 
         return (
             <div className="Browse-files-page">
