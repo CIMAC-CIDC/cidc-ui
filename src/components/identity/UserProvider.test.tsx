@@ -1,11 +1,11 @@
 import * as React from "react";
-import { getAccountInfo } from "../api/api";
+import { getAccountInfo } from "../../api/api";
 import { render, waitForElement } from "@testing-library/react";
 import history from "./History";
 import { AuthContext } from "./AuthProvider";
 import UserProvider from "./UserProvider";
 import { Router } from "react-router";
-jest.mock("../api/api");
+jest.mock("../../api/api");
 
 const ChildComponent = () => <div data-testid="children" />;
 
