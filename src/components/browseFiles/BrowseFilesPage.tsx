@@ -9,7 +9,7 @@ import FileFilter from "./FileFilter";
 import FileTable from "./FileTable";
 import { getFiles } from "../../api/api";
 import Loader from "../generic/Loader";
-import { withIdToken } from "../../identity/AuthProvider";
+import { withIdToken } from "../identity/AuthProvider";
 import { RouteComponentProps } from "react-router";
 
 export interface IBrowseFilesPageState {

@@ -15,8 +15,8 @@ import AdminMenu from "./AdminMenu";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
 import Permission from "../../model/permission";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
-import { AuthContext } from "../../identity/AuthProvider";
-import { useUserContext } from "../../identity/UserProvider";
+import { AuthContext } from "../identity/AuthProvider";
+import { useUserContext } from "../identity/UserProvider";
 import { AccountCircle, FolderShared } from "@material-ui/icons";
 
 export default function UserAccountPage() {
@@ -75,9 +75,7 @@ export default function UserAccountPage() {
                                             color="textSecondary"
                                             paragraph
                                         >
-                                            {`${userAccount.first_n} ${
-                                                userAccount.last_n
-                                            }`}
+                                            {`${userAccount.first_n} ${userAccount.last_n}`}
                                         </Typography>
                                     </Grid>
                                     <Grid item>
@@ -153,11 +151,7 @@ export default function UserAccountPage() {
                                                         }
                                                     >
                                                         <Chip
-                                                            label={`${
-                                                                perm.trial
-                                                            }: ${
-                                                                perm.assay_type
-                                                            }`}
+                                                            label={`${perm.trial}: ${perm.assay_type}`}
                                                         />
                                                     </Grid>
                                                 );

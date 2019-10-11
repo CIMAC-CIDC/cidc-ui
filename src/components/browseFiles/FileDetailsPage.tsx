@@ -4,7 +4,7 @@ import { getSingleFile } from "../../api/api";
 import { DataFile } from "../../model/file";
 import { Typography, CircularProgress, Grid, Button } from "@material-ui/core";
 import FileDetailsTable from "./FileDetailsTable";
-import { withIdToken } from "../../identity/AuthProvider";
+import { withIdToken } from "../identity/AuthProvider";
 import AdditionalMetadataTable from "./AdditionalMetadataTable";
 
 export interface IFileDetailsPageState {

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
 import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
-import { withIdToken } from "../../identity/AuthProvider";
+import { withIdToken } from "../identity/AuthProvider";
 
 export interface IAssayInstructionsProps
     extends RouteComponentProps<{ assay: string }> {
@@ -11,9 +11,7 @@ export interface IAssayInstructionsProps
 const AssayInstructions: React.FunctionComponent<
     IAssayInstructionsProps
 > = props => {
-    const path = `cidc-documentation/master/assays/${
-        props.match.params.assay
-    }.md`;
+    const path = `cidc-documentation/master/assays/${props.match.params.assay}.md`;
     const token = props.token;
 
     return <CIDCGithubMarkdown path={path} authToken={token} />;

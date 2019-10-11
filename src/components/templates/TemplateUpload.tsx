@@ -27,7 +27,7 @@ import {
 } from "@material-ui/icons";
 import { XLSX_MIMETYPE } from "../../util/constants";
 import Loader from "../generic/Loader";
-import { AuthContext } from "../../identity/AuthProvider";
+import { AuthContext } from "../identity/AuthProvider";
 import { InfoContext } from "../info/InfoProvider";
 
 type Status =

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { render } from "@testing-library/react";
 import ErrorGuard, { ErrorContext } from "./ErrorGuard";
-import history from "../../identity/History";
+import history from "../identity/History";
 
 it("renders a component that doesn't error", () => {
     const HappyComponent = () => <div data-testid="happy" />;

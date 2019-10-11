@@ -10,7 +10,7 @@ import {
 import "./TransferData.css";
 import CopyToClipboard from "react-copy-to-clipboard";
 import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
-import { withIdToken } from "../../identity/AuthProvider";
+import { withIdToken } from "../identity/AuthProvider";
 
 class CliInstructions extends React.Component<any> {
     public render() {

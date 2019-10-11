@@ -8,7 +8,7 @@ import {
 import TemplateUpload from "./TemplateUpload";
 import { XLSX_MIMETYPE } from "../../util/constants";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
-import { AuthContext } from "../../identity/AuthProvider";
+import { AuthContext } from "../identity/AuthProvider";
 import { InfoContext } from "../info/InfoProvider";
 jest.mock("../../api/api");
 

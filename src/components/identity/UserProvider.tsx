@@ -1,10 +1,10 @@
 import * as React from "react";
 import { AuthContext, AuthLoader } from "./AuthProvider";
-import { Account } from "../model/account";
+import { Account } from "../../model/account";
 import { RouteComponentProps, withRouter } from "react-router";
-import { getAccountInfo } from "../api/api";
+import { getAccountInfo } from "../../api/api";
 import history from "./History";
-import { ErrorContext } from "../components/errors/ErrorGuard";
+import { ErrorContext } from "../errors/ErrorGuard";
 
 export const UserContext = React.createContext<Account | undefined>(undefined);
 

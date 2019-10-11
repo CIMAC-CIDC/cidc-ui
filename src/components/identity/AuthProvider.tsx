@@ -1,14 +1,14 @@
 import * as React from "react";
-import { UnregisteredAccount } from "../model/account";
+import { UnregisteredAccount } from "../../model/account";
 import auth0 from "auth0-js";
 import history from "./History";
 import nanoid from "nanoid";
 import { RouteComponentProps, withRouter } from "react-router";
 import { Location } from "history";
 import IdleTimer from "react-idle-timer";
-import Loader from "../components/generic/Loader";
+import Loader from "../generic/Loader";
 import { Grid } from "@material-ui/core";
-import { IError, ErrorContext } from "../components/errors/ErrorGuard";
+import { IError, ErrorContext } from "../errors/ErrorGuard";
 
 const CLIENT_ID: string = process.env.REACT_APP_AUTH0_CLIENT_ID!;
 const DOMAIN: string = process.env.REACT_APP_AUTH0_DOMAIN!;
