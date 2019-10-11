@@ -1,51 +1,20 @@
-import { Grid, TextField, Typography } from "@material-ui/core";
+import { Grid, TextField, Typography, Button } from "@material-ui/core";
 import autobind from "autobind-decorator";
 import _ from "lodash";
 import * as React from "react";
-import { DataFile } from "../../model/file";
 import "./BrowseFiles.css";
 import { changeOption, filterFiles } from "./browseFilesUtil";
 import FileFilter from "./FileFilter";
 import FileTable from "./FileTable";
-import { getFiles } from "../../api/api";
-import Loader from "../generic/Loader";
 import { withIdToken } from "../identity/AuthProvider";
 import { RouteComponentProps } from "react-router";
-
-export interface IBrowseFilesPageState {
-    files: DataFile[] | undefined;
-    trials: string[] | undefined;
-}
+import { withData, IDataContext } from "../data/DataProvider";
+import { Refresh } from "@material-ui/icons";
+import Loader from "../generic/Loader";
 
 class BrowseFilesPage extends React.Component<
-    RouteComponentProps & { token: string },
-    IBrowseFilesPageState
+    RouteComponentProps & { token: string } & IDataContext
 > {
-    state: IBrowseFilesPageState = {
-        files: undefined,
-        trials: undefined
-    };
-
-    componentDidMount() {
-        if (this.props.token) {
-            this.getFiles();
-        }
-    }
-
-    componentDidUpdate(prevProps: any) {
-        if (this.props.token !== prevProps.token) {
-            this.getFiles();
-        }
-    }
-
-    @autobind
-    private getFiles() {
-        getFiles(this.props.token).then(files => {
-            const trials = _.uniq(files.map(file => file.trial));
-            this.setState({ files, trials });
-        });
-    }
-
     @autobind
     private handleArrayParamChange(
         params: URLSearchParams,
@@ -90,33 +59,32 @@ class BrowseFilesPage extends React.Component<
 
         return (
             <div className="Browse-files-page">
-                {!this.state.files && <Loader />}
-                {this.state.files && this.state.files.length === 0 && (
+                {this.props.files.length === 0 && (
                     <div className="Browse-files-progress">
                         <Typography style={{ fontSize: 18 }}>
-                            No files found
+                            No files found.
                         </Typography>
                     </div>
                 )}
-                {this.state.files && this.state.files.length > 0 && (
+                {this.props.files.length > 0 && (
                     <Grid container={true} spacing={3}>
                         <Grid item={true} xs={3}>
                             <FileFilter
                                 trialIds={{
                                     options: _.uniq(
-                                        _.map(this.state.files, "trial")
+                                        _.map(this.props.files, "trial")
                                     ),
                                     checked: selectedTrialIds
                                 }}
                                 experimentalStrategies={{
                                     options: _.uniq(
-                                        _.map(this.state.files, "assay_type")
+                                        _.map(this.props.files, "assay_type")
                                     ),
                                     checked: selectedTypes
                                 }}
                                 dataFormats={{
                                     options: _.uniq(
-                                        _.map(this.state.files, "data_format")
+                                        _.map(this.props.files, "data_format")
                                     ),
                                     checked: selectedDataFormats
                                 }}
@@ -147,38 +115,72 @@ class BrowseFilesPage extends React.Component<
                             />
                         </Grid>
                         <Grid item={true} xs={9}>
-                            <div className="File-search-border">
-                                <TextField
-                                    label="Search"
-                                    type="search"
-                                    margin="normal"
-                                    variant="outlined"
-                                    value={searchFilter}
-                                    className="File-search"
-                                    InputProps={{
-                                        className: "File-search-input"
-                                    }}
-                                    InputLabelProps={{
-                                        className: "File-search-label"
-                                    }}
-                                    onChange={(
-                                        e: React.ChangeEvent<HTMLInputElement>
-                                    ) =>
-                                        this.handleSearchFilterChange(e, params)
-                                    }
+                            <Grid
+                                container
+                                direction="row"
+                                justify="space-between"
+                            >
+                                <Grid item>
+                                    <div className="File-search-border">
+                                        <TextField
+                                            label="Search"
+                                            type="search"
+                                            margin="normal"
+                                            variant="outlined"
+                                            value={searchFilter}
+                                            className="File-search"
+                                            InputProps={{
+                                                className: "File-search-input"
+                                            }}
+                                            InputLabelProps={{
+                                                className: "File-search-label"
+                                            }}
+                                            onChange={(
+                                                e: React.ChangeEvent<
+                                                    HTMLInputElement
+                                                >
+                                            ) =>
+                                                this.handleSearchFilterChange(
+                                                    e,
+                                                    params
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                </Grid>
+                                <Grid item>
+                                    <Button
+                                        endIcon={<Refresh />}
+                                        disabled={
+                                            this.props.dataStatus === "fetching"
+                                        }
+                                        onClick={() => this.props.refreshData()}
+                                    >
+                                        Refresh
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                            {this.props.dataStatus === "fetching" && <Loader />}
+                            {this.props.dataStatus === "fetched" && (
+                                <FileTable
+                                    history={this.props.history}
+                                    files={filterFiles(
+                                        this.props.files,
+                                        selectedTrialIds,
+                                        selectedTypes,
+                                        selectedDataFormats,
+                                        searchFilter
+                                    )}
+                                    trials={this.props.trials.map(
+                                        trial => trial.trial_id
+                                    )}
                                 />
-                            </div>
-                            <FileTable
-                                history={this.props.history}
-                                files={filterFiles(
-                                    this.state.files,
-                                    selectedTrialIds,
-                                    selectedTypes,
-                                    selectedDataFormats,
-                                    searchFilter
-                                )}
-                                trials={this.state.trials!}
-                            />
+                            )}
+                            {this.props.dataStatus === "failed" && (
+                                <Typography>
+                                    Encountered an error fetching file data.
+                                </Typography>
+                            )}
                         </Grid>
                     </Grid>
                 )}
@@ -187,4 +189,4 @@ class BrowseFilesPage extends React.Component<
     }
 }
 
-export default withIdToken(BrowseFilesPage);
+export default withData(withIdToken(BrowseFilesPage));

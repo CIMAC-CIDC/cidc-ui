@@ -10,10 +10,8 @@ import {
     Link
 } from "@material-ui/core";
 import "./UserAccount.css";
-import { getPermissionsForUser } from "../../api/api";
 import AdminMenu from "./AdminMenu";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
-import Permission from "../../model/permission";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
 import { AuthContext } from "../identity/AuthProvider";
 import { useUserContext } from "../identity/UserProvider";
@@ -23,19 +21,8 @@ export default function UserAccountPage() {
     const authData = React.useContext(AuthContext);
     const userAccount = useUserContext();
 
-    const [permissions, setPermissions] = React.useState<
-        Permission[] | undefined
-    >(undefined);
-
-    React.useEffect(() => {
-        if (authData && authData.idToken) {
-            getPermissionsForUser(authData.idToken, userAccount.id).then(
-                setPermissions
-            );
-        }
-    }, [authData, userAccount.id]);
-
     const isAdmin = userAccount && userAccount.role === "cidc-admin";
+    const permissions = userAccount && userAccount.permissions;
     const hasPerms = permissions && permissions.length > 0;
 
     return (
