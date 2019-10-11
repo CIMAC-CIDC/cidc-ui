@@ -1,5 +1,5 @@
 import * as React from "react";
-import { getAccountInfo } from "../../api/api";
+import { getAccountInfo, getPermissionsForUser } from "../../api/api";
 import { render, waitForElement } from "@testing-library/react";
 import history from "./History";
 import { AuthContext } from "./AuthProvider";
@@ -39,11 +39,19 @@ it("displays a loader if no auth data has loaded", () => {
 });
 
 it("handles an approved user", async () => {
+    const user = { id: 1, approval_date: Date.now() };
     getAccountInfo.mockImplementation((token: string) => {
         expect(token).toBe(TOKEN);
 
-        return Promise.resolve({ approval_date: Date.now() });
+        return Promise.resolve(user);
     });
+    getPermissionsForUser.mockImplementation((token: string, id: number) => {
+        expect(token).toBe(TOKEN);
+        expect(id).toBe(user.id);
+
+        return Promise.resolve([]);
+    });
+
     const { getByTestId } = renderWithMockedAuthContext(true);
     const children = await waitForElement(() => getByTestId("children"));
     expect(children).toBeInTheDocument();
