@@ -17,7 +17,6 @@ import {
     ListItemIcon,
     CardHeader
 } from "@material-ui/core";
-import { ITemplateCardProps } from "./TemplatesPage";
 import { onValueChange } from "./utils";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
 import {
@@ -30,6 +29,7 @@ import Loader from "../generic/Loader";
 import { AuthContext } from "../identity/AuthProvider";
 import { InfoContext } from "../info/InfoProvider";
 import { DataContext } from "../data/DataProvider";
+import "./Manifests.css";
 
 type Status =
     | "loading"
@@ -39,9 +39,7 @@ type Status =
     | "uploadErrors"
     | "uploadSuccess";
 
-const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
-    props: ITemplateCardProps
-) => {
+const ManifestUpload: React.FunctionComponent = () => {
     const authData = React.useContext(AuthContext);
     const info = React.useContext(InfoContext);
     const dataContext = React.useContext(DataContext);
@@ -144,7 +142,7 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     };
 
     return (
-        <Card className={props.cardClass}>
+        <Card className="Manifests-card">
             <CardHeader
                 avatar={<CloudUpload />}
                 title={
@@ -252,4 +250,4 @@ const TemplateUpload: React.FunctionComponent<ITemplateCardProps> = (
     );
 };
 
-export default TemplateUpload;
+export default ManifestUpload;

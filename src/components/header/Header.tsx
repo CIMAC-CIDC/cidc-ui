@@ -16,12 +16,8 @@ import {
 } from "react-router-dom";
 import "./Header.css";
 import logo from "../../logo.png";
-import {
-    AccountCircle,
-    Search,
-    TableChart,
-    CloudUpload
-} from "@material-ui/icons";
+import { AccountCircle, Search, TableChart } from "@material-ui/icons";
+import { useUserContext } from "../identity/UserProvider";
 
 const ENV = process.env.REACT_APP_ENV;
 
@@ -65,22 +61,29 @@ const StyledTabs = withStyles({
 ));
 
 const Header: React.FunctionComponent<RouteComponentProps> = props => {
+    const user = useUserContext();
+
     function handleChange(_: React.ChangeEvent<{}>, value: any) {
         props.history.push(value);
     }
 
     let selectedTab = props.location.pathname;
-    if (selectedTab.startsWith("/transfer-data")) {
-        selectedTab = "/transfer-data";
+    if (selectedTab.startsWith("/assays")) {
+        selectedTab = "/assays";
     } else if (selectedTab === "/callback") {
         return null;
     } else if (selectedTab.startsWith("/file-details")) {
         selectedTab = "/browse-files";
-    } else if (selectedTab.startsWith("/templates")) {
-        selectedTab = "/templates";
+    } else if (selectedTab.startsWith("/manifests")) {
+        selectedTab = "/manifests";
     } else if (["/register", "/unactivated"].includes(selectedTab)) {
         return null;
     }
+
+    const showAssays =
+        user.role && ["cimac-biofx-user", "cidc-admin"].includes(user.role);
+    const showManifests =
+        user.role && ["nci-biobank-user", "cidc-admin"].includes(user.role);
 
     return (
         <div style={{ backgroundColor: "var(--light-grey-gradient)" }}>
@@ -104,18 +107,23 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                 label="Browse Files"
                                 icon={<Search />}
                             />
-                            <Tab
-                                disableRipple={true}
-                                value="/transfer-data"
-                                label="Transfer Data"
-                                icon={<CloudUpload />}
-                            />
-                            <Tab
-                                disableRipple={true}
-                                value="/templates"
-                                label="Templates"
-                                icon={<TableChart />}
-                            />
+                            {showAssays && (
+                                <Tab
+                                    disableRipple={true}
+                                    value="/assays"
+                                    label="Assays"
+                                    icon={<TableChart />}
+                                />
+                            )}
+                            {showManifests && (
+                                <Tab
+                                    disableRipple={true}
+                                    value="/manifests"
+                                    label="Manifests"
+                                    icon={<TableChart />}
+                                />
+                            )}
+
                             <Tab
                                 disableRipple={true}
                                 value="/user-account"

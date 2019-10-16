@@ -1,3 +1,4 @@
+// TODO: should we be getting this from the API?
 type Role =
     | "cidc-admin"
     | "cidc-biofx-user"

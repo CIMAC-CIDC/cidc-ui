@@ -15,7 +15,7 @@ export default class HomePage extends React.Component<any, {}> {
                 <Typography style={{ fontSize: 18 }}>
                     <li>
                         Get instructions on{" "}
-                        <Link to="/transfer-data">transferring new data.</Link>
+                        <Link to="/assays">transferring new data.</Link>
                     </li>
                     <li>
                         Browse previously{" "}

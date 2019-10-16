@@ -15,7 +15,7 @@ export default class TransferDataPage extends React.Component<any, {}> {
                 </Typography>
                 <Typography style={{ fontSize: 18 }} paragraph={true}>
                     Start by reading our{" "}
-                    <Link to="/transfer-data/cli-instructions">
+                    <Link to="/assays/cli-instructions">
                         instructions on using the CIDC Transfer Tool.
                     </Link>
                 </Typography>
@@ -26,17 +26,17 @@ export default class TransferDataPage extends React.Component<any, {}> {
                 <Typography style={{ fontSize: 18 }}>
                     <li>
                         How to upload{" "}
-                        <Link to="/transfer-data/wes">
+                        <Link to="/assays/wes">
                             whole exome sequencing data.
                         </Link>
                     </li>
                     <li>
                         How to upload{" "}
-                        <Link to="/transfer-data/olink">Olink data.</Link>
+                        <Link to="/assays/olink">Olink data.</Link>
                     </li>
                     <li>
                         How to upload{" "}
-                        <Link to="/transfer-data/cytof">CyTOF data.</Link>
+                        <Link to="/assays/cytof">CyTOF data.</Link>
                     </li>
                 </Typography>
             </div>

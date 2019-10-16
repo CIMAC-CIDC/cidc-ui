@@ -7,7 +7,7 @@ import {
     TextField,
     Grid
 } from "@material-ui/core";
-import "./TransferData.css";
+import "./Assays.css";
 import CopyToClipboard from "react-copy-to-clipboard";
 import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
 import { withIdToken } from "../identity/AuthProvider";

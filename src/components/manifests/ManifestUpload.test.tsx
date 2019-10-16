@@ -5,7 +5,7 @@ import {
     waitForElement,
     RenderResult
 } from "@testing-library/react";
-import TemplateUpload from "./TemplateUpload";
+import ManifestUpload from "./ManifestUpload";
 import { XLSX_MIMETYPE } from "../../util/constants";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
 import { AuthContext } from "../identity/AuthProvider";
@@ -23,7 +23,7 @@ function renderWithMockedAuthContext() {
             <AuthContext.Provider
                 value={{ idToken: TOKEN, user: { email: "" } }}
             >
-                <TemplateUpload cardClass="foo" />
+                <ManifestUpload cardClass="foo" />
             </AuthContext.Provider>
         </InfoContext.Provider>
     );

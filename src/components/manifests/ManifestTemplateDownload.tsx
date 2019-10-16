@@ -11,23 +11,19 @@ import {
     Typography,
     CardHeader
 } from "@material-ui/core";
-import { ITemplateCardProps } from "./TemplatesPage";
 import { onValueChange } from "./utils";
 import { InfoContext } from "../info/InfoProvider";
 import { CloudDownload } from "@material-ui/icons";
+import "./Manifests.css";
 
 // Given a template type and name, get the path to the corresponding
 // xlsx file in the static/ folder.
 function nameToURL(type: string, name: string) {
     const fmtedName = name.toLowerCase().replace(" ", "_");
-    return `${
-        process.env.PUBLIC_URL
-    }/static/xlsx/${type}/${fmtedName}_template.xlsx`;
+    return `${process.env.PUBLIC_URL}/static/xlsx/${type}/${fmtedName}_template.xlsx`;
 }
 
-const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
-    props: ITemplateCardProps
-) => {
+const ManifestTemplateDownload: React.FunctionComponent = () => {
     const info = React.useContext(InfoContext);
 
     const [templateType, setTemplateType] = React.useState<string | undefined>(
@@ -43,7 +39,7 @@ const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
         templateType && templateName && nameToURL(templateType, templateName);
 
     return (
-        <Card className={props.cardClass}>
+        <Card className="Manifests-card">
             <CardHeader
                 avatar={<CloudDownload />}
                 title={
@@ -128,4 +124,4 @@ const TemplateDownload: React.FunctionComponent<ITemplateCardProps> = (
     );
 };
 
-export default TemplateDownload;
+export default ManifestTemplateDownload;

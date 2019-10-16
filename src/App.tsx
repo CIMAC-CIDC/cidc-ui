@@ -6,15 +6,15 @@ import { Router, Switch, Route } from "react-router-dom";
 import Header from "./components/header/Header";
 import Footer from "./components/footer/Footer";
 import HomePage from "./components/home/HomePage";
-import TransferDataPage from "./components/transferData/TransferDataPage";
-import CliInstructions from "./components/transferData/CliInstructions";
-import TemplatesPage from "./components/templates/TemplatesPage";
+import TransferDataPage from "./components/assays/AssaysPage";
+import CliInstructions from "./components/assays/CliInstructions";
+import ManifestsPage from "./components/manifests/ManifestsPage";
 import PrivacyAndSecurityPage from "./components/privacyAndSecurity/PrivacyAndSecurityPage";
 import UserAccountPage from "./components/userAccount/UserAccountPage";
 import Register from "./components/identity/Register";
 import Unactivated from "./components/identity/Unactivated";
 import history from "./components/identity/History";
-import AssayInstructions from "./components/transferData/AssayInstructions";
+import AssayInstructions from "./components/assays/AssayInstructions";
 import AuthProvider from "./components/identity/AuthProvider";
 import UserProvider from "./components/identity/UserProvider";
 import ErrorGuard from "./components/errors/ErrorGuard";
@@ -61,16 +61,16 @@ export default function App() {
                                                     component={HomePage}
                                                 />
                                                 <Route
-                                                    path="/transfer-data"
+                                                    path="/assays"
                                                     component={TransferDataPage}
                                                     exact
                                                 />
                                                 <Route
-                                                    path="/transfer-data/cli-instructions"
+                                                    path="/assays/cli-instructions"
                                                     component={CliInstructions}
                                                 />
                                                 <Route
-                                                    path="/transfer-data/:assay"
+                                                    path="/assays/:assay"
                                                     component={
                                                         AssayInstructions
                                                     }
@@ -80,8 +80,8 @@ export default function App() {
                                                     component={BrowseFilesPage}
                                                 />
                                                 <Route
-                                                    path="/templates"
-                                                    component={TemplatesPage}
+                                                    path="/manifests"
+                                                    component={ManifestsPage}
                                                 />
                                                 <Route
                                                     path="/privacy-security"
