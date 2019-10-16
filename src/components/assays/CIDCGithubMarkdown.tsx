@@ -1,11 +1,11 @@
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import "github-markdown-css/github-markdown.css";
+import { AuthContext } from "../identity/AuthProvider";
 
 export interface ICIDCGithubMarkdownProps {
     path: string;
-    trimStartLines?: number;
-    authToken?: string;
+    insertIdToken?: boolean;
 }
 
 const MARKDOWN_BASE_URL = "https://raw.githubusercontent.com/CIMAC-CIDC/";
@@ -13,31 +13,29 @@ const MARKDOWN_BASE_URL = "https://raw.githubusercontent.com/CIMAC-CIDC/";
 const CIDCGithubMarkdown: React.FunctionComponent<
     ICIDCGithubMarkdownProps
 > = props => {
+    const authData = React.useContext(AuthContext);
+
     const [markdown, setMarkdown] = React.useState<string | undefined>(
         undefined
     );
 
     const fullURL = MARKDOWN_BASE_URL + props.path;
 
+    const idToken = props.insertIdToken && authData && authData.idToken;
+
     React.useEffect(() => {
         fetch(fullURL)
             .then(response => response.text())
             .then(text => {
-                const trimmedText = props.trimStartLines
-                    ? text
-                          .split("\n")
-                          .slice(props.trimStartLines)
-                          .join("\n")
-                    : text;
-                const finalText = props.authToken
-                    ? trimmedText.replace(
+                const finalText = idToken
+                    ? text.replace(
                           /cidc login \[token\]/g,
-                          "cidc login " + props.authToken
+                          "cidc login " + idToken
                       )
-                    : trimmedText;
+                    : text;
                 setMarkdown(finalText);
             });
-    }, [fullURL, props.trimStartLines, props.authToken]);
+    }, [fullURL, idToken]);
 
     return (
         <div>

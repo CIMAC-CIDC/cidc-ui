@@ -1,7 +1,10 @@
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
 import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
+import TemplateDownloadButton from "../generic/TemplateDownloadButton";
 import { withIdToken } from "../identity/AuthProvider";
+import { Grid } from "@material-ui/core";
+import { CloudDownload } from "@material-ui/icons";
 
 export interface IAssayInstructionsProps
     extends RouteComponentProps<{ assay: string }> {
@@ -11,10 +14,25 @@ export interface IAssayInstructionsProps
 const AssayInstructions: React.FunctionComponent<
     IAssayInstructionsProps
 > = props => {
-    const path = `cidc-documentation/master/assays/${props.match.params.assay}.md`;
-    const token = props.token;
+    const assay = props.match.params.assay;
+    const path = `cidc-documentation/master/assays/${assay}.md`;
 
-    return <CIDCGithubMarkdown path={path} authToken={token} />;
+    return (
+        <Grid container direction="column" spacing={1}>
+            <Grid item>
+                <TemplateDownloadButton
+                    templateName={assay}
+                    templateType="metadata"
+                    fullWidth
+                    variant="contained"
+                    startIcon={<CloudDownload />}
+                ></TemplateDownloadButton>
+            </Grid>
+            <Grid item>
+                <CIDCGithubMarkdown path={path} insertIdToken />
+            </Grid>
+        </Grid>
+    );
 };
 
 export default withIdToken(AssayInstructions);

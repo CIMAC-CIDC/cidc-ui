@@ -7,14 +7,12 @@ import Header from "./components/header/Header";
 import Footer from "./components/footer/Footer";
 import HomePage from "./components/home/HomePage";
 import TransferDataPage from "./components/assays/AssaysPage";
-import CliInstructions from "./components/assays/CliInstructions";
 import ManifestsPage from "./components/manifests/ManifestsPage";
 import PrivacyAndSecurityPage from "./components/privacyAndSecurity/PrivacyAndSecurityPage";
 import UserAccountPage from "./components/userAccount/UserAccountPage";
 import Register from "./components/identity/Register";
 import Unactivated from "./components/identity/Unactivated";
 import history from "./components/identity/History";
-import AssayInstructions from "./components/assays/AssayInstructions";
 import AuthProvider from "./components/identity/AuthProvider";
 import UserProvider from "./components/identity/UserProvider";
 import ErrorGuard from "./components/errors/ErrorGuard";
@@ -63,17 +61,6 @@ export default function App() {
                                                 <Route
                                                     path="/assays"
                                                     component={TransferDataPage}
-                                                    exact
-                                                />
-                                                <Route
-                                                    path="/assays/cli-instructions"
-                                                    component={CliInstructions}
-                                                />
-                                                <Route
-                                                    path="/assays/:assay"
-                                                    component={
-                                                        AssayInstructions
-                                                    }
                                                 />
                                                 <Route
                                                     path="/browse-files"

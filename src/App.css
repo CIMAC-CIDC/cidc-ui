@@ -12,7 +12,7 @@
 }
 
 .Content {
-    padding: 3em;
+    padding: 1em 3em 3em;
     min-height: 960px; /* totally arbitrary */
     background: var(--light-grey);
 }
