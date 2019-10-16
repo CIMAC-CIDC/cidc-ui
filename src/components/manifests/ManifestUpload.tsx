@@ -7,15 +7,16 @@ import {
     FormControl,
     Grid,
     Input,
-    InputLabel,
-    Select,
     List,
     ListItem,
     ListItemText,
     Divider,
-    MenuItem,
     ListItemIcon,
-    CardHeader
+    CardHeader,
+    RadioGroup,
+    FormControlLabel,
+    Radio,
+    FormLabel
 } from "@material-ui/core";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
 import {
@@ -165,39 +166,38 @@ const ManifestUpload: React.FunctionComponent = () => {
                     >
                         <Grid item xs={3}>
                             <FormControl fullWidth>
-                                <InputLabel htmlFor="manifestType">
+                                <FormLabel component="legend">
                                     Manifest Type
-                                </InputLabel>
-                                <Select
-                                    inputProps={{
-                                        id: "manifestType",
-                                        name: "type",
-                                        "data-testid": "manifest-type-select"
-                                    }}
+                                </FormLabel>
+                                <RadioGroup
+                                    name="manifestType"
                                     value={manifestType || ""}
                                     onChange={(e: any) =>
                                         onValueChange(setManifestType)(e)
                                     }
+                                    row
                                 >
                                     {info &&
                                         info.supportedTemplates.manifests.map(
                                             name => (
-                                                <MenuItem
+                                                <FormControlLabel
                                                     key={name}
+                                                    label={name}
                                                     value={name}
+                                                    control={<Radio />}
                                                 >
                                                     {name}
-                                                </MenuItem>
+                                                </FormControlLabel>
                                             )
                                         )}
-                                </Select>
+                                </RadioGroup>
                             </FormControl>
                         </Grid>
                         <Grid item xs={3}>
                             <FormControl fullWidth>
-                                <InputLabel htmlFor="uploadInput" shrink>
+                                <FormLabel component="legend">
                                     Select a manifest to upload
-                                </InputLabel>
+                                </FormLabel>
                                 <Input
                                     id="uploadInput"
                                     onClick={() => {
