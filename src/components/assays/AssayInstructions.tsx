@@ -21,9 +21,9 @@ const AssayInstructions: React.FunctionComponent<
         <Grid container direction="column" spacing={1}>
             <Grid item>
                 <TemplateDownloadButton
+                    fullWidth
                     templateName={assay}
                     templateType="metadata"
-                    fullWidth
                     variant="contained"
                     startIcon={<CloudDownload />}
                 ></TemplateDownloadButton>

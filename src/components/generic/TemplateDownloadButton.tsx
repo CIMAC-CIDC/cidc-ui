@@ -20,7 +20,7 @@ const TemplateDownloadButton: React.FunctionComponent<
 > = ({ templateName: name, templateType, ...buttonProps }) => {
     const info = React.useContext(InfoContext);
 
-    const hasURL = info && info[templateType].includes(name);
+    const hasURL = info && info.supportedTemplates[templateType].includes(name);
     if (!hasURL) {
         return null;
     }
