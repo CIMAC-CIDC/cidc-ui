@@ -17,7 +17,6 @@ import {
     ListItemIcon,
     CardHeader
 } from "@material-ui/core";
-import { onValueChange } from "./utils";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
 import {
     WarningRounded,
@@ -73,6 +72,11 @@ const ManifestUpload: React.FunctionComponent = () => {
             });
         }
     }, [file, manifestType, authData]);
+
+    const onValueChange = (setState: (v: string | undefined) => void) => {
+        return (e: React.ChangeEvent<HTMLSelectElement>) =>
+            setState(e.target.value);
+    };
 
     const onSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault();

@@ -1,18 +1,11 @@
 import * as React from "react";
 import {
-    FormControl,
-    MenuItem,
-    InputLabel,
-    Select,
     Grid,
     Card,
     CardContent,
     Typography,
-    CardHeader,
-    GridList,
-    GridListTile
+    CardHeader
 } from "@material-ui/core";
-import { onValueChange } from "./utils";
 import { InfoContext } from "../info/InfoProvider";
 import { CloudDownload } from "@material-ui/icons";
 import "./Manifests.css";

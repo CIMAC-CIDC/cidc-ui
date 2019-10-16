@@ -26,7 +26,9 @@ const AssayInstructions: React.FunctionComponent<
                     templateType="metadata"
                     variant="contained"
                     startIcon={<CloudDownload />}
-                ></TemplateDownloadButton>
+                >
+                    Download an empty {assay} template
+                </TemplateDownloadButton>
             </Grid>
             <Grid item>
                 <CIDCGithubMarkdown path={path} insertIdToken />
