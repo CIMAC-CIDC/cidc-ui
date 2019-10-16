@@ -1,12 +1,10 @@
 import * as React from "react";
-import { Trial } from "../../model/trial";
 import { DataFile } from "../../model/file";
 import { AuthContext } from "../identity/AuthProvider";
-import { getTrials, getFiles } from "../../api/api";
+import { getFiles } from "../../api/api";
 import Loader from "../generic/Loader";
 
 export interface IDataContext {
-    trials: Trial[];
     files: DataFile[];
     dataStatus: "fetching" | "fetched" | "failed";
     refreshData: () => void;
@@ -19,7 +17,6 @@ export const DataContext = React.createContext<IDataContext | undefined>(
 export const DataProvider: React.FunctionComponent = props => {
     const authContext = React.useContext(AuthContext);
 
-    const [trials, setTrials] = React.useState<Trial[] | undefined>(undefined);
     const [files, setFiles] = React.useState<DataFile[] | undefined>(undefined);
     const [dataStatus, setDataStatus] = React.useState<
         IDataContext["dataStatus"]
@@ -28,18 +25,18 @@ export const DataProvider: React.FunctionComponent = props => {
     const refreshData = () => {
         if (authContext) {
             setDataStatus("fetching");
-            Promise.all([
-                getTrials(authContext.idToken).then(ts => setTrials(ts)),
-                getFiles(authContext.idToken).then(fs => setFiles(fs))
-            ])
-                .then(() => setDataStatus("fetched"))
+            getFiles(authContext.idToken)
+                .then(fs => {
+                    setFiles(fs);
+                    setDataStatus("fetched");
+                })
                 .catch(() => setDataStatus("failed"));
         }
     };
 
     React.useEffect(refreshData, []);
 
-    const value = trials && files && { trials, files, dataStatus, refreshData };
+    const value = files && { files, dataStatus, refreshData };
 
     return (
         <DataContext.Provider value={value}>

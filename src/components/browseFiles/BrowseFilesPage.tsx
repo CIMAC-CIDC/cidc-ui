@@ -57,6 +57,8 @@ class BrowseFilesPage extends React.Component<
         const selectedDataFormats = params.getAll("data_format");
         const selectedTypes = params.getAll("type");
 
+        const trials = _.uniq(this.props.files.map(f => f.trial));
+
         return (
             <div className="Browse-files-page">
                 {this.props.files.length === 0 && (
@@ -171,9 +173,7 @@ class BrowseFilesPage extends React.Component<
                                         selectedDataFormats,
                                         searchFilter
                                     )}
-                                    trials={this.props.trials.map(
-                                        trial => trial.trial_id
-                                    )}
+                                    trials={trials}
                                 />
                             )}
                             {this.props.dataStatus === "failed" && (
