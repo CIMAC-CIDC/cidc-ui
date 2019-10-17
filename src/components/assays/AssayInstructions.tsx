@@ -21,7 +21,13 @@ const AssayInstructions: React.FunctionComponent<
         <Grid container direction="column" spacing={1}>
             <Grid item>
                 <TemplateDownloadButton
-                    fullWidth
+                    style={{
+                        // A hack to place the download button
+                        // next to the markdown doc title
+                        float: "right",
+                        top: "10px",
+                        marginBottom: "-50px"
+                    }}
                     templateName={assay}
                     templateType="metadata"
                     variant="contained"
