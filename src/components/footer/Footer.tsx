@@ -1,6 +1,6 @@
 import * as React from "react";
 import "./Footer.css";
-import { Link as MuiLink } from "@material-ui/core";
+import { Link as MuiLink, Divider } from "@material-ui/core";
 import { Link as RouterLink } from "react-router-dom";
 
 export default class Footer extends React.Component<{}, {}> {
