@@ -39,7 +39,7 @@ class FileDetailsPage extends React.Component<any, IFileDetailsPageState> {
 
     public render() {
         return (
-            <div className="Browse-files-page">
+            <div style={{ width: 1200 }}>
                 {!this.state.file && (
                     <div className="Browse-files-progress">
                         <CircularProgress />
