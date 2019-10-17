@@ -73,7 +73,7 @@ export default class FileDetailsTable extends React.Component<
                         </TableRow>
                         <TableRow>
                             <TableCell className="File-table-row-cell">
-                                Data Upload Timestamp
+                                Date/Time Uploaded
                             </TableCell>
                             <TableCell className="File-table-row-cell">
                                 {new Date(
