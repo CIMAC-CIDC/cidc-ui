@@ -16,3 +16,7 @@
     min-height: 960px; /* totally arbitrary */
     background: var(--light-grey);
 }
+
+code.language-bash:before {
+    content: "$ ";
+}
