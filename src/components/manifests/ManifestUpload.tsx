@@ -185,6 +185,9 @@ const ManifestUpload: React.FunctionComponent = () => {
                                                     label={name}
                                                     value={name}
                                                     control={<Radio />}
+                                                    disabled={
+                                                        status === "loading"
+                                                    }
                                                     data-testid={`radio-${name}`}
                                                 >
                                                     {name}
@@ -208,9 +211,15 @@ const ManifestUpload: React.FunctionComponent = () => {
                                         if (fileInput.current) {
                                             fileInput.current.value = "";
                                         }
+                                        // Also, reset the form state.
+                                        setStatus("unset");
+                                        setErrors([]);
+                                        setFile(undefined);
                                     }}
                                     disabled={
-                                        !manifestType || manifestType === ""
+                                        !manifestType ||
+                                        manifestType === "" ||
+                                        status === "loading"
                                     }
                                     onChange={() => {
                                         if (fileInput.current) {
