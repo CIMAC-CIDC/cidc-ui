@@ -7,12 +7,14 @@ import history from "./History";
 import { ErrorContext } from "../errors/ErrorGuard";
 import Permission from "../../model/permission";
 
-export interface IAccountWithPermissions extends Account {
+export interface IAccountWithExtraContext extends Account {
     permissions?: Permission[];
+    showAssays?: boolean;
+    showManifests?: boolean;
 }
 
 export const UserContext = React.createContext<
-    IAccountWithPermissions | undefined
+    IAccountWithExtraContext | undefined
 >(undefined);
 
 export function useUserContext() {
@@ -66,12 +68,23 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         }
     }, [idToken, setError, user, permissions]);
 
+    const showAssays =
+        user &&
+        user.role &&
+        ["cimac-biofx-user", "cidc-admin"].includes(user.role);
+    const showManifests =
+        user &&
+        user.role &&
+        ["nci-biobank-user", "cidc-admin"].includes(user.role);
+
     const isUnactivatedPath = UNACTIVATED_PATHS.includes(
         props.location.pathname
     );
 
+    const value = user && { ...user, permissions, showAssays, showManifests };
+
     return (
-        <UserContext.Provider value={user && { ...user, permissions }}>
+        <UserContext.Provider value={value}>
             {((user || isUnactivatedPath) && <>{props.children}</>) || (
                 <div data-testid="loader">
                     <AuthLoader />

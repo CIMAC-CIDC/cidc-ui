@@ -29,14 +29,6 @@ const ListLink: React.FunctionComponent<{
 
 const HomePage: React.FunctionComponent = () => {
     const user = React.useContext(UserContext);
-    const showAssays =
-        user &&
-        user.role &&
-        ["cimac-biofx-user", "cidc-admin"].includes(user.role);
-    const showManifests =
-        user &&
-        user.role &&
-        ["nci-biobank-user", "cidc-admin"].includes(user.role);
 
     return (
         <div style={{ width: 1000, margin: "auto" }}>
@@ -61,12 +53,12 @@ const HomePage: React.FunctionComponent = () => {
                 <ListLink icon={<Search />} href="/browse-files">
                     Browse ingested data
                 </ListLink>
-                {showAssays && (
+                {user && user.showAssays && (
                     <ListLink icon={<TableChart />} href="/assays">
                         Prepare to upload new assay data
                     </ListLink>
                 )}
-                {showAssays && (
+                {user && user.showManifests && (
                     <ListLink icon={<TableChart />} href="/manifests">
                         Upload a shipping/receiving manifest
                     </ListLink>

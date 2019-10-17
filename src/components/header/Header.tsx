@@ -80,11 +80,6 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
         return null;
     }
 
-    const showAssays =
-        user.role && ["cimac-biofx-user", "cidc-admin"].includes(user.role);
-    const showManifests =
-        user.role && ["nci-biobank-user", "cidc-admin"].includes(user.role);
-
     return (
         <div style={{ backgroundColor: "var(--light-grey-gradient)" }}>
             <EnvBanner />
@@ -107,7 +102,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                 label="Browse Files"
                                 icon={<Search />}
                             />
-                            {showAssays && (
+                            {user && user.showAssays && (
                                 <Tab
                                     disableRipple={true}
                                     value="/assays"
@@ -115,7 +110,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                     icon={<TableChart />}
                                 />
                             )}
-                            {showManifests && (
+                            {user && user.showManifests && (
                                 <Tab
                                     disableRipple={true}
                                     value="/manifests"
