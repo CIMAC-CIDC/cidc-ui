@@ -26,7 +26,7 @@ const CopyIdToken: React.FunctionComponent = () => {
                 color="primary"
                 fullWidth
                 startIcon={<Fingerprint />}
-                disabled={!authData || copied}
+                disabled={!authData}
                 onClick={() => setCopied(true)}
             >
                 {copied ? "Token Copied!" : "Copy Identity Token"}
