@@ -41,9 +41,7 @@ const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
                             title="CLI Instructions"
                             path={`/assays/${paths.cli}`}
                         />
-                        <ListSubheader>
-                            Assay-Specific Documentation
-                        </ListSubheader>
+                        <ListSubheader>Assay-Specific Docs</ListSubheader>
                         <AssayListItem
                             title="Olink"
                             path={`/assays/${paths.olink}`}
