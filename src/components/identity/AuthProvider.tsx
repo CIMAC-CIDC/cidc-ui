@@ -241,9 +241,9 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
 
 export default withRouter(AuthProvider);
 
-export function withIdToken(
+export function withIdToken<P>(
     Component: React.ComponentType<any>
-): React.FunctionComponent {
+): React.FunctionComponent<P> {
     return (props: any) => {
         const authData = React.useContext(AuthContext);
 

@@ -2,14 +2,36 @@ import * as React from "react";
 import { RouteComponentProps } from "react-router";
 import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
 import TemplateDownloadButton from "../generic/TemplateDownloadButton";
-import { withIdToken } from "../identity/AuthProvider";
-import { Grid } from "@material-ui/core";
-import { CloudDownload } from "@material-ui/icons";
+import { withIdToken, AuthContext } from "../identity/AuthProvider";
+import { Grid, Button } from "@material-ui/core";
+import { CloudDownload, Fingerprint } from "@material-ui/icons";
+import CopyToClipboard from "react-copy-to-clipboard";
 
 export interface IAssayInstructionsProps
     extends RouteComponentProps<{ assay: string }> {
     token?: string;
+    tokenButton?: boolean;
 }
+
+const CopyIdToken: React.FunctionComponent = () => {
+    const authData = React.useContext(AuthContext);
+    const [copied, setCopied] = React.useState<boolean>(false);
+
+    return (
+        <CopyToClipboard text={authData ? authData.idToken : ""}>
+            <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                startIcon={<Fingerprint />}
+                disabled={!authData}
+                onClick={() => setCopied(true)}
+            >
+                {copied ? "Token Copied!" : "Copy Identity Token"}
+            </Button>
+        </CopyToClipboard>
+    );
+};
 
 const AssayInstructions: React.FunctionComponent<
     IAssayInstructionsProps
@@ -30,14 +52,19 @@ const AssayInstructions: React.FunctionComponent<
                         marginBottom: -50
                     }}
                 >
-                    <TemplateDownloadButton
-                        templateName={assay}
-                        templateType="metadata"
-                        variant="contained"
-                        startIcon={<CloudDownload />}
-                    >
-                        Download an empty {assay} template
-                    </TemplateDownloadButton>
+                    {props.tokenButton ? (
+                        <CopyIdToken />
+                    ) : (
+                        <TemplateDownloadButton
+                            color="primary"
+                            templateName={assay}
+                            templateType="metadata"
+                            variant="contained"
+                            startIcon={<CloudDownload />}
+                        >
+                            Download an empty {assay} template
+                        </TemplateDownloadButton>
+                    )}
                 </div>
             </Grid>
             <Grid item>
@@ -47,4 +74,4 @@ const AssayInstructions: React.FunctionComponent<
     );
 };
 
-export default withIdToken(AssayInstructions);
+export default withIdToken<IAssayInstructionsProps>(AssayInstructions);

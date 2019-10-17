@@ -5,34 +5,16 @@ import {
     ListItem,
     ListItemText,
     Divider,
-    Typography,
-    Button,
     ListSubheader
 } from "@material-ui/core";
 import { RouteComponentProps, Route, withRouter, Redirect } from "react-router";
 import AssayInstructions from "./AssayInstructions";
-import CopyToClipboard from "react-copy-to-clipboard";
-import { Fingerprint } from "@material-ui/icons";
-import { AuthContext } from "../identity/AuthProvider";
 
-const CopyIdToken: React.FunctionComponent = () => {
-    const authData = React.useContext(AuthContext);
-    const [copied, setCopied] = React.useState<boolean>(false);
-
-    return (
-        <CopyToClipboard text={authData ? authData.idToken : ""}>
-            <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                startIcon={<Fingerprint />}
-                disabled={!authData}
-                onClick={() => setCopied(true)}
-            >
-                {copied ? "Token Copied!" : "Copy Identity Token"}
-            </Button>
-        </CopyToClipboard>
-    );
+const paths = {
+    cli: "cli-instructions",
+    wes: "wes",
+    olink: "olink",
+    cytof: "cytof"
 };
 
 const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
@@ -51,36 +33,29 @@ const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
 
     return (
         <div>
-            <Grid
-                container
-                direction="row"
-                alignItems="center"
-                justify="space-between"
-            >
-                <Grid item>
-                    <Typography variant="overline" style={{ fontSize: 24 }}>
-                        Assay Upload Documentation
-                    </Typography>
-                </Grid>
-                <Grid item>
-                    <CopyIdToken />
-                </Grid>
-            </Grid>
-            <Divider />
             <Grid container direction="row">
                 <Grid item lg={2}>
                     <List style={{ paddingTop: 0 }}>
                         <ListSubheader>General Overview</ListSubheader>
                         <AssayListItem
                             title="CLI Instructions"
-                            path="/assays/cli-instructions"
+                            path={`/assays/${paths.cli}`}
                         />
                         <ListSubheader>
                             Assay-Specific Documentation
                         </ListSubheader>
-                        <AssayListItem title="Olink" path="/assays/olink" />
-                        <AssayListItem title="CyTOF" path="/assays/cytof" />
-                        <AssayListItem title="WES" path="/assays/wes" />
+                        <AssayListItem
+                            title="Olink"
+                            path={`/assays/${paths.olink}`}
+                        />
+                        <AssayListItem
+                            title="CyTOF"
+                            path={`/assays/${paths.cytof}`}
+                        />
+                        <AssayListItem
+                            title="WES"
+                            path={`/assays/${paths.wes}`}
+                        />
                     </List>
                 </Grid>
                 <Grid item>
@@ -93,7 +68,16 @@ const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
                         </Route>
                         <Route
                             path="/assays/:assay"
-                            component={AssayInstructions}
+                            render={(
+                                rprops: RouteComponentProps<{ assay: string }>
+                            ) => (
+                                <AssayInstructions
+                                    {...rprops}
+                                    tokenButton={
+                                        rprops.match.params.assay === paths.cli
+                                    }
+                                />
+                            )}
                         />
                     </div>
                 </Grid>
