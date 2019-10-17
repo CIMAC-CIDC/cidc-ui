@@ -18,23 +18,27 @@ const AssayInstructions: React.FunctionComponent<
     const path = `cidc-documentation/master/assays/${assay}.md`;
 
     return (
-        <Grid container direction="column" spacing={1}>
+        <Grid container direction="column">
             <Grid item>
-                <TemplateDownloadButton
+                <div
                     style={{
                         // A hack to place the download button
                         // next to the markdown doc title
                         float: "right",
-                        top: "10px",
-                        marginBottom: "-50px"
+                        top: 10,
+                        padding: 0,
+                        marginBottom: -50
                     }}
-                    templateName={assay}
-                    templateType="metadata"
-                    variant="contained"
-                    startIcon={<CloudDownload />}
                 >
-                    Download an empty {assay} template
-                </TemplateDownloadButton>
+                    <TemplateDownloadButton
+                        templateName={assay}
+                        templateType="metadata"
+                        variant="contained"
+                        startIcon={<CloudDownload />}
+                    >
+                        Download an empty {assay} template
+                    </TemplateDownloadButton>
+                </div>
             </Grid>
             <Grid item>
                 <CIDCGithubMarkdown path={path} insertIdToken />
