@@ -185,6 +185,7 @@ const ManifestUpload: React.FunctionComponent = () => {
                                                     label={name}
                                                     value={name}
                                                     control={<Radio />}
+                                                    data-testid={`radio-${name}`}
                                                 >
                                                     {name}
                                                 </FormControlLabel>
