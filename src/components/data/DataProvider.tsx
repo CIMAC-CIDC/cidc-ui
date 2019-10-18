@@ -7,6 +7,7 @@ import Loader from "../generic/Loader";
 export interface IDataContext {
     files: DataFile[];
     dataStatus: "fetching" | "fetched" | "failed";
+    error: string;
     refreshData: () => void;
 }
 
@@ -21,6 +22,7 @@ export const DataProvider: React.FunctionComponent = props => {
     const [dataStatus, setDataStatus] = React.useState<
         IDataContext["dataStatus"]
     >("fetching");
+    const [error, setError] = React.useState<IDataContext["error"]>("");
 
     const refreshData = () => {
         if (authContext) {
@@ -30,13 +32,17 @@ export const DataProvider: React.FunctionComponent = props => {
                     setFiles(fs);
                     setDataStatus("fetched");
                 })
-                .catch(() => setDataStatus("failed"));
+                .catch(err => {
+                    setFiles([]);
+                    setError(err.toString());
+                    setDataStatus("failed");
+                });
         }
     };
 
     React.useEffect(refreshData, []);
 
-    const value = files && { files, dataStatus, refreshData };
+    const value = files && { files, dataStatus, error, refreshData };
 
     return (
         <DataContext.Provider value={value}>

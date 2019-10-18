@@ -60,9 +60,9 @@ function _transformFile(file: DataFile): DataFile {
 }
 
 function getFiles(token: string): Promise<DataFile[]> {
-    return _getItems<DataFile>(token, "downloadable_files").then(trials =>
-        trials.map(_transformFile)
-    );
+    return _getItems<DataFile>(token, "downloadable_files")
+        .then(trials => trials.map(_transformFile))
+        .catch(_extractErrorMessage);
 }
 
 function getSingleFile(

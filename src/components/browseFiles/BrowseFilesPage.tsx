@@ -61,13 +61,21 @@ class BrowseFilesPage extends React.Component<
 
         return (
             <div className="Browse-files-page">
-                {this.props.files.length === 0 && (
-                    <div className="Browse-files-progress">
-                        <Typography style={{ fontSize: 18 }}>
-                            No files found.
-                        </Typography>
-                    </div>
+                {this.props.dataStatus === "fetching" && <Loader />}
+                {this.props.dataStatus === "failed" && (
+                    <Typography>
+                        Encountered an error fetching file data:{" "}
+                        {this.props.error}
+                    </Typography>
                 )}
+                {this.props.dataStatus === "fetched" &&
+                    this.props.files.length === 0 && (
+                        <div className="Browse-files-progress">
+                            <Typography style={{ fontSize: 18 }}>
+                                No files found.
+                            </Typography>
+                        </div>
+                    )}
                 {this.props.files.length > 0 && (
                     <Grid container={true} spacing={3}>
                         <Grid item={true} xs={3}>
@@ -175,11 +183,6 @@ class BrowseFilesPage extends React.Component<
                                     )}
                                     trials={trials}
                                 />
-                            )}
-                            {this.props.dataStatus === "failed" && (
-                                <Typography>
-                                    Encountered an error fetching file data.
-                                </Typography>
                             )}
                         </Grid>
                     </Grid>
