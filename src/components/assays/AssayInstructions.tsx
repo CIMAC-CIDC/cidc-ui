@@ -3,9 +3,9 @@ import { RouteComponentProps } from "react-router";
 import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
 import TemplateDownloadButton from "../generic/TemplateDownloadButton";
 import { withIdToken, AuthContext } from "../identity/AuthProvider";
-import { Grid, Button } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import { CloudDownload, Fingerprint } from "@material-ui/icons";
-import CopyToClipboard from "react-copy-to-clipboard";
+import CopyToClipboardButton from "../generic/CopyToClipboardButton";
 
 export interface IAssayInstructionsProps
     extends RouteComponentProps<{ assay: string }> {
@@ -15,21 +15,17 @@ export interface IAssayInstructionsProps
 
 const CopyIdToken: React.FunctionComponent = () => {
     const authData = React.useContext(AuthContext);
-    const [copied, setCopied] = React.useState<boolean>(false);
 
     return (
-        <CopyToClipboard text={authData ? authData.idToken : ""}>
-            <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                startIcon={<Fingerprint />}
-                disabled={!authData}
-                onClick={() => setCopied(true)}
-            >
-                {copied ? "Token Copied!" : "Copy Identity Token"}
-            </Button>
-        </CopyToClipboard>
+        <CopyToClipboardButton
+            title="Identity Token"
+            copyValue={authData ? authData.idToken : ""}
+            variant="contained"
+            color="primary"
+            fullWidth
+            startIcon={<Fingerprint />}
+            disabled={!authData}
+        />
     );
 };
 

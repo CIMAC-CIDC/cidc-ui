@@ -74,6 +74,14 @@ function getSingleFile(
     );
 }
 
+function getDownloadURL(token: string, fileID: string): Promise<string> {
+    return getApiClient(token)
+        .get("downloadable_files/download_url", {
+            params: { id: fileID }
+        })
+        .then(_extractItem);
+}
+
 function getAccountInfo(token: string): Promise<Account | undefined> {
     return getApiClient(token)
         .get("users/self")
@@ -235,6 +243,7 @@ export {
     getApiClient,
     getFiles,
     getSingleFile,
+    getDownloadURL,
     getAccountInfo,
     getTrials,
     createUser,

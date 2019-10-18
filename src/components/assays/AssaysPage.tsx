@@ -35,13 +35,17 @@ const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
         <div>
             <Grid container direction="row">
                 <Grid item lg={2}>
-                    <List style={{ paddingTop: 0 }}>
-                        <ListSubheader>General Overview</ListSubheader>
+                    <List>
+                        <ListSubheader disableSticky>
+                            General Overview
+                        </ListSubheader>
                         <AssayListItem
                             title="CLI Instructions"
                             path={`/assays/${paths.cli}`}
                         />
-                        <ListSubheader>Assay-Specific Docs</ListSubheader>
+                        <ListSubheader disableSticky>
+                            Assay-Specific Docs
+                        </ListSubheader>
                         <AssayListItem
                             title="Olink"
                             path={`/assays/${paths.olink}`}
