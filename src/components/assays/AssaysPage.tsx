@@ -35,7 +35,7 @@ const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
         <div>
             <Grid container direction="row">
                 <Grid item lg={2}>
-                    <List>
+                    <List style={{ paddingTop: 0 }}>
                         <ListSubheader disableSticky>
                             General Overview
                         </ListSubheader>
