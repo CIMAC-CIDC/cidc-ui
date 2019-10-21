@@ -84,7 +84,7 @@ export const CoreDetailsTable: React.FunctionComponent<{
         <FileDetailsTable
             title="Core File Details"
             values={[
-                value("File Name", props.file.file_name),
+                value("File Name", props.file.object_url),
                 value("Protocol Identifier", props.file.trial),
                 value("Type", props.file.assay_type),
                 value("Format", props.file.data_format),
