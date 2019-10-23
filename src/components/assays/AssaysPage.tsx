@@ -9,6 +9,7 @@ import {
 } from "@material-ui/core";
 import { RouteComponentProps, Route, withRouter, Redirect } from "react-router";
 import AssayInstructions from "./AssayInstructions";
+import { useRootStyles } from "../../rootStyles";
 
 const paths = {
     cli: "cli-instructions",
@@ -18,6 +19,8 @@ const paths = {
 };
 
 const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
+    const classes = useRootStyles();
+
     const AssayListItem: React.FunctionComponent<{
         title: string;
         path: string;
@@ -31,10 +34,12 @@ const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
         </ListItem>
     );
 
+    const menuWidth = 200;
+
     return (
-        <div>
+        <div className={classes.centeredPage}>
             <Grid container direction="row">
-                <Grid item lg={2}>
+                <Grid item style={{ width: menuWidth }}>
                     <List style={{ paddingTop: 0 }}>
                         <ListSubheader disableSticky>
                             General Overview

@@ -15,8 +15,11 @@ import { AuthContext } from "../identity/AuthProvider";
 import { useUserContext } from "../identity/UserProvider";
 import { AccountCircle, FolderShared } from "@material-ui/icons";
 import Loader from "../generic/Loader";
+import { useRootStyles } from "../../rootStyles";
 
 export default function UserAccountPage() {
+    const classes = useRootStyles();
+
     const authData = React.useContext(AuthContext);
     const userAccount = useUserContext();
 
@@ -25,7 +28,7 @@ export default function UserAccountPage() {
     const hasPerms = permissions && permissions.length > 0;
 
     return (
-        <div>
+        <div className={classes.centeredPage}>
             {!userAccount || !permissions ? (
                 <Loader />
             ) : (

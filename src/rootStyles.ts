@@ -19,5 +19,9 @@ export const useRootStyles = makeStyles({
         padding: "1em 3em 3em",
         minHeight: 960,
         background: "white"
+    },
+    centeredPage: {
+        width: 1200,
+        margin: "auto"
     }
 });

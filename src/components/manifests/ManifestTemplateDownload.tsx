@@ -10,16 +10,14 @@ import { InfoContext } from "../info/InfoProvider";
 import { CloudDownload } from "@material-ui/icons";
 import TemplateDownloadButton from "../generic/TemplateDownloadButton";
 import Loader from "../generic/Loader";
-import { useManifestsStyles } from "./ManifestsPage";
 
 const ManifestTemplateDownload: React.FunctionComponent = () => {
-    const classes = useManifestsStyles();
     const info = React.useContext(InfoContext);
 
     const manifests = info && info.supportedTemplates.manifests;
 
     return (
-        <Card className={classes.card}>
+        <Card>
             <CardHeader
                 avatar={<CloudDownload />}
                 title={
