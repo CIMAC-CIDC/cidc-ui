@@ -15,6 +15,7 @@ import { RouteComponentProps } from "react-router";
 import { CloudDownload, Link, Refresh } from "@material-ui/icons";
 import CopyToClipboardButton from "../generic/CopyToClipboardButton";
 import { ButtonProps } from "@material-ui/core/Button";
+import Loader from "../generic/Loader";
 
 const DownloadURL: React.FunctionComponent<{
     fileId: string;
@@ -103,9 +104,7 @@ const FileDetailsPage: React.FunctionComponent<
     return (
         <div>
             {!file || !idToken ? (
-                <div className="Browse-files-progress">
-                    <CircularProgress />
-                </div>
+                <Loader />
             ) : (
                 <Grid
                     container
