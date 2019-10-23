@@ -16,7 +16,7 @@ import {
 } from "@material-ui/icons";
 import history from "../identity/History";
 import { UserContext } from "../identity/UserProvider";
-import { useRootStyles } from "../../rootStyles";
+import { widths } from "../../rootStyles";
 
 const ListLink: React.FunctionComponent<{
     icon: React.ReactElement;
@@ -29,11 +29,16 @@ const ListLink: React.FunctionComponent<{
 );
 
 const HomePage: React.FunctionComponent = () => {
-    const classes = useRootStyles();
     const user = React.useContext(UserContext);
 
     return (
-        <div className={classes.centeredPage}>
+        <div
+            style={{
+                minWidth: 700,
+                maxWidth: widths.pageWidth,
+                margin: "auto"
+            }}
+        >
             <Typography
                 variant="h4"
                 style={{ textAlign: "center" }}

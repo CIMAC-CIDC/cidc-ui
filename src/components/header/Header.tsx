@@ -18,7 +18,7 @@ import {
 import logo from "../../logo.png";
 import { AccountCircle, Search, TableChart } from "@material-ui/icons";
 import { useUserContext } from "../identity/UserProvider";
-import { colors } from "../../rootStyles";
+import { colors, widths } from "../../rootStyles";
 
 const ENV = process.env.REACT_APP_ENV;
 
@@ -100,7 +100,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
     }
 
     return (
-        <div>
+        <div style={{ minWidth: widths.pageWidth }}>
             <EnvBanner />
             <div className={classes.tabs}>
                 <Grid
