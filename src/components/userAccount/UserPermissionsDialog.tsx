@@ -1,7 +1,6 @@
 import * as React from "react";
 import {
     Dialog,
-    CircularProgress,
     DialogTitle,
     DialogContent,
     Table,

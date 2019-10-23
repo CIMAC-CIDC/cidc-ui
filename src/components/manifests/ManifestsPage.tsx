@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Grid, makeStyles } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import ManifestTemplateDownload from "./ManifestTemplateDownload";
 import ManifestUpload from "./ManifestUpload";
 import { RouteComponentProps } from "react-router";

@@ -1,13 +1,6 @@
 import * as React from "react";
 import { getSingleFile, getDownloadURL } from "../../api/api";
-import {
-    CircularProgress,
-    Grid,
-    Button,
-    Card,
-    CardContent,
-    CardHeader
-} from "@material-ui/core";
+import { Grid, Button, Card, CardContent, CardHeader } from "@material-ui/core";
 import { AdditionalMetadataTable, CoreDetailsTable } from "./FileDetails";
 import { AuthContext } from "../identity/AuthProvider";
 import { DataFile } from "../../model/file";
