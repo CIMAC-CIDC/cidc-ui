@@ -181,7 +181,7 @@ const ManifestUpload: React.FunctionComponent = () => {
                                             name => (
                                                 <FormControlLabel
                                                     key={name}
-                                                    label={name}
+                                                    label={name.toUpperCase()}
                                                     value={name}
                                                     control={<Radio />}
                                                     disabled={
