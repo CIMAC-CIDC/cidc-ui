@@ -18,6 +18,13 @@ const paths = {
     cytof: "cytof"
 };
 
+const pathTitleMap = {
+    [paths.cli]: "The CIDC Command-Line Interface",
+    [paths.wes]: "WES upload",
+    [paths.olink]: "Olink upload",
+    [paths.cytof]: "CyTOF upload"
+};
+
 const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
     const classes = useRootStyles();
 
@@ -80,6 +87,9 @@ const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
                             ) => (
                                 <AssayInstructions
                                     {...rprops}
+                                    title={
+                                        pathTitleMap[rprops.match.params.assay]
+                                    }
                                     tokenButton={
                                         rprops.match.params.assay === paths.cli
                                     }

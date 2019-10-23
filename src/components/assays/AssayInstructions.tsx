@@ -3,12 +3,14 @@ import { RouteComponentProps } from "react-router";
 import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
 import TemplateDownloadButton from "../generic/TemplateDownloadButton";
 import { withIdToken, AuthContext } from "../identity/AuthProvider";
-import { Grid } from "@material-ui/core";
+import { Grid, Typography, Divider } from "@material-ui/core";
 import { CloudDownload, Fingerprint } from "@material-ui/icons";
 import CopyToClipboardButton from "../generic/CopyToClipboardButton";
+import { widths } from "../../rootStyles";
 
 export interface IAssayInstructionsProps
     extends RouteComponentProps<{ assay: string }> {
+    title: string;
     token?: string;
     tokenButton?: boolean;
 }
@@ -22,7 +24,6 @@ const CopyIdToken: React.FunctionComponent = () => {
             copyValue={authData ? authData.idToken : ""}
             variant="contained"
             color="primary"
-            fullWidth
             startIcon={<Fingerprint />}
             disabled={!authData}
         />
@@ -38,33 +39,42 @@ const AssayInstructions: React.FunctionComponent<
     return (
         <Grid container direction="column">
             <Grid item>
-                <div
-                    style={{
-                        // A hack to place the download button
-                        // next to the markdown doc title
-                        float: "right",
-                        top: 10,
-                        padding: 0,
-                        marginBottom: -50
-                    }}
+                <Grid
+                    container
+                    direction="row"
+                    justify="space-between"
+                    alignItems="center"
+                    style={{ width: widths.markdownWidth }}
                 >
-                    {props.tokenButton ? (
-                        <CopyIdToken />
-                    ) : (
-                        <TemplateDownloadButton
-                            color="primary"
-                            templateName={assay}
-                            templateType="metadata"
-                            variant="contained"
-                            startIcon={<CloudDownload />}
-                        >
-                            Download an empty {assay} template
-                        </TemplateDownloadButton>
-                    )}
-                </div>
+                    <Grid item>
+                        <Typography variant="h4">{props.title}</Typography>
+                    </Grid>
+                    <Grid item>
+                        {props.tokenButton ? (
+                            <CopyIdToken />
+                        ) : (
+                            <TemplateDownloadButton
+                                color="primary"
+                                templateName={assay}
+                                templateType="metadata"
+                                variant="contained"
+                                startIcon={<CloudDownload />}
+                            >
+                                Download an empty {assay} template
+                            </TemplateDownloadButton>
+                        )}
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid item style={{ padding: "1em 0" }}>
+                <Divider />
             </Grid>
             <Grid item>
-                <CIDCGithubMarkdown path={path} insertIdToken />
+                <CIDCGithubMarkdown
+                    path={path}
+                    insertIdToken
+                    trimLeadingHeader
+                />
             </Grid>
         </Grid>
     );

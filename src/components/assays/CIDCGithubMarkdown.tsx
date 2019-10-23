@@ -6,6 +6,7 @@ import { useRootStyles } from "../../rootStyles";
 
 export interface ICIDCGithubMarkdownProps {
     path: string;
+    trimLeadingHeader?: boolean;
     insertIdToken?: boolean;
 }
 
@@ -30,15 +31,28 @@ const CIDCGithubMarkdown: React.FunctionComponent<
         fetch(fullURL)
             .then(response => response.text())
             .then(text => {
+                // Header trimming
+                let trimmedText = text;
+                if (props.trimLeadingHeader) {
+                    const lines = text.split("\n");
+                    console.log(lines);
+                    const hasLeadingHeader = lines && lines[0].startsWith("#");
+                    if (hasLeadingHeader) {
+                        trimmedText = lines.slice(1).join("\n");
+                    }
+                }
+
+                // ID token substitution
                 const finalText = idToken
-                    ? text.replace(
+                    ? trimmedText.replace(
                           /cidc login \[token\]/g,
                           "cidc login " + idToken
                       )
-                    : text;
+                    : trimmedText;
+
                 setMarkdown(finalText);
             });
-    }, [fullURL, idToken]);
+    }, [fullURL, idToken, props.trimLeadingHeader]);
 
     return (
         <div>

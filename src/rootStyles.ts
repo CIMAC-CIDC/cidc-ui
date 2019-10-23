@@ -7,7 +7,8 @@ export const colors = {
 };
 
 export const widths = {
-    pageWidth: 1200
+    pageWidth: 1200,
+    markdownWidth: 880
 };
 
 export const useRootStyles = makeStyles({
@@ -16,7 +17,7 @@ export const useRootStyles = makeStyles({
         height: "100vh"
     },
     markdown: {
-        width: 880,
+        width: widths.markdownWidth,
         margin: "auto"
     },
     content: {
