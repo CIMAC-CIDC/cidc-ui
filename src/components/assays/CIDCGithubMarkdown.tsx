@@ -2,6 +2,7 @@ import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import "github-markdown-css/github-markdown.css";
 import { AuthContext } from "../identity/AuthProvider";
+import { useRootStyles } from "../../rootStyles";
 
 export interface ICIDCGithubMarkdownProps {
     path: string;
@@ -13,6 +14,8 @@ const MARKDOWN_BASE_URL = "https://raw.githubusercontent.com/CIMAC-CIDC/";
 const CIDCGithubMarkdown: React.FunctionComponent<
     ICIDCGithubMarkdownProps
 > = props => {
+    const { markdown: markdownClass } = useRootStyles();
+
     const authData = React.useContext(AuthContext);
 
     const [markdown, setMarkdown] = React.useState<string | undefined>(
@@ -41,7 +44,7 @@ const CIDCGithubMarkdown: React.FunctionComponent<
         <div>
             <ReactMarkdown
                 source={markdown}
-                className="markdown-body Markdown-width"
+                className={`markdown-body ${markdownClass}`}
             />
         </div>
     );

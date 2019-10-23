@@ -1,52 +1,52 @@
 import * as React from "react";
-import "./Footer.css";
-import { Link as MuiLink } from "@material-ui/core";
+import { Link as MuiLink, Grid } from "@material-ui/core";
 import { Link as RouterLink } from "react-router-dom";
 
 export default class Footer extends React.Component<{}, {}> {
     public render() {
         return (
-            <div className="Footer-container">
-                <div className="Footer">
-                    <div style={{ flex: 3 }}>
+            <div>
+                <Grid container justify="center" spacing={5}>
+                    <Grid item>
                         &copy; {new Date().getFullYear()} CIDC @ Dana-Farber
                         Cancer Institute{" "}
-                    </div>
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "space-around",
-                            flex: 2
-                        }}
-                    >
-                        <div>
-                            <MuiLink
-                                underline="none"
-                                href="https://cimac-network.org/cidc/"
-                            >
-                                About
-                            </MuiLink>
-                        </div>
-                        <div>
-                            <RouterLink
-                                style={{ textDecoration: "none" }}
-                                to="/privacy-security"
-                            >
-                                <MuiLink underline="none">
-                                    Privacy and Security
+                    </Grid>
+                    <Grid item>
+                        <Grid
+                            container
+                            justify="space-between"
+                            wrap="nowrap"
+                            spacing={2}
+                        >
+                            <Grid item>
+                                <MuiLink
+                                    underline="none"
+                                    href="https://cimac-network.org/cidc/"
+                                >
+                                    About
                                 </MuiLink>
-                            </RouterLink>
-                        </div>
-                        <div>
-                            <MuiLink
-                                underline="none"
-                                href="https://github.com/cimac-cidc"
-                            >
-                                GitHub
-                            </MuiLink>
-                        </div>
-                    </div>
-                </div>
+                            </Grid>
+                            <Grid item>
+                                <RouterLink
+                                    style={{ textDecoration: "none" }}
+                                    to="/privacy-security"
+                                >
+                                    <MuiLink underline="none">
+                                        Privacy and Security
+                                    </MuiLink>
+                                </RouterLink>
+                            </Grid>
+                            <Grid item>
+                                <MuiLink
+                                    underline="none"
+                                    href="https://github.com/cimac-cidc"
+                                >
+                                    GitHub
+                                </MuiLink>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
             </div>
         );
     }

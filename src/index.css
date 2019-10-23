@@ -7,3 +7,7 @@ html *:not(code) {
     font-family: "Karla", sans-serif !important;
     font-stretch: condensed;
 }
+
+code.language-bash:before {
+    content: "$ ";
+}

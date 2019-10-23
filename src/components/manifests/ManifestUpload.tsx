@@ -29,7 +29,7 @@ import Loader from "../generic/Loader";
 import { AuthContext } from "../identity/AuthProvider";
 import { InfoContext } from "../info/InfoProvider";
 import { DataContext } from "../data/DataProvider";
-import "./Manifests.css";
+import { useManifestsStyles } from "./ManifestsPage";
 
 type Status =
     | "loading"
@@ -40,6 +40,7 @@ type Status =
     | "uploadSuccess";
 
 const ManifestUpload: React.FunctionComponent = () => {
+    const classes = useManifestsStyles();
     const authData = React.useContext(AuthContext);
     const info = React.useContext(InfoContext);
     const dataContext = React.useContext(DataContext);
@@ -147,7 +148,7 @@ const ManifestUpload: React.FunctionComponent = () => {
     };
 
     return (
-        <Card className="Manifests-card">
+        <Card className={classes.card}>
             <CardHeader
                 avatar={<CloudUpload />}
                 title={

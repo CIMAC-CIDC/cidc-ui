@@ -9,15 +9,32 @@ import {
     OutlinedInput,
     MenuItem,
     Typography,
-    CircularProgress
+    CircularProgress,
+    makeStyles
 } from "@material-ui/core";
-import "./Register.css";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
 import { createUser } from "../../api/api";
 import { AuthContext } from "./AuthProvider";
 import history from "./History";
+import { colors } from "../../rootStyles";
+
+export const useRegisterStyles = makeStyles({
+    header: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: colors.LIGHT_BLUE,
+        height: 48,
+        fontSize: 24
+    },
+    progress: {
+        textAlign: "center",
+        paddingTop: 30
+    }
+});
 
 export default function Register() {
+    const classes = useRegisterStyles();
     const authData = React.useContext(AuthContext);
 
     const [state, setEntireState] = React.useState({
@@ -85,8 +102,8 @@ export default function Register() {
     if (!authData) {
         return (
             <>
-                <div className="Register-header">Registration</div>
-                <div className="Register-progress">
+                <div className={classes.header}>Registration</div>
+                <div className={classes.progress}>
                     <CircularProgress />
                 </div>
             </>
@@ -95,7 +112,7 @@ export default function Register() {
 
     return (
         <div>
-            <div className="Register-header">Registration</div>
+            <div className={classes.header}>Registration</div>
             <div style={{ width: "25%", margin: "auto", paddingTop: 25 }}>
                 <Typography
                     style={{ fontSize: 18, width: "100%", margin: "auto" }}

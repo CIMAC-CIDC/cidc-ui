@@ -7,17 +7,18 @@ import {
     Link as MuiLink,
     Divider,
     Grid,
-    withStyles
+    withStyles,
+    makeStyles
 } from "@material-ui/core";
 import {
     withRouter,
     RouteComponentProps,
     Link as RouterLink
 } from "react-router-dom";
-import "./Header.css";
 import logo from "../../logo.png";
 import { AccountCircle, Search, TableChart } from "@material-ui/icons";
 import { useUserContext } from "../identity/UserProvider";
+import { colors } from "../../rootStyles";
 
 const ENV = process.env.REACT_APP_ENV;
 
@@ -60,7 +61,16 @@ const StyledTabs = withStyles({
     <Tabs {...props} TabIndicatorProps={{ children: <div /> }} />
 ));
 
+const useHeaderStyles = makeStyles({
+    tabs: {
+        background: `linear-gradient(to right, white,${colors.LIGHT_BLUE} 300px, ${colors.LIGHT_BLUE})`,
+        width: "100%"
+    },
+    logo: { height: 87, padding: 5 }
+});
+
 const Header: React.FunctionComponent<RouteComponentProps> = props => {
+    const classes = useHeaderStyles();
     const user = useUserContext();
 
     function handleChange(_: React.ChangeEvent<{}>, value: any) {
@@ -81,17 +91,22 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
     }
 
     return (
-        <div style={{ backgroundColor: "var(--light-grey-gradient)" }}>
+        <div>
             <EnvBanner />
-            <div className="Header-tabs">
+            <div className={classes.tabs}>
                 <Grid
                     container
                     alignItems="center"
+                    wrap="nowrap"
                     style={{ width: "100%", paddingBottom: "0" }}
                 >
                     <Grid item>
                         <RouterLink to="/">
-                            <img src={logo} className="Logo" alt="Home" />
+                            <img
+                                src={logo}
+                                className={classes.logo}
+                                alt="Home"
+                            />
                         </RouterLink>
                     </Grid>
                     <Grid item>

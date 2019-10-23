@@ -16,7 +16,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import UserPermissionsDialog from "./UserPermissionsDialog";
 import { ORGANIZATION_NAME_MAP, ROLES } from "../../util/constants";
-import "./UserAccount.css";
 import { updateRole, deleteUser, getUserEtag } from "../../api/api";
 
 export default class UserTableRow extends React.Component<any, {}> {
@@ -75,13 +74,11 @@ export default class UserTableRow extends React.Component<any, {}> {
     public render() {
         return (
             <>
-                <TableCell className="Admin-row-text">
-                    {this.props.account.email}
-                </TableCell>
-                <TableCell className="Admin-row-text">
+                <TableCell>{this.props.account.email}</TableCell>
+                <TableCell>
                     {this.props.account.first_n} {this.props.account.last_n}
                 </TableCell>
-                <TableCell className="Admin-row-text">
+                <TableCell>
                     {ORGANIZATION_NAME_MAP[this.props.account.organization]}
                 </TableCell>
                 <TableCell>

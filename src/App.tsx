@@ -1,5 +1,4 @@
 import * as React from "react";
-import "./App.css";
 import BrowseFilesPage from "./components/browseFiles/BrowseFilesPage";
 import FileDetailsPage from "./components/browseFiles/FileDetailsPage";
 import { Router, Switch, Route } from "react-router-dom";
@@ -19,6 +18,7 @@ import ErrorGuard from "./components/errors/ErrorGuard";
 import InfoProvider from "./components/info/InfoProvider";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core";
 import DataProvider from "./components/data/DataProvider";
+import { useRootStyles } from "./rootStyles";
 
 const theme = createMuiTheme({
     overrides: {
@@ -41,9 +41,11 @@ const theme = createMuiTheme({
 });
 
 export default function App() {
+    const classes = useRootStyles();
+
     return (
         <Router history={history}>
-            <div className="App">
+            <div className={classes.root}>
                 <MuiThemeProvider theme={theme}>
                     <ErrorGuard>
                         <AuthProvider>
@@ -51,7 +53,7 @@ export default function App() {
                                 <DataProvider>
                                     <InfoProvider>
                                         <Header />
-                                        <div className="Content">
+                                        <div className={classes.content}>
                                             <Switch>
                                                 <Route
                                                     path="/"
