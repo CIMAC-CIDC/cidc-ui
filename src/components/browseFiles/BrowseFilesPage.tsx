@@ -2,7 +2,6 @@ import { Grid, TextField, Typography, Button } from "@material-ui/core";
 import autobind from "autobind-decorator";
 import _ from "lodash";
 import * as React from "react";
-import "./BrowseFiles.css";
 import { changeOption, filterFiles } from "./browseFilesUtil";
 import FileFilter from "./FileFilter";
 import FileTable from "./FileTable";
@@ -59,18 +58,21 @@ class BrowseFilesPage extends React.Component<
 
         const trials = _.uniq(this.props.files.map(f => f.trial));
 
+        const filterWidth = 300;
+        const maxTableWidth = 1500;
+
         return (
-            <div className="Browse-files-page">
-                {this.props.files.length === 0 && (
-                    <div className="Browse-files-progress">
-                        <Typography style={{ fontSize: 18 }}>
-                            No files found.
-                        </Typography>
-                    </div>
-                )}
+            <div
+                style={{
+                    margin: "auto",
+                    padding: 20,
+                    maxWidth: filterWidth + maxTableWidth
+                }}
+            >
+                {this.props.files.length === 0 && <Loader />}
                 {this.props.files.length > 0 && (
-                    <Grid container={true} spacing={3}>
-                        <Grid item={true} xs={3}>
+                    <Grid container spacing={3}>
+                        <Grid item style={{ width: filterWidth }}>
                             <FileFilter
                                 trialIds={{
                                     options: _.uniq(
@@ -116,39 +118,39 @@ class BrowseFilesPage extends React.Component<
                                 }
                             />
                         </Grid>
-                        <Grid item={true} xs={9}>
+                        <Grid
+                            item
+                            style={{
+                                maxWidth: 1500,
+                                width: `calc(100% - ${filterWidth}px)`
+                            }}
+                        >
                             <Grid
                                 container
+                                wrap="nowrap"
                                 direction="row"
                                 justify="space-between"
+                                alignItems="center"
                             >
                                 <Grid item>
-                                    <div className="File-search-border">
-                                        <TextField
-                                            label="Search"
-                                            type="search"
-                                            margin="normal"
-                                            variant="outlined"
-                                            value={searchFilter}
-                                            className="File-search"
-                                            InputProps={{
-                                                className: "File-search-input"
-                                            }}
-                                            InputLabelProps={{
-                                                className: "File-search-label"
-                                            }}
-                                            onChange={(
-                                                e: React.ChangeEvent<
-                                                    HTMLInputElement
-                                                >
-                                            ) =>
-                                                this.handleSearchFilterChange(
-                                                    e,
-                                                    params
-                                                )
-                                            }
-                                        />
-                                    </div>
+                                    <TextField
+                                        style={{ marginTop: 0 }}
+                                        label="Search"
+                                        type="search"
+                                        margin="dense"
+                                        variant="outlined"
+                                        value={searchFilter}
+                                        onChange={(
+                                            e: React.ChangeEvent<
+                                                HTMLInputElement
+                                            >
+                                        ) =>
+                                            this.handleSearchFilterChange(
+                                                e,
+                                                params
+                                            )
+                                        }
+                                    />
                                 </Grid>
                                 <Grid item>
                                     <Button

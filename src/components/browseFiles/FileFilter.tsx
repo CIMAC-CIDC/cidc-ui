@@ -3,6 +3,7 @@ import * as React from "react";
 import FileFilterCheckboxGroup, {
     IFilterConfig
 } from "./FileFilterCheckboxGroup";
+import { colors } from "../../rootStyles";
 
 export interface IFileFilterProps {
     trialIds: IFilterConfig;
@@ -13,34 +14,39 @@ export interface IFileFilterProps {
     onDataFormatChange: (dataFormat: string) => void;
 }
 
-export default class FileFilter extends React.Component<IFileFilterProps, {}> {
-    public render() {
-        return (
-            <div className="File-filter">
-                <Grid container={true}>
-                    <Grid item={true} xs={12}>
-                        <FileFilterCheckboxGroup
-                            title="Protocol Identifier"
-                            config={this.props.trialIds}
-                            onChange={this.props.onTrialIdChange}
-                        />
-                    </Grid>
-                    <Grid item={true} xs={12}>
-                        <FileFilterCheckboxGroup
-                            title="Type"
-                            config={this.props.experimentalStrategies}
-                            onChange={this.props.onExperimentalStrategyChange}
-                        />
-                    </Grid>
-                    <Grid item={true} xs={12}>
-                        <FileFilterCheckboxGroup
-                            title="Format"
-                            config={this.props.dataFormats}
-                            onChange={this.props.onDataFormatChange}
-                        />
-                    </Grid>
+const FileFilter: React.FunctionComponent<IFileFilterProps> = props => {
+    return (
+        <div
+            style={{
+                border: `1px solid ${colors.DARK_BLUE_GREY}`,
+                borderRadius: 5
+            }}
+        >
+            <Grid container={true}>
+                <Grid item={true} xs={12}>
+                    <FileFilterCheckboxGroup
+                        title="Protocol Identifier"
+                        config={props.trialIds}
+                        onChange={props.onTrialIdChange}
+                    />
                 </Grid>
-            </div>
-        );
-    }
-}
+                <Grid item={true} xs={12}>
+                    <FileFilterCheckboxGroup
+                        title="Type"
+                        config={props.experimentalStrategies}
+                        onChange={props.onExperimentalStrategyChange}
+                    />
+                </Grid>
+                <Grid item={true} xs={12}>
+                    <FileFilterCheckboxGroup
+                        title="Format"
+                        config={props.dataFormats}
+                        onChange={props.onDataFormatChange}
+                    />
+                </Grid>
+            </Grid>
+        </div>
+    );
+};
+
+export default FileFilter;

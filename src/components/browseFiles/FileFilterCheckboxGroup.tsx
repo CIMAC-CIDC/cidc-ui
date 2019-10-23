@@ -2,11 +2,30 @@ import {
     FormControlLabel,
     FormGroup,
     Toolbar,
-    Typography
+    Typography,
+    makeStyles
 } from "@material-ui/core";
 import Checkbox from "@material-ui/core/Checkbox";
-import autobind from "autobind-decorator";
 import * as React from "react";
+import { colors } from "../../rootStyles";
+
+const useFilterStyles = makeStyles({
+    header: {
+        justifyContent: "center",
+        backgroundColor: colors.DARK_BLUE_GREY,
+        color: "white",
+        minHeight: 36
+    },
+    checkboxGroup: {
+        flexWrap: "nowrap",
+        paddingLeft: 10,
+        maxHeight: 200,
+        overflow: "auto"
+    },
+    checkbox: {
+        padding: 5
+    }
+});
 
 export interface IFilterConfig {
     options: string[];
@@ -19,46 +38,42 @@ export interface IFileFilterCheckboxGroupProps {
     onChange: (option: string) => void;
 }
 
-export default class FileFilterCheckboxGroup extends React.Component<
-    IFileFilterCheckboxGroupProps,
-    {}
-> {
-    @autobind
-    private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-        this.props.onChange(event.target.value);
-    }
+const FileFilterCheckboxGroup: React.FunctionComponent<
+    IFileFilterCheckboxGroupProps
+> = props => {
+    const classes = useFilterStyles();
 
-    public render() {
-        return (
-            <div>
-                <Toolbar className="File-filter-toolbar">
-                    <Typography className="File-filter-toolbar-text">
-                        {this.props.title}
-                    </Typography>
-                </Toolbar>
-                <div className="File-filter-checkboxes">
-                    <FormGroup>
-                        {this.props.config.options.map((dataFormat: string) => {
-                            return (
-                                <FormControlLabel
-                                    key={dataFormat}
-                                    label={dataFormat}
-                                    control={
-                                        <Checkbox
-                                            value={dataFormat}
-                                            checked={this.props.config.checked.includes(
-                                                dataFormat
-                                            )}
-                                            onChange={this.handleChange}
-                                            className="File-filter-checkbox"
-                                        />
-                                    }
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        props.onChange(event.target.value);
+    };
+
+    return (
+        <div>
+            <Toolbar className={classes.header} disableGutters>
+                <Typography>{props.title}</Typography>
+            </Toolbar>
+            <FormGroup className={classes.checkboxGroup}>
+                {props.config.options.map((dataFormat: string) => {
+                    return (
+                        <FormControlLabel
+                            key={dataFormat}
+                            label={dataFormat}
+                            control={
+                                <Checkbox
+                                    value={dataFormat}
+                                    checked={props.config.checked.includes(
+                                        dataFormat
+                                    )}
+                                    onChange={handleChange}
+                                    className={classes.checkbox}
                                 />
-                            );
-                        })}
-                    </FormGroup>
-                </div>
-            </div>
-        );
-    }
-}
+                            }
+                        />
+                    );
+                })}
+            </FormGroup>
+        </div>
+    );
+};
+
+export default FileFilterCheckboxGroup;

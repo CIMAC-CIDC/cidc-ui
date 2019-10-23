@@ -2,7 +2,11 @@ import {
     TablePagination,
     TableSortLabel,
     Popover,
-    Typography
+    Typography,
+    Theme,
+    createStyles,
+    withStyles,
+    WithStyles
 } from "@material-ui/core";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -14,6 +18,7 @@ import _ from "lodash";
 import * as React from "react";
 import { DataFile } from "../../model/file";
 import { LOCALE, DATE_OPTIONS } from "../../util/constants";
+import { colors } from "../../rootStyles";
 
 const NAME_KEY = "object_url";
 const TRIAL_ID_KEY = "trial_id";
@@ -25,7 +30,20 @@ const SORT_MAP = {
     [DATETIME_KEY]: (f: DataFile) => new Date(f.uploaded_timestamp)
 };
 
-export interface IFileTableProps {
+const tableStyles = (theme: Theme) =>
+    createStyles({
+        table: {
+            border: `1px solid ${colors.LIGHT_GREY}`,
+            borderRadius: 5,
+            borderCollapse: "separate"
+        },
+        row: {
+            cursor: "pointer"
+        }
+    });
+const withTableStyles = withStyles(tableStyles);
+
+export interface IFileTableProps extends WithStyles<typeof tableStyles> {
     files: DataFile[];
     trials: string[];
     history: any;
@@ -39,10 +57,7 @@ export interface IFileTableState {
     anchorEl: any;
 }
 
-export default class FileTable extends React.Component<
-    IFileTableProps,
-    IFileTableState
-> {
+class FileTable extends React.Component<IFileTableProps, IFileTableState> {
     state: IFileTableState = {
         page: 0,
         rowsPerPage: 10,
@@ -78,18 +93,12 @@ export default class FileTable extends React.Component<
     }
 
     public render() {
-        console.log(
-            this.state.sortBy in SORT_MAP
-                ? SORT_MAP[this.state.sortBy]
-                : this.state.sortBy
-        );
-
         return (
             <div>
-                <Table className="File-table">
+                <Table className={this.props.classes.table}>
                     <TableHead>
                         <TableRow>
-                            <TableCell className="File-table-header-cell">
+                            <TableCell>
                                 <TableSortLabel
                                     active={this.state.sortBy === NAME_KEY}
                                     direction={this.state.sortDirection}
@@ -101,7 +110,7 @@ export default class FileTable extends React.Component<
                                     File Name
                                 </TableSortLabel>
                             </TableCell>
-                            <TableCell className="File-table-header-cell">
+                            <TableCell>
                                 <TableSortLabel
                                     active={this.state.sortBy === TRIAL_ID_KEY}
                                     direction={this.state.sortDirection}
@@ -113,7 +122,7 @@ export default class FileTable extends React.Component<
                                     Protocol Identifier
                                 </TableSortLabel>
                             </TableCell>
-                            <TableCell className="File-table-header-cell">
+                            <TableCell>
                                 <TableSortLabel
                                     active={
                                         this.state.sortBy === ASSAY_TYPE_KEY
@@ -127,7 +136,7 @@ export default class FileTable extends React.Component<
                                     Type
                                 </TableSortLabel>
                             </TableCell>
-                            <TableCell className="File-table-header-cell">
+                            <TableCell>
                                 <TableSortLabel
                                     active={this.state.sortBy === FILE_TYPE_KEY}
                                     direction={this.state.sortDirection}
@@ -139,7 +148,7 @@ export default class FileTable extends React.Component<
                                     Format
                                 </TableSortLabel>
                             </TableCell>
-                            <TableCell className="File-table-header-cell">
+                            <TableCell>
                                 <TableSortLabel
                                     active={this.state.sortBy === DATETIME_KEY}
                                     direction={this.state.sortDirection}
@@ -171,7 +180,7 @@ export default class FileTable extends React.Component<
                                 // but evaluate adding it back as necessary.
                                 return (
                                     <TableRow
-                                        className="File-table-row"
+                                        className={this.props.classes.row}
                                         key={file.id}
                                         hover={true}
                                         // tslint:disable-next-line:jsx-no-lambda
@@ -179,19 +188,13 @@ export default class FileTable extends React.Component<
                                             this.handleClick(file.id)
                                         }
                                     >
-                                        <TableCell className="File-table-row-cell filename">
-                                            {file.object_url}
-                                        </TableCell>
-                                        <TableCell className="File-table-row-cell">
-                                            {file.trial}
-                                        </TableCell>
-                                        <TableCell className="File-table-row-cell">
-                                            {file.assay_type}
-                                        </TableCell>
-                                        <TableCell className="File-table-row-cell">
+                                        <TableCell>{file.object_url}</TableCell>
+                                        <TableCell>{file.trial}</TableCell>
+                                        <TableCell>{file.assay_type}</TableCell>
+                                        <TableCell>
                                             {file.data_format}
                                         </TableCell>
-                                        <TableCell className="File-table-row-cell">
+                                        <TableCell>
                                             {new Date(
                                                 file.uploaded_timestamp
                                             ).toLocaleString(
@@ -234,3 +237,5 @@ export default class FileTable extends React.Component<
         );
     }
 }
+
+export default withTableStyles(FileTable);
