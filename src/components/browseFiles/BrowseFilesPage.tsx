@@ -69,7 +69,13 @@ class BrowseFilesPage extends React.Component<
                     maxWidth: filterWidth + maxTableWidth
                 }}
             >
-                {this.props.files.length === 0 && <Loader />}
+                {this.props.files.length === 0 && (
+                    <Grid container justify="center">
+                        <Grid item>
+                            <Typography>No files found.</Typography>
+                        </Grid>
+                    </Grid>
+                )}
                 {this.props.files.length > 0 && (
                     <Grid container spacing={3}>
                         <Grid item style={{ width: filterWidth }}>
