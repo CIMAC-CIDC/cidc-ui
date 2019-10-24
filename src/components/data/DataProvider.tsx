@@ -36,7 +36,8 @@ export const DataProvider: React.FunctionComponent = props => {
 
     React.useEffect(refreshData, []);
 
-    const value = files && { files, dataStatus, refreshData };
+    const value =
+        files === undefined ? undefined : { files, dataStatus, refreshData };
 
     return (
         <DataContext.Provider value={value}>
