@@ -35,7 +35,6 @@ const CIDCGithubMarkdown: React.FunctionComponent<
                 let trimmedText = text;
                 if (props.trimLeadingHeader) {
                     const lines = text.split("\n");
-                    console.log(lines);
                     const hasLeadingHeader = lines && lines[0].startsWith("#");
                     if (hasLeadingHeader) {
                         trimmedText = lines.slice(1).join("\n");
