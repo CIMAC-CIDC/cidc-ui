@@ -3,6 +3,7 @@ import { DataFile } from "../../model/file";
 import { AuthContext } from "../identity/AuthProvider";
 import { getFiles } from "../../api/api";
 import Loader from "../generic/Loader";
+import { UserContext } from "../identity/UserProvider";
 
 export interface IDataContext {
     files: DataFile[];
@@ -16,6 +17,7 @@ export const DataContext = React.createContext<IDataContext | undefined>(
 
 export const DataProvider: React.FunctionComponent = props => {
     const authContext = React.useContext(AuthContext);
+    const userContext = React.useContext(UserContext);
 
     const [files, setFiles] = React.useState<DataFile[] | undefined>(undefined);
     const [dataStatus, setDataStatus] = React.useState<
@@ -23,7 +25,8 @@ export const DataProvider: React.FunctionComponent = props => {
     >("fetching");
 
     const refreshData = () => {
-        if (authContext) {
+        // Only try to fetch data if user has been approved
+        if (authContext && userContext && userContext.role) {
             setDataStatus("fetching");
             getFiles(authContext.idToken)
                 .then(fs => {
@@ -34,7 +37,9 @@ export const DataProvider: React.FunctionComponent = props => {
         }
     };
 
-    React.useEffect(refreshData, []);
+    React.useEffect(refreshData, [
+        authContext && userContext && userContext.role
+    ]);
 
     const value = files && { files, dataStatus, refreshData };
 

@@ -30,13 +30,18 @@ export const useRegisterStyles = makeStyles({
     progress: {
         textAlign: "center",
         paddingTop: 30
-    }
+    },
+    body: { width: 700, margin: "auto", paddingTop: 25 },
+    text: { fontSize: 18 }
 });
 
 export default function Register() {
     const classes = useRegisterStyles();
     const authData = React.useContext(AuthContext);
 
+    const [hasPrepopulated, setHasPrepopulated] = React.useState<boolean>(
+        false
+    );
     const [state, setEntireState] = React.useState({
         first_n: "",
         last_n: "",
@@ -48,30 +53,27 @@ export default function Register() {
         token: undefined
     });
 
-    const setState = React.useCallback(
-        (partialState: any) => setEntireState({ ...state, ...partialState }),
-        [state]
-    );
+    const setState = React.useCallback((partialState: any) => {
+        setEntireState({ ...state, ...partialState });
+    }, Object.values(state));
 
     React.useEffect(() => {
         if (authData) {
-            setState({ token: authData.idToken, ...authData.user });
+            if (!hasPrepopulated) {
+                setState({ ...authData.user, token: authData.idToken });
+                setHasPrepopulated(true);
+            } else {
+                setState({ token: authData.idToken });
+            }
         }
     }, [authData, setState]);
 
-    function handleFirstNameChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setState({ first_n: event.target.value });
-    }
-
-    function handleLastNameChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setState({ last_n: event.target.value });
-    }
-
-    function handleOrganizationChange(
-        event: React.ChangeEvent<HTMLSelectElement>
-    ) {
-        setState({ organization: event.target.value });
-    }
+    const handleChange = (
+        field: string,
+        event: React.ChangeEvent<{ value: any }>
+    ) => {
+        setState({ [field]: event.target.value });
+    };
 
     function handleClick() {
         const firstNameError: boolean = !state.first_n;
@@ -102,7 +104,7 @@ export default function Register() {
     if (!authData) {
         return (
             <>
-                <div className={classes.header}>Registration</div>
+                <div className={classes.header}>CIDC Registration Request</div>
                 <div className={classes.progress}>
                     <CircularProgress />
                 </div>
@@ -112,19 +114,16 @@ export default function Register() {
 
     return (
         <div>
-            <div className={classes.header}>Registration</div>
-            <div style={{ width: "25%", margin: "auto", paddingTop: 25 }}>
-                <Typography
-                    style={{ fontSize: 18, width: "100%", margin: "auto" }}
-                >
-                    Please complete your CIMAC-CIDC Data Portal registration
-                    request below.
+            <div className={classes.header}>CIDC Registration Request</div>
+            <div className={classes.body}>
+                <Typography className={classes.text}>
+                    If you are interested in accessing the CIMAC-CIDC Data
+                    Portal, please complete your registration request below.
                 </Typography>
-                <Grid container={true} spacing={3}>
-                    <Grid item={true} xs={12}>
+                <Grid container={true} spacing={3} direction="column">
+                    <Grid item={true}>
                         <TextField
-                            label="Login Email"
-                            style={{ minWidth: 420 }}
+                            label="Contact Email"
                             value={state.email}
                             disabled={true}
                             fullWidth={true}
@@ -132,35 +131,34 @@ export default function Register() {
                             variant="outlined"
                         />
                     </Grid>
-                    <Grid item={true} xs={12}>
+                    <Grid item={true}>
                         <TextField
                             label="First Name"
-                            style={{ minWidth: 420 }}
                             fullWidth={true}
                             value={state.first_n}
-                            onChange={handleFirstNameChange}
+                            onChange={e => handleChange("first_n", e)}
                             margin="normal"
                             variant="outlined"
                             required={true}
                             error={state.firstNameError}
                         />
                     </Grid>
-                    <Grid item={true} xs={12}>
+                    <Grid item={true}>
                         <TextField
                             label="Last Name"
-                            style={{ minWidth: 420 }}
                             fullWidth={true}
                             value={state.last_n}
-                            onChange={handleLastNameChange}
+                            onChange={e => handleChange("last_n", e)}
                             margin="normal"
                             variant="outlined"
                             required={true}
                             error={state.lastNameError}
                         />
                     </Grid>
-                    <Grid item={true} xs={12}>
+                    <Grid item={true}>
                         <FormControl
                             variant="outlined"
+                            fullWidth
                             required={true}
                             margin="normal"
                             error={state.organizationError}
@@ -169,9 +167,7 @@ export default function Register() {
                             <InputLabel>Organization</InputLabel>
                             <Select
                                 value={state.organization}
-                                onChange={(e: any) =>
-                                    handleOrganizationChange(e)
-                                }
+                                onChange={e => handleChange("organization", e)}
                                 input={<OutlinedInput labelWidth={100} />}
                             >
                                 <MenuItem value="EMPTY">Please select</MenuItem>
@@ -193,22 +189,26 @@ export default function Register() {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item={true} xs={12}>
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "center"
-                            }}
-                        >
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                // tslint:disable-next-line:jsx-no-lambda
-                                onClick={() => handleClick()}
-                            >
-                                Register
-                            </Button>
-                        </div>
+                    <Grid item={true}>
+                        <Grid container justify="space-between">
+                            <Grid item>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => history.push("/logout")}
+                                >
+                                    Cancel
+                                </Button>
+                            </Grid>
+                            <Grid item>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => handleClick()}
+                                >
+                                    Register
+                                </Button>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
             </div>

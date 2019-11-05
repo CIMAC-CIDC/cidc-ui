@@ -60,7 +60,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                             history.replace("/register");
                         }
                     });
-            } else if (!permissions) {
+            } else if (!permissions && user.role) {
                 getPermissionsForUser(idToken, user.id).then(perms =>
                     setPermissions(perms)
                 );

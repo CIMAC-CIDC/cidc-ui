@@ -3,6 +3,7 @@ import { Typography } from "@material-ui/core";
 import history from "./History";
 import { useUserContext } from "./UserProvider";
 import { useRegisterStyles } from "./Register";
+import ContactAnAdmin from "../generic/ContactAnAdmin";
 
 export default function Unactivated() {
     const classes = useRegisterStyles();
@@ -15,19 +16,22 @@ export default function Unactivated() {
 
     return (
         <div data-testid="unactivated-message">
-            <div className={classes.header}>Registration</div>
-            <Typography
-                style={{
-                    fontSize: 20,
-                    width: "70%",
-                    margin: "auto",
-                    paddingTop: 25
-                }}
-            >
-                Thank for you registering for the CIMAC-CIDC Data Portal. We
-                will email you when your authorization request has been
-                completed.
-            </Typography>
+            <div className={classes.header}>CIDC Registration Request</div>
+            <div className={classes.body}>
+                <Typography paragraph className={classes.text}>
+                    Thank for you for submitting a registration request for the
+                    CIMAC-CIDC Data Portal.
+                </Typography>
+                <Typography paragraph className={classes.text}>
+                    If you are a member of the CIMAC Network, we will issue an
+                    account to you as data for your trial(s) become available on
+                    the site.
+                </Typography>
+                <Typography paragraph className={classes.text}>
+                    In the meantime, feel free to <ContactAnAdmin lower /> with
+                    any questions you may have.
+                </Typography>
+            </div>
         </div>
     );
 }
