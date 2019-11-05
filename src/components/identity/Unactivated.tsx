@@ -24,8 +24,9 @@ export default function Unactivated() {
                 </Typography>
                 <Typography paragraph className={classes.text}>
                     If you are a member of the CIMAC Network, we will issue an
-                    account to you as data for your trial(s) become available on
-                    the site.
+                    "@cimac-network.org" email account to you that you can use
+                    to access the CIDC Portal once data for your trial(s) become
+                    available on the site.
                 </Typography>
                 <Typography paragraph className={classes.text}>
                     In the meantime, feel free to <ContactAnAdmin lower /> with
