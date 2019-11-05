@@ -60,7 +60,7 @@ export default function Register() {
         // React's linter complains about spread elements in dependency arrays,
         // but we bypass in this case to avoid having a very long dependency array.
         // eslint-disable-next-line
-        [...Object.values(state), state]
+        Object.values(state)
     );
 
     React.useEffect(() => {
