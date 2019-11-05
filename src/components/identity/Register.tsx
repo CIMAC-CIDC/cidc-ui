@@ -53,9 +53,15 @@ export default function Register() {
         token: undefined
     });
 
-    const setState = React.useCallback((partialState: any) => {
-        setEntireState({ ...state, ...partialState });
-    }, Object.values(state));
+    const setState = React.useCallback(
+        (partialState: any) => {
+            setEntireState({ ...state, ...partialState });
+        },
+        // React's linter complains about spread elements in dependency arrays,
+        // but we bypass in this case to avoid having a very long dependency array.
+        // eslint-disable-next-line
+        [...Object.values(state), state]
+    );
 
     React.useEffect(() => {
         if (authData) {
@@ -66,7 +72,7 @@ export default function Register() {
                 setState({ token: authData.idToken });
             }
         }
-    }, [authData, setState]);
+    }, [authData, setState, hasPrepopulated]);
 
     const handleChange = (
         field: string,
