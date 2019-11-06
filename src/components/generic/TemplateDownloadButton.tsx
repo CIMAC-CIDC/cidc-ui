@@ -7,7 +7,7 @@ import { InfoContext } from "../info/InfoProvider";
 // xlsx file in the static/ folder.
 export function nameToURL(type: string, name: string) {
     const fmtedName = name.toLowerCase().replace(" ", "_");
-    return `${process.env.PUBLIC_URL}/static/xlsx/${type}/${fmtedName}_template.xlsx`;
+    return `${process.env.REACT_APP_API_URL}/info/templates/${type}/${fmtedName}`;
 }
 
 export interface ITemplateDownloadButtonProps extends ButtonProps {
