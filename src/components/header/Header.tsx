@@ -28,7 +28,7 @@ const EnvBanner: React.FunctionComponent = () =>
             style={{
                 background:
                     "repeating-linear-gradient(45deg, #ffcc00, #ffcc00 10px, black 10px, black 20px)",
-                padding: "1em",
+                padding: ENV === "staging" ? "1em" : "0",
                 textAlign: "center"
             }}
         >
