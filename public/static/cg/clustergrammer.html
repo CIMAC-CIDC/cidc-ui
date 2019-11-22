@@ -16,13 +16,18 @@
 
         <link rel="stylesheet" href="static/cg/lib/css/font-awesome.min.css" />
         <link rel="stylesheet" href="static/cg/lib/css/bootstrap.css" />
-        <link rel="stylesheet" href="static/cg/css/custom.css" />
-    </head>
+        <link rel="stylesheet" href="static/cg/clustergrammer.min.css" />
 
+        <!-- Prevent scrolling -->
+        <style>
+            html,
+            body {
+                overflow: hidden;
+            }
+        </style>
+    </head>
     <body>
-        <div id="cg-root">
-            <h1 class="wait_message">Please wait ...</h1>
-        </div>
+        <div id="cg-root"></div>
 
         <!-- Required JS Libraries -->
         <script src="static/cg/lib/js/d3.js"></script>
@@ -31,14 +36,32 @@
         <script src="static/cg/lib/js/bootstrap.min.js"></script>
 
         <!-- Clustergrammer JS -->
-        <script src="static/cg/clustergrammer.js"></script>
+        <script src="static/cg/clustergrammer.min.js"></script>
 
-        <!-- optional modules -->
-        <script src="static/cg/js/Enrichrgram.js"></script>
-        <script src="static/cg/js/hzome_functions.js"></script>
-        <script src="static/cg/js/send_to_Enrichr.js"></script>
+        <script>
+            // Add a function for drawing clustergrammer network data
+            // to the document object. This function will be called
+            // by instances of the Clustergrammer component within the CIDC
+            // React app (src/components/visualizations/Clustergrammer.tsx).
+            document.createAttribute("clustergrammer");
+            document.clustergrammer = function(network_data) {
+                var args = {
+                    root: "#cg-root",
+                    network_data: network_data,
+                    sidebar_width: 150
+                };
 
-        <!-- make clustergram -->
-        <script src="static/cg/js/load_clustergram.js"></script>
+                d3.select(args.root)
+                    .style("width", window.innerWidth + "px")
+                    .style("height", window.innerHeight - 20 + "px");
+
+                d3.select(window).on("resize", function() {
+                    resize_container(args);
+                    cgm.resize_viz();
+                });
+
+                cgm = Clustergrammer(args);
+            };
+        </script>
     </body>
 </html>

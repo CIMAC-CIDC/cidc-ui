@@ -1,28 +1,38 @@
 import React from "react";
 import Frame, { FrameContextConsumer } from "react-frame-component";
 import useRawFile from "../../util/useRawFile";
-import testData from "./testData";
 
-const Clustergrammer: React.FC = () => {
+// TODO: refine this type
+export interface INetworkData {
+    [k: string]: any;
+}
+
+export interface IClustergrammerProps {
+    networkData: INetworkData;
+    width?: number;
+    height?: number;
+}
+
+const Clustergrammer: React.FC<IClustergrammerProps> = props => {
     const cgHTML = useRawFile("static/cg/clustergrammer.html");
+
+    const drawCg = (iframeContext: {
+        clustergrammer?: (data: INetworkData) => void;
+    }) => {
+        if (iframeContext.clustergrammer) {
+            iframeContext.clustergrammer(props.networkData);
+        }
+    };
 
     return cgHTML ? (
         <Frame
             initialContent={cgHTML}
-            width={1000}
-            height={500}
+            width={props.width || 1000}
+            height={props.height || 600}
             frameBorder={0}
         >
             <FrameContextConsumer>
-                {({
-                    document
-                }: {
-                    document: { make_clust?: (data: any) => void };
-                }) => {
-                    if (document.make_clust) {
-                        document.make_clust(testData);
-                    }
-                }}
+                {(context: any) => drawCg(context.document)}
             </FrameContextConsumer>
         </Frame>
     ) : null;

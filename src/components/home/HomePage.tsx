@@ -1,6 +1,4 @@
 import * as React from "react";
-// import Iframe from "react-iframe";
-// import ShadowRoot from "react-shadow";
 import {
     Typography,
     Link,
@@ -19,7 +17,6 @@ import {
 import history from "../identity/History";
 import { UserContext } from "../identity/UserProvider";
 import { widths } from "../../rootStyles";
-import Clustergrammer from "../visualizations/Clustergrammer";
 
 const ListLink: React.FunctionComponent<{
     icon: React.ReactElement;
@@ -42,7 +39,6 @@ const HomePage: React.FunctionComponent = () => {
                 margin: "auto"
             }}
         >
-            <Clustergrammer />
             <Typography
                 variant="h4"
                 style={{ textAlign: "center" }}
