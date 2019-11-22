@@ -87,7 +87,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
         props.history.push(value);
     }
 
-    let selectedTab = props.location.pathname;
+    let selectedTab: string | false = props.location.pathname;
     if (selectedTab.startsWith("/assays")) {
         selectedTab = "/assays";
     } else if (selectedTab === "/callback") {
@@ -96,6 +96,8 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
         selectedTab = "/browse-files";
     } else if (selectedTab.startsWith("/manifests")) {
         selectedTab = "/manifests";
+    } else if (["/", "/privacy-security"].includes(selectedTab)) {
+        selectedTab = false;
     } else if (["/register", "/unactivated"].includes(selectedTab)) {
         return null;
     }
@@ -120,10 +122,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                         </RouterLink>
                     </Grid>
                     <Grid item>
-                        <StyledTabs
-                            value={selectedTab === "/" ? false : selectedTab}
-                            onChange={handleChange}
-                        >
+                        <StyledTabs value={selectedTab} onChange={handleChange}>
                             <Tab
                                 disableRipple={true}
                                 value="/browse-files"

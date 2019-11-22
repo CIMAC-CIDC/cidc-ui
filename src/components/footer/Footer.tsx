@@ -1,8 +1,9 @@
 import * as React from "react";
 import { Link as MuiLink, Grid } from "@material-ui/core";
-import { Link as RouterLink } from "react-router-dom";
+import { withRouter, RouteComponentProps } from "react-router";
+import MuiRouterLink from "../generic/MuiRouterLink";
 
-export default class Footer extends React.Component<{}, {}> {
+class Footer extends React.Component<RouteComponentProps, {}> {
     public render() {
         return (
             <div>
@@ -27,14 +28,12 @@ export default class Footer extends React.Component<{}, {}> {
                                 </MuiLink>
                             </Grid>
                             <Grid item>
-                                <RouterLink
-                                    style={{ textDecoration: "none" }}
+                                <MuiRouterLink
+                                    LinkProps={{ underline: "none" }}
                                     to="/privacy-security"
                                 >
-                                    <MuiLink underline="none">
-                                        Privacy and Security
-                                    </MuiLink>
-                                </RouterLink>
+                                    Privacy and Security
+                                </MuiRouterLink>
                             </Grid>
                             <Grid item>
                                 <MuiLink
@@ -51,3 +50,5 @@ export default class Footer extends React.Component<{}, {}> {
         );
     }
 }
+
+export default withRouter(Footer);
