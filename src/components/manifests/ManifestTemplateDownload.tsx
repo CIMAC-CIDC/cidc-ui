@@ -32,7 +32,7 @@ const ManifestTemplateDownload: React.FunctionComponent = () => {
                 ) : (
                     <Grid container spacing={1}>
                         {manifests.map(name => (
-                            <Grid item>
+                            <Grid key={name} item>
                                 <TemplateDownloadButton
                                     fullWidth
                                     templateName={name}
