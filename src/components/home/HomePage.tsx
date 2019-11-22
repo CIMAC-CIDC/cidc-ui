@@ -1,4 +1,5 @@
 import * as React from "react";
+import Iframe from "react-iframe";
 import {
     Typography,
     Link,
@@ -39,6 +40,7 @@ const HomePage: React.FunctionComponent = () => {
                 margin: "auto"
             }}
         >
+            <Iframe sandbox="allow-scripts" url="static/cg/index.html"></Iframe>
             <Typography
                 variant="h4"
                 style={{ textAlign: "center" }}
