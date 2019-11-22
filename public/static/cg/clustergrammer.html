@@ -43,12 +43,11 @@
             // to the document object. This function will be called
             // by instances of the Clustergrammer component within the CIDC
             // React app (src/components/visualizations/Clustergrammer.tsx).
-            document.createAttribute("clustergrammer");
-            document.clustergrammer = function(network_data) {
+            document.createAttribute("Clustergrammer");
+            document.Clustergrammer = function(config) {
                 var args = {
                     root: "#cg-root",
-                    network_data: network_data,
-                    sidebar_width: 150
+                    ...config
                 };
 
                 d3.select(args.root)

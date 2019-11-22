@@ -13,14 +13,26 @@ export interface IClustergrammerProps {
     height?: number;
 }
 
+interface IClustergrammerConfig {
+    network_data: INetworkData;
+    sidebar_width: number;
+}
+
+/** Wrapper for clustergrammer-js: https://clustergrammer.readthedocs.io/clustergrammer_js.html
+ *
+ * NOTE: this component renders static files stored in the `public/static/cg/` directory.
+ */
 const Clustergrammer: React.FC<IClustergrammerProps> = props => {
     const cgHTML = useRawFile("static/cg/clustergrammer.html");
 
     const drawCg = (iframeContext: {
-        clustergrammer?: (data: INetworkData) => void;
+        Clustergrammer?: (config: IClustergrammerConfig) => void;
     }) => {
-        if (iframeContext.clustergrammer) {
-            iframeContext.clustergrammer(props.networkData);
+        if (iframeContext.Clustergrammer) {
+            iframeContext.Clustergrammer({
+                network_data: props.networkData,
+                sidebar_width: 150
+            });
         }
     };
 
