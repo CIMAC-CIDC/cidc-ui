@@ -44,11 +44,8 @@
             // by instances of the Clustergrammer component within the CIDC
             // React app (src/components/visualizations/Clustergrammer.tsx).
             document.createAttribute("Clustergrammer");
-            document.Clustergrammer = function(config) {
-                var args = {
-                    root: "#cg-root",
-                    ...config
-                };
+            document.Clustergrammer = function(args) {
+                args.root = "#cg-root";
 
                 d3.select(args.root)
                     .style("width", window.innerWidth + "px")
