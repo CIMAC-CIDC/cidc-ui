@@ -51,7 +51,7 @@ const EnvBanner: React.FunctionComponent = () =>
     ) : null;
 
 interface IStyledTabsProps {
-    value: string;
+    value: string | false;
     onChange: (event: React.ChangeEvent<{}>, newValue: string) => void;
 }
 
@@ -120,7 +120,10 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                         </RouterLink>
                     </Grid>
                     <Grid item>
-                        <StyledTabs value={selectedTab} onChange={handleChange}>
+                        <StyledTabs
+                            value={selectedTab === "/" ? false : selectedTab}
+                            onChange={handleChange}
+                        >
                             <Tab
                                 disableRipple={true}
                                 value="/browse-files"
