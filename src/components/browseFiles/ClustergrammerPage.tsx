@@ -55,6 +55,7 @@ const ClustergrammerPage: React.FC<IClustergrammerPageProps> = ({
                                 <Button
                                     href={CLUSTERGRAMMER_HELP_LINK}
                                     variant="contained"
+                                    target="_blank"
                                 >
                                     Clustergrammer Help
                                 </Button>
