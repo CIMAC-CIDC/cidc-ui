@@ -9,6 +9,8 @@ import { CloudDownload, Link, Refresh } from "@material-ui/icons";
 import CopyToClipboardButton from "../generic/CopyToClipboardButton";
 import { ButtonProps } from "@material-ui/core/Button";
 import Loader from "../generic/Loader";
+import ClustergrammerModal from "./ClustergrammerModal";
+import Clustergrammer from "../visualizations/Clustergrammer";
 
 const DownloadURL: React.FunctionComponent<{
     fileId: string;
@@ -106,6 +108,11 @@ const FileDetailsPage: React.FunctionComponent<
                     style={{ width: 1050, margin: "auto" }}
                 >
                     <Grid item>
+                        {file.clustergrammer && (
+                            <Clustergrammer networkData={file.clustergrammer} />
+                        )}
+                    </Grid>
+                    <Grid item>
                         <Grid container spacing={3} wrap="nowrap">
                             <Grid item>
                                 <CoreDetailsTable file={file} />
@@ -141,6 +148,13 @@ const FileDetailsPage: React.FunctionComponent<
                                                     fileId={fileId}
                                                 />
                                             </Grid>
+                                            {file && file.clustergrammer && (
+                                                <Grid item>
+                                                    <ClustergrammerModal
+                                                        file={file}
+                                                    />
+                                                </Grid>
+                                            )}
                                         </Grid>
                                     </CardContent>
                                 </Card>

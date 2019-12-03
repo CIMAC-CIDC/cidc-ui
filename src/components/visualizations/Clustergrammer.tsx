@@ -13,27 +13,24 @@ export interface IClustergrammerProps {
     height?: number;
 }
 
-interface IClustergrammerConfig {
-    network_data: INetworkData;
-    sidebar_width: number;
-}
-
 /** Wrapper for clustergrammer-js: https://clustergrammer.readthedocs.io/clustergrammer_js.html
  *
  * NOTE: this component renders static files stored in the `public/static/cg/` directory.
  */
 const Clustergrammer: React.FC<IClustergrammerProps> = props => {
-    const cgHTML = useRawFile("static/cg/clustergrammer.html");
+    const cgHTML = useRawFile("/static/cg/clustergrammer.html");
 
-    const drawCg = (iframeContext: {
-        Clustergrammer?: (config: IClustergrammerConfig) => void;
+    const drawCg = (iframe: {
+        document: Document & { DrawClustergram?: (cfg: any) => void };
     }) => {
-        if (iframeContext.Clustergrammer) {
-            iframeContext.Clustergrammer({
-                network_data: props.networkData,
-                sidebar_width: 150
-            });
-        }
+        setTimeout(() => {
+            if (iframe.document.DrawClustergram) {
+                iframe.document.DrawClustergram({
+                    network_data: props.networkData,
+                    sidebar_width: 150
+                });
+            }
+        }, 1000);
     };
 
     return cgHTML ? (
@@ -44,7 +41,7 @@ const Clustergrammer: React.FC<IClustergrammerProps> = props => {
             frameBorder={0}
         >
             <FrameContextConsumer>
-                {(context: any) => drawCg(context.document)}
+                {(context: any) => drawCg(context)}
             </FrameContextConsumer>
         </Frame>
     ) : null;

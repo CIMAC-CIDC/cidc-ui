@@ -14,9 +14,9 @@
             type="image/x-icon"
         />
 
-        <link rel="stylesheet" href="static/cg/lib/css/font-awesome.min.css" />
-        <link rel="stylesheet" href="static/cg/lib/css/bootstrap.css" />
-        <link rel="stylesheet" href="static/cg/clustergrammer.min.css" />
+        <link rel="stylesheet" href="/static/cg/lib/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/static/cg/lib/css/bootstrap.css" />
+        <link rel="stylesheet" href="/static/cg/clustergrammer.min.css" />
 
         <!-- Prevent scrolling -->
         <style>
@@ -30,21 +30,20 @@
         <div id="cg-root"></div>
 
         <!-- Required JS Libraries -->
-        <script src="static/cg/lib/js/d3.min.js"></script>
-        <script src="static/cg/lib/js/jquery-1.11.2.min.js"></script>
-        <script src="static/cg/lib/js/underscore-min.js"></script>
-        <script src="static/cg/lib/js/bootstrap.min.js"></script>
+        <script src="/static/cg/lib/js/d3.min.js"></script>
+        <script src="/static/cg/lib/js/jquery-1.11.2.min.js"></script>
+        <script src="/static/cg/lib/js/underscore-min.js"></script>
+        <script src="/static/cg/lib/js/bootstrap.min.js"></script>
 
         <!-- Clustergrammer JS -->
-        <script src="static/cg/clustergrammer.min.js"></script>
+        <script src="/static/cg/clustergrammer.min.js"></script>
 
         <script>
             // Add a function for drawing clustergrammer network data
             // to the document object. This function will be called
             // by instances of the Clustergrammer component within the CIDC
             // React app (src/components/visualizations/Clustergrammer.tsx).
-            document.createAttribute("Clustergrammer");
-            document.Clustergrammer = function(args) {
+            document.DrawClustergram = function(args) {
                 args.root = "#cg-root";
 
                 d3.select(args.root)
