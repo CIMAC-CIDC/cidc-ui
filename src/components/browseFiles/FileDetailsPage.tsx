@@ -4,13 +4,12 @@ import { Grid, Button, Card, CardContent, CardHeader } from "@material-ui/core";
 import { AdditionalMetadataTable, CoreDetailsTable } from "./FileDetails";
 import { AuthContext } from "../identity/AuthProvider";
 import { DataFile } from "../../model/file";
-import { RouteComponentProps } from "react-router";
+import { RouteComponentProps, Route } from "react-router";
 import { CloudDownload, Link, Refresh } from "@material-ui/icons";
 import CopyToClipboardButton from "../generic/CopyToClipboardButton";
 import { ButtonProps } from "@material-ui/core/Button";
 import Loader from "../generic/Loader";
-import ClustergrammerModal from "./ClustergrammerModal";
-import Clustergrammer from "../visualizations/Clustergrammer";
+import ClustergrammerPage from "./ClustergrammerPage";
 
 const DownloadURL: React.FunctionComponent<{
     fileId: string;
@@ -96,10 +95,20 @@ const FileDetailsPage: React.FunctionComponent<
         }
     };
 
+    const showVis = fileId && !props.location.pathname.endsWith(fileId);
+    const clustergrammerPath = props.location.pathname + "/clustergrammer";
+
     return (
         <div>
             {!file || !idToken ? (
                 <Loader />
+            ) : showVis ? (
+                <Route
+                    path="/file-details/:fileId/clustergrammer"
+                    render={routeProps => (
+                        <ClustergrammerPage file={file} {...routeProps} />
+                    )}
+                ></Route>
             ) : (
                 <Grid
                     container
@@ -108,12 +117,12 @@ const FileDetailsPage: React.FunctionComponent<
                     style={{ width: 1050, margin: "auto" }}
                 >
                     <Grid item>
-                        {file.clustergrammer && (
-                            <Clustergrammer networkData={file.clustergrammer} />
-                        )}
-                    </Grid>
-                    <Grid item>
-                        <Grid container spacing={3} wrap="nowrap">
+                        <Grid
+                            container
+                            spacing={3}
+                            direction="row"
+                            wrap="nowrap"
+                        >
                             <Grid item>
                                 <CoreDetailsTable file={file} />
                             </Grid>
@@ -148,11 +157,22 @@ const FileDetailsPage: React.FunctionComponent<
                                                     fileId={fileId}
                                                 />
                                             </Grid>
-                                            {file && file.clustergrammer && (
+                                            {file.clustergrammer && (
                                                 <Grid item>
-                                                    <ClustergrammerModal
-                                                        file={file}
-                                                    />
+                                                    <Button
+                                                        fullWidth
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={() =>
+                                                            props.history.push(
+                                                                clustergrammerPath
+                                                            )
+                                                        }
+                                                        disabled={!idToken}
+                                                    >
+                                                        Visualize with
+                                                        Clustergrammer
+                                                    </Button>
                                                 </Grid>
                                             )}
                                         </Grid>
@@ -161,11 +181,13 @@ const FileDetailsPage: React.FunctionComponent<
                             </Grid>
                         </Grid>
                     </Grid>
-                    {file.additional_metadata && (
-                        <Grid item>
-                            <AdditionalMetadataTable file={file} />
-                        </Grid>
-                    )}
+                    <Grid item>
+                        {file.additional_metadata && (
+                            <Grid item>
+                                <AdditionalMetadataTable file={file} />
+                            </Grid>
+                        )}
+                    </Grid>
                 </Grid>
             )}
         </div>

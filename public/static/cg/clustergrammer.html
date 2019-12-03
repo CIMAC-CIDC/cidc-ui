@@ -27,7 +27,11 @@
         </style>
     </head>
     <body>
-        <div id="cg-root"></div>
+        <div id="cg-root">
+            <div id="cg-loader">
+                Loading Clustergrammer...
+            </div>
+        </div>
 
         <!-- Required JS Libraries -->
         <script src="/static/cg/lib/js/d3.min.js"></script>
@@ -56,6 +60,7 @@
                 });
 
                 cgm = Clustergrammer(args);
+                document.getElementById("cg-loader").remove();
             };
         </script>
     </body>

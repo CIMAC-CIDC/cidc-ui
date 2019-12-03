@@ -12,5 +12,5 @@ export interface DataFile {
     additional_metadata?: {
         [prop: string]: any;
     };
-    clustergrammer?: any;
+    clustergrammer?: JSON;
 }

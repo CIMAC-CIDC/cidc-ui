@@ -74,7 +74,10 @@ function getSingleFile(
     );
 }
 
-function getDownloadURL(token: string, fileID: string): Promise<string> {
+function getDownloadURL(
+    token: string,
+    fileID: string | number
+): Promise<string> {
     return getApiClient(token)
         .get("downloadable_files/download_url", {
             params: { id: fileID }
