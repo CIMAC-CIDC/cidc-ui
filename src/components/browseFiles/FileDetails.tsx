@@ -27,12 +27,6 @@ const FileDetailsTable: React.FunctionComponent<
             <CardHeader title={props.title} />
             <CardContent style={{ padding: 0 }}>
                 <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Attribute Name</TableCell>
-                            <TableCell>Value</TableCell>
-                        </TableRow>
-                    </TableHead>
                     <TableBody>
                         {props.values.map(({ name, value }) => (
                             <TableRow key={name}>
