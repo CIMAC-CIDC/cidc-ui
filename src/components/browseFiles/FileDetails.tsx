@@ -26,7 +26,7 @@ const FileDetailsTable: React.FunctionComponent<
         <Card>
             <CardHeader title={props.title} />
             <CardContent style={{ padding: 0 }}>
-                <Table>
+                <Table size="small">
                     <TableHead>
                         <TableRow>
                             <TableCell>Attribute Name</TableCell>
