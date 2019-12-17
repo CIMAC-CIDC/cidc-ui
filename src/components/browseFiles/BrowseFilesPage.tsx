@@ -1,8 +1,7 @@
 import { Grid, TextField, Typography, Button } from "@material-ui/core";
-import autobind from "autobind-decorator";
-import _ from "lodash";
+import uniq from "lodash/uniq";
 import * as React from "react";
-import { changeOption, filterFiles } from "./browseFilesUtil";
+import { filterFiles } from "./browseFilesUtil";
 import FileFilter from "./FileFilter";
 import FileTable from "./FileTable";
 import { withIdToken } from "../identity/AuthProvider";
@@ -10,191 +9,149 @@ import { RouteComponentProps } from "react-router";
 import { withData, IDataContext } from "../data/DataProvider";
 import { Refresh } from "@material-ui/icons";
 import Loader from "../generic/Loader";
+import { StringParam, ArrayParam, useQueryParams } from "use-query-params";
 
-class BrowseFilesPage extends React.Component<
+export const filterConfig = {
+    search: StringParam,
+    protocol_id: ArrayParam,
+    data_format: ArrayParam,
+    type: ArrayParam
+};
+
+const BrowseFilesPage: React.FC<
     RouteComponentProps & { token: string } & IDataContext
-> {
-    @autobind
-    private handleArrayParamChange(
-        params: URLSearchParams,
-        values: string[],
-        paramKey: "protocol_id" | "type" | "data_format",
-        value: string
-    ) {
-        const newValues = changeOption(values, value);
-
-        // Clear all old values for this param then set new values
-        params.delete(paramKey);
-        for (const val of newValues) {
-            params.append(paramKey, val);
+> = props => {
+    const [filters, setFilters] = useQueryParams(filterConfig);
+    const updateFilters = (k: keyof typeof filterConfig, v: string) => {
+        if (k === "search") {
+            setFilters({ search: v });
+        } else {
+            const current = filters[k];
+            const updated = current
+                ? current.includes(v)
+                    ? current.filter(f => f !== v)
+                    : [...current, v]
+                : [v];
+            setFilters({ [k]: updated });
         }
+    };
 
-        // Apply search string updates to the current location
-        this.props.history.push({
-            ...this.props.location,
-            search: params.toString()
-        });
-    }
+    const trials = uniq(props.files.map(f => f.trial));
 
-    @autobind
-    private handleSearchFilterChange(
-        event: React.ChangeEvent<HTMLInputElement>,
-        params: URLSearchParams
-    ) {
-        params.set("search", event.target.value);
-        this.props.history.push({
-            ...this.props.location,
-            search: params.toString()
-        });
-    }
+    const filterWidth = 300;
+    const maxTableWidth = 1500;
 
-    public render() {
-        // Extract current filter parameters from the URL
-        const params = new URLSearchParams(this.props.location.search);
-        const searchFilter = params.get("search") || "";
-        const selectedTrialIds = params.getAll("protocol_id");
-        const selectedDataFormats = params.getAll("data_format");
-        const selectedTypes = params.getAll("type");
-
-        const trials = _.uniq(this.props.files.map(f => f.trial));
-
-        const filterWidth = 300;
-        const maxTableWidth = 1500;
-
-        return (
-            <div
-                style={{
-                    margin: "auto",
-                    padding: 20,
-                    maxWidth: filterWidth + maxTableWidth
-                }}
-            >
-                {this.props.files.length === 0 && (
-                    <Grid container justify="center">
-                        <Grid item>
-                            <Typography>No files found.</Typography>
-                        </Grid>
+    return (
+        <div
+            style={{
+                margin: "auto",
+                padding: 20,
+                maxWidth: filterWidth + maxTableWidth
+            }}
+        >
+            {props.files.length === 0 && (
+                <Grid container justify="center">
+                    <Grid item>
+                        <Typography>No files found.</Typography>
                     </Grid>
-                )}
-                {this.props.files.length > 0 && (
-                    <Grid container spacing={3}>
-                        <Grid item style={{ width: filterWidth }}>
-                            <FileFilter
-                                trialIds={{
-                                    options: _.uniq(
-                                        _.map(this.props.files, "trial")
-                                    ),
-                                    checked: selectedTrialIds
-                                }}
-                                experimentalStrategies={{
-                                    options: _.uniq(
-                                        _.map(this.props.files, "assay_type")
-                                    ),
-                                    checked: selectedTypes
-                                }}
-                                dataFormats={{
-                                    options: _.uniq(
-                                        _.map(this.props.files, "data_format")
-                                    ),
-                                    checked: selectedDataFormats
-                                }}
-                                onTrialIdChange={tid =>
-                                    this.handleArrayParamChange(
-                                        params,
-                                        selectedTrialIds,
-                                        "protocol_id",
-                                        tid
-                                    )
-                                }
-                                onExperimentalStrategyChange={typ =>
-                                    this.handleArrayParamChange(
-                                        params,
-                                        selectedTypes,
-                                        "type",
-                                        typ
-                                    )
-                                }
-                                onDataFormatChange={dataFormat =>
-                                    this.handleArrayParamChange(
-                                        params,
-                                        selectedDataFormats,
-                                        "data_format",
-                                        dataFormat
-                                    )
-                                }
-                            />
-                        </Grid>
-                        <Grid
-                            item
-                            style={{
-                                maxWidth: 1500,
-                                width: `calc(100% - ${filterWidth}px)`
+                </Grid>
+            )}
+            {props.files.length > 0 && (
+                <Grid container spacing={3}>
+                    <Grid item style={{ width: filterWidth }}>
+                        <FileFilter
+                            trialIds={{
+                                options: uniq(
+                                    props.files.map(file => file.trial)
+                                ),
+                                checked: filters.protocol_id
                             }}
-                        >
-                            <Grid
-                                container
-                                wrap="nowrap"
-                                direction="row"
-                                justify="space-between"
-                                alignItems="center"
-                            >
-                                <Grid item>
-                                    <TextField
-                                        style={{ marginTop: 0 }}
-                                        label="Search"
-                                        type="search"
-                                        margin="dense"
-                                        variant="outlined"
-                                        value={searchFilter}
-                                        onChange={(
-                                            e: React.ChangeEvent<
-                                                HTMLInputElement
-                                            >
-                                        ) =>
-                                            this.handleSearchFilterChange(
-                                                e,
-                                                params
-                                            )
-                                        }
-                                    />
-                                </Grid>
-                                <Grid item>
-                                    <Button
-                                        endIcon={<Refresh />}
-                                        disabled={
-                                            this.props.dataStatus === "fetching"
-                                        }
-                                        onClick={() => this.props.refreshData()}
-                                    >
-                                        Refresh
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                            {this.props.dataStatus === "fetching" && <Loader />}
-                            {this.props.dataStatus === "fetched" && (
-                                <FileTable
-                                    history={this.props.history}
-                                    files={filterFiles(
-                                        this.props.files,
-                                        selectedTrialIds,
-                                        selectedTypes,
-                                        selectedDataFormats,
-                                        searchFilter
-                                    )}
-                                    trials={trials}
-                                />
-                            )}
-                            {this.props.dataStatus === "failed" && (
-                                <Typography>
-                                    Encountered an error fetching file data.
-                                </Typography>
-                            )}
-                        </Grid>
+                            experimentalStrategies={{
+                                options: uniq(
+                                    props.files.map(file => file.assay_type)
+                                ),
+                                checked: filters.type
+                            }}
+                            dataFormats={{
+                                options: uniq(
+                                    props.files.map(file => file.data_format)
+                                ),
+                                checked: filters.data_format
+                            }}
+                            onTrialIdChange={v =>
+                                updateFilters("protocol_id", v)
+                            }
+                            onExperimentalStrategyChange={v =>
+                                updateFilters("type", v)
+                            }
+                            onDataFormatChange={v =>
+                                updateFilters("data_format", v)
+                            }
+                        />
                     </Grid>
-                )}
-            </div>
-        );
-    }
-}
+                    <Grid
+                        item
+                        style={{
+                            maxWidth: 1500,
+                            width: `calc(100% - ${filterWidth}px)`
+                        }}
+                    >
+                        <Grid
+                            container
+                            wrap="nowrap"
+                            direction="row"
+                            justify="space-between"
+                            alignItems="center"
+                        >
+                            <Grid item>
+                                <TextField
+                                    style={{ marginTop: 0 }}
+                                    label="Search"
+                                    type="search"
+                                    margin="dense"
+                                    variant="outlined"
+                                    value={filters.search}
+                                    onChange={(
+                                        e: React.ChangeEvent<HTMLInputElement>
+                                    ) =>
+                                        updateFilters("search", e.target.value)
+                                    }
+                                />
+                            </Grid>
+                            <Grid item>
+                                <Button
+                                    endIcon={<Refresh />}
+                                    disabled={props.dataStatus === "fetching"}
+                                    onClick={() => props.refreshData()}
+                                >
+                                    Refresh
+                                </Button>
+                            </Grid>
+                        </Grid>
+                        {props.dataStatus === "fetching" && <Loader />}
+                        {props.dataStatus === "fetched" && (
+                            <FileTable
+                                history={props.history}
+                                files={filterFiles(
+                                    props.files,
+                                    filters.protocol_id || [],
+                                    filters.type || [],
+                                    filters.data_format || [],
+                                    filters.search || ""
+                                )}
+                                trials={trials}
+                            />
+                        )}
+                        {props.dataStatus === "failed" && (
+                            <Typography>
+                                Encountered an error fetching file data.
+                            </Typography>
+                        )}
+                    </Grid>
+                </Grid>
+            )}
+        </div>
+    );
+};
 
 export default withData(withIdToken(BrowseFilesPage));

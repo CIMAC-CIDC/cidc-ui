@@ -29,7 +29,7 @@ const useFilterStyles = makeStyles({
 
 export interface IFilterConfig {
     options: string[];
-    checked: string[];
+    checked: string[] | undefined;
 }
 
 export interface IFileFilterCheckboxGroupProps {
@@ -47,6 +47,8 @@ const FileFilterCheckboxGroup: React.FunctionComponent<
         props.onChange(event.target.value);
     };
 
+    const checked = props.config.checked || [];
+
     return (
         <div>
             <Toolbar className={classes.header} disableGutters>
@@ -61,9 +63,7 @@ const FileFilterCheckboxGroup: React.FunctionComponent<
                             control={
                                 <Checkbox
                                     value={dataFormat}
-                                    checked={props.config.checked.includes(
-                                        dataFormat
-                                    )}
+                                    checked={checked.includes(dataFormat)}
                                     onChange={handleChange}
                                     className={classes.checkbox}
                                 />
