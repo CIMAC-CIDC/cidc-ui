@@ -30,7 +30,7 @@ export const DataProvider: React.FunctionComponent = props => {
             setDataStatus("fetching");
             getFiles(authContext.idToken)
                 .then(fs => {
-                    setFiles(fs);
+                    setFiles(fs.data);
                     setDataStatus("fetched");
                 })
                 .catch(() => setDataStatus("failed"));

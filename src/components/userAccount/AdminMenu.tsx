@@ -14,6 +14,8 @@ import { List } from "@material-ui/icons";
 import orderBy from "lodash/orderBy";
 import PaginatedTable from "../generic/PaginatedTable";
 
+const ADMIN_TABLE_PAGE_SIZE = 15;
+
 export interface IAdminMenuProps {
     token: string;
     userId: number;
@@ -22,7 +24,8 @@ export interface IAdminMenuProps {
 export default class AdminMenu extends React.Component<IAdminMenuProps, {}> {
     state = {
         accounts: undefined,
-        searchFilter: ""
+        searchFilter: "",
+        page: 0
     };
 
     componentDidMount() {
@@ -94,14 +97,19 @@ export default class AdminMenu extends React.Component<IAdminMenuProps, {}> {
                                 onChange={this.handleSearchFilterChange}
                             />
                             <PaginatedTable
-                                totalCount={accounts.length}
+                                data={orderBy(
+                                    accounts,
+                                    a => `${a.first_n} ${a.last_n}`
+                                ).slice(
+                                    this.state.page * ADMIN_TABLE_PAGE_SIZE,
+                                    (this.state.page + 1) *
+                                        ADMIN_TABLE_PAGE_SIZE
+                                )}
+                                count={accounts.length}
+                                page={this.state.page}
+                                rowsPerPage={ADMIN_TABLE_PAGE_SIZE}
+                                onChangePage={page => this.setState({ page })}
                                 getRowKey={account => account.id}
-                                getNextN={(n: number, startingAt: number) =>
-                                    orderBy(
-                                        accounts,
-                                        a => `${a.first_n} ${a.last_n}`
-                                    ).slice(startingAt, startingAt + n)
-                                }
                                 renderRow={account => (
                                     <UserTableRow
                                         token={this.props.token}

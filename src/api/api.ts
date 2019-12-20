@@ -59,10 +59,23 @@ function _transformFile(file: DataFile): DataFile {
     return { ...file, data_format: file.data_format.toLowerCase() };
 }
 
-function getFiles(token: string): Promise<DataFile[]> {
-    return _getItems<DataFile>(token, "downloadable_files").then(trials =>
-        trials.map(_transformFile)
-    );
+export interface IDataWithMeta<D> {
+    data: D;
+    meta: {
+        total: number;
+    };
+}
+
+function getFiles(
+    token: string,
+    params?: any
+): Promise<IDataWithMeta<DataFile[]>> {
+    return getApiClient(token)
+        .get("downloadable_files", { params })
+        .then(res => {
+            const { _items, _meta: meta } = _extractItem(res);
+            return { data: _items.map(_transformFile), meta };
+        });
 }
 
 function getSingleFile(

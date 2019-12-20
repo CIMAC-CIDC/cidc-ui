@@ -11,15 +11,15 @@ import {
 
 export interface IPaginatedTableProps {
     headers?: IHeader[];
-    initialSorting?: ISortConfig;
-    totalCount: number;
+    sortable?: boolean;
+    data?: DataRow[];
+    count: number;
+    page: number;
+    rowsPerPage: number;
     getRowKey: (row: DataRow) => string | number;
-    getNextN: (
-        n: number,
-        startingAt: number,
-        sortConfig?: ISortConfig
-    ) => DataRow[];
-    handleRowClick?: (row: DataRow) => void;
+    onChangePage: (page: number) => void;
+    onClickHeader?: (header: IHeader) => void;
+    onClickRow?: (row: DataRow) => void;
     renderRow?: (row: DataRow) => React.ReactElement;
 }
 
@@ -28,54 +28,29 @@ export interface IHeader {
     label: string;
     sortBy?: (row: any) => any;
     format?: (v: any) => string;
+    active?: boolean;
+    direction?: "asc" | "desc";
 }
 
 // TODO (maybe): refine this type
 export type DataRow = any;
 
-export interface ISortConfig extends IHeader {
-    direction: "asc" | "desc";
-}
-
 const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
-    const [page, setPage] = React.useState<number>(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState<number>(10);
-    const [sortConfig, setSortConfig] = React.useState<ISortConfig | undefined>(
-        props.initialSorting
-    );
-
-    const handleSortChange = (header: IHeader) => {
-        const direction =
-            sortConfig &&
-            sortConfig.key === header.key &&
-            sortConfig.direction === "asc"
-                ? "desc"
-                : "asc";
-        setSortConfig({ ...header, direction });
-    };
-
-    const dataPage = props.getNextN(
-        rowsPerPage,
-        page * rowsPerPage,
-        sortConfig
-    );
-
     return (
         <>
-            <Table>
+            <Table size="small">
                 {props.headers && (
                     <TableHead>
                         <TableRow>
                             {props.headers.map(header => (
                                 <TableCell key={header.key}>
-                                    {sortConfig ? (
+                                    {props.sortable ? (
                                         <TableSortLabel
-                                            active={
-                                                sortConfig.key === header.key
-                                            }
-                                            direction={sortConfig.direction}
+                                            active={header.active}
+                                            direction={header.direction}
                                             onClick={() =>
-                                                handleSortChange(header)
+                                                props.onClickHeader &&
+                                                props.onClickHeader(header)
                                             }
                                         >
                                             {header.label}
@@ -89,44 +64,43 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                     </TableHead>
                 )}
                 <TableBody>
-                    {dataPage.map(row => (
-                        <TableRow
-                            key={props.getRowKey(row)}
-                            hover={!!props.handleRowClick}
-                            onClick={() =>
-                                props.handleRowClick &&
-                                props.handleRowClick(row)
-                            }
-                        >
-                            {props.renderRow
-                                ? props.renderRow(row)
-                                : props.headers
-                                ? props.headers.map(header => (
-                                      <TableCell key={header.key}>
-                                          {header.format
-                                              ? header.format(row[header.key])
-                                              : row[header.key]}
-                                      </TableCell>
-                                  ))
-                                : Object.values(row).map((v: any, i) => (
-                                      <TableCell key={i}>
-                                          {v.toString()}
-                                      </TableCell>
-                                  ))}
-                        </TableRow>
-                    ))}
+                    {props.data &&
+                        props.data.map(row => (
+                            <TableRow
+                                key={props.getRowKey(row)}
+                                hover={!!props.onClickRow}
+                                onClick={() =>
+                                    props.onClickRow && props.onClickRow(row)
+                                }
+                            >
+                                {props.renderRow
+                                    ? props.renderRow(row)
+                                    : props.headers
+                                    ? props.headers.map(header => (
+                                          <TableCell key={header.key}>
+                                              {header.format
+                                                  ? header.format(
+                                                        row[header.key]
+                                                    )
+                                                  : row[header.key]}
+                                          </TableCell>
+                                      ))
+                                    : Object.values(row).map((v: any, i) => (
+                                          <TableCell key={i}>
+                                              {v.toString()}
+                                          </TableCell>
+                                      ))}
+                            </TableRow>
+                        ))}
                 </TableBody>
             </Table>
             <TablePagination
                 component="div"
-                rowsPerPageOptions={[5, 10, 25]}
-                count={props.totalCount}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onChangePage={(_, n) => setPage(n)}
-                onChangeRowsPerPage={e =>
-                    setRowsPerPage(parseInt(e.target.value, 10))
-                }
+                count={props.count}
+                rowsPerPage={props.rowsPerPage}
+                rowsPerPageOptions={[]}
+                page={props.page}
+                onChangePage={(_, n) => props.onChangePage(n)}
             />
         </>
     );

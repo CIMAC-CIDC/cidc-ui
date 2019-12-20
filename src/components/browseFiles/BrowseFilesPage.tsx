@@ -1,7 +1,6 @@
-import { Grid, TextField, Typography, Button } from "@material-ui/core";
+import { Grid, Typography, Button } from "@material-ui/core";
 import uniq from "lodash/uniq";
 import * as React from "react";
-import { filterFiles } from "./browseFilesUtil";
 import FileFilter from "./FileFilter";
 import FileTable from "./FileTable";
 import { withIdToken } from "../identity/AuthProvider";
@@ -16,6 +15,19 @@ export const filterConfig = {
     protocol_id: ArrayParam,
     data_format: ArrayParam,
     type: ArrayParam
+};
+type Filters = ReturnType<typeof useQueryParams>[0];
+
+export const filtersToWhereClause = (filters: Filters): string => {
+    const arraySubclause = (ids: any, key: string) =>
+        !!ids && `(${ids.map((id: string) => `${key}=="${id}"`).join(" or ")})`;
+    const subclauses = [
+        arraySubclause(filters.protocol_id, "trial"),
+        arraySubclause(filters.type, "assay_type"),
+        arraySubclause(filters.data_format, "data_format")
+    ];
+
+    return subclauses.filter(c => !!c).join(" and ");
 };
 
 const BrowseFilesPage: React.FC<
@@ -35,8 +47,6 @@ const BrowseFilesPage: React.FC<
             setFilters({ [k]: updated });
         }
     };
-
-    const trials = uniq(props.files.map(f => f.trial));
 
     const filterWidth = 300;
     const maxTableWidth = 1500;
@@ -104,6 +114,10 @@ const BrowseFilesPage: React.FC<
                             alignItems="center"
                         >
                             <Grid item>
+                                {/*
+                                Free text search is disabled for now, pending
+                                engineering decisions about how to do this server-side.
+
                                 <TextField
                                     style={{ marginTop: 0 }}
                                     label="Search"
@@ -116,7 +130,7 @@ const BrowseFilesPage: React.FC<
                                     ) =>
                                         updateFilters("search", e.target.value)
                                     }
-                                />
+                                />*/}
                             </Grid>
                             <Grid item>
                                 <Button
@@ -130,17 +144,7 @@ const BrowseFilesPage: React.FC<
                         </Grid>
                         {props.dataStatus === "fetching" && <Loader />}
                         {props.dataStatus === "fetched" && (
-                            <FileTable
-                                history={props.history}
-                                files={filterFiles(
-                                    props.files,
-                                    filters.protocol_id || [],
-                                    filters.type || [],
-                                    filters.data_format || [],
-                                    filters.search || ""
-                                )}
-                                trials={trials}
-                            />
+                            <FileTable history={props.history} />
                         )}
                         {props.dataStatus === "failed" && (
                             <Typography>
