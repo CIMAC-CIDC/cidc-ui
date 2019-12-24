@@ -7,9 +7,15 @@ import {
     TableRow,
     TableSortLabel,
     TablePagination,
-    Grid,
-    Typography
+    Typography,
+    makeStyles
 } from "@material-ui/core";
+
+const useStyles = makeStyles({
+    message: {
+        margin: "1rem"
+    }
+});
 
 export interface IPaginatedTableProps {
     headers?: IHeader[];
@@ -36,6 +42,8 @@ export interface IHeader {
 export type DataRow = any;
 
 const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
+    const classes = useStyles();
+
     const [dataWillChange, setDataWillChange] = React.useState<boolean>(true);
     React.useEffect(() => setDataWillChange(false), [props.data]);
 
@@ -105,20 +113,14 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                         ))}
                     </TableBody>
                 ) : (
-                    <Grid
-                        container
-                        style={{ padding: "1em" }}
-                        justify="center"
-                        alignItems="center"
+                    <Typography
+                        className={classes.message}
+                        color="textSecondary"
                     >
-                        <Grid item>
-                            <Typography color="textSecondary">
-                                {props.data === undefined
-                                    ? "Loading..."
-                                    : "No data found for these filters."}
-                            </Typography>
-                        </Grid>
-                    </Grid>
+                        {props.data === undefined
+                            ? "Loading..."
+                            : "No data found for these filters."}
+                    </Typography>
                 )}
             </Table>
             <TablePagination
