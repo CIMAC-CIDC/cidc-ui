@@ -28,7 +28,7 @@ export interface IFileTableProps {
     history: any;
 }
 
-const filtersToWhereClause = (filters: Filters): string => {
+export const filtersToWhereClause = (filters: Filters): string => {
     const arraySubclause = (ids: any, key: string) =>
         !!ids && `(${ids.map((id: string) => `${key}=="${id}"`).join(" or ")})`;
     const subclauses = [
@@ -40,7 +40,7 @@ const filtersToWhereClause = (filters: Filters): string => {
     return subclauses.filter(c => !!c).join(" and ");
 };
 
-const headerToSortClause = (header: IHeader): string => {
+export const headerToSortClause = (header: IHeader): string => {
     return `[("${header.key}", ${header.direction === "asc" ? 1 : -1})]`;
 };
 

@@ -1,5 +1,5 @@
-import { changeOption, filterFiles } from "./browseFilesUtil";
-import { DataFile } from "../../model/file";
+import { changeOption, filterFiles } from "../browseFilesUtil";
+import { DataFile } from "../../../model/file";
 
 const files: DataFile[] = [
     {
