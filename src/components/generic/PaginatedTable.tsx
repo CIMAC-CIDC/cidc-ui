@@ -6,12 +6,13 @@ import {
     TableHead,
     TableRow,
     TableSortLabel,
-    TablePagination
+    TablePagination,
+    Grid,
+    Typography
 } from "@material-ui/core";
 
 export interface IPaginatedTableProps {
     headers?: IHeader[];
-    sortable?: boolean;
     data?: DataRow[];
     count: number;
     page: number;
@@ -36,6 +37,9 @@ export interface IHeader {
 export type DataRow = any;
 
 const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
+    const [dataWillChange, setDataWillChange] = React.useState<boolean>(false);
+    React.useEffect(() => setDataWillChange(false), [props.data]);
+
     return (
         <>
             <Table size="small">
@@ -44,7 +48,7 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                         <TableRow>
                             {props.headers.map(header => (
                                 <TableCell key={header.key}>
-                                    {props.sortable ? (
+                                    {props.onClickHeader ? (
                                         <TableSortLabel
                                             active={header.active}
                                             direction={header.direction}
@@ -63,9 +67,9 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                         </TableRow>
                     </TableHead>
                 )}
-                <TableBody>
-                    {props.data &&
-                        props.data.map(row => (
+                {props.data ? (
+                    <TableBody>
+                        {props.data.map(row => (
                             <TableRow
                                 key={props.getRowKey(row)}
                                 hover={!!props.onClickRow}
@@ -92,7 +96,23 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                                       ))}
                             </TableRow>
                         ))}
-                </TableBody>
+                    </TableBody>
+                ) : (
+                    <Grid
+                        container
+                        style={{ padding: "1em" }}
+                        justify="center"
+                        alignItems="center"
+                    >
+                        <Grid item>
+                            <Typography color="textSecondary">
+                                {props.data === undefined
+                                    ? "Loading..."
+                                    : "No data found for these filters."}
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                )}
             </Table>
             <TablePagination
                 component="div"
@@ -100,7 +120,14 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                 rowsPerPage={props.rowsPerPage}
                 rowsPerPageOptions={[]}
                 page={props.page}
-                onChangePage={(_, n) => props.onChangePage(n)}
+                onChangePage={(_, n) => {
+                    setDataWillChange(true);
+                    props.onChangePage(n);
+                }}
+                backIconButtonProps={{
+                    disabled: dataWillChange || props.page === 0
+                }}
+                nextIconButtonProps={{ disabled: dataWillChange }}
             />
         </>
     );

@@ -1,4 +1,4 @@
-import { Grid, Typography, Button } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import uniq from "lodash/uniq";
 import * as React from "react";
 import FileFilter from "./FileFilter";
@@ -6,7 +6,6 @@ import FileTable from "./FileTable";
 import { withIdToken } from "../identity/AuthProvider";
 import { RouteComponentProps } from "react-router";
 import { withData, IDataContext } from "../data/DataProvider";
-import { Refresh } from "@material-ui/icons";
 import Loader from "../generic/Loader";
 import { StringParam, ArrayParam, useQueryParams } from "use-query-params";
 
@@ -16,19 +15,7 @@ export const filterConfig = {
     data_format: ArrayParam,
     type: ArrayParam
 };
-type Filters = ReturnType<typeof useQueryParams>[0];
-
-export const filtersToWhereClause = (filters: Filters): string => {
-    const arraySubclause = (ids: any, key: string) =>
-        !!ids && `(${ids.map((id: string) => `${key}=="${id}"`).join(" or ")})`;
-    const subclauses = [
-        arraySubclause(filters.protocol_id, "trial"),
-        arraySubclause(filters.type, "assay_type"),
-        arraySubclause(filters.data_format, "data_format")
-    ];
-
-    return subclauses.filter(c => !!c).join(" and ");
-};
+export type Filters = ReturnType<typeof useQueryParams>[0];
 
 const BrowseFilesPage: React.FC<
     RouteComponentProps & { token: string } & IDataContext
@@ -106,7 +93,7 @@ const BrowseFilesPage: React.FC<
                             width: `calc(100% - ${filterWidth}px)`
                         }}
                     >
-                        <Grid
+                        {/*<Grid
                             container
                             wrap="nowrap"
                             direction="row"
@@ -114,7 +101,7 @@ const BrowseFilesPage: React.FC<
                             alignItems="center"
                         >
                             <Grid item>
-                                {/*
+
                                 Free text search is disabled for now, pending
                                 engineering decisions about how to do this server-side.
 
@@ -130,7 +117,7 @@ const BrowseFilesPage: React.FC<
                                     ) =>
                                         updateFilters("search", e.target.value)
                                     }
-                                />*/}
+                                />
                             </Grid>
                             <Grid item>
                                 <Button
@@ -141,7 +128,7 @@ const BrowseFilesPage: React.FC<
                                     Refresh
                                 </Button>
                             </Grid>
-                        </Grid>
+                        </Grid>*/}
                         {props.dataStatus === "fetching" && <Loader />}
                         {props.dataStatus === "fetched" && (
                             <FileTable history={props.history} />

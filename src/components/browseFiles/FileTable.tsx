@@ -4,7 +4,7 @@ import { LOCALE, DATE_OPTIONS } from "../../util/constants";
 import { colors } from "../../rootStyles";
 import PaginatedTable, { IHeader } from "../generic/PaginatedTable";
 import { makeStyles } from "@material-ui/core";
-import { filtersToWhereClause, filterConfig } from "./BrowseFilesPage";
+import { filterConfig, Filters } from "./BrowseFilesPage";
 import { useQueryParams } from "use-query-params";
 import { getFiles, IDataWithMeta } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
@@ -27,6 +27,18 @@ const useStyles = makeStyles({
 export interface IFileTableProps {
     history: any;
 }
+
+export const filtersToWhereClause = (filters: Filters): string => {
+    const arraySubclause = (ids: any, key: string) =>
+        !!ids && `(${ids.map((id: string) => `${key}=="${id}"`).join(" or ")})`;
+    const subclauses = [
+        arraySubclause(filters.protocol_id, "trial"),
+        arraySubclause(filters.type, "assay_type"),
+        arraySubclause(filters.data_format, "data_format")
+    ];
+
+    return subclauses.filter(c => !!c).join(" and ");
+};
 
 const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
@@ -64,7 +76,6 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     return (
         <div className={classes.root}>
             <PaginatedTable
-                sortable
                 count={data ? data.meta.total : 0}
                 page={page}
                 onChangePage={p => setPage(p)}
