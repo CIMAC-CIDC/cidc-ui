@@ -28,7 +28,7 @@ export interface IFileTableProps {
     history: any;
 }
 
-export const filtersToWhereClause = (filters: Filters): string => {
+const filtersToWhereClause = (filters: Filters): string => {
     const arraySubclause = (ids: any, key: string) =>
         !!ids && `(${ids.map((id: string) => `${key}=="${id}"`).join(" or ")})`;
     const subclauses = [
@@ -40,6 +40,10 @@ export const filtersToWhereClause = (filters: Filters): string => {
     return subclauses.filter(c => !!c).join(" and ");
 };
 
+const headerToSortClause = (header: IHeader): string => {
+    return `[("${header.key}", ${header.direction === "asc" ? 1 : -1})]`;
+};
+
 const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
     const filters = useQueryParams(filterConfig)[0];
@@ -49,16 +53,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         IDataWithMeta<DataFile[]> | undefined
     >(undefined);
 
-    React.useEffect(() => {
-        // TODO: handle total_count for this query!
-        getFiles(props.token, {
-            page: page + 1, // eve-sqlalchemy pagination starts at 1
-            where: filtersToWhereClause(filters),
-            max_results: FILE_TABLE_PAGE_SIZE
-        }).then(files => setData(files));
-    }, [filters, page, props.token]);
-
-    const headers = [
+    const [headers, setHeaders] = React.useState<IHeader[]>([
         { key: "object_url", label: "File Name" },
         { key: "assay_type", label: "Type" },
         { key: "data_format", label: "Format" },
@@ -67,11 +62,21 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             label: "Date/Time Uploaded",
             format: (ts: number) =>
                 new Date(ts).toLocaleString(LOCALE, DATE_OPTIONS),
-            sortBy: (f: DataFile) => new Date(f.uploaded_timestamp),
             active: true,
             direction: "desc"
         } as IHeader
-    ];
+    ]);
+    const sortHeader = headers.filter(h => h.active)[0];
+
+    React.useEffect(() => {
+        // TODO: handle total_count for this query!
+        getFiles(props.token, {
+            page: page + 1, // eve-sqlalchemy pagination starts at 1
+            where: filtersToWhereClause(filters),
+            max_results: FILE_TABLE_PAGE_SIZE,
+            sort: headerToSortClause(sortHeader)
+        }).then(files => setData(files));
+    }, [filters, page, props.token, sortHeader]);
 
     return (
         <div className={classes.root}>
@@ -86,6 +91,24 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                 onClickRow={row =>
                     props.history.push("/file-details/" + row.id)
                 }
+                onClickHeader={header => {
+                    const newHeaders = headers.map(h => {
+                        const newHeader = { ...h };
+                        if (h.key === header.key) {
+                            if (h.active) {
+                                newHeader.direction =
+                                    h.direction === "desc" ? "asc" : "desc";
+                            } else {
+                                newHeader.active = true;
+                                newHeader.direction = "desc";
+                            }
+                        } else {
+                            newHeader.active = false;
+                        }
+                        return newHeader;
+                    });
+                    setHeaders(newHeaders);
+                }}
             />
         </div>
     );

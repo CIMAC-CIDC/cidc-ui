@@ -27,7 +27,6 @@ export interface IPaginatedTableProps {
 export interface IHeader {
     key: string;
     label: string;
-    sortBy?: (row: any) => any;
     format?: (v: any) => string;
     active?: boolean;
     direction?: "asc" | "desc";
@@ -37,8 +36,14 @@ export interface IHeader {
 export type DataRow = any;
 
 const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
-    const [dataWillChange, setDataWillChange] = React.useState<boolean>(false);
+    const [dataWillChange, setDataWillChange] = React.useState<boolean>(true);
     React.useEffect(() => setDataWillChange(false), [props.data]);
+
+    const backDisabled = dataWillChange || props.page === 0;
+    const nextDisabled =
+        dataWillChange ||
+        props.data === undefined ||
+        props.data.length <= props.count;
 
     return (
         <>
@@ -52,10 +57,12 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                                         <TableSortLabel
                                             active={header.active}
                                             direction={header.direction}
-                                            onClick={() =>
-                                                props.onClickHeader &&
-                                                props.onClickHeader(header)
-                                            }
+                                            onClick={() => {
+                                                if (props.onClickHeader) {
+                                                    setDataWillChange(true);
+                                                    props.onClickHeader(header);
+                                                }
+                                            }}
                                         >
                                             {header.label}
                                         </TableSortLabel>
@@ -67,7 +74,7 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                         </TableRow>
                     </TableHead>
                 )}
-                {props.data ? (
+                {props.data && props.data.length > 0 ? (
                     <TableBody>
                         {props.data.map(row => (
                             <TableRow
@@ -124,10 +131,8 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                     setDataWillChange(true);
                     props.onChangePage(n);
                 }}
-                backIconButtonProps={{
-                    disabled: dataWillChange || props.page === 0
-                }}
-                nextIconButtonProps={{ disabled: dataWillChange }}
+                backIconButtonProps={{ disabled: backDisabled }}
+                nextIconButtonProps={{ disabled: nextDisabled }}
             />
         </>
     );
