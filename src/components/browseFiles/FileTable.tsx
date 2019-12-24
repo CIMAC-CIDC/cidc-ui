@@ -69,7 +69,6 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const sortHeader = headers.filter(h => h.active)[0];
 
     React.useEffect(() => {
-        // TODO: handle total_count for this query!
         getFiles(props.token, {
             page: page + 1, // eve-sqlalchemy pagination starts at 1
             where: filtersToWhereClause(filters),
