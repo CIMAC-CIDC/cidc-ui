@@ -51,8 +51,8 @@ export const DataProvider: React.FunctionComponent = props => {
 };
 
 export function withData<T>(
-    Component: React.ComponentType<T>
-): React.ComponentType<T & IDataContext> {
+    Component: React.ComponentType<T & IDataContext>
+): React.ComponentType<T> {
     return props => (
         <DataContext.Consumer>
             {dataContext =>

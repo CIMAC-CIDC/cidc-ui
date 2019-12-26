@@ -1,47 +1,82 @@
-import { Grid } from "@material-ui/core";
 import * as React from "react";
-import FileFilterCheckboxGroup, {
-    IFilterConfig
-} from "./FileFilterCheckboxGroup";
+import { Grid, makeStyles } from "@material-ui/core";
+import uniq from "lodash/uniq";
+import FileFilterCheckboxGroup from "./FileFilterCheckboxGroup";
 import { colors } from "../../rootStyles";
+import { withData, IDataContext } from "../data/DataProvider";
+import { StringParam, ArrayParam, useQueryParams } from "use-query-params";
+import { DataFile } from "../../model/file";
 
-export interface IFileFilterProps {
-    trialIds: IFilterConfig;
-    experimentalStrategies: IFilterConfig;
-    dataFormats: IFilterConfig;
-    onTrialIdChange: (trialId: string) => void;
-    onExperimentalStrategyChange: (experimentalStrategy: string) => void;
-    onDataFormatChange: (dataFormat: string) => void;
-}
+export const filterConfig = {
+    search: StringParam,
+    protocol_id: ArrayParam,
+    data_format: ArrayParam,
+    type: ArrayParam
+};
+export type Filters = ReturnType<typeof useQueryParams>[0];
 
-const FileFilter: React.FunctionComponent<IFileFilterProps> = props => {
+const useStyles = makeStyles({
+    container: {
+        border: `1px solid ${colors.DARK_BLUE_GREY}`,
+        borderRadius: 5
+    }
+});
+
+const FileFilter: React.FunctionComponent<IDataContext> = props => {
+    const classes = useStyles();
+
+    const [filters, setFilters] = useQueryParams(filterConfig);
+    const updateFilters = (k: keyof typeof filterConfig) => (v: string) => {
+        if (k === "search") {
+            setFilters({ search: v });
+        } else {
+            const current = filters[k];
+            const updated = current
+                ? current.includes(v)
+                    ? current.filter(f => f !== v)
+                    : [...current, v]
+                : [v];
+            setFilters({ [k]: updated });
+        }
+    };
+
+    const extractDistinct = (column: keyof DataFile) =>
+        uniq(props.files.map(f => f[column] as string));
+    const trialIds = extractDistinct("trial");
+    const types = extractDistinct("assay_type");
+    const formats = extractDistinct("data_format");
+
     return (
-        <div
-            style={{
-                border: `1px solid ${colors.DARK_BLUE_GREY}`,
-                borderRadius: 5
-            }}
-        >
-            <Grid container={true}>
-                <Grid item={true} xs={12}>
+        <div className={classes.container}>
+            <Grid container>
+                <Grid item xs={12}>
                     <FileFilterCheckboxGroup
                         title="Protocol Identifier"
-                        config={props.trialIds}
-                        onChange={props.onTrialIdChange}
+                        config={{
+                            options: trialIds,
+                            checked: filters.protocol_id
+                        }}
+                        onChange={updateFilters("protocol_id")}
                     />
                 </Grid>
-                <Grid item={true} xs={12}>
+                <Grid item xs={12}>
                     <FileFilterCheckboxGroup
                         title="Type"
-                        config={props.experimentalStrategies}
-                        onChange={props.onExperimentalStrategyChange}
+                        config={{
+                            options: types,
+                            checked: filters.type
+                        }}
+                        onChange={updateFilters("type")}
                     />
                 </Grid>
-                <Grid item={true} xs={12}>
+                <Grid item xs={12}>
                     <FileFilterCheckboxGroup
                         title="Format"
-                        config={props.dataFormats}
-                        onChange={props.onDataFormatChange}
+                        config={{
+                            options: formats,
+                            checked: filters.data_format
+                        }}
+                        onChange={updateFilters("protocol_id")}
                     />
                 </Grid>
             </Grid>
@@ -49,4 +84,4 @@ const FileFilter: React.FunctionComponent<IFileFilterProps> = props => {
     );
 };
 
-export default FileFilter;
+export default withData(FileFilter);

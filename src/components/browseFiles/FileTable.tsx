@@ -4,7 +4,7 @@ import { LOCALE, DATE_OPTIONS } from "../../util/constants";
 import { colors } from "../../rootStyles";
 import PaginatedTable, { IHeader } from "../generic/PaginatedTable";
 import { makeStyles } from "@material-ui/core";
-import { filterConfig, Filters } from "./BrowseFilesPage";
+import { filterConfig, Filters } from "./FileFilter";
 import { useQueryParams } from "use-query-params";
 import { getFiles, IDataWithMeta } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
