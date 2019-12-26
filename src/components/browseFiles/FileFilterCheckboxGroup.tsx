@@ -1,11 +1,12 @@
 import {
     FormControlLabel,
-    FormGroup,
-    Toolbar,
-    Typography,
-    makeStyles
+    makeStyles,
+    TextField,
+    Chip,
+    Grid
 } from "@material-ui/core";
 import Checkbox from "@material-ui/core/Checkbox";
+import { Autocomplete } from "@material-ui/lab";
 import * as React from "react";
 import { colors } from "../../rootStyles";
 
@@ -43,36 +44,62 @@ const FileFilterCheckboxGroup: React.FunctionComponent<
 > = props => {
     const classes = useFilterStyles();
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        props.onChange(event.target.value);
+    const handleChange = (event: React.ChangeEvent<{}>) => {
+        // @ts-ignore
+        const value = event.target.value;
+
+        if (props.config.options.includes(value)) {
+            props.onChange(value);
+        }
     };
 
     const checked = props.config.checked || [];
 
     return (
-        <div>
-            <Toolbar className={classes.header} disableGutters>
-                <Typography>{props.title}</Typography>
-            </Toolbar>
-            <FormGroup className={classes.checkboxGroup}>
-                {props.config.options.map((dataFormat: string) => {
-                    return (
-                        <FormControlLabel
-                            key={dataFormat}
-                            label={dataFormat}
-                            control={
-                                <Checkbox
-                                    value={dataFormat}
-                                    checked={checked.includes(dataFormat)}
-                                    onChange={handleChange}
-                                    className={classes.checkbox}
-                                />
-                            }
-                        />
-                    );
-                })}
-            </FormGroup>
-        </div>
+        <Autocomplete
+            multiple
+            autoComplete
+            disableCloseOnSelect
+            disableClearable
+            options={props.config.options}
+            value={checked}
+            onChange={handleChange}
+            renderInput={params => (
+                <TextField
+                    {...params}
+                    fullWidth
+                    variant="outlined"
+                    label={props.title}
+                    placeholder="Select multiple"
+                    InputLabelProps={{ shrink: true }}
+                />
+            )}
+            renderOption={option => (
+                <FormControlLabel
+                    key={option}
+                    label={option}
+                    control={
+                        <Checkbox
+                            value={option}
+                            className={classes.checkbox}
+                            checked={checked.includes(option)}
+                        ></Checkbox>
+                    }
+                />
+            )}
+            renderTags={tags => (
+                <Grid container spacing={1}>
+                    {tags.map((tag: string) => (
+                        <Grid item key={tag}>
+                            <Chip
+                                label={tag}
+                                onDelete={() => props.onChange(tag)}
+                            />
+                        </Grid>
+                    ))}
+                </Grid>
+            )}
+        />
     );
 };
 
