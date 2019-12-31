@@ -3,7 +3,7 @@ import { DataFile } from "../../model/file";
 import { LOCALE, DATE_OPTIONS } from "../../util/constants";
 import { colors } from "../../rootStyles";
 import PaginatedTable, { IHeader } from "../generic/PaginatedTable";
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, Grid, Typography } from "@material-ui/core";
 import { filterConfig, Filters } from "./FileFilter";
 import { useQueryParams } from "use-query-params";
 import { getFiles, IDataWithMeta } from "../../api/api";
@@ -21,6 +21,9 @@ const useStyles = makeStyles({
         "& .MuiTableRow-root": {
             cursor: "pointer"
         }
+    },
+    forwardSlash: {
+        fontSize: "inherit"
     }
 });
 
@@ -54,9 +57,33 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     >(undefined);
 
     const [headers, setHeaders] = React.useState<IHeader[]>([
-        { key: "object_url", label: "File Name" },
-        { key: "assay_type", label: "Type" },
-        { key: "data_format", label: "Format" },
+        {
+            key: "object_url",
+            label: "File",
+            format: (name: string) => {
+                const parts = name.split("/");
+                const lastPartIndex = parts.length - 1;
+                return (
+                    <Grid container spacing={1}>
+                        {parts.flatMap((part, i) => (
+                            <React.Fragment key={part}>
+                                <Grid item>{part}</Grid>
+                                {i !== lastPartIndex && (
+                                    <Grid item>
+                                        <Typography
+                                            className={classes.forwardSlash}
+                                            color="textSecondary"
+                                        >
+                                            /
+                                        </Typography>
+                                    </Grid>
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </Grid>
+                );
+            }
+        },
         {
             key: "uploaded_timestamp",
             label: "Date/Time Uploaded",

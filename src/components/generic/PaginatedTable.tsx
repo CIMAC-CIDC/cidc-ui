@@ -33,7 +33,7 @@ export interface IPaginatedTableProps {
 export interface IHeader {
     key: string;
     label: string;
-    format?: (v: any) => string;
+    format?: (v: any) => string | React.ReactElement;
     active?: boolean;
     direction?: "asc" | "desc";
 }

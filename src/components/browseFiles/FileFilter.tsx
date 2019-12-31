@@ -63,7 +63,7 @@ const FileFilter: React.FunctionComponent<IDataContext> = props => {
                     </Grid>
                     <Grid item xs={12}>
                         <FileFilterCheckboxGroup
-                            title="Types"
+                            title="Data Categories"
                             config={{
                                 options: types,
                                 checked: filters.type
@@ -73,7 +73,7 @@ const FileFilter: React.FunctionComponent<IDataContext> = props => {
                     </Grid>
                     <Grid item xs={12}>
                         <FileFilterCheckboxGroup
-                            title="Formats"
+                            title="File Formats"
                             config={{
                                 options: formats,
                                 checked: filters.data_format
