@@ -9,12 +9,11 @@ import {
 import uniq from "lodash/uniq";
 import FileFilterCheckboxGroup from "./FileFilterCheckboxGroup";
 import { withData, IDataContext } from "../data/DataProvider";
-import { StringParam, ArrayParam, useQueryParams } from "use-query-params";
+import { ArrayParam, useQueryParams } from "use-query-params";
 import { DataFile } from "../../model/file";
 import { FilterList } from "@material-ui/icons";
 
 export const filterConfig = {
-    search: StringParam,
     protocol_id: ArrayParam,
     data_format: ArrayParam,
     type: ArrayParam
@@ -23,18 +22,8 @@ export type Filters = ReturnType<typeof useQueryParams>[0];
 
 const FileFilter: React.FunctionComponent<IDataContext> = props => {
     const [filters, setFilters] = useQueryParams(filterConfig);
-    const updateFilters = (k: keyof typeof filterConfig) => (v: string) => {
-        if (k === "search") {
-            setFilters({ search: v });
-        } else {
-            const current = filters[k];
-            const updated = current
-                ? current.includes(v)
-                    ? current.filter(f => f !== v)
-                    : [...current, v]
-                : [v];
-            setFilters({ [k]: updated });
-        }
+    const updateFilters = (k: keyof typeof filterConfig) => (vs: string[]) => {
+        setFilters({ [k]: vs });
     };
 
     const extractDistinct = (column: keyof DataFile) =>

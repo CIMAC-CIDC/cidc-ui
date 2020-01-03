@@ -36,7 +36,7 @@ export interface IFilterConfig {
 export interface IFileFilterCheckboxGroupProps {
     title: string;
     config: IFilterConfig;
-    onChange: (option: string) => void;
+    onChange: (options: string[]) => void;
 }
 
 const FileFilterCheckboxGroup: React.FunctionComponent<
@@ -44,13 +44,8 @@ const FileFilterCheckboxGroup: React.FunctionComponent<
 > = props => {
     const classes = useFilterStyles();
 
-    const handleChange = (event: React.ChangeEvent<{}>) => {
-        // @ts-ignore
-        const value = event.target.value;
-
-        if (props.config.options.includes(value)) {
-            props.onChange(value);
-        }
+    const handleChange = (_: React.ChangeEvent<{}>, values: any) => {
+        props.onChange(values);
     };
 
     const checked = props.config.checked || [];
@@ -75,17 +70,14 @@ const FileFilterCheckboxGroup: React.FunctionComponent<
                 />
             )}
             renderOption={option => (
-                <FormControlLabel
-                    key={option}
-                    label={option}
-                    control={
-                        <Checkbox
-                            value={option}
-                            className={classes.checkbox}
-                            checked={checked.includes(option)}
-                        ></Checkbox>
-                    }
-                />
+                <React.Fragment key={option}>
+                    <Checkbox
+                        value={option}
+                        className={classes.checkbox}
+                        checked={checked.includes(option)}
+                    ></Checkbox>
+                    {option}
+                </React.Fragment>
             )}
             renderTags={tags => (
                 <Grid container spacing={1}>
@@ -93,7 +85,11 @@ const FileFilterCheckboxGroup: React.FunctionComponent<
                         <Grid item key={tag}>
                             <Chip
                                 label={tag}
-                                onDelete={() => props.onChange(tag)}
+                                onDelete={() =>
+                                    props.onChange(
+                                        tags.filter((t: string) => t !== tag)
+                                    )
+                                }
                             />
                         </Grid>
                     ))}
