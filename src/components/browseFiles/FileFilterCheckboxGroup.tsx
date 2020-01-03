@@ -1,10 +1,4 @@
-import {
-    FormControlLabel,
-    makeStyles,
-    TextField,
-    Chip,
-    Grid
-} from "@material-ui/core";
+import { makeStyles, TextField, Chip, Grid } from "@material-ui/core";
 import Checkbox from "@material-ui/core/Checkbox";
 import { Autocomplete } from "@material-ui/lab";
 import * as React from "react";
