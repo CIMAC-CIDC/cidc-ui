@@ -53,6 +53,7 @@ const UserPermissionsDialogWithInfo: React.FunctionComponent<
     const supportedTypes = [
         ...supportedTemplates.metadata,
         ...supportedTemplates.manifests,
+        ...supportedTemplates.analyses,
         ...extraDataTypes
     ];
 
@@ -196,7 +197,10 @@ class UserPermissionsDialog extends React.Component<
                                             <TableCell>Trial</TableCell>
                                             {this.props.supportedTypes.map(
                                                 typ => (
-                                                    <TableCell key={typ}>
+                                                    <TableCell
+                                                        key={typ}
+                                                        size="small"
+                                                    >
                                                         {typ}
                                                     </TableCell>
                                                 )

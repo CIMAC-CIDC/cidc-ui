@@ -235,6 +235,12 @@ function getSupportedManifests(): Promise<string[]> {
         .then(_extractItem);
 }
 
+function getSupportedAnalyses(): Promise<string[]> {
+    return getApiClient()
+        .get("/info/analyses")
+        .then(_extractItem);
+}
+
 function getExtraDataTypes(): Promise<string[]> {
     return getApiClient()
         .get("/info/extra_data_types")
@@ -274,5 +280,6 @@ export {
     revokePermission,
     getSupportedAssays,
     getSupportedManifests,
+    getSupportedAnalyses,
     getExtraDataTypes
 };

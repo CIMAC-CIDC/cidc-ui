@@ -2,13 +2,15 @@ import * as React from "react";
 import {
     getSupportedAssays,
     getSupportedManifests,
-    getExtraDataTypes
+    getExtraDataTypes,
+    getSupportedAnalyses
 } from "../../api/api";
 
 export interface IInfoContext {
     supportedTemplates: {
         manifests: string[];
         metadata: string[];
+        analyses: string[];
     };
     extraDataTypes: string[];
 }
@@ -24,6 +26,9 @@ const InfoProvider: React.FunctionComponent = props => {
     const [manifests, setManifests] = React.useState<string[] | undefined>(
         undefined
     );
+    const [analyses, setAnalyses] = React.useState<string[] | undefined>(
+        undefined
+    );
     const [extraDataTypes, setExtraDataTypes] = React.useState<
         string[] | undefined
     >(undefined);
@@ -31,12 +36,16 @@ const InfoProvider: React.FunctionComponent = props => {
     React.useEffect(() => {
         getSupportedAssays().then(setMetadata);
         getSupportedManifests().then(setManifests);
+        getSupportedAnalyses().then(setAnalyses);
         getExtraDataTypes().then(setExtraDataTypes);
     }, []);
 
     const context =
-        metadata && manifests && extraDataTypes
-            ? { supportedTemplates: { metadata, manifests }, extraDataTypes }
+        metadata && manifests && analyses && extraDataTypes
+            ? {
+                  supportedTemplates: { metadata, manifests, analyses },
+                  extraDataTypes
+              }
             : undefined;
 
     return (
