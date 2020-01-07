@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button } from "@material-ui/core";
+import { Button, Grid } from "@material-ui/core";
 import { ButtonProps } from "@material-ui/core/Button";
 import { InfoContext } from "../info/InfoProvider";
 
@@ -19,17 +19,31 @@ const TemplateDownloadButton: React.FunctionComponent<
 > = ({ templateName: name, templateType, ...buttonProps }) => {
     const info = React.useContext(InfoContext);
 
-    const hasURL = info && info.supportedTemplates[templateType].includes(name);
-    if (!hasURL) {
+    // For, e.g., templateName == WES, we expect multiple template types
+    // (wes_fastq and wes_bam). In that case, multiple buttons will render.
+    const types =
+        info &&
+        info.supportedTemplates[templateType].filter(typ =>
+            typ.startsWith(name)
+        );
+    if (!types) {
         return null;
     }
 
-    const templateURL = nameToURL(templateType, name);
+    const templateURLs = types.map(typ => nameToURL(templateType, typ));
 
     return (
-        <form method="get" action={templateURL}>
-            <Button type="submit" {...buttonProps} />
-        </form>
+        <Grid container direction="column" spacing={1}>
+            {templateURLs.map((url, i) => (
+                <Grid item key={url}>
+                    <form method="get" action={url}>
+                        <Button type="submit" {...buttonProps}>
+                            Download an empty {types[i]} template
+                        </Button>
+                    </form>
+                </Grid>
+            ))}
+        </Grid>
     );
 };
 

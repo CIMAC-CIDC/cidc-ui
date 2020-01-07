@@ -54,14 +54,13 @@ const AssayInstructions: React.FunctionComponent<
                             <CopyIdToken />
                         ) : (
                             <TemplateDownloadButton
+                                fullWidth
                                 color="primary"
                                 templateName={assay}
                                 templateType="metadata"
                                 variant="contained"
                                 startIcon={<CloudDownload />}
-                            >
-                                Download an empty {assay} template
-                            </TemplateDownloadButton>
+                            />
                         )}
                     </Grid>
                 </Grid>
