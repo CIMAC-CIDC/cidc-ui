@@ -34,7 +34,8 @@ function doRender() {
     const infoContext = {
         supportedTemplates: {
             metadata: ["cytof", "wes", "olink", "ihc"],
-            manifests: []
+            manifests: [],
+            analyses: []
         },
         extraDataTypes: []
     };
