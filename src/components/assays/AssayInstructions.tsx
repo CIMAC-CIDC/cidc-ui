@@ -55,6 +55,7 @@ const AssayInstructions: React.FunctionComponent<
                         ) : (
                             <TemplateDownloadButton
                                 fullWidth
+                                verboseLabel
                                 color="primary"
                                 templateName={assay}
                                 templateType="metadata"

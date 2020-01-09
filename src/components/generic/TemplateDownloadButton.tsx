@@ -12,11 +12,12 @@ export function nameToURL(type: string, name: string) {
 export interface ITemplateDownloadButtonProps extends ButtonProps {
     templateType: "metadata" | "manifests";
     templateName: string;
+    verboseLabel?: boolean;
 }
 
 const TemplateDownloadButton: React.FunctionComponent<
     ITemplateDownloadButtonProps
-> = ({ templateName: name, templateType, ...buttonProps }) => {
+> = ({ templateName: name, templateType, verboseLabel, ...buttonProps }) => {
     const info = React.useContext(InfoContext);
 
     // For, e.g., templateName == WES, we expect multiple template types
@@ -38,7 +39,9 @@ const TemplateDownloadButton: React.FunctionComponent<
                 <Grid item key={url}>
                     <form method="get" action={url}>
                         <Button type="submit" {...buttonProps}>
-                            Download an empty {types[i]} template
+                            {verboseLabel
+                                ? `Download an empty ${types[i]} template`
+                                : types[i]}
                         </Button>
                     </form>
                 </Grid>
