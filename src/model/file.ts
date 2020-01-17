@@ -15,13 +15,5 @@ export interface DataFile {
         [prop: string]: any;
     };
     clustergrammer?: JSON;
-    ihc_barplot: IHCBarplotJSON;
-}
-
-export interface IHCBarplotJSON {
-    meta: {
-        facets: string[];
-        tps_column: string;
-    };
-    data: Array<Dictionary<string | number>>;
+    ihc_combined_plot: Array<Dictionary<string | number>>;
 }

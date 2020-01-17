@@ -3,7 +3,7 @@ import Plot from "react-plotly.js";
 import chroma from "chroma-js";
 import groupBy from "lodash/groupBy";
 import map from "lodash/map";
-import { IHCBarplotJSON } from "../../model/file";
+import { DataFile } from "../../model/file";
 import {
     Grid,
     Card,
@@ -16,35 +16,34 @@ import {
 } from "@material-ui/core";
 
 export interface IHCBarplotProps {
-    config: IHCBarplotJSON;
+    data: DataFile["ihc_combined_plot"];
 }
+
+const IHC_CONFIG = {
+    facets: [
+        { label: "Cohort", value: "cohort_name" },
+        { label: "Collection Event", value: "collection_event_name" }
+    ],
+    dataColumn: "tumor_proportion_score"
+};
 
 const IHCBarplot: React.FC<IHCBarplotProps> = props => {
     const [facet, setFacet] = React.useState<string>(
-        props.config.meta.facets[0]
+        IHC_CONFIG.facets[0].value
     );
 
-    const dataColumn = props.config.meta.tps_column;
-    const facetGroups = groupBy(props.config.data, facet);
-    const colors = chroma
-        .scale("RdYlBu")
-        .colors(Object.keys(facetGroups).length);
+    const facetGroups = groupBy(props.data, facet);
+    const colors = chroma.brewer.Set1.slice();
     const data = map(facetGroups, (rows, key) => ({
         x: map(rows, "cimac_id"),
-        y: map(rows, dataColumn),
+        y: map(rows, IHC_CONFIG.dataColumn),
         type: "bar",
-        marker: { color: colors.pop() },
+        marker: { color: colors.shift() },
         name: key
     }));
 
     return (
-        <Grid
-            container
-            spacing={2}
-            direction="row"
-            alignItems="center"
-            wrap="nowrap"
-        >
+        <Grid container direction="row" alignItems="center" wrap="nowrap">
             <Grid item>
                 <Card>
                     <CardContent>
@@ -54,12 +53,12 @@ const IHCBarplot: React.FC<IHCBarplotProps> = props => {
                                 value={facet}
                                 onChange={(_, v) => setFacet(v)}
                             >
-                                {props.config.meta.facets.map(name => (
+                                {IHC_CONFIG.facets.map(f => (
                                     <FormControlLabel
-                                        key={name}
-                                        value={name}
+                                        key={f.value}
+                                        value={f.value}
                                         control={<Radio />}
-                                        label={name}
+                                        label={f.label}
                                     />
                                 ))}
                             </RadioGroup>
@@ -72,6 +71,7 @@ const IHCBarplot: React.FC<IHCBarplotProps> = props => {
                     data={data}
                     layout={{
                         title: "IHC Expression Distribution",
+                        showlegend: true,
                         yaxis: {
                             anchor: "x",
                             title: { text: "TPS" }
@@ -80,7 +80,7 @@ const IHCBarplot: React.FC<IHCBarplotProps> = props => {
                             anchor: "y",
                             title: { text: "CIMAC ID" },
                             categorymode: "array",
-                            categoryarray: map(props.config.data, "cimac_id")
+                            categoryarray: map(props.data, "cimac_id")
                         }
                     }}
                     config={{ displaylogo: false }}

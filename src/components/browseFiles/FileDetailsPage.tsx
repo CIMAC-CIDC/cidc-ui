@@ -10,6 +10,7 @@ import CopyToClipboardButton from "../generic/CopyToClipboardButton";
 import { ButtonProps } from "@material-ui/core/Button";
 import Loader from "../generic/Loader";
 import ClustergrammerPage from "./ClustergrammerPage";
+import IHCBarplot from "../visualizations/IHCBarplot";
 
 const DownloadURL: React.FunctionComponent<{
     fileId: string;
@@ -181,13 +182,16 @@ const FileDetailsPage: React.FunctionComponent<
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item>
-                        {file.additional_metadata && (
-                            <Grid item>
-                                <AdditionalMetadataTable file={file} />
-                            </Grid>
-                        )}
-                    </Grid>
+                    {file.additional_metadata && (
+                        <Grid item>
+                            <AdditionalMetadataTable file={file} />
+                        </Grid>
+                    )}
+                    {file.ihc_combined_plot && (
+                        <Grid item>
+                            <IHCBarplot data={file.ihc_combined_plot} />
+                        </Grid>
+                    )}
                 </Grid>
             )}
         </div>
