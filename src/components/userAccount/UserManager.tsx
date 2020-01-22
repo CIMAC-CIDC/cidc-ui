@@ -10,18 +10,21 @@ import { getAllAccounts } from "../../api/api";
 import autobind from "autobind-decorator";
 import { Account } from "../../model/account";
 import UserTableRow from "./UserTableRow";
-import { List } from "@material-ui/icons";
+import { SupervisorAccount } from "@material-ui/icons";
 import orderBy from "lodash/orderBy";
 import PaginatedTable from "../generic/PaginatedTable";
 
 const ADMIN_TABLE_PAGE_SIZE = 15;
 
-export interface IAdminMenuProps {
+export interface IUserManagerProps {
     token: string;
     userId: number;
 }
 
-export default class AdminMenu extends React.Component<IAdminMenuProps, {}> {
+export default class UserManager extends React.Component<
+    IUserManagerProps,
+    {}
+> {
     state = {
         accounts: undefined,
         searchFilter: "",
@@ -76,14 +79,14 @@ export default class AdminMenu extends React.Component<IAdminMenuProps, {}> {
             this.state.searchFilter
         );
         return (
-            <div style={{ marginTop: 20 }}>
+            <div>
                 {accounts && (
                     <Card>
                         <CardHeader
-                            avatar={<List />}
+                            avatar={<SupervisorAccount />}
                             title={
                                 <Typography variant="h6">
-                                    Admin Tasks
+                                    Manage Users
                                 </Typography>
                             }
                         />
