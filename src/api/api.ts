@@ -1,5 +1,5 @@
 import { Account } from "../model/account";
-import { Trial } from "../model/trial";
+import { Trial, NewTrial } from "../model/trial";
 import { DataFile } from "../model/file";
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
 import Permission from "../model/permission";
@@ -112,10 +112,7 @@ function getTrials(token: string): Promise<Trial[]> {
         .then(_extractItems);
 }
 
-function createTrial(
-    token: string,
-    trial: { trial_id: string; metadata_json: string }
-): Promise<Trial> {
+function createTrial(token: string, trial: NewTrial): Promise<Trial> {
     return getApiClient(token)
         .post("trial_metadata", trial)
         .then(_extractItem);

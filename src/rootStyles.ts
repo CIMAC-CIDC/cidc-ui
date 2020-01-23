@@ -7,8 +7,8 @@ export const colors = {
 };
 
 export const widths = {
-    pageWidth: 1200,
-    markdownWidth: 880
+    pageWidth: 1000,
+    markdownWidth: 750
 };
 
 export const useRootStyles = makeStyles({
