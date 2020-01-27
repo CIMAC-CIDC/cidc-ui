@@ -3,10 +3,10 @@ import { filtersToWhereClause, headerToSortClause } from "../FileTable";
 test("filtersToWhereClause", () => {
     expect(filtersToWhereClause({})).toBe("");
     expect(filtersToWhereClause({ type: [1, 2] })).toBe(
-        '(assay_type=="1" or assay_type=="2")'
+        '(upload_type=="1" or upload_type=="2")'
     );
     expect(filtersToWhereClause({ type: [1, 2], protocol_id: undefined })).toBe(
-        '(assay_type=="1" or assay_type=="2")'
+        '(upload_type=="1" or upload_type=="2")'
     );
     expect(
         filtersToWhereClause({
@@ -15,7 +15,7 @@ test("filtersToWhereClause", () => {
             data_format: ["wes"]
         })
     ).toBe(
-        '(trial=="a" or trial=="b") and (assay_type=="1" or assay_type=="2") and (data_format=="wes")'
+        '(trial=="a" or trial=="b") and (upload_type=="1" or upload_type=="2") and (data_format=="wes")'
     );
 });
 

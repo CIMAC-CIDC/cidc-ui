@@ -9,7 +9,7 @@ export interface DataFile {
     uploaded_timestamp: Date;
     file_size_bytes: number;
     artifact_category: string;
-    assay_type: string;
+    upload_type: string;
     data_format: string;
     additional_metadata?: {
         [prop: string]: any;

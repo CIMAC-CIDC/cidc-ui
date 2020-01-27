@@ -44,7 +44,7 @@ export const filtersToWhereClause = (filters: Filters): string => {
         !!ids && `(${ids.map((id: string) => `${key}=="${id}"`).join(" or ")})`;
     const subclauses = [
         arraySubclause(filters.protocol_id, "trial"),
-        arraySubclause(filters.type, "assay_type"),
+        arraySubclause(filters.type, "upload_type"),
         arraySubclause(filters.data_format, "data_format")
     ];
 

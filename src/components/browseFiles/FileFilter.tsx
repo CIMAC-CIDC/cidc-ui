@@ -26,7 +26,7 @@ const FileFilter: React.FunctionComponent<IDataContext> = props => {
     const extractDistinct = (column: keyof DataFile) =>
         uniq(props.files.map(f => f[column] as string));
     const trialIds = extractDistinct("trial");
-    const types = extractDistinct("assay_type");
+    const types = extractDistinct("upload_type");
     const formats = extractDistinct("data_format");
 
     return (

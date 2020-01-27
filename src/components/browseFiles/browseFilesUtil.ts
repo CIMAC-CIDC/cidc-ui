@@ -17,7 +17,7 @@ export function filterFiles(
         }
         if (selectedExperimentalStrategies.length > 0) {
             isExperimentalStrategyMatch = selectedExperimentalStrategies.includes(
-                file.assay_type
+                file.upload_type
             );
         }
         if (selectedDataFormats.length > 0) {

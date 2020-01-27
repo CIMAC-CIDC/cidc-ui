@@ -237,7 +237,7 @@ function grantPermission(
     return getApiClient(token).post("permissions", {
         to_user: user.id,
         trial,
-        assay_type: assay
+        upload_type: assay
     });
 }
 

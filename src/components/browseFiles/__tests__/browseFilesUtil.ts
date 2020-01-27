@@ -5,7 +5,7 @@ const files: DataFile[] = [
     {
         id: 6,
         data_format: "MAF",
-        assay_type: "WES",
+        upload_type: "WES",
         file_name: "dfci-9999.maf",
         artifact_category: "Assay from CIMAC",
         file_size_bytes: 1234567,
@@ -17,7 +17,7 @@ const files: DataFile[] = [
     {
         id: 1,
         data_format: "FASTQ",
-        assay_type: "WES",
+        upload_type: "WES",
         file_name: "cimac-6521-001.fa",
         artifact_category: "Assay from CIMAC",
         file_size_bytes: 234,
@@ -29,7 +29,7 @@ const files: DataFile[] = [
     {
         id: 2,
         data_format: "FASTQ",
-        assay_type: "WES",
+        upload_type: "WES",
         file_name: "cimac-6521-002.fa",
         artifact_category: "Assay from CIMAC",
         file_size_bytes: 21,
@@ -44,7 +44,7 @@ const files: DataFile[] = [
     {
         id: 3,
         data_format: "FASTQ",
-        assay_type: "WES",
+        upload_type: "WES",
         file_name: "cimac-6521-003.fa",
         artifact_category: "Assay from CIMAC",
         file_size_bytes: 22345,
@@ -59,7 +59,7 @@ const files: DataFile[] = [
     {
         id: 4,
         data_format: "FASTQ",
-        assay_type: "WES",
+        upload_type: "WES",
         file_name: "cimac-6521-004.fa",
         artifact_category: "Assay from CIMAC",
         file_size_bytes: 12345545,
@@ -74,7 +74,7 @@ const files: DataFile[] = [
     {
         id: 5,
         data_format: "VCF",
-        assay_type: "WES",
+        upload_type: "WES",
         file_name: "cimac-6521.vcf",
         artifact_category: "Assay from CIMAC",
         file_size_bytes: 7654645,

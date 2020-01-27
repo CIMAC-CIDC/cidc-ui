@@ -141,11 +141,11 @@ export default function UserAccountPage() {
                                                                 item
                                                                 key={
                                                                     perm.trial +
-                                                                    perm.assay_type
+                                                                    perm.upload_type
                                                                 }
                                                             >
                                                                 <Chip
-                                                                    label={`${perm.trial}: ${perm.assay_type}`}
+                                                                    label={`${perm.trial}: ${perm.upload_type}`}
                                                                 />
                                                             </Grid>
                                                         );
