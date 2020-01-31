@@ -3,6 +3,7 @@ import { Trial, NewTrial } from "../model/trial";
 import { DataFile } from "../model/file";
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
 import Permission from "../model/permission";
+import { Dictionary } from "lodash";
 
 const URL: string = process.env.REACT_APP_API_URL!;
 
@@ -249,6 +250,12 @@ function revokePermission(token: string, permissionID: number): Promise<any> {
     );
 }
 
+function getFilterFacets(token: string): Promise<Dictionary<string[]>> {
+    return getApiClient(token)
+        .get("downloadable_files/filter_facets")
+        .then(_extractItem);
+}
+
 function getSupportedAssays(): Promise<string[]> {
     return getApiClient()
         .get("/info/assays")
@@ -306,6 +313,7 @@ export {
     getPermissionsForUser,
     grantPermission,
     revokePermission,
+    getFilterFacets,
     getSupportedAssays,
     getSupportedManifests,
     getSupportedAnalyses,

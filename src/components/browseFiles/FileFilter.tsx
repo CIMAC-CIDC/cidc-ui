@@ -6,21 +6,25 @@ import {
     Switch,
     Typography
 } from "@material-ui/core";
-import uniq from "lodash/uniq";
 import FileFilterCheckboxGroup from "./FileFilterCheckboxGroup";
-import { withData, IDataContext } from "../data/DataProvider";
 import { ArrayParam, useQueryParams, BooleanParam } from "use-query-params";
-import { DataFile } from "../../model/file";
+import { withIdToken } from "../identity/AuthProvider";
+import { getFilterFacets } from "../../api/api";
+import { Dictionary } from "lodash";
 
 export const filterConfig = {
     analysis_friendly: BooleanParam,
-    protocol_id: ArrayParam,
-    data_format: ArrayParam,
-    type: ArrayParam
+    trial_id: ArrayParam,
+    upload_type: ArrayParam
 };
 export type Filters = ReturnType<typeof useQueryParams>[0];
 
-const FileFilter: React.FunctionComponent<IDataContext> = props => {
+const FileFilter: React.FunctionComponent<{ token: string }> = props => {
+    const [facets, setFacets] = React.useState<Dictionary<string[]> | null>();
+    React.useEffect(() => {
+        getFilterFacets(props.token).then(setFacets);
+    }, [props.token]);
+
     const [filters, setFilters] = useQueryParams(filterConfig);
     const updateFilters = (k: keyof typeof filterConfig) => (v: string) => {
         if (k === "analysis_friendly") {
@@ -37,12 +41,6 @@ const FileFilter: React.FunctionComponent<IDataContext> = props => {
     React.useEffect(() => {
         setFilters({ analysis_friendly: true });
     }, [setFilters]);
-
-    const extractDistinct = (column: keyof DataFile) =>
-        uniq(props.files.map(f => f[column] as string));
-    const trialIds = extractDistinct("trial");
-    const types = extractDistinct("upload_type");
-    const formats = extractDistinct("data_format");
 
     return (
         <Card>
@@ -68,39 +66,33 @@ const FileFilter: React.FunctionComponent<IDataContext> = props => {
                         }
                     />
                 </Grid>
-                <Grid item xs={12}>
-                    <FileFilterCheckboxGroup
-                        title="Protocol Identifiers"
-                        config={{
-                            options: trialIds,
-                            checked: filters.protocol_id
-                        }}
-                        onChange={updateFilters("protocol_id")}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <FileFilterCheckboxGroup
-                        title="Data Categories"
-                        config={{
-                            options: types,
-                            checked: filters.type
-                        }}
-                        onChange={updateFilters("type")}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <FileFilterCheckboxGroup
-                        title="File Formats"
-                        config={{
-                            options: formats,
-                            checked: filters.data_format
-                        }}
-                        onChange={updateFilters("data_format")}
-                    />
-                </Grid>
+                {facets && facets.trial_id && (
+                    <Grid item xs={12}>
+                        <FileFilterCheckboxGroup
+                            title="Protocol Identifiers"
+                            config={{
+                                options: facets.trial_id,
+                                checked: filters.trial_id
+                            }}
+                            onChange={updateFilters("trial_id")}
+                        />
+                    </Grid>
+                )}
+                {facets && facets.upload_type && (
+                    <Grid item xs={12}>
+                        <FileFilterCheckboxGroup
+                            title="Data Categories"
+                            config={{
+                                options: facets.upload_type,
+                                checked: filters.upload_type
+                            }}
+                            onChange={updateFilters("upload_type")}
+                        />
+                    </Grid>
+                )}
             </Grid>
         </Card>
     );
 };
 
-export default withData(FileFilter);
+export default withIdToken(FileFilter);
