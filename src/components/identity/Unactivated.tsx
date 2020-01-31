@@ -9,6 +9,8 @@ export default function Unactivated() {
     const classes = useRegisterStyles();
     const user = useUserContext();
 
+    console.log(user);
+
     // If the user is approved, they should be redirected home
     if (user && user.approval_date) {
         history.replace("/");
