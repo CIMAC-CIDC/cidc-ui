@@ -20,7 +20,7 @@ const useFilterStyles = makeStyles({
         fontSize: ".8rem"
     },
     checkboxGroup: {
-        maxHeight: "10.5rem",
+        maxHeight: "12.5rem",
         flexWrap: "nowrap",
         overflow: "auto",
         paddingLeft: 15

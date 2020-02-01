@@ -2,20 +2,19 @@ import { filtersToWhereClause, headerToSortClause } from "../FileTable";
 
 test("filtersToWhereClause", () => {
     expect(filtersToWhereClause({})).toBe("");
-    expect(filtersToWhereClause({ type: [1, 2] })).toBe(
-        '(upload_type=="1" or upload_type=="2")'
-    );
-    expect(filtersToWhereClause({ type: [1, 2], protocol_id: undefined })).toBe(
+    expect(filtersToWhereClause({ upload_type: [1, 2] })).toBe(
         '(upload_type=="1" or upload_type=="2")'
     );
     expect(
+        filtersToWhereClause({ upload_type: [1, 2], trial_id: undefined })
+    ).toBe('(upload_type=="1" or upload_type=="2")');
+    expect(
         filtersToWhereClause({
-            type: [1, 2],
-            protocol_id: ["a", "b"],
-            data_format: ["wes"]
+            upload_type: [1, 2],
+            trial_id: ["a", "b"]
         })
     ).toBe(
-        '(trial=="a" or trial=="b") and (upload_type=="1" or upload_type=="2") and (data_format=="wes")'
+        '(trial=="a" or trial=="b") and (upload_type=="1" or upload_type=="2")'
     );
 });
 
