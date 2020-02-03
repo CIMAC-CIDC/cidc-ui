@@ -13,7 +13,7 @@ import { getFilterFacets } from "../../api/api";
 import { Dictionary } from "lodash";
 
 export const filterConfig = {
-    analysis_friendly: BooleanParam,
+    show_raw_files: BooleanParam,
     trial_id: ArrayParam,
     upload_type: ArrayParam
 };
@@ -27,7 +27,7 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
 
     const [filters, setFilters] = useQueryParams(filterConfig);
     const updateFilters = (k: keyof typeof filterConfig) => (v: string) => {
-        if (k === "analysis_friendly") {
+        if (k === "show_raw_files") {
             setFilters({ [k]: v === "true" || undefined });
         } else {
             const currentVals = filters[k] || [];
@@ -37,10 +37,6 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
             setFilters({ [k]: vals });
         }
     };
-    // Default to filter only analysis-friendly files
-    React.useEffect(() => {
-        setFilters({ analysis_friendly: true });
-    }, [setFilters]);
 
     return (
         <Card>
@@ -50,10 +46,11 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                         style={{ padding: 10 }}
                         control={
                             <Switch
+                                size="small"
                                 color="primary"
-                                checked={!!filters.analysis_friendly}
+                                checked={!!filters.show_raw_files}
                                 onChange={(_, checked) =>
-                                    updateFilters("analysis_friendly")(
+                                    updateFilters("show_raw_files")(
                                         checked.toString()
                                     )
                                 }
@@ -61,7 +58,7 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                         }
                         label={
                             <Typography variant="body2">
-                                Show only analysis-friendly files
+                                Include raw files in results
                             </Typography>
                         }
                     />
