@@ -3,11 +3,19 @@ import { DataFile } from "../../model/file";
 import { LOCALE, DATE_OPTIONS } from "../../util/constants";
 import { colors } from "../../rootStyles";
 import PaginatedTable, { IHeader } from "../generic/PaginatedTable";
-import { makeStyles, Grid, Typography } from "@material-ui/core";
+import {
+    makeStyles,
+    Typography,
+    TableCell,
+    Checkbox,
+    Button,
+    CircularProgress
+} from "@material-ui/core";
 import { filterConfig, Filters } from "./FileFilter";
 import { useQueryParams } from "use-query-params";
-import { getFiles, IDataWithMeta } from "../../api/api";
+import { getFiles, IDataWithMeta, getDownloadURL } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
+import MuiRouterLink from "../generic/MuiRouterLink";
 
 const FILE_TABLE_PAGE_SIZE = 15;
 
@@ -31,7 +39,11 @@ const useStyles = makeStyles({
         }
     },
     forwardSlash: {
-        fontSize: "inherit"
+        fontSize: "inherit",
+        display: "inline"
+    },
+    checkbox: {
+        padding: 0
     }
 });
 
@@ -55,6 +67,24 @@ export const headerToSortClause = (header: IHeader): string => {
     return `[("${header.key}", ${header.direction === "asc" ? 1 : -1})]`;
 };
 
+export const triggerBatchDownload = async (
+    token: string,
+    fileIds: string[]
+) => {
+    const urls = await Promise.all(
+        fileIds.map(id => getDownloadURL(token, id))
+    );
+
+    let interval: NodeJS.Timeout;
+    interval = setInterval(() => {
+        if (urls.length === 0) {
+            clearInterval(interval);
+        }
+        const url = urls.pop();
+        window.open(url, "_parent");
+    }, 300);
+};
+
 const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
     const filters = useQueryParams(filterConfig)[0];
@@ -63,40 +93,17 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const [data, setData] = React.useState<
         IDataWithMeta<DataFile[]> | undefined
     >(undefined);
-
+    const [checked, setChecked] = React.useState<string[]>([]);
+    const [downloading, setDownloading] = React.useState<boolean>(false);
     const [headers, setHeaders] = React.useState<IHeader[]>([
+        { key: "", label: "" },
         {
             key: "object_url",
-            label: "File",
-            format: (name: string) => {
-                const parts = name.split("/");
-                const lastPartIndex = parts.length - 1;
-                return (
-                    <Grid container spacing={1}>
-                        {parts.flatMap((part, i) => (
-                            <React.Fragment key={part}>
-                                <Grid item>{part}</Grid>
-                                {i !== lastPartIndex && (
-                                    <Grid item>
-                                        <Typography
-                                            className={classes.forwardSlash}
-                                            color="textSecondary"
-                                        >
-                                            /
-                                        </Typography>
-                                    </Grid>
-                                )}
-                            </React.Fragment>
-                        ))}
-                    </Grid>
-                );
-            }
+            label: "File"
         },
         {
             key: "uploaded_timestamp",
             label: "Date/Time Uploaded",
-            format: (ts: number) =>
-                new Date(ts).toLocaleString(LOCALE, DATE_OPTIONS),
             active: true,
             direction: "desc"
         } as IHeader
@@ -110,11 +117,65 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             max_results: FILE_TABLE_PAGE_SIZE,
             sort: headerToSortClause(sortHeader),
             projection: FILE_TABLE_QUERY_PROJECTION
-        }).then(files => setData(files));
+        }).then(files => {
+            setData(files);
+            setChecked([]);
+        });
     }, [filters, page, props.token, sortHeader]);
+
+    const formatObjectURL = (row: DataFile) => {
+        const parts = row.object_url.split("/");
+        const lastPartIndex = parts.length - 1;
+        return (
+            <MuiRouterLink
+                to={`/file-details/${row.id}`}
+                LinkProps={{ color: "initial" }}
+            >
+                {parts.flatMap((part, i) => (
+                    <React.Fragment key={part}>
+                        {part}
+                        {i !== lastPartIndex && (
+                            <Typography
+                                className={classes.forwardSlash}
+                                color="textSecondary"
+                            >
+                                {" "}
+                                /{" "}
+                            </Typography>
+                        )}
+                    </React.Fragment>
+                ))}
+            </MuiRouterLink>
+        );
+    };
+
+    const formatUploadTimestamp = (row: DataFile) =>
+        new Date(row.uploaded_timestamp).toLocaleString(LOCALE, DATE_OPTIONS);
 
     return (
         <div className={classes.root}>
+            <Button
+                variant="outlined"
+                color="primary"
+                disabled={!checked.length || downloading}
+                disableRipple
+                onClick={() => {
+                    setDownloading(true);
+                    triggerBatchDownload(props.token, checked).then(() => {
+                        setChecked([]);
+                        setDownloading(false);
+                    });
+                }}
+                endIcon={
+                    downloading && (
+                        <CircularProgress size={12} color="inherit" />
+                    )
+                }
+            >
+                {checked.length
+                    ? `Download ${checked.length} files`
+                    : "Select files for batch download"}
+            </Button>
             <PaginatedTable
                 count={data ? data.meta.total : 0}
                 page={page}
@@ -123,9 +184,27 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                 headers={headers}
                 data={data && data.data}
                 getRowKey={row => row.id}
-                onClickRow={row =>
-                    props.history.push("/file-details/" + row.id)
-                }
+                renderRow={row => {
+                    return (
+                        <>
+                            <TableCell>
+                                <Checkbox
+                                    className={classes.checkbox}
+                                    size="small"
+                                    checked={checked.includes(row.id)}
+                                />
+                            </TableCell>
+                            <TableCell>{formatObjectURL(row)}</TableCell>
+                            <TableCell>{formatUploadTimestamp(row)}</TableCell>
+                        </>
+                    );
+                }}
+                onClickRow={row => {
+                    const newChecked = checked.includes(row.id)
+                        ? checked.filter(id => id !== row.id)
+                        : [...checked, row.id];
+                    setChecked(newChecked);
+                }}
                 onClickHeader={header => {
                     const newHeaders = headers.map(h => {
                         const newHeader = { ...h };

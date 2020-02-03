@@ -36,6 +36,7 @@ export interface IHeader {
     format?: (v: any) => string | React.ReactElement;
     active?: boolean;
     direction?: "asc" | "desc";
+    disableSort?: boolean;
 }
 
 // TODO (maybe): refine this type
@@ -61,18 +62,24 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                             {props.headers.map(header => (
                                 <TableCell key={header.key}>
                                     {props.onClickHeader ? (
-                                        <TableSortLabel
-                                            active={header.active}
-                                            direction={header.direction}
-                                            onClick={() => {
-                                                if (props.onClickHeader) {
-                                                    setDataWillChange(true);
-                                                    props.onClickHeader(header);
-                                                }
-                                            }}
-                                        >
-                                            {header.label}
-                                        </TableSortLabel>
+                                        header.disableSort ? (
+                                            header.label
+                                        ) : (
+                                            <TableSortLabel
+                                                active={header.active}
+                                                direction={header.direction}
+                                                onClick={() => {
+                                                    if (props.onClickHeader) {
+                                                        setDataWillChange(true);
+                                                        props.onClickHeader(
+                                                            header
+                                                        );
+                                                    }
+                                                }}
+                                            >
+                                                {header.label}
+                                            </TableSortLabel>
+                                        )
                                     ) : (
                                         header.label
                                     )}
