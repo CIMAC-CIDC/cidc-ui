@@ -42,7 +42,6 @@ export interface IFileTableProps {
 export const filtersToWhereClause = (filters: Filters): string => {
     const arraySubclause = (ids: any, key: string) =>
         !!ids && `(${ids.map((id: string) => `${key}=="${id}"`).join(" or ")})`;
-    console.log(filters);
     const subclauses = [
         arraySubclause(filters.trial_id, "trial"),
         arraySubclause(filters.upload_type, "upload_type"),
