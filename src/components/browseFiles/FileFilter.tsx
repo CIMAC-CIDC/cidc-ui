@@ -13,7 +13,7 @@ import { getFilterFacets } from "../../api/api";
 import { Dictionary } from "lodash";
 
 export const filterConfig = {
-    show_raw_files: BooleanParam,
+    raw_files: BooleanParam,
     trial_id: ArrayParam,
     upload_type: ArrayParam
 };
@@ -27,7 +27,7 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
 
     const [filters, setFilters] = useQueryParams(filterConfig);
     const updateFilters = (k: keyof typeof filterConfig) => (v: string) => {
-        if (k === "show_raw_files") {
+        if (k === "raw_files") {
             setFilters({ [k]: v === "true" || undefined });
         } else {
             const currentVals = filters[k] || [];
@@ -48,9 +48,9 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                             <Switch
                                 size="small"
                                 color="primary"
-                                checked={!!filters.show_raw_files}
+                                checked={!!filters.raw_files}
                                 onChange={(_, checked) =>
-                                    updateFilters("show_raw_files")(
+                                    updateFilters("raw_files")(
                                         checked.toString()
                                     )
                                 }

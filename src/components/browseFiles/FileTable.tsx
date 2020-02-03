@@ -45,7 +45,7 @@ export const filtersToWhereClause = (filters: Filters): string => {
     const subclauses = [
         arraySubclause(filters.trial_id, "trial"),
         arraySubclause(filters.upload_type, "upload_type"),
-        !filters.show_raw_files && "(analysis_friendly == true)"
+        !filters.raw_files && "(analysis_friendly==true)"
     ];
 
     return subclauses.filter(c => !!c).join(" and ");
