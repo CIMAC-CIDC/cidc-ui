@@ -18,13 +18,13 @@ const TRIAL = { trial_id: "test-1" } as Trial;
 const TRIALS = [TRIAL];
 const WES_PERMISSION = {
     id: 123,
-    to_user: USER.id,
+    granted_to_user: USER.id,
     trial: "test-1",
     upload_type: "wes"
 };
 const PERMISSIONS = [
     WES_PERMISSION,
-    { to_user: USER.id, trial: TRIAL.trial_id, upload_type: "olink" }
+    { granted_to_user: USER.id, trial: TRIAL.trial_id, upload_type: "olink" }
 ];
 
 getTrials.mockResolvedValue(TRIALS);
@@ -44,7 +44,7 @@ function doRender() {
         <InfoContext.Provider value={infoContext}>
             <UserPermissionsDialogWithInfo
                 token={TOKEN}
-                user={USER}
+                grantee={USER}
                 open={true}
                 onCancel={jest.fn()}
             />

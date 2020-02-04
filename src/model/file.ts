@@ -3,7 +3,7 @@ import { Dictionary } from "lodash";
 // tslint:disable-next-line:interface-name
 export interface DataFile {
     id: number;
-    trial: string;
+    trial_id: string;
     file_name: string;
     object_url: string;
     uploaded_timestamp: Date;

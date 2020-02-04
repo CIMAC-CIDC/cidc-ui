@@ -13,7 +13,7 @@ export function filterFiles(
         let isDataFormatMatch = true;
         let isSearchFilterMatch = true;
         if (selectedTrialIds.length > 0) {
-            isTrialIdMatch = selectedTrialIds.includes(file.trial);
+            isTrialIdMatch = selectedTrialIds.includes(file.trial_id);
         }
         if (selectedExperimentalStrategies.length > 0) {
             isExperimentalStrategyMatch = selectedExperimentalStrategies.includes(

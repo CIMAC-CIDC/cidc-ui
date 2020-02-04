@@ -19,7 +19,7 @@ test("filtersToWhereClause", () => {
             trial_id: ["a", "b"]
         })
     ).toBe(
-        '(trial=="a" or trial=="b") and (upload_type=="1" or upload_type=="2") and (analysis_friendly==true)'
+        '(trial_id=="a" or trial_id=="b") and (upload_type=="1" or upload_type=="2") and (analysis_friendly==true)'
     );
 });
 

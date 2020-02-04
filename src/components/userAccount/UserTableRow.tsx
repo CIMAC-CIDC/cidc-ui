@@ -112,7 +112,7 @@ export default class UserTableRow extends React.Component<any, {}> {
                     </Button>
                     <UserPermissionsDialog
                         open={this.state.trialsDialogOpen}
-                        user={this.props.account}
+                        grantee={this.props.account}
                         token={this.props.token}
                         onCancel={this.handleTrialCancel}
                     />

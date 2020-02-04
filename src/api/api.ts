@@ -224,19 +224,21 @@ function getPermissionsForUser(
 ): Promise<Permission[] | undefined> {
     return getApiClient(token)
         .get("permissions", {
-            params: { where: { to_user: userID } }
+            params: { where: { granted_to_user: userID } }
         })
         .then(_extractItems);
 }
 
 function grantPermission(
     token: string,
-    user: Account,
+    granterId: number,
+    granteeId: number,
     trial: string,
     assay: string
 ): Promise<any> {
     return getApiClient(token).post("permissions", {
-        to_user: user.id,
+        granted_to_user: granteeId,
+        granted_by_user: granterId,
         trial,
         upload_type: assay
     });
