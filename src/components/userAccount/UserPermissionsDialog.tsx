@@ -119,7 +119,10 @@ class UserPermissionsDialog extends React.Component<
             const checked = e.currentTarget.checked;
             if (checked) {
                 // Add to local state
-                const tempNewPerm = { trial, upload_type: assay } as Permission;
+                const tempNewPerm = {
+                    trial_id: trial,
+                    upload_type: assay
+                } as Permission;
                 this.setState(({ permissions }) => ({
                     permissions: permissions
                         ? [...permissions, tempNewPerm]
@@ -140,7 +143,11 @@ class UserPermissionsDialog extends React.Component<
                     permissions:
                         permissions &&
                         permissions.filter(
-                            p => !(p.trial === trial && p.upload_type === assay)
+                            p =>
+                                !(
+                                    p.trial_id === trial &&
+                                    p.upload_type === assay
+                                )
                         )
                 }));
 
@@ -179,7 +186,7 @@ class UserPermissionsDialog extends React.Component<
         }
         // Create a mapping from trial ID -> assay type -> permission
         const permissionsMap = mapValues(
-            groupBy(this.state.permissions, p => p.trial),
+            groupBy(this.state.permissions, p => p.trial_id),
             trialGroup =>
                 trialGroup.reduce(
                     (acc, p) => ({ ...acc, [p.upload_type]: p }),

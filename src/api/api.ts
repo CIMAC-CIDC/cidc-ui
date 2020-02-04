@@ -233,14 +233,14 @@ function grantPermission(
     token: string,
     granterId: number,
     granteeId: number,
-    trial: string,
-    assay: string
+    trialId: string,
+    uploadType: string
 ): Promise<any> {
     return getApiClient(token).post("permissions", {
         granted_to_user: granteeId,
         granted_by_user: granterId,
-        trial,
-        upload_type: assay
+        trial_id: trialId,
+        upload_type: uploadType
     });
 }
 
