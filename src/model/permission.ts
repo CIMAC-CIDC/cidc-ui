@@ -2,8 +2,8 @@
 export default interface Permission {
     id: number;
     _etag: string;
-    by_user: number;
+    granted_by_user: number;
     granted_to_user: number;
-    trial: string;
+    trial_id: string;
     upload_type: string;
 }
