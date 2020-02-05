@@ -90,6 +90,38 @@ export const triggerBatchDownload = async (
     }, 300);
 };
 
+const BatchDownloadButton: React.FC<{
+    ids: string[];
+    token: string;
+    onComplete: () => void;
+}> = ({ ids, token, onComplete }) => {
+    const [downloading, setDownloading] = React.useState<boolean>(false);
+
+    return (
+        <Button
+            variant="contained"
+            color="primary"
+            disabled={!ids.length || downloading}
+            disableRipple
+            onClick={() => {
+                setDownloading(true);
+                triggerBatchDownload(token, ids).then(() => {
+                    onComplete();
+                    setDownloading(false);
+                });
+            }}
+            startIcon={<CloudDownload />}
+            endIcon={
+                downloading && <CircularProgress size={12} color="inherit" />
+            }
+        >
+            {ids.length
+                ? `Download ${ids.length} file${ids.length > 1 ? "s" : ""}`
+                : "Select files for batch download"}
+        </Button>
+    );
+};
+
 const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
     const filters = useQueryParams(filterConfig)[0];
@@ -99,7 +131,6 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         IDataWithMeta<DataFile[]> | undefined
     >(undefined);
     const [checked, setChecked] = React.useState<string[]>([]);
-    const [downloading, setDownloading] = React.useState<boolean>(false);
     const [headers, setHeaders] = React.useState<IHeader[]>([
         { key: "", label: "", disableSort: true },
         {
@@ -161,33 +192,11 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         <div className={classes.root}>
             <Grid container direction="column" spacing={1}>
                 <Grid item>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        disabled={!checked.length || downloading}
-                        disableRipple
-                        onClick={() => {
-                            setDownloading(true);
-                            triggerBatchDownload(props.token, checked).then(
-                                () => {
-                                    setChecked([]);
-                                    setDownloading(false);
-                                }
-                            );
-                        }}
-                        startIcon={<CloudDownload />}
-                        endIcon={
-                            downloading && (
-                                <CircularProgress size={12} color="inherit" />
-                            )
-                        }
-                    >
-                        {checked.length
-                            ? `Download ${checked.length} file${
-                                  checked.length > 1 ? "s" : ""
-                              }`
-                            : "Select files for batch download"}
-                    </Button>
+                    <BatchDownloadButton
+                        ids={checked}
+                        token={props.token}
+                        onComplete={() => setChecked([])}
+                    />
                 </Grid>
                 <Grid item>
                     <PaginatedTable
