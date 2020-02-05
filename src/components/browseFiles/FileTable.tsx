@@ -9,7 +9,8 @@ import {
     TableCell,
     Checkbox,
     Button,
-    CircularProgress
+    CircularProgress,
+    Grid
 } from "@material-ui/core";
 import { filterConfig, Filters } from "./FileFilter";
 import { useQueryParams } from "use-query-params";
@@ -44,6 +45,9 @@ const useStyles = makeStyles({
     },
     checkbox: {
         padding: 0
+    },
+    checkboxCell: {
+        paddingRight: 0
     }
 });
 
@@ -96,7 +100,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const [checked, setChecked] = React.useState<string[]>([]);
     const [downloading, setDownloading] = React.useState<boolean>(false);
     const [headers, setHeaders] = React.useState<IHeader[]>([
-        { key: "", label: "" },
+        { key: "", label: "", disableSort: true },
         {
             key: "object_url",
             label: "File"
@@ -154,76 +158,90 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
 
     return (
         <div className={classes.root}>
-            <Button
-                variant="outlined"
-                color="primary"
-                disabled={!checked.length || downloading}
-                disableRipple
-                onClick={() => {
-                    setDownloading(true);
-                    triggerBatchDownload(props.token, checked).then(() => {
-                        setChecked([]);
-                        setDownloading(false);
-                    });
-                }}
-                endIcon={
-                    downloading && (
-                        <CircularProgress size={12} color="inherit" />
-                    )
-                }
-            >
-                {checked.length
-                    ? `Download ${checked.length} files`
-                    : "Select files for batch download"}
-            </Button>
-            <PaginatedTable
-                count={data ? data.meta.total : 0}
-                page={page}
-                onChangePage={p => setPage(p)}
-                rowsPerPage={FILE_TABLE_PAGE_SIZE}
-                headers={headers}
-                data={data && data.data}
-                getRowKey={row => row.id}
-                renderRowContents={row => {
-                    return (
-                        <>
-                            <TableCell>
-                                <Checkbox
-                                    className={classes.checkbox}
-                                    size="small"
-                                    checked={checked.includes(row.id)}
-                                />
-                            </TableCell>
-                            <TableCell>{formatObjectURL(row)}</TableCell>
-                            <TableCell>{formatUploadTimestamp(row)}</TableCell>
-                        </>
-                    );
-                }}
-                onClickRow={row => {
-                    const newChecked = checked.includes(row.id)
-                        ? checked.filter(id => id !== row.id)
-                        : [...checked, row.id];
-                    setChecked(newChecked);
-                }}
-                onClickHeader={header => {
-                    const newHeaders = headers.map(h => {
-                        const newHeader = { ...h };
-                        if (h.key === header.key) {
-                            if (h.active) {
-                                newHeader.direction =
-                                    h.direction === "desc" ? "asc" : "desc";
-                            } else {
-                                newHeader.active = true;
-                                newHeader.direction = "desc";
-                            }
-                        } else {
-                            newHeader.active = false;
+            <Grid container direction="column" spacing={1}>
+                <Grid item>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        disabled={!checked.length || downloading}
+                        disableRipple
+                        onClick={() => {
+                            setDownloading(true);
+                            triggerBatchDownload(props.token, checked).then(
+                                () => {
+                                    setChecked([]);
+                                    setDownloading(false);
+                                }
+                            );
+                        }}
+                        endIcon={
+                            downloading && (
+                                <CircularProgress size={12} color="inherit" />
+                            )
                         }
-                        return newHeader;
-                    });
-                    setHeaders(newHeaders);
-                }}
-            />
+                    >
+                        {checked.length
+                            ? `Download ${checked.length} files`
+                            : "Select files for batch download"}
+                    </Button>
+                </Grid>
+                <Grid item>
+                    <PaginatedTable
+                        count={data ? data.meta.total : 0}
+                        page={page}
+                        onChangePage={p => setPage(p)}
+                        rowsPerPage={FILE_TABLE_PAGE_SIZE}
+                        headers={headers}
+                        data={data && data.data}
+                        getRowKey={row => row.id}
+                        renderRowContents={row => {
+                            return (
+                                <>
+                                    <TableCell className={classes.checkboxCell}>
+                                        <Checkbox
+                                            className={classes.checkbox}
+                                            size="small"
+                                            checked={checked.includes(row.id)}
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        {formatObjectURL(row)}
+                                    </TableCell>
+                                    <TableCell>
+                                        {formatUploadTimestamp(row)}
+                                    </TableCell>
+                                </>
+                            );
+                        }}
+                        onClickRow={row => {
+                            const newChecked = checked.includes(row.id)
+                                ? checked.filter(id => id !== row.id)
+                                : [...checked, row.id];
+                            setChecked(newChecked);
+                        }}
+                        onClickHeader={header => {
+                            const newHeaders = headers.map(h => {
+                                const newHeader = { ...h };
+                                if (h.key === header.key) {
+                                    if (h.active) {
+                                        newHeader.direction =
+                                            h.direction === "desc"
+                                                ? "asc"
+                                                : "desc";
+                                    } else {
+                                        newHeader.active = true;
+                                        newHeader.direction = "desc";
+                                    }
+                                } else {
+                                    newHeader.active = false;
+                                }
+                                return newHeader;
+                            });
+                            setHeaders(newHeaders);
+                        }}
+                    />
+                </Grid>
+            </Grid>
         </div>
     );
 };
