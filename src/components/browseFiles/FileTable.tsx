@@ -17,6 +17,7 @@ import { useQueryParams } from "use-query-params";
 import { getFiles, IDataWithMeta, getDownloadURL } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
+import { CloudDownload } from "@material-ui/icons";
 
 const FILE_TABLE_PAGE_SIZE = 15;
 
@@ -161,7 +162,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             <Grid container direction="column" spacing={1}>
                 <Grid item>
                     <Button
-                        variant="outlined"
+                        variant="contained"
                         color="primary"
                         disabled={!checked.length || downloading}
                         disableRipple
@@ -174,6 +175,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                                 }
                             );
                         }}
+                        startIcon={<CloudDownload />}
                         endIcon={
                             downloading && (
                                 <CircularProgress size={12} color="inherit" />
@@ -181,7 +183,9 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                         }
                     >
                         {checked.length
-                            ? `Download ${checked.length} files`
+                            ? `Download ${checked.length} file${
+                                  checked.length > 1 ? "s" : ""
+                              }`
                             : "Select files for batch download"}
                     </Button>
                 </Grid>
