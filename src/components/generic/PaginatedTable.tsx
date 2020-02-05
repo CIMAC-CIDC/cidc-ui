@@ -14,6 +14,9 @@ import {
 const useStyles = makeStyles({
     message: {
         margin: "1rem"
+    },
+    row: {
+        cursor: "auto !important"
     }
 });
 
@@ -27,7 +30,7 @@ export interface IPaginatedTableProps {
     onChangePage: (page: number) => void;
     onClickHeader?: (header: IHeader) => void;
     onClickRow?: (row: DataRow) => void;
-    renderRow?: (row: DataRow) => React.ReactElement;
+    renderRowContents?: (row: DataRow) => React.ReactElement;
 }
 
 export interface IHeader {
@@ -58,7 +61,7 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
             <Table size="small">
                 {props.headers && (
                     <TableHead>
-                        <TableRow>
+                        <TableRow className={classes.row}>
                             {props.headers.map(header => (
                                 <TableCell key={header.key}>
                                     {props.onClickHeader ? (
@@ -93,13 +96,14 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                         {props.data.map(row => (
                             <TableRow
                                 key={props.getRowKey(row)}
+                                className={classes.row}
                                 hover={!!props.onClickRow}
                                 onClick={() =>
                                     props.onClickRow && props.onClickRow(row)
                                 }
                             >
-                                {props.renderRow
-                                    ? props.renderRow(row)
+                                {props.renderRowContents
+                                    ? props.renderRowContents(row)
                                     : props.headers
                                     ? props.headers.map(header => (
                                           <TableCell key={header.key}>

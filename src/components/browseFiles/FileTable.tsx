@@ -184,7 +184,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                 headers={headers}
                 data={data && data.data}
                 getRowKey={row => row.id}
-                renderRow={row => {
+                renderRowContents={row => {
                     return (
                         <>
                             <TableCell>

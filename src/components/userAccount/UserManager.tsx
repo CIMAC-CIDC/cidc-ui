@@ -113,7 +113,7 @@ export default class UserManager extends React.Component<
                                 rowsPerPage={ADMIN_TABLE_PAGE_SIZE}
                                 onChangePage={page => this.setState({ page })}
                                 getRowKey={account => account.id}
-                                renderRow={account => (
+                                renderRowContents={account => (
                                     <UserTableRow
                                         token={this.props.token}
                                         account={account}
