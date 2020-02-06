@@ -74,7 +74,8 @@ export const headerToSortClause = (header: IHeader): string => {
 
 export const triggerBatchDownload = async (
     token: string,
-    fileIds: string[]
+    fileIds: string[],
+    callback: () => void = () => null
 ) => {
     const urls = await Promise.all(
         fileIds.map(id => getDownloadURL(token, id))
@@ -84,6 +85,7 @@ export const triggerBatchDownload = async (
     interval = setInterval(() => {
         if (urls.length === 0) {
             clearInterval(interval);
+            callback();
         }
         const url = urls.pop();
         window.open(url, "_parent");
