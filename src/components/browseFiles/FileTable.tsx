@@ -131,8 +131,8 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const filters = useQueryParams(filterConfig)[0];
     const whereClause = filtersToWhereClause(filters);
 
-    const [pageParam, setPage] = useQueryParam("page", NumberParam);
-    const queryPage = pageParam || 0;
+    const [maybeQueryPage, setQueryPage] = useQueryParam("page", NumberParam);
+    const queryPage = maybeQueryPage || 0;
     const [tablePage, setTablePage] = React.useState<number>(0);
     const [prevPage, setPrevPage] = React.useState<number | null>();
 
@@ -160,7 +160,10 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             // Reset the query page to 0, since the user has either
             // changed the filtering or the sorting.
             // NOTE: This change doesn't update the file table.
-            setPage(0);
+            setQueryPage(0);
+        } else if (queryPage < 0) {
+            // A negative queryPage is invalid
+            setQueryPage(0);
         } else {
             getFiles(props.token, {
                 page: queryPage + 1, // eve-sqlalchemy pagination starts at 1
@@ -168,19 +171,28 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                 sort: sortClause,
                 ...fileQueryDefaults
             }).then(files => {
-                // De-select all selected files
-                setChecked([]);
+                // Check if queryPage is too high for the current filters.
+                if (
+                    queryPage * fileQueryDefaults.max_results >
+                    files.meta.total
+                ) {
+                    // queryPage is out of bounds, so reset to 0.
+                    setQueryPage(0);
+                } else {
+                    // De-select all selected files.
+                    setChecked([]);
 
-                // Update the page in the file table
-                setTablePage(queryPage);
+                    // Update the page in the file table.
+                    setTablePage(queryPage);
 
-                // Push the new data to the table
-                setData(files);
+                    // Push the new data to the table.
+                    setData(files);
+                }
             });
         }
         // Track which page we're switching from.
         setPrevPage(queryPage);
-    }, [props.token, whereClause, sortClause, queryPage, setPage]);
+    }, [props.token, whereClause, sortClause, queryPage, setQueryPage]);
 
     const formatObjectURL = (row: DataFile) => {
         const parts = row.object_url.split("/");
@@ -225,7 +237,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                     <PaginatedTable
                         count={data ? data.meta.total : 0}
                         page={tablePage}
-                        onChangePage={p => setPage(p)}
+                        onChangePage={p => setQueryPage(p)}
                         rowsPerPage={fileQueryDefaults.max_results}
                         headers={headers}
                         data={data && data.data}
