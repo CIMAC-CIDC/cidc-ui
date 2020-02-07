@@ -192,6 +192,12 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         }
         // Track which page we're switching from.
         setPrevPage(queryPage);
+
+        // If we include prevPage in the useEffect dependencies, this
+        // effect will rerun until queryPage == prevPage, preventing
+        // the component from remaining in a state where queryPage != 0.
+        // TODO: maybe there's a refactor that prevents this issue.
+        // eslint-disable-next-line
     }, [props.token, whereClause, sortClause, queryPage, setQueryPage]);
 
     const formatObjectURL = (row: DataFile) => {
