@@ -13,7 +13,7 @@ import {
     Grid
 } from "@material-ui/core";
 import { filterConfig, Filters } from "./FileFilter";
-import { useQueryParams } from "use-query-params";
+import { useQueryParams, useQueryParam, NumberParam } from "use-query-params";
 import { getFiles, IDataWithMeta, getDownloadURL } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
@@ -127,8 +127,9 @@ const BatchDownloadButton: React.FC<{
 const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
     const filters = useQueryParams(filterConfig)[0];
+    const [pageParam, setPage] = useQueryParam("page", NumberParam);
+    const page = pageParam || 0;
 
-    const [page, setPage] = React.useState<number>(0);
     const [data, setData] = React.useState<
         IDataWithMeta<DataFile[]> | undefined
     >(undefined);
@@ -156,10 +157,15 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             sort: headerToSortClause(sortHeader),
             projection: FILE_TABLE_QUERY_PROJECTION
         }).then(files => {
-            setData(files);
-            setChecked([]);
+            if (page * FILE_TABLE_PAGE_SIZE > files.meta.total) {
+                setPage(0);
+                setData({ data: [], meta: files.meta });
+            } else {
+                setData(files);
+                setChecked([]);
+            }
         });
-    }, [filters, page, props.token, sortHeader]);
+    }, [filters, page, setPage, props.token, sortHeader]);
 
     const formatObjectURL = (row: DataFile) => {
         const parts = row.object_url.split("/");
