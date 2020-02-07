@@ -19,14 +19,15 @@ import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
 import { CloudDownload } from "@material-ui/icons";
 
-const FILE_TABLE_PAGE_SIZE = 15;
-
-// Columns to omit from `getFiles` queries.
-// These columns may contain large JSON blobs
-// that would slow the query down.
-const FILE_TABLE_QUERY_PROJECTION = {
-    clustergrammer: 0,
-    additional_metadata: 0
+const fileQueryDefaults = {
+    max_results: 15,
+    // Columns to omit from `getFiles` queries.
+    // These columns may contain large JSON blobs
+    // that would slow the query down.
+    projection: {
+        clustergrammer: 0,
+        additional_metadata: 0
+    }
 };
 
 const useStyles = makeStyles({
@@ -126,9 +127,14 @@ const BatchDownloadButton: React.FC<{
 
 const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
+
     const filters = useQueryParams(filterConfig)[0];
+    const whereClause = filtersToWhereClause(filters);
+
     const [pageParam, setPage] = useQueryParam("page", NumberParam);
     const page = pageParam || 0;
+    const [tablePage, setTablePage] = React.useState<number>(0);
+    const [prevPage, setPrevPage] = React.useState<number | null>();
 
     const [data, setData] = React.useState<
         IDataWithMeta<DataFile[]> | undefined
@@ -147,25 +153,28 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             direction: "desc"
         } as IHeader
     ]);
-    const sortHeader = headers.filter(h => h.active)[0];
+    const sortClause = headerToSortClause(headers.filter(h => h.active)[0]);
 
     React.useEffect(() => {
-        getFiles(props.token, {
-            page: page + 1, // eve-sqlalchemy pagination starts at 1
-            where: filtersToWhereClause(filters),
-            max_results: FILE_TABLE_PAGE_SIZE,
-            sort: headerToSortClause(sortHeader),
-            projection: FILE_TABLE_QUERY_PROJECTION
-        }).then(files => {
-            if (page * FILE_TABLE_PAGE_SIZE > files.meta.total) {
-                setPage(0);
-                setData({ data: [], meta: files.meta });
-            } else {
-                setData(files);
+        // Reset the page to 0 if the user has changed
+        // the filtering or sorting.
+        if (page === prevPage && prevPage !== 0) {
+            setPage(0);
+        } else {
+            getFiles(props.token, {
+                page: page + 1, // eve-sqlalchemy pagination starts at 1
+                where: whereClause,
+                sort: sortClause,
+                ...fileQueryDefaults
+            }).then(files => {
                 setChecked([]);
-            }
-        });
-    }, [filters, page, setPage, props.token, sortHeader]);
+                setData(files);
+                setTablePage(page);
+            });
+        }
+        // Track which page we're switching from.
+        setPrevPage(page);
+    }, [props.token, whereClause, sortClause, page, setPage]);
 
     const formatObjectURL = (row: DataFile) => {
         const parts = row.object_url.split("/");
@@ -209,9 +218,9 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                 <Grid item>
                     <PaginatedTable
                         count={data ? data.meta.total : 0}
-                        page={page}
+                        page={tablePage}
                         onChangePage={p => setPage(p)}
-                        rowsPerPage={FILE_TABLE_PAGE_SIZE}
+                        rowsPerPage={fileQueryDefaults.max_results}
                         headers={headers}
                         data={data && data.data}
                         getRowKey={row => row.id}
