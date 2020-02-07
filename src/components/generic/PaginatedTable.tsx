@@ -52,7 +52,8 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
     React.useEffect(() => setDataWillChange(false), [props.data]);
 
     const backDisabled = dataWillChange || props.page === 0;
-    const isLastPage = props.count - props.rowsPerPage * (props.page + 1) <= 0;
+    const isLastPage =
+        Math.floor(props.count / props.rowsPerPage) <= props.page;
     const nextDisabled =
         dataWillChange || props.data === undefined || isLastPage;
 
