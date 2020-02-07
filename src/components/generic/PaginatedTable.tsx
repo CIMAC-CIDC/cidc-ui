@@ -128,8 +128,7 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                         className={classes.message}
                         color="textSecondary"
                     >
-                        {props.data === undefined ||
-                        (props.data.length === 0 && props.count > 0)
+                        {props.data === undefined
                             ? "Loading..."
                             : "No data found for these filters."}
                     </Typography>
