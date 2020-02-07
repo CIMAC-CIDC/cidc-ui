@@ -132,7 +132,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const whereClause = filtersToWhereClause(filters);
 
     const [pageParam, setPage] = useQueryParam("page", NumberParam);
-    const page = pageParam || 0;
+    const queryPage = pageParam || 0;
     const [tablePage, setTablePage] = React.useState<number>(0);
     const [prevPage, setPrevPage] = React.useState<number | null>();
 
@@ -156,25 +156,31 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const sortClause = headerToSortClause(headers.filter(h => h.active)[0]);
 
     React.useEffect(() => {
-        // Reset the page to 0 if the user has changed
-        // the filtering or sorting.
-        if (page === prevPage && prevPage !== 0) {
+        if (queryPage === prevPage && prevPage !== 0) {
+            // Reset the query page to 0, since the user has either
+            // changed the filtering or the sorting.
+            // NOTE: This change doesn't update the file table.
             setPage(0);
         } else {
             getFiles(props.token, {
-                page: page + 1, // eve-sqlalchemy pagination starts at 1
+                page: queryPage + 1, // eve-sqlalchemy pagination starts at 1
                 where: whereClause,
                 sort: sortClause,
                 ...fileQueryDefaults
             }).then(files => {
+                // De-select all selected files
                 setChecked([]);
+
+                // Update the page in the file table
+                setTablePage(queryPage);
+
+                // Push the new data to the table
                 setData(files);
-                setTablePage(page);
             });
         }
         // Track which page we're switching from.
-        setPrevPage(page);
-    }, [props.token, whereClause, sortClause, page, setPage]);
+        setPrevPage(queryPage);
+    }, [props.token, whereClause, sortClause, queryPage, setPage]);
 
     const formatObjectURL = (row: DataFile) => {
         const parts = row.object_url.split("/");
