@@ -82,15 +82,8 @@ export const triggerBatchDownload = async (
         fileIds.map(id => getDownloadURL(token, id))
     );
 
-    let interval: NodeJS.Timeout;
-    interval = setInterval(() => {
-        if (urls.length === 0) {
-            clearInterval(interval);
-            callback();
-        }
-        const url = urls.pop();
-        window.open(url, "_parent");
-    }, 300);
+    urls.map(url => window.open(url, "_blank"));
+    callback();
 };
 
 const BatchDownloadButton: React.FC<{
