@@ -55,9 +55,9 @@ test("triggerBatchDownload", async done => {
         expect(window.open).toHaveBeenCalledTimes(3);
         expect(new Set(window.open.mock.calls)).toEqual(
             new Set([
-                ["/a", "_parent"],
-                ["/b", "_parent"],
-                ["/c", "_parent"]
+                ["/a", "_blank"],
+                ["/b", "_blank"],
+                ["/c", "_blank"]
             ])
         );
         done();
