@@ -71,7 +71,9 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
     const showAssays =
         user &&
         user.role &&
-        ["cimac-biofx-user", "cidc-admin"].includes(user.role);
+        ["cimac-biofx-user", "cidc-biofx-user", "cidc-admin"].includes(
+            user.role
+        );
     const showManifests =
         user &&
         user.role &&
