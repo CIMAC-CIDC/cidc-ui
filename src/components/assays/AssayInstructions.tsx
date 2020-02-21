@@ -30,9 +30,7 @@ const CopyIdToken: React.FunctionComponent = () => {
     );
 };
 
-const AssayInstructions: React.FunctionComponent<
-    IAssayInstructionsProps
-> = props => {
+const AssayInstructions: React.FunctionComponent<IAssayInstructionsProps> = props => {
     const assay = props.match.params.assay;
     const path = `cidc-documentation/master/assays/${assay}.md`;
 
@@ -45,6 +43,7 @@ const AssayInstructions: React.FunctionComponent<
                     justify="space-between"
                     alignItems="center"
                     style={{ width: widths.markdownWidth }}
+                    wrap="nowrap"
                 >
                     <Grid item>
                         <Typography variant="h4">{props.title}</Typography>
