@@ -56,9 +56,11 @@ const FileFilterCheckboxGroup: React.FunctionComponent<IFileFilterCheckboxGroupP
     const [showMore, setShowMore] = React.useState<boolean>(false);
 
     const checked = props.config.checked || [];
-    const options = showMore
-        ? props.config.options
-        : props.config.options.slice(0, NUM_INITIAL_FILTERS);
+    const showShowMore = props.config.options.length > NUM_INITIAL_FILTERS;
+    const options =
+        showShowMore && showMore
+            ? props.config.options
+            : props.config.options.slice(0, NUM_INITIAL_FILTERS);
 
     return (
         <>
@@ -116,16 +118,18 @@ const FileFilterCheckboxGroup: React.FunctionComponent<IFileFilterCheckboxGroupP
                     />
                 ))}
             </FormGroup>
-            <Grid container justify="center">
-                <Button
-                    className={classes.showMoreButton}
-                    size="small"
-                    color="primary"
-                    onClick={() => setShowMore(!showMore)}
-                >
-                    {showMore ? "fewer options" : "more options"}
-                </Button>
-            </Grid>
+            {showShowMore && (
+                <Grid container justify="center">
+                    <Button
+                        className={classes.showMoreButton}
+                        size="small"
+                        color="primary"
+                        onClick={() => setShowMore(!showMore)}
+                    >
+                        {showMore ? "fewer options" : "more options"}
+                    </Button>
+                </Grid>
+            )}
         </>
     );
 };
