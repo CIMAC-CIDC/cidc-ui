@@ -126,7 +126,7 @@ const FileFilterCheckboxGroup: React.FunctionComponent<IFileFilterCheckboxGroupP
                         color="primary"
                         onClick={() => setShowMore(!showMore)}
                     >
-                        {showMore ? "fewer options" : "more options"}
+                        {showMore ? "show fewer options" : "show more options"}
                     </Button>
                 </Grid>
             )}
