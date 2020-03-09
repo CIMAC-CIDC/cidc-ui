@@ -5,7 +5,8 @@ import {
     Typography,
     Divider,
     Grid,
-    Chip
+    Chip,
+    Button
 } from "@material-ui/core";
 import Checkbox from "@material-ui/core/Checkbox";
 import * as React from "react";
@@ -20,9 +21,7 @@ const useFilterStyles = makeStyles({
         fontSize: ".8rem"
     },
     checkboxGroup: {
-        maxHeight: "12.5rem",
         flexWrap: "nowrap",
-        overflow: "auto",
         paddingLeft: 15
     },
     checkboxLabel: {
@@ -32,8 +31,13 @@ const useFilterStyles = makeStyles({
     },
     checkbox: {
         padding: 3
+    },
+    showMoreButton: {
+        fontSize: ".7rem"
     }
 });
+
+const NUM_INITIAL_FILTERS = 5;
 
 export interface IFilterConfig {
     options: string[];
@@ -47,12 +51,14 @@ export interface IFileFilterCheckboxGroupProps {
     onChange: (option: string) => void;
 }
 
-const FileFilterCheckboxGroup: React.FunctionComponent<
-    IFileFilterCheckboxGroupProps
-> = props => {
+const FileFilterCheckboxGroup: React.FunctionComponent<IFileFilterCheckboxGroupProps> = props => {
     const classes = useFilterStyles();
+    const [showMore, setShowMore] = React.useState<boolean>(false);
 
     const checked = props.config.checked || [];
+    const options = showMore
+        ? props.config.options
+        : props.config.options.slice(0, NUM_INITIAL_FILTERS);
 
     return (
         <>
@@ -95,7 +101,7 @@ const FileFilterCheckboxGroup: React.FunctionComponent<
             </Grid>
             <Divider />
             <FormGroup className={classes.checkboxGroup} row={false}>
-                {props.config.options.map(opt => (
+                {options.map(opt => (
                     <FormControlLabel
                         className={classes.checkboxLabel}
                         key={opt}
@@ -110,6 +116,16 @@ const FileFilterCheckboxGroup: React.FunctionComponent<
                     />
                 ))}
             </FormGroup>
+            <Grid container justify="center">
+                <Button
+                    className={classes.showMoreButton}
+                    size="small"
+                    color="primary"
+                    onClick={() => setShowMore(!showMore)}
+                >
+                    {showMore ? "fewer options" : "more options"}
+                </Button>
+            </Grid>
         </>
     );
 };
