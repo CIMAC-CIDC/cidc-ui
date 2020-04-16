@@ -63,7 +63,7 @@ const ManifestUpload: React.FunctionComponent = () => {
             getManifestValidationErrors(authData.idToken, {
                 schema: manifestType,
                 template: file
-            }).then(({ errs, feedb }) => {
+            }).then(({ errors: errs, feedback: feedb }) => {
                 setErrors(errs);
                 setFeedback(feedb);
                 if (errs) {
