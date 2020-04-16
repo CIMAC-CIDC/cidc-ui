@@ -127,6 +127,8 @@ test("getManifestValidationErrors", done => {
     });
 
     getManifestValidationErrors(TOKEN, formData)
-        .then(errors => expect(errors).toEqual(response.errors))
+        .then(({ errors: errs, feedback: _ }) =>
+            expect(errs).toEqual(response.errors)
+        )
         .then(done);
 });
