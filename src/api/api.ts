@@ -193,17 +193,25 @@ function uploadManifest(
     ).then(_extractItem);
 }
 
+interface IManifestValidationResponse {
+    errors: string[] | undefined;
+    feedback: string[] | undefined;
+}
+
 function getManifestValidationErrors(
     token: string,
     form: IManifestForm
-): Promise<string[] | undefined> {
-    return _makeManifestRequest<{ errors: string[] }>(
+): Promise<IManifestValidationResponse> {
+    return _makeManifestRequest<IManifestValidationResponse>(
         "ingestion/validate",
         token,
         form
     )
-        .then(res => _extractItem(res).errors)
-        .catch(error => error.errors || [error.toString()]);
+        .then(_extractItem)
+        .catch(error => ({
+            errors: error.errors || [error.toString()],
+            feedback: undefined
+        }));
 }
 
 function _getEtag<T extends { _etag: string }>(

@@ -48,6 +48,9 @@ const ManifestUpload: React.FunctionComponent = () => {
     );
     const [status, setStatus] = React.useState<Status>("unset");
     const [errors, setErrors] = React.useState<string[] | undefined>(undefined);
+    const [feedback, setFeedback] = React.useState<string[] | undefined>(
+        undefined
+    );
     const [file, setFile] = React.useState<File | undefined>(undefined);
     const [targetTrial, setTargetTrial] = React.useState<string | undefined>(
         undefined
@@ -60,8 +63,9 @@ const ManifestUpload: React.FunctionComponent = () => {
             getManifestValidationErrors(authData.idToken, {
                 schema: manifestType,
                 template: file
-            }).then(errs => {
+            }).then(({ errs, feedb }) => {
                 setErrors(errs);
+                setFeedback(feedb);
                 if (errs) {
                     setStatus(
                         errs.length ? "validationErrors" : "validationSuccess"
@@ -115,6 +119,32 @@ const ManifestUpload: React.FunctionComponent = () => {
         </ListItem>
     );
 
+    const nestedFeeback = (item: string | string[]) => {
+        if (!Array.isArray(item)) {
+            return item;
+        } else {
+            return (
+                <List dense>
+                    {item.map(subitem => (
+                        <ListItem>
+                            <ListItemText>
+                                {nestedFeeback(subitem)}
+                            </ListItemText>
+                        </ListItem>
+                    ))}
+                </List>
+            );
+        }
+    };
+
+    const feedbackList =
+        feedback &&
+        feedback.map(fb => (
+            <ListItem key={fb}>
+                <ListItemText>{nestedFeeback(fb)}</ListItemText>
+            </ListItem>
+        ));
+
     const feedbackDisplay: { [k in Status]: React.ReactElement } = {
         unset: (
             <Typography color="textSecondary" data-testid="unset">
@@ -128,6 +158,7 @@ const ManifestUpload: React.FunctionComponent = () => {
         validationSuccess: (
             <List dense data-testid="validationSuccess">
                 {successMessage("Manifest is valid.")}
+                {feedbackList}
             </List>
         ),
         uploadErrors: <List data-testid="uploadErrors">{errorList}</List>,
