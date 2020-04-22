@@ -12,7 +12,7 @@ import { IError, ErrorContext } from "../errors/ErrorGuard";
 
 const CLIENT_ID: string = process.env.REACT_APP_AUTH0_CLIENT_ID!;
 const DOMAIN: string = process.env.REACT_APP_AUTH0_DOMAIN!;
-const IDLE_TIMEOUT: number = 1000 * 60 * 15;
+const IDLE_TIMEOUT: number = 1000 * 60 * 60 * 4;
 
 export const auth0Client = new auth0.WebAuth({
     domain: DOMAIN,
