@@ -12,7 +12,7 @@ import {
     CircularProgress,
     Grid
 } from "@material-ui/core";
-import { filterConfig } from "./FileFilter";
+import { filterConfig, Filters } from "./FileFilter";
 import { useQueryParams, useQueryParam, NumberParam } from "use-query-params";
 import { getFiles, IDataWithMeta, getDownloadURL } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
@@ -56,6 +56,24 @@ const useStyles = makeStyles({
 export interface IFileTableProps {
     history: any;
 }
+
+const filterParamsFromFilters = (filters: Filters) => {
+    return {
+        trial_ids: filters.trial_id?.join(","),
+        upload_types: filters.upload_type?.join(","),
+        analysis_friendly:
+            filters.raw_files === undefined ? true : !filters.raw_files
+    };
+};
+
+const sortParamsFromHeader = (header?: IHeader) => {
+    return (
+        header && {
+            sort_field: header?.key,
+            sort_direction: header?.direction
+        }
+    );
+};
 
 export const triggerBatchDownload = async (
     token: string,
@@ -142,12 +160,9 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             setQueryPage(0);
         } else {
             getFiles(props.token, {
-                page_num: queryPage, // eve-sqlalchemy pagination starts at 1
-                trial_ids: filters.trial_id?.join(","),
-                upload_types: filters.upload_type?.join(","),
-                // TODO: analysis_friendly!
-                sort_field: sortHeader?.key,
-                sort_direction: sortHeader?.direction,
+                page_num: queryPage,
+                ...filterParamsFromFilters(filters),
+                ...sortParamsFromHeader(sortHeader),
                 ...fileQueryDefaults
             }).then(files => {
                 // Check if queryPage is too high for the current filters.
