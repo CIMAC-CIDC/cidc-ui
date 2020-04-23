@@ -108,7 +108,7 @@ function getAccountInfo(token: string): Promise<Account | undefined> {
 function getTrials(token: string): Promise<Trial[]> {
     return getApiClient(token)
         .get("trial_metadata", {
-            params: { sort: '[("trial_id", 1)]' }
+            params: { sort_field: "trial_id", sort_direction: "asc" }
         })
         .then(_extractItems);
 }
@@ -136,7 +136,7 @@ function updateTrialMetadata(
 }
 
 function createUser(token: string, newUser: any): Promise<Account | undefined> {
-    return getApiClient(token).post("new_users", newUser);
+    return getApiClient(token).post("users/self", newUser);
 }
 
 function getAllAccounts(token: string): Promise<Account[]> {
@@ -224,7 +224,7 @@ function getPermissionsForUser(
 ): Promise<Permission[] | undefined> {
     return getApiClient(token)
         .get("permissions", {
-            params: { where: { granted_to_user: userID } }
+            params: { user_id: userID }
         })
         .then(_extractItems);
 }

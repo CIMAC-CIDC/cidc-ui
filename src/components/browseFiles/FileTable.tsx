@@ -12,7 +12,7 @@ import {
     CircularProgress,
     Grid
 } from "@material-ui/core";
-import { filterConfig, Filters } from "./FileFilter";
+import { filterConfig } from "./FileFilter";
 import { useQueryParams, useQueryParam, NumberParam } from "use-query-params";
 import { getFiles, IDataWithMeta, getDownloadURL } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
@@ -20,14 +20,14 @@ import MuiRouterLink from "../generic/MuiRouterLink";
 import { CloudDownload } from "@material-ui/icons";
 
 const fileQueryDefaults = {
-    max_results: 15,
-    // Columns to omit from `getFiles` queries.
-    // These columns may contain large JSON blobs
-    // that would slow the query down.
-    projection: {
-        clustergrammer: 0,
-        additional_metadata: 0
-    }
+    page_size: 15
+    // // Columns to omit from `getFiles` queries.
+    // // These columns may contain large JSON blobs
+    // // that would slow the query down.
+    // projection: {
+    //     clustergrammer: 0,
+    //     additional_metadata: 0
+    // }
 };
 
 const useStyles = makeStyles({
@@ -56,22 +56,6 @@ const useStyles = makeStyles({
 export interface IFileTableProps {
     history: any;
 }
-
-export const filtersToWhereClause = (filters: Filters): string => {
-    const arraySubclause = (ids: any, key: string) =>
-        !!ids && `(${ids.map((id: string) => `${key}=="${id}"`).join(" or ")})`;
-    const subclauses = [
-        arraySubclause(filters.trial_id, "trial_id"),
-        arraySubclause(filters.upload_type, "upload_type"),
-        !filters.raw_files && "(analysis_friendly==true)"
-    ];
-
-    return subclauses.filter(c => !!c).join(" and ");
-};
-
-export const headerToSortClause = (header: IHeader): string => {
-    return `[("${header.key}", ${header.direction === "asc" ? 1 : -1})]`;
-};
 
 export const triggerBatchDownload = async (
     token: string,
@@ -122,7 +106,6 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
 
     const filters = useQueryParams(filterConfig)[0];
-    const whereClause = filtersToWhereClause(filters);
 
     const [maybeQueryPage, setQueryPage] = useQueryParam("page", NumberParam);
     const queryPage = maybeQueryPage || 0;
@@ -146,7 +129,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             direction: "desc"
         } as IHeader
     ]);
-    const sortClause = headerToSortClause(headers.filter(h => h.active)[0]);
+    const sortHeader = headers.find(h => h.active);
 
     React.useEffect(() => {
         if (queryPage === prevPage && prevPage !== 0) {
@@ -159,14 +142,17 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             setQueryPage(0);
         } else {
             getFiles(props.token, {
-                page: queryPage + 1, // eve-sqlalchemy pagination starts at 1
-                where: whereClause,
-                sort: sortClause,
+                page_num: queryPage, // eve-sqlalchemy pagination starts at 1
+                trial_ids: filters.trial_id?.join(","),
+                upload_types: filters.upload_type?.join(","),
+                // TODO: analysis_friendly!
+                sort_field: sortHeader?.key,
+                sort_direction: sortHeader?.direction,
                 ...fileQueryDefaults
             }).then(files => {
                 // Check if queryPage is too high for the current filters.
                 if (
-                    queryPage * fileQueryDefaults.max_results >
+                    queryPage * fileQueryDefaults.page_size >
                     files.meta.total
                 ) {
                     // queryPage is out of bounds, so reset to 0.
@@ -191,7 +177,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         // the component from remaining in a state where queryPage != 0.
         // TODO: maybe there's a refactor that prevents this issue.
         // eslint-disable-next-line
-    }, [props.token, whereClause, sortClause, queryPage, setQueryPage]);
+    }, [props.token, filters, sortHeader, queryPage, setQueryPage]);
 
     const formatObjectURL = (row: DataFile) => {
         const parts = row.object_url.split("/");
@@ -237,7 +223,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                         count={data ? data.meta.total : 0}
                         page={tablePage}
                         onChangePage={p => setQueryPage(p)}
-                        rowsPerPage={fileQueryDefaults.max_results}
+                        rowsPerPage={fileQueryDefaults.page_size}
                         headers={headers}
                         data={data && data.data}
                         getRowKey={row => row.id}
