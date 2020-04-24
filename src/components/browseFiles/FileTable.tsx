@@ -57,7 +57,7 @@ export interface IFileTableProps {
     history: any;
 }
 
-const filterParamsFromFilters = (filters: Filters) => {
+export const filterParamsFromFilters = (filters: Filters) => {
     return {
         trial_ids: filters.trial_id?.join(","),
         upload_types: filters.upload_type?.join(","),
@@ -66,7 +66,7 @@ const filterParamsFromFilters = (filters: Filters) => {
     };
 };
 
-const sortParamsFromHeader = (header?: IHeader) => {
+export const sortParamsFromHeader = (header?: IHeader) => {
     return (
         header && {
             sort_field: header?.key,
