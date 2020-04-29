@@ -1,6 +1,6 @@
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
-import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
+import CIDCGithubMarkdown from "../../CIDCGithubMarkdown";
 import TemplateDownloadButton from "../generic/TemplateDownloadButton";
 import { withIdToken, AuthContext } from "../identity/AuthProvider";
 import { Grid, Typography, Divider } from "@material-ui/core";
@@ -30,7 +30,9 @@ const CopyIdToken: React.FunctionComponent = () => {
     );
 };
 
-const AssayInstructions: React.FunctionComponent<IAssayInstructionsProps> = props => {
+const AssayInstructions: React.FunctionComponent<
+    IAssayInstructionsProps
+> = props => {
     const assay = props.match.params.assay;
     const path = `cidc-documentation/master/assays/${assay}.md`;
 
