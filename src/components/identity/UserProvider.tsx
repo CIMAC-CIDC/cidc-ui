@@ -10,6 +10,7 @@ import Permission from "../../model/permission";
 export interface IAccountWithExtraContext extends Account {
     permissions?: Permission[];
     showAssays?: boolean;
+    showAnalyses?: boolean;
     showManifests?: boolean;
 }
 
