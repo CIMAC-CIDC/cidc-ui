@@ -10,7 +10,7 @@ export function nameToURL(type: string, name: string) {
 }
 
 export interface ITemplateDownloadButtonProps extends ButtonProps {
-    templateType: "metadata" | "manifests";
+    templateType: "metadata" | "manifests | analyses";
     templateName: string;
     verboseLabel?: boolean;
 }

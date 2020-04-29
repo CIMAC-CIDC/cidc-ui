@@ -7,6 +7,7 @@ import Footer from "./components/footer/Footer";
 import HomePage from "./components/home/HomePage";
 import TransferDataPage from "./components/assays/AssaysPage";
 import ManifestsPage from "./components/manifests/ManifestsPage";
+import AnalysesPage from "./components/analyses/AnalysesPage";
 import PrivacyAndSecurityPage from "./components/privacyAndSecurity/PrivacyAndSecurityPage";
 import UserAccountPage from "./components/userAccount/UserAccountPage";
 import Register from "./components/identity/Register";

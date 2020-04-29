@@ -65,6 +65,11 @@ const HomePage: React.FunctionComponent = () => {
                         Prepare to upload new assay data
                     </ListLink>
                 )}
+                {user && user.showAnalyses && (
+                    <ListLink icon={<TableChart />} href="/analyses">
+                        Prepare to upload new analysis data
+                    </ListLink>
+                )}
                 {user && user.showManifests && (
                     <ListLink icon={<TableChart />} href="/manifests">
                         Upload a shipping/receiving manifest
