@@ -61,7 +61,7 @@ const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
                         </ListSubheader>
                         <AssayListItem
                             title="CLI Instructions"
-                            path={`/assays/${paths.cli}`}
+                            path={`/${paths.cli}`}
                         />
                         <ListSubheader disableSticky>
                             Assay-Specific Docs
@@ -102,7 +102,7 @@ const AssaysPage: React.FunctionComponent<RouteComponentProps> = props => {
                 <Grid item>
                     <div style={{ padding: "1em" }}>
                         <Route path="/assays" exact>
-                            <Redirect to="/assays/cli-instructions"></Redirect>
+                            <Redirect to="/cli-instructions"></Redirect>
                         </Route>
                         <Route
                             path="/assays/:assay"

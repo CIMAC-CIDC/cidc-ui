@@ -53,7 +53,7 @@ const AnalysesPage: React.FunctionComponent<RouteComponentProps> = props => {
                         </ListSubheader>
                         <AnalysisListItem
                             title="CLI Instructions"
-                            path={`/analyses/${paths.cli}`}
+                            path={`/${paths.cli}`}
                         />
                         <ListSubheader disableSticky>
                             Analysis-Specific Docs
@@ -78,7 +78,7 @@ const AnalysesPage: React.FunctionComponent<RouteComponentProps> = props => {
                 <Grid item>
                     <div style={{ padding: "1em" }}>
                         <Route path="/analyses" exact>
-                            <Redirect to="/analyses/cli-instructions"></Redirect>
+                            <Redirect to="/cli-instructions"></Redirect>
                         </Route>
                         <Route
                             path="/analyses/:analysis"
