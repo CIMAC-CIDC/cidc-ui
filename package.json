@@ -64,7 +64,7 @@
         "precommit": "lint-staged",
         "start": "react-scripts start",
         "start-dev": "REACT_APP_NODE_ENV='dev' react-scripts start",
-        "build": "react-scripts build",
+        "build": "react-scripts --expose-gc --max-old-space-size=8192 build",
         "build-upload": "react-scripts build ; ./google-deploy.sh",
         "test": "REACT_APP_NODE_ENV='dev' react-scripts test --env=jsdom",
         "test-cover": "REACT_APP_NODE_ENV='dev' react-scripts test --env=jsdom --coverage",
