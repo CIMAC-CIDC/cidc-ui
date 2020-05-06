@@ -62,12 +62,12 @@ const HomePage: React.FunctionComponent = () => {
                 </ListLink>
                 {user && user.showAssays && (
                     <ListLink icon={<TableChart />} href="/assays">
-                        Prepare to upload new assay data
+                        Learn how to upload new assay data
                     </ListLink>
                 )}
                 {user && user.showAnalyses && (
                     <ListLink icon={<TableChart />} href="/analyses">
-                        Prepare to upload new analysis data
+                        Learn how to upload new analysis data
                     </ListLink>
                 )}
                 {user && user.showManifests && (
