@@ -1,16 +1,17 @@
 import * as React from "react";
-import { RouteComponentProps } from "react-router";
-import CIDCGithubMarkdown from "../../CIDCGithubMarkdown";
+import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
 import TemplateDownloadButton from "../generic/TemplateDownloadButton";
 import { withIdToken, AuthContext } from "../identity/AuthProvider";
 import { Grid, Typography, Divider } from "@material-ui/core";
 import { CloudDownload, Fingerprint } from "@material-ui/icons";
 import CopyToClipboardButton from "../generic/CopyToClipboardButton";
 import { widths } from "../../rootStyles";
+import { IUploadDocsPageProps } from "./UploadDocsPages";
 
-export interface IAnalysesInstructionsPropsInstructionsProps
-    extends RouteComponentProps<{ analysis: string }> {
+export interface IUploadInstructionsProps {
     title: string;
+    docPath: string;
+    uploadType: IUploadDocsPageProps["uploadType"];
     token?: string;
     tokenButton?: boolean;
 }
@@ -30,11 +31,8 @@ const CopyIdToken: React.FunctionComponent = () => {
     );
 };
 
-const AnalysesInstructions: React.FunctionComponent<
-    IAnalysesInstructionsProps
-> = props => {
-    const analysis = props.match.params.analysis;
-    const path = `cidc-documentation/master/analyses/${analysis}.md`;
+const UploadInstructions: React.FunctionComponent<IUploadInstructionsProps> = props => {
+    const path = `cidc-documentation/master/${props.docPath}`;
 
     return (
         <Grid container direction="column">
@@ -58,8 +56,8 @@ const AnalysesInstructions: React.FunctionComponent<
                                 fullWidth
                                 verboseLabel
                                 color="primary"
-                                templateName={analysis}
-                                templateType="metadata"
+                                templateName={props.docPath}
+                                templateType={props.uploadType}
                                 variant="contained"
                                 startIcon={<CloudDownload />}
                             />
@@ -81,4 +79,4 @@ const AnalysesInstructions: React.FunctionComponent<
     );
 };
 
-export default withIdToken<IAnalysesInstructionsProps>(AnalysesInstructions);
+export default withIdToken<IUploadInstructionsProps>(UploadInstructions);

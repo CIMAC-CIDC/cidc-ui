@@ -90,17 +90,17 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
     let selectedTab: string | false = props.location.pathname;
     if (selectedTab.startsWith("/assays")) {
         selectedTab = "/assays";
-    } else if (selectedTab === "/analyses") {
+    } else if (selectedTab.startsWith("/analyses")) {
         selectedTab = "/analyses";
-    } else if (selectedTab === "/callback") {
-        return null;
     } else if (selectedTab.startsWith("/file-details")) {
         selectedTab = "/browse-files";
     } else if (selectedTab.startsWith("/manifests")) {
         selectedTab = "/manifests";
     } else if (["/", "/privacy-security"].includes(selectedTab)) {
         selectedTab = false;
-    } else if (["/register", "/unactivated"].includes(selectedTab)) {
+    } else if (
+        ["/register", "/unactivated", "/callback"].includes(selectedTab)
+    ) {
         return null;
     }
 

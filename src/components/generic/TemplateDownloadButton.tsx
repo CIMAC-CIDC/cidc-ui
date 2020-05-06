@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button, Grid } from "@material-ui/core";
 import { ButtonProps } from "@material-ui/core/Button";
-import { InfoContext } from "../info/InfoProvider";
+import { InfoContext, IInfoContext } from "../info/InfoProvider";
 
 // Given a template type and name, get the API URL for downloading that template.
 export function nameToURL(type: string, name: string) {
@@ -10,14 +10,17 @@ export function nameToURL(type: string, name: string) {
 }
 
 export interface ITemplateDownloadButtonProps extends ButtonProps {
-    templateType: "metadata" | "manifests | analyses";
+    templateType: keyof IInfoContext["supportedTemplates"];
     templateName: string;
     verboseLabel?: boolean;
 }
 
-const TemplateDownloadButton: React.FunctionComponent<
-    ITemplateDownloadButtonProps
-> = ({ templateName: name, templateType, verboseLabel, ...buttonProps }) => {
+const TemplateDownloadButton: React.FunctionComponent<ITemplateDownloadButtonProps> = ({
+    templateName: name,
+    templateType,
+    verboseLabel,
+    ...buttonProps
+}) => {
     const info = React.useContext(InfoContext);
 
     // For, e.g., templateName == WES, we expect multiple template types

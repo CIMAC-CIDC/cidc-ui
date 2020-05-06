@@ -44,9 +44,7 @@ export interface IUserPermissionsDialogState {
     isRefreshing: boolean;
 }
 
-const UserPermissionsDialogWithInfo: React.FunctionComponent<
-    IUserPermissionsDialogProps
-> = props => {
+const UserPermissionsDialogWithInfo: React.FunctionComponent<IUserPermissionsDialogProps> = props => {
     const info = React.useContext(InfoContext);
     const granter = React.useContext(UserContext);
 
@@ -57,7 +55,7 @@ const UserPermissionsDialogWithInfo: React.FunctionComponent<
     const { supportedTemplates, extraDataTypes } = info;
 
     const supportedTypes = [
-        ...supportedTemplates.metadata,
+        ...supportedTemplates.assays,
         ...supportedTemplates.manifests,
         ...supportedTemplates.analyses,
         ...extraDataTypes

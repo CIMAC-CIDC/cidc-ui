@@ -88,7 +88,13 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         props.location.pathname
     );
 
-    const value = user && { ...user, permissions, showAssays, showManifests };
+    const value = user && {
+        ...user,
+        permissions,
+        showAssays,
+        showManifests,
+        showAnalyses
+    };
 
     return (
         <UserContext.Provider value={value}>

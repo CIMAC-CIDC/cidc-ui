@@ -9,7 +9,7 @@ import {
 export interface IInfoContext {
     supportedTemplates: {
         manifests: string[];
-        metadata: string[];
+        assays: string[];
         analyses: string[];
     };
     extraDataTypes: string[];
@@ -20,9 +20,7 @@ export const InfoContext = React.createContext<IInfoContext | undefined>(
 );
 
 const InfoProvider: React.FunctionComponent = props => {
-    const [metadata, setMetadata] = React.useState<string[] | undefined>(
-        undefined
-    );
+    const [assays, setAssays] = React.useState<string[] | undefined>(undefined);
     const [manifests, setManifests] = React.useState<string[] | undefined>(
         undefined
     );
@@ -34,16 +32,16 @@ const InfoProvider: React.FunctionComponent = props => {
     >(undefined);
 
     React.useEffect(() => {
-        getSupportedAssays().then(setMetadata);
+        getSupportedAssays().then(setAssays);
         getSupportedManifests().then(setManifests);
         getSupportedAnalyses().then(setAnalyses);
         getExtraDataTypes().then(setExtraDataTypes);
     }, []);
 
     const context =
-        metadata && manifests && analyses && extraDataTypes
+        assays && manifests && analyses && extraDataTypes
             ? {
-                  supportedTemplates: { metadata, manifests, analyses },
+                  supportedTemplates: { assays, manifests, analyses },
                   extraDataTypes
               }
             : undefined;

@@ -13,9 +13,7 @@ export interface ICIDCGithubMarkdownProps {
 
 const MARKDOWN_BASE_URL = "https://raw.githubusercontent.com/CIMAC-CIDC/";
 
-const CIDCGithubMarkdown: React.FunctionComponent<
-    ICIDCGithubMarkdownProps
-> = props => {
+const CIDCGithubMarkdown: React.FunctionComponent<ICIDCGithubMarkdownProps> = props => {
     const { markdown: markdownClass } = useRootStyles();
 
     const authData = React.useContext(AuthContext);
