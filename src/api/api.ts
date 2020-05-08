@@ -113,6 +113,10 @@ function getTrials(token: string): Promise<Trial[]> {
         .then(_extractItems);
 }
 
+function getTrial(token: string, trialId: string): Promise<Trial> {
+    return _getItem<Trial>(token, "trial_metadata", trialId);
+}
+
 function createTrial(token: string, trial: NewTrial): Promise<Trial> {
     return getApiClient(token)
         .post("trial_metadata", trial)
@@ -122,7 +126,7 @@ function createTrial(token: string, trial: NewTrial): Promise<Trial> {
 function updateTrialMetadata(
     token: string,
     etag: string,
-    trial: Trial
+    trial: Pick<Trial, "trial_id" | "metadata_json">
 ): Promise<Trial> {
     return getApiClient(token)
         .patch(
@@ -303,6 +307,7 @@ export {
     getDownloadURL,
     getAccountInfo,
     getTrials,
+    getTrial,
     createTrial,
     updateTrialMetadata,
     createUser,

@@ -92,6 +92,8 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
         selectedTab = "/assays";
     } else if (selectedTab.startsWith("/analyses")) {
         selectedTab = "/analyses";
+    } else if (selectedTab.startsWith("/trials")) {
+        selectedTab = "/trials";
     } else if (selectedTab.startsWith("/file-details")) {
         selectedTab = "/browse-files";
     } else if (selectedTab.startsWith("/manifests")) {
@@ -155,7 +157,14 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                     icon={<TableChart />}
                                 />
                             )}
-
+                            {user && user.showTrials && (
+                                <Tab
+                                    disableRipple={true}
+                                    value="/trials"
+                                    label="Trials"
+                                    icon={<TableChart />}
+                                />
+                            )}
                             <Tab
                                 disableRipple={true}
                                 value="/user-account"
