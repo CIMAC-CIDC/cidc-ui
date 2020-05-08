@@ -33,6 +33,8 @@ const CopyIdToken: React.FunctionComponent = () => {
 
 const UploadInstructions: React.FunctionComponent<IUploadInstructionsProps> = props => {
     const path = `cidc-documentation/master/${props.docPath}`;
+    const pathParts = props.docPath.split("/");
+    const name = pathParts[pathParts.length - 1].slice(0, -3);
 
     return (
         <Grid container direction="column">
@@ -56,7 +58,7 @@ const UploadInstructions: React.FunctionComponent<IUploadInstructionsProps> = pr
                                 fullWidth
                                 verboseLabel
                                 color="primary"
-                                templateName={props.docPath}
+                                templateName={name}
                                 templateType={props.uploadType}
                                 variant="contained"
                                 startIcon={<CloudDownload />}

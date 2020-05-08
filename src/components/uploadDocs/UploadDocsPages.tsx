@@ -21,12 +21,9 @@ interface IDocPathConfig {
     analyses?: boolean;
 }
 
+const CLIInstructionsPath = "/cli-instructions";
+
 const pathConfigs: Dictionary<IDocPathConfig> = {
-    "cli-instructions": {
-        path: "cli-instructions",
-        label: "CLI Instructions",
-        title: "The CIDC Command-Line Interface"
-    },
     wes: {
         path: "wes",
         label: "WES",
@@ -84,18 +81,20 @@ const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
         </ListItem>
     );
 
-    const CLIRedirect = () => (
-        <Redirect to={`/${props.uploadType}/cli-instructions`}></Redirect>
-    );
+    const CLIInstructionsSitePath = `/${props.uploadType}/${CLIInstructionsPath}`;
 
-    const CLIUploadInstructions = () => (
-        <UploadInstructions
-            docPath={`/assays/cli-instructions.md`}
-            title={pathConfigs["cli-instructions"].title}
-            tokenButton={true}
-            uploadType={props.uploadType}
-        />
-    );
+    const CLIRedirect = () => <Redirect to={CLIInstructionsSitePath} />;
+
+    const CLIUploadInstructions = () => {
+        return (
+            <UploadInstructions
+                docPath={`${CLIInstructionsPath}.md`}
+                title={"The CLI Command-Line Interface"}
+                tokenButton={true}
+                uploadType={props.uploadType}
+            />
+        );
+    };
 
     const SelectedUploadInstructions: React.FC<RouteComponentProps<{
         docPath: string;
@@ -129,18 +128,15 @@ const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
                             General Overview
                         </ListSubheader>
                         <DocsListItem
-                            label={pathConfigs["cli-instructions"].label}
-                            path={`/${props.uploadType}/${pathConfigs["cli-instructions"].path}`}
+                            label={"CLI Instructions"}
+                            path={CLIInstructionsSitePath}
                         />
                         <ListSubheader disableSticky>
                             Assay-Specific Docs
                         </ListSubheader>
                         {map(pathConfigs, (config, path) => {
-                            const shouldRender =
-                                path !== "cli-instructions" &&
-                                config[props.uploadType];
                             return (
-                                shouldRender && (
+                                config[props.uploadType] && (
                                     <DocsListItem
                                         key={path}
                                         label={config.label}
@@ -162,7 +158,7 @@ const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
                             exact
                         />
                         <Route
-                            path={`/${props.uploadType}/cli-instructions`}
+                            path={CLIInstructionsSitePath}
                             component={CLIUploadInstructions}
                         />
                         <Route
