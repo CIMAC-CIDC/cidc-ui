@@ -12,7 +12,7 @@ const FormStepFooter: React.FC<ITrialFormFooterProps> = ({
     backButton,
     nextButton
 }) => {
-    const { getValues } = useFormContext();
+    const { getValues, handleSubmit } = useFormContext();
     const { prevStep, nextStep } = useTrialFormContext();
 
     return (
@@ -24,18 +24,17 @@ const FormStepFooter: React.FC<ITrialFormFooterProps> = ({
         >
             <Grid item>
                 {backButton && (
-                    <Button onClick={() => prevStep(getValues)}>back</Button>
+                    <Button onClick={handleSubmit(() => prevStep(getValues))}>
+                        back
+                    </Button>
                 )}
             </Grid>
             <Grid item>
                 {nextButton && (
                     <Button
-                        type="submit"
                         variant="contained"
                         color="primary"
-                        onClick={() => {
-                            nextStep(getValues);
-                        }}
+                        onClick={handleSubmit(() => nextStep(getValues))}
                     >
                         save and continue
                     </Button>

@@ -9,18 +9,16 @@ import {
     Card,
     CardHeader
 } from "@material-ui/core";
-import pickBy from "lodash/pickBy";
 import { Control } from "react-hook-form";
 import TrialInfoStep from "./_TrialInfoStep";
 import CollectionEventsStep from "./_CollectionEventsStep";
 import ParticipantsStep from "./_ParticipantsStep";
 import BiospecimensStep from "./_BiospecimensStep";
-import { Dictionary } from "lodash";
+import { merge, pickBy, Dictionary } from "lodash";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 import { getTrial, updateTrialMetadata } from "../../api/api";
 import { AuthContext } from "../identity/AuthProvider";
 
-// TODO: flesh this out
 export interface ITrialMetadata extends Dictionary<any> {}
 
 const TrialFormContext = React.createContext<{
@@ -50,15 +48,18 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
     }, [idToken, trial_id]);
 
     const updateTrial = (updates: Partial<ITrialMetadata>) => {
-        const cleanUpdates = pickBy(updates, v => !!v);
-        const updatedMetadata = { ...trial, ...cleanUpdates };
+        // Provide a default value for `participants.samples`
+        const participants = updates.participants?.map((p: any) => {
+            return { ...p, samples: p.samples || [] };
+        });
+        const cleanUpdates = pickBy({ ...updates, participants }, v => !!v);
+        const updatedMetadata = merge(trial, cleanUpdates);
         setTrial(updatedMetadata);
-        getTrial(idToken, trial_id).then(
-            ({ _etag }) =>
-                updateTrialMetadata(idToken, _etag, {
-                    trial_id,
-                    metadata_json: updatedMetadata
-                }).then
+        getTrial(idToken, trial_id).then(({ _etag }) =>
+            updateTrialMetadata(idToken, _etag, {
+                trial_id,
+                metadata_json: updatedMetadata
+            })
         );
     };
 
@@ -101,7 +102,7 @@ const InnerTrialForm: React.FC = () => {
     const { activeStep, trial } = useTrialFormContext();
 
     return (
-        <Card style={{ padding: "1em" }}>
+        <Card>
             <CardHeader
                 title={`Editing metadata for ${trial.protocol_identifier}`}
             />

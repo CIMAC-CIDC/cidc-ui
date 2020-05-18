@@ -30,7 +30,6 @@ function makeInputField(name: string, label: string, isArray?: boolean) {
                 multiline
                 name={name}
                 label={label}
-                defaultValue={trial[name]}
                 value={inputValue}
                 onChange={({ target: { value } }) => {
                     setInputValue(value);

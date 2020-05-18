@@ -1,71 +1,94 @@
 import React from "react";
+import { countBy } from "lodash";
 import { useTrialFormContext } from "./TrialForm";
 import { useForm, FormContext } from "react-hook-form";
-import { Grid, Tooltip, IconButton } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import FormStepHeader from "./_FormStepHeader";
 import FormStepFooter from "./_FormStepFooter";
 import FormStepDataSheet, {
     IGridElement,
     makeHeaderRow,
-    makeEmptyRow
+    IFormStepDataSheetProps,
+    ICellWithLocation
 } from "./_FormStepDataSheet";
-import { Add, Remove } from "@material-ui/icons";
+
+const randomString = () =>
+    `CIDC-${Math.random()
+        .toString(36)
+        .substring(2, 5)}`;
 
 const KEY_NAME = "participants";
-const ATTR_NAMES = [
-    "cidc_participant_id",
-    "cimac_participant_id",
-    "participant_id"
-];
+
+interface IParticipant {
+    cimac_participant_id: string;
+    participant_id: string;
+}
+
+const attrToHeader = {
+    cidc_participant_id: "CIDC Participant ID",
+    cimac_participant_id: "CIMAC Participant ID",
+    participant_id: "Trial Participant ID"
+};
+
+const colToAttr: IFormStepDataSheetProps<IParticipant>["colToAttr"] = {
+    2: "cimac_participant_id",
+    3: "participant_id"
+};
+
+const getCellName = ({ row, attr }: any) => `${KEY_NAME}[${row}].${attr}`;
+
+const makeRow = (row: number, participant?: any) => {
+    if (participant) {
+        return [
+            { readOnly: true, value: row + 1 },
+            { readOnly: true, value: randomString(), header: true },
+            { value: participant.cimac_participant_id },
+            { value: participant.participant_id }
+        ];
+    } else {
+        return [
+            { readOnly: true, value: row },
+            { readOnly: true, value: randomString(), header: true },
+            { value: "" },
+            { value: "" }
+        ];
+    }
+};
 
 const ParticipantsStep: React.FC = () => {
-    const { nextStep, trial } = useTrialFormContext();
-    const formInstance = useForm({ mode: "onBlur" });
+    const { trial } = useTrialFormContext();
+    const formInstance = useForm({ mode: "onChange" });
+    const { getValues } = formInstance;
 
-    const defaultValues = trial[KEY_NAME];
-    const defaultCells = !!defaultValues
-        ? defaultValues.map((v: any, row: number) => [
-              { readOnly: true, value: row + 1 },
-              ...ATTR_NAMES.map(attr => ({ value: v[attr] }))
-          ])
-        : [makeEmptyRow(1, ATTR_NAMES.length)];
+    const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
+        const headers = makeHeaderRow(...Object.values(attrToHeader));
+        const defaultValues = trial[KEY_NAME];
+        if (!!defaultValues && defaultValues.length > 0) {
+            return [
+                headers,
+                ...defaultValues.map((e: any, r: number) => makeRow(r, e))
+            ];
+        } else {
+            return [headers, makeRow(1)];
+        }
+    });
 
-    const [grid, setGrid] = React.useState<IGridElement[][]>([
-        makeHeaderRow(
-            "CIDC Participant ID",
-            "CIMAC Participant ID",
-            "Trial Participant ID"
-        ),
-        ...defaultCells
-    ]);
-
-    const addRow = () => {
-        setGrid([...grid, makeEmptyRow(grid.length, ATTR_NAMES.length)]);
-    };
-    const removeRow = () => {
-        setGrid(grid.slice(0, grid.length - 1));
-    };
-
-    const disableRemoveRow = grid.length <= 2;
-
-    const dataSheet = (
-        <FormStepDataSheet
-            grid={grid}
-            setGrid={setGrid}
-            getCellName={({ row, col }) =>
-                `${KEY_NAME}[${row - 1}].${ATTR_NAMES[col - 1]}`
+    const getCellValidation = ({ attr }: ICellWithLocation<IParticipant>) => {
+        return (value: any) => {
+            if (!value) {
+                return "This is a required field";
             }
-            processCellValue={v => v}
-        />
-    );
+            const participants: IParticipant[] = getValues({
+                nest: true
+            })[KEY_NAME];
+            const isUnique = countBy(participants, attr)[value] === 1;
+            return isUnique || `${attrToHeader[attr]}s must be unique`;
+        };
+    };
 
     return (
         <FormContext {...formInstance}>
-            <form
-                onSubmit={formInstance.handleSubmit(() => {
-                    nextStep(formInstance.getValues);
-                })}
-            >
+            <form>
                 <Grid
                     container
                     direction="column"
@@ -74,26 +97,21 @@ const ParticipantsStep: React.FC = () => {
                 >
                     <Grid item>
                         <FormStepHeader
-                            title="Add Trial Participants"
-                            subtitle="A list of all participants in this trial. Please include all trial-specific local participant identifiers in addition to CIMAC global identifiers."
+                            title="Define Trial Participants"
+                            subtitle="List identifiers for all participants in this trial. Please include all trial-specific local participant identifiers in addition to CIMAC global identifiers."
                         />
                     </Grid>
-                    <Grid item>{dataSheet}</Grid>
                     <Grid item>
-                        <Tooltip title="add a row" placement="bottom">
-                            <IconButton color="primary" onClick={addRow}>
-                                <Add />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="remove last row" placement="bottom">
-                            <IconButton
-                                disabled={disableRemoveRow}
-                                color="secondary"
-                                onClick={removeRow}
-                            >
-                                <Remove />
-                            </IconButton>
-                        </Tooltip>
+                        <FormStepDataSheet<IParticipant>
+                            grid={grid}
+                            setGrid={setGrid}
+                            colToAttr={colToAttr}
+                            getCellName={getCellName}
+                            getCellValidation={getCellValidation}
+                            rootObjectName={KEY_NAME}
+                            processCellValue={v => v.value}
+                            makeEmptyRow={makeRow}
+                        />
                     </Grid>
                 </Grid>
                 <FormStepFooter backButton nextButton />
