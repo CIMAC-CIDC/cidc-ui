@@ -1,16 +1,20 @@
 import React from "react";
-import { makeStyles, Tooltip, Grid, IconButton } from "@material-ui/core";
+import {
+    makeStyles,
+    Tooltip,
+    Grid,
+    IconButton,
+    Button
+} from "@material-ui/core";
 import { useFormContext } from "react-hook-form";
 // @ts-ignore
 import ReactDataSheet, { Cell } from "react-datasheet";
 import "react-datasheet/lib/react-datasheet.css";
 import { withStyles } from "@material-ui/styles";
-import { Add, Remove } from "@material-ui/icons";
+import { Delete } from "@material-ui/icons";
 
-export const makeHeaderRow = (...headers: string[]) => [
-    { readOnly: true, value: "" },
-    ...headers.map(h => ({ readOnly: true, value: h, header: true }))
-];
+export const makeHeaderRow = (headers: string[]) =>
+    headers.map(h => ({ readOnly: true, value: h, header: true }));
 
 const useStyles = makeStyles({
     datasheet: {
@@ -69,6 +73,7 @@ export interface IGridElement
     extends ReactDataSheet.Cell<IGridElement, CellValue> {
     header?: boolean;
     error?: string;
+    locked?: string;
     value: CellValue;
 }
 
@@ -86,7 +91,7 @@ export interface IFormStepDataSheetProps<T> {
     getCellName: (cell: Omit<ICellWithLocation<T>, "value">) => string;
     getCellValidation: (cell: ICellWithLocation<T>) => (value: any) => any;
     processCellValue: (cell: ICellWithLocation<T>) => any;
-    makeEmptyRow: (rowNum: number) => IGridElement[];
+    makeEmptyRow: () => IGridElement[];
 }
 
 function FormStepDataSheet<T>({
@@ -130,21 +135,53 @@ function FormStepDataSheet<T>({
         processCellValue
     ]);
 
-    const addRow = () => {
-        setGrid([...grid, makeEmptyRow(grid.length)]);
+    const addRows = (num: number) => {
+        const newRows = Array(num)
+            .fill(null)
+            .map(() => makeEmptyRow());
+        setGrid([...grid, ...newRows]);
     };
-    const removeRow = () => {
-        const row = grid.length - 1;
+    const removeRow = (row: number) => {
+        // Unregister the bottom row
         Object.values(colToAttr).forEach(attr => {
-            const name = getCellName({ attr, row: row - 1 });
+            const name = getCellName({ attr, row: grid.length - 2 });
             form.unregister(name);
             form.triggerValidation(name);
         });
-        setGrid(grid.slice(0, grid.length - 1));
+        const newGrid = [...grid.slice(0, row), ...grid.slice(row + 1)];
+        setGrid(newGrid);
+    };
+
+    const rowRenderer: ReactDataSheet.RowRenderer<
+        IGridElement,
+        CellValue
+    > = props => {
+        return (
+            <tr>
+                {props.children}
+                {props.row > 0 && (
+                    <td>
+                        <Tooltip title="Remove row">
+                            <IconButton
+                                size="small"
+                                color="secondary"
+                                onClick={() => removeRow(props.row)}
+                            >
+                                <Delete />
+                            </IconButton>
+                        </Tooltip>
+                    </td>
+                )}
+            </tr>
+        );
     };
 
     const errs = form.errors[rootObjectName];
-    const gridWithErrors = grid.map((row: any, rowNumWithHeader: number) => {
+    const processedGrid = grid.map((row: any, rowNumWithHeader: number) => {
+        const rowNumCell = {
+            readOnly: true,
+            value: rowNumWithHeader === 0 ? "" : rowNumWithHeader
+        };
         const rowNum = rowNumWithHeader - 1;
         row.forEach((cell: IGridElement, colNum: number) => {
             const attr = colToAttr[colNum];
@@ -155,55 +192,49 @@ function FormStepDataSheet<T>({
                 row[colNum].error = undefined;
             }
         });
-        return row;
+        return [rowNumCell, ...row];
     });
 
     return (
-        <Grid container direction="column" alignItems="center">
-            <ReactDataSheet<IGridElement, CellValue>
-                className={styles.datasheet}
-                data={gridWithErrors}
-                cellRenderer={cellRenderer}
-                attributesRenderer={attributesRenderer}
-                valueRenderer={cell => cell.value}
-                onCellsChanged={(changes, additions) => {
-                    const g = grid.map(row => [...row]);
-                    changes.forEach(({ row, col, value }) => {
-                        g[row][col] = {
-                            ...grid[row][col],
-                            value
-                        };
-                    });
-                    if (makeEmptyRow) {
-                        additions?.forEach(({ row, col, value }) => {
-                            if (!g[row]) {
-                                g[row] = makeEmptyRow(row);
-                            }
-                            g[row][col] = { value };
-                        });
-                    }
-                    setGrid(g);
-                }}
-            />
+        <Grid container direction="column" alignItems="center" spacing={1}>
             <Grid item>
-                <Tooltip title="add a row" placement="bottom">
-                    <IconButton color="primary" onClick={addRow}>
-                        <div>
-                            <Add />
-                        </div>
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="remove last row" placement="bottom">
-                    <IconButton
-                        color="secondary"
-                        disabled={grid.length <= 2}
-                        onClick={removeRow}
-                    >
-                        <div>
-                            <Remove />
-                        </div>
-                    </IconButton>
-                </Tooltip>
+                <ReactDataSheet<IGridElement, CellValue>
+                    className={styles.datasheet}
+                    data={processedGrid}
+                    cellRenderer={cellRenderer}
+                    rowRenderer={rowRenderer}
+                    attributesRenderer={attributesRenderer}
+                    valueRenderer={cell => cell.value}
+                    onCellsChanged={(changesWithRowNum, additions) => {
+                        // Adjust for added row numbers by shifting each change's
+                        // column left by 1 cell.
+                        const changes = changesWithRowNum.map(c => ({
+                            ...c,
+                            col: c.col - 1
+                        }));
+                        const g = grid.map(row => [...row]);
+                        changes.forEach(({ row, col, value }) => {
+                            g[row][col] = {
+                                ...grid[row][col],
+                                value
+                            };
+                        });
+                        if (makeEmptyRow) {
+                            additions?.forEach(({ row, col, value }) => {
+                                if (!g[row]) {
+                                    g[row] = makeEmptyRow();
+                                }
+                                g[row][col] = { value };
+                            });
+                        }
+                        setGrid(g);
+                    }}
+                />
+            </Grid>
+            <Grid item>
+                <Button size="small" onClick={() => addRows(5)}>
+                    Add 5 Rows
+                </Button>
             </Grid>
         </Grid>
     );

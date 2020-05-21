@@ -14,7 +14,7 @@ import TrialInfoStep from "./_TrialInfoStep";
 import CollectionEventsStep from "./_CollectionEventsStep";
 import ParticipantsStep from "./_ParticipantsStep";
 import BiospecimensStep from "./_BiospecimensStep";
-import { merge, pickBy, Dictionary } from "lodash";
+import { mergeWith, isArray, pickBy, Dictionary } from "lodash";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 import { getTrial, updateTrialMetadata } from "../../api/api";
 import { AuthContext } from "../identity/AuthProvider";
@@ -53,7 +53,15 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
             return { ...p, samples: p.samples || [] };
         });
         const cleanUpdates = pickBy({ ...updates, participants }, v => !!v);
-        const updatedMetadata = merge(trial, cleanUpdates);
+        const updatedMetadata = mergeWith(
+            trial,
+            cleanUpdates,
+            (obj: any, src: any) => {
+                if (isArray(obj)) {
+                    return src;
+                }
+            }
+        );
         setTrial(updatedMetadata);
         getTrial(idToken, trial_id).then(({ _etag }) =>
             updateTrialMetadata(idToken, _etag, {

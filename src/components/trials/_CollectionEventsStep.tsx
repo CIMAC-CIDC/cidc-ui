@@ -25,21 +25,20 @@ const attrToHeader = {
     sample_types: "Sample Types"
 };
 
-const colToAttr: IFormStepDataSheetProps<ICollectionEvent>["colToAttr"] = {
-    1: "collection_event",
-    2: "sample_types"
-};
+const colToAttr: IFormStepDataSheetProps<ICollectionEvent>["colToAttr"] = [
+    "collection_event",
+    "sample_types"
+];
 
-const makeRow = (row: number, event?: any) => {
+const makeRow = (event?: any) => {
     if (event) {
         return [
-            { readOnly: true, value: row + 1 },
             { value: event.collection_event },
             { value: event.sample_types.join(SAMPLE_TYPE_DELIMITER) }
         ];
     } else {
         const values = Array(2).fill({ value: "" });
-        return [{ readOnly: true, value: row }, ...values];
+        return values;
     }
 };
 
@@ -51,15 +50,12 @@ const CollectionEventsStep: React.FC = () => {
     const { getValues } = formInstance;
 
     const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
-        const headers = makeHeaderRow(...Object.values(attrToHeader));
+        const headers = makeHeaderRow(Object.values(attrToHeader));
         const defaultValues = trial[KEY_NAME];
         if (!!defaultValues && defaultValues.length > 0) {
-            return [
-                headers,
-                ...defaultValues.map((e: any, r: number) => makeRow(r, e))
-            ];
+            return [headers, ...defaultValues.map((e: any) => makeRow(e))];
         } else {
-            return [headers, makeRow(1)];
+            return [headers, makeRow()];
         }
     });
 
@@ -74,7 +70,7 @@ const CollectionEventsStep: React.FC = () => {
                 const events: ICollectionEvent[] = getValues({
                     nest: true
                 })[KEY_NAME];
-                const isUnique = countBy(events, attr)[value] === 1;
+                const isUnique = countBy(events, attr)[value] <= 1;
                 return (
                     isUnique ||
                     `${attrToHeader.collection_event}s must be unique`

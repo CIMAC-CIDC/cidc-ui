@@ -72,14 +72,14 @@ const BiospecimensStep: React.FC = () => {
     );
 
     const [grid, setGrid] = React.useState<IGridElement[][]>([
-        makeHeaderRow(
+        makeHeaderRow([
             "CIDC Participant ID",
             "CIDC Biospecimen ID",
             "Parent Biospecimen ID",
             "Collection Event",
             "Specimen Type",
             "Intended Assays (Comma-Delimited)"
-        ),
+        ]),
         ...rows
     ]);
 

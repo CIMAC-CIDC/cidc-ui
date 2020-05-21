@@ -31,23 +31,21 @@ const attrToHeader = {
 };
 
 const colToAttr: IFormStepDataSheetProps<IParticipant>["colToAttr"] = {
-    2: "cimac_participant_id",
-    3: "participant_id"
+    1: "cimac_participant_id",
+    2: "participant_id"
 };
 
 const getCellName = ({ row, attr }: any) => `${KEY_NAME}[${row}].${attr}`;
 
-const makeRow = (row: number, participant?: any) => {
+const makeRow = (participant?: any) => {
     if (participant) {
         return [
-            { readOnly: true, value: row + 1 },
             { readOnly: true, value: randomString(), header: true },
             { value: participant.cimac_participant_id },
             { value: participant.participant_id }
         ];
     } else {
         return [
-            { readOnly: true, value: row },
             { readOnly: true, value: randomString(), header: true },
             { value: "" },
             { value: "" }
@@ -61,13 +59,10 @@ const ParticipantsStep: React.FC = () => {
     const { getValues } = formInstance;
 
     const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
-        const headers = makeHeaderRow(...Object.values(attrToHeader));
+        const headers = makeHeaderRow(Object.values(attrToHeader));
         const defaultValues = trial[KEY_NAME];
         if (!!defaultValues && defaultValues.length > 0) {
-            return [
-                headers,
-                ...defaultValues.map((e: any, r: number) => makeRow(r, e))
-            ];
+            return [headers, ...defaultValues.map((e: any) => makeRow(e))];
         } else {
             return [headers, makeRow(1)];
         }
