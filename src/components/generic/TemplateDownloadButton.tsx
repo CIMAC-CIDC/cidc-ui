@@ -4,9 +4,14 @@ import { ButtonProps } from "@material-ui/core/Button";
 import { InfoContext, IInfoContext } from "../info/InfoProvider";
 
 // Given a template type and name, get the API URL for downloading that template.
-export function nameToURL(type: string, name: string) {
+export function nameToURL(
+    type: keyof IInfoContext["supportedTemplates"],
+    name: string
+) {
     const fmtedName = name.toLowerCase().replace(" ", "_");
-    return `${process.env.REACT_APP_API_URL}/info/templates/${type}/${fmtedName}`;
+    // Assay templates have type "metadata" on the server
+    const fixedType = type === "assays" ? "metadata" : type;
+    return `${process.env.REACT_APP_API_URL}/info/templates/${fixedType}/${fmtedName}`;
 }
 
 export interface ITemplateDownloadButtonProps extends ButtonProps {
