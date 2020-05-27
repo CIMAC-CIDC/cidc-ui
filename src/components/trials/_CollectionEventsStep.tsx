@@ -45,10 +45,11 @@ const makeRow = (event?: any) => {
 const getCellName = ({ row, attr }: any) => `${KEY_NAME}[${row}].${attr}`;
 
 const CollectionEventsStep: React.FC = () => {
-    const { trial, setHasChanged } = useTrialFormContext();
+    const { trial, hasChanged, setHasChanged } = useTrialFormContext();
     const formInstance = useForm({ mode: "onBlur" });
     const { getValues } = formInstance;
-    useTrialFormSaver(formInstance.getValues);
+
+    useTrialFormSaver(getValues);
 
     const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
         const headers = makeHeaderRow(Object.values(attrToHeader));
@@ -99,10 +100,12 @@ const CollectionEventsStep: React.FC = () => {
     };
 
     React.useEffect(() => {
-        setHasChanged(
-            !isEqual(getValues({ nest: true })[KEY_NAME], trial[KEY_NAME])
-        );
-    }, [grid, trial, getValues, setHasChanged]);
+        if (!hasChanged) {
+            setHasChanged(
+                !isEqual(getValues({ nest: true })[KEY_NAME], trial[KEY_NAME])
+            );
+        }
+    }, [grid, trial, getValues, hasChanged, setHasChanged]);
 
     return (
         <FormContext {...formInstance}>

@@ -10,7 +10,8 @@ import {
     Card,
     CardHeader,
     Button,
-    Typography
+    Typography,
+    CircularProgress
 } from "@material-ui/core";
 import { Control } from "react-hook-form";
 import TrialInfoStep from "./_TrialInfoStep";
@@ -52,25 +53,16 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
     const [shouldSave, setShouldSave] = React.useState<boolean>(false);
     const triggerSave = () => setShouldSave(true);
 
-    const [savedTrial, setSavedTrial] = React.useState<
-        ITrialMetadata | undefined
-    >();
-    const [localTrial, setLocalTrial] = React.useState<
-        ITrialMetadata | undefined
-    >();
+    const [trial, setTrial] = React.useState<ITrialMetadata | undefined>();
     const [lastUpdated, setLastUpdated] = React.useState<string | undefined>();
     React.useEffect(() => {
         getTrial(idToken, trial_id).then(({ _updated, metadata_json }) => {
-            setLocalTrial(metadata_json);
-            setSavedTrial(metadata_json);
+            setTrial(metadata_json);
             setLastUpdated(_updated);
         });
     }, [idToken, trial_id]);
 
     const [hasChanged, setHasChanged] = React.useState<boolean>(false);
-    React.useEffect(() => {
-        setHasChanged(!isEqual(localTrial, savedTrial));
-    }, [localTrial, savedTrial]);
 
     const updateTrial = (
         updates: Partial<ITrialMetadata>,
@@ -82,7 +74,7 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
         });
         const cleanUpdates = pickBy({ ...updates, participants }, v => !!v);
         const updatedMetadata = mergeWith(
-            { ...localTrial },
+            { ...trial },
             cleanUpdates,
             (obj: any, src: any) => {
                 if (isArray(obj)) {
@@ -90,19 +82,25 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
                 }
             }
         );
-        if (hasChanged && saveToDb) {
-            getTrial(idToken, trial_id).then(({ _etag }) =>
-                updateTrialMetadata(idToken, _etag, {
-                    trial_id,
-                    metadata_json: updatedMetadata
-                }).then(({ _updated, metadata_json }) => {
-                    setSavedTrial(metadata_json);
-                    setLastUpdated(_updated);
-                    setShouldSave(false);
-                })
-            );
+        // console.log("updatedMetadata", updatedMetadata);
+        // console.log("hasChanged", hasChanged, "saveToDb", saveToDb);
+        if (hasChanged) {
+            if (saveToDb) {
+                getTrial(idToken, trial_id).then(({ _etag }) =>
+                    updateTrialMetadata(idToken, _etag, {
+                        trial_id,
+                        metadata_json: updatedMetadata
+                    }).then(({ _updated, metadata_json }) => {
+                        setLastUpdated(_updated);
+                        setShouldSave(false);
+                        setTrial(metadata_json);
+                        setHasChanged(false);
+                    })
+                );
+            } else {
+                setTrial(updatedMetadata);
+            }
         }
-        setLocalTrial(updatedMetadata);
     };
 
     const [step, setStep] = useQueryParam("step", NumberParam);
@@ -123,10 +121,10 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
         updateTrial(getValues({ nest: true }));
     };
 
-    return localTrial ? (
+    return trial ? (
         <TrialFormContext.Provider
             value={{
-                trial: localTrial,
+                trial,
                 lastUpdated,
                 updateTrial,
                 activeStep,
@@ -145,7 +143,7 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
 const TrialFormProviderWithRouter = withRouter(TrialFormProvider);
 
 export const useTrialFormSaver = (getValues: Control["getValues"]) => {
-    const { shouldSave, updateTrial } = useTrialFormContext();
+    const { shouldSave, hasChanged, updateTrial } = useTrialFormContext();
 
     React.useEffect(() => {
         if (shouldSave) {
@@ -161,16 +159,53 @@ const steps = [
     <BiospecimensStep />
 ];
 
-const InnerTrialForm: React.FC = () => {
-    const {
-        activeStep,
-        trial,
-        lastUpdated,
-        hasChanged,
-        triggerSave
-    } = useTrialFormContext();
+const SaveButton: React.FC = () => {
+    const { hasChanged, triggerSave, lastUpdated } = useTrialFormContext();
+    const [isSaving, setIsSaving] = React.useState<boolean>(false);
+    React.useEffect(() => {
+        if (!hasChanged) {
+            setIsSaving(false);
+        }
+    }, [hasChanged]);
 
     const lastUpdatedText = moment.utc(lastUpdated).fromNow();
+
+    console.log("hasChanged", hasChanged, "isSaving", isSaving);
+
+    return (
+        <Grid container spacing={2} alignItems="baseline">
+            <Grid item>
+                {lastUpdated && (
+                    <Typography variant="subtitle1" color="textSecondary">
+                        {`Last updated ${lastUpdatedText}.`}
+                    </Typography>
+                )}
+            </Grid>
+            <Grid item>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={!hasChanged || isSaving}
+                    startIcon={<Save />}
+                    endIcon={
+                        isSaving && (
+                            <CircularProgress size={12} color="inherit" />
+                        )
+                    }
+                    onClick={() => {
+                        triggerSave();
+                        setIsSaving(true);
+                    }}
+                >
+                    Save Changes
+                </Button>
+            </Grid>
+        </Grid>
+    );
+};
+
+const InnerTrialForm: React.FC = () => {
+    const { activeStep, trial } = useTrialFormContext();
 
     return (
         <Card>
@@ -181,29 +216,7 @@ const InnerTrialForm: React.FC = () => {
                             Editing metadata for {trial.protocol_identifier}
                         </Grid>
                         <Grid item>
-                            <Grid container spacing={2} alignItems="baseline">
-                                <Grid item>
-                                    {lastUpdated && (
-                                        <Typography
-                                            variant="subtitle1"
-                                            color="textSecondary"
-                                        >
-                                            {`Last updated ${lastUpdatedText}.`}
-                                        </Typography>
-                                    )}
-                                </Grid>
-                                <Grid item>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        disabled={!hasChanged}
-                                        startIcon={<Save />}
-                                        onClick={() => triggerSave()}
-                                    >
-                                        Save Changes
-                                    </Button>
-                                </Grid>
-                            </Grid>
+                            <SaveButton />
                         </Grid>
                     </Grid>
                 }
