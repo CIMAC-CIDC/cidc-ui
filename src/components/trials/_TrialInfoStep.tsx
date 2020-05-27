@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import { useFormContext, useForm, FormContext } from "react-hook-form";
 import FormStepHeader from "./_FormStepHeader";
-import { useTrialFormContext } from "./TrialForm";
+import { useTrialFormContext, useTrialFormSaver } from "./TrialForm";
 import FormStepFooter from "./_FormStepFooter";
 
 function makeInputField(name: string, label: string, isArray?: boolean) {
@@ -54,7 +54,7 @@ const TrialStatusField = () => {
     return (
         <FormControl component="fieldset">
             <FormLabel>Trial Status</FormLabel>
-            <RadioGroup row name={name} value={trial[name]}>
+            <RadioGroup row name={name} defaultValue={trial[name]}>
                 {["New", "Ongoing", "Completed"].map(v => (
                     <FormControlLabel
                         key={v}
@@ -122,8 +122,10 @@ const fieldComponents = fields.map(field => {
 });
 
 const TrialInfoStep: React.FC = () => {
-    const { nextStep } = useTrialFormContext();
+    const { nextStep, setHasChanged } = useTrialFormContext();
     const formInstance = useForm({ mode: "onBlur" });
+
+    useTrialFormSaver(formInstance.getValues);
 
     return (
         <FormContext {...formInstance}>
@@ -131,6 +133,7 @@ const TrialInfoStep: React.FC = () => {
                 onSubmit={formInstance.handleSubmit(() => {
                     nextStep(formInstance.getValues);
                 })}
+                onChange={() => setHasChanged(true)}
             >
                 <Grid container spacing={3}>
                     <Grid item xs={12}>

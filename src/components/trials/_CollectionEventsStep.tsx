@@ -4,7 +4,7 @@ import { Grid } from "@material-ui/core";
 import { useForm, FormContext } from "react-hook-form";
 import FormStepHeader from "./_FormStepHeader";
 import FormStepFooter from "./_FormStepFooter";
-import { useTrialFormContext } from "./TrialForm";
+import { useTrialFormContext, useTrialFormSaver } from "./TrialForm";
 import FormStepDataSheet, {
     IGridElement,
     makeHeaderRow,
@@ -45,9 +45,10 @@ const makeRow = (event?: any) => {
 const getCellName = ({ row, attr }: any) => `${KEY_NAME}[${row}].${attr}`;
 
 const CollectionEventsStep: React.FC = () => {
-    const { trial } = useTrialFormContext();
+    const { trial, setHasChanged } = useTrialFormContext();
     const formInstance = useForm({ mode: "onBlur" });
     const { getValues } = formInstance;
+    useTrialFormSaver(formInstance.getValues);
 
     const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
         const headers = makeHeaderRow(Object.values(attrToHeader));
@@ -96,6 +97,12 @@ const CollectionEventsStep: React.FC = () => {
                 return v;
         }
     };
+
+    React.useEffect(() => {
+        setHasChanged(
+            !isEqual(getValues({ nest: true })[KEY_NAME], trial[KEY_NAME])
+        );
+    }, [grid, trial, getValues, setHasChanged]);
 
     return (
         <FormContext {...formInstance}>

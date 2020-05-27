@@ -1,4 +1,5 @@
 import React from "react";
+import { cloneDeep } from "lodash";
 import {
     makeStyles,
     Tooltip,
@@ -12,6 +13,7 @@ import ReactDataSheet, { Cell } from "react-datasheet";
 import "react-datasheet/lib/react-datasheet.css";
 import { withStyles } from "@material-ui/styles";
 import { Delete } from "@material-ui/icons";
+import Alert from "../generic/Alert";
 
 export const makeHeaderRow = (headers: string[]) =>
     headers.map(h => ({ readOnly: true, value: h, header: true }));
@@ -95,7 +97,7 @@ export interface IFormStepDataSheetProps<T> {
 }
 
 function FormStepDataSheet<T>({
-    grid,
+    grid: origGrid,
     colToAttr,
     rootObjectName,
     setGrid,
@@ -106,6 +108,8 @@ function FormStepDataSheet<T>({
 }: IFormStepDataSheetProps<T>) {
     const styles = useStyles();
     const form = useFormContext();
+
+    const grid = cloneDeep(origGrid);
 
     React.useEffect(() => {
         const rows = grid.slice(1);
@@ -152,10 +156,12 @@ function FormStepDataSheet<T>({
         setGrid(newGrid);
     };
 
-    const rowRenderer: ReactDataSheet.RowRenderer<
+    const RowRenderer: React.FC<ReactDataSheet.RowRendererProps<
         IGridElement,
         CellValue
-    > = props => {
+    >> = props => {
+        const [alertOpen, setAlertOpen] = React.useState<boolean>(false);
+
         return (
             <tr>
                 {props.children}
@@ -165,11 +171,18 @@ function FormStepDataSheet<T>({
                             <IconButton
                                 size="small"
                                 color="secondary"
-                                onClick={() => removeRow(props.row)}
+                                onClick={() => setAlertOpen(true)}
                             >
                                 <Delete />
                             </IconButton>
                         </Tooltip>
+                        <Alert
+                            open={alertOpen}
+                            title="Are you sure you want to delete this row?"
+                            description="This will invalidate any other data that depends on this row."
+                            onAccept={() => removeRow(props.row)}
+                            onCancel={() => setAlertOpen(false)}
+                        />
                     </td>
                 )}
             </tr>
@@ -195,6 +208,38 @@ function FormStepDataSheet<T>({
         return [rowNumCell, ...row];
     });
 
+    const handleCellsChanged: ReactDataSheet.CellsChangedHandler<
+        IGridElement,
+        CellValue
+    > = (changesWithRowNum, additionsWithRowNum) => {
+        // Adjust for added row numbers by shifting each change's
+        // column to the left by 1 cell.
+        const shiftLeft = (c: any) => ({
+            ...c,
+            col: c.col - 1
+        });
+        const changes = changesWithRowNum.map(shiftLeft);
+        const additions = additionsWithRowNum?.map(shiftLeft);
+
+        changes.forEach(({ row, col, value }) => {
+            grid[row][col] = {
+                ...grid[row][col],
+                value
+            };
+        });
+
+        // If additional data beyond the current bounds of the spreadsheet
+        // was pasted, created and fill new cells with that data.
+        additions?.forEach(({ row, col, value }) => {
+            if (!grid[row]) {
+                grid[row] = makeEmptyRow();
+            }
+            grid[row][col] = { value };
+        });
+
+        setGrid(grid);
+    };
+
     return (
         <Grid container direction="column" alignItems="center" spacing={1}>
             <Grid item>
@@ -202,33 +247,10 @@ function FormStepDataSheet<T>({
                     className={styles.datasheet}
                     data={processedGrid}
                     cellRenderer={cellRenderer}
-                    rowRenderer={rowRenderer}
+                    rowRenderer={RowRenderer}
                     attributesRenderer={attributesRenderer}
                     valueRenderer={cell => cell.value}
-                    onCellsChanged={(changesWithRowNum, additions) => {
-                        // Adjust for added row numbers by shifting each change's
-                        // column left by 1 cell.
-                        const changes = changesWithRowNum.map(c => ({
-                            ...c,
-                            col: c.col - 1
-                        }));
-                        const g = grid.map(row => [...row]);
-                        changes.forEach(({ row, col, value }) => {
-                            g[row][col] = {
-                                ...grid[row][col],
-                                value
-                            };
-                        });
-                        if (makeEmptyRow) {
-                            additions?.forEach(({ row, col, value }) => {
-                                if (!g[row]) {
-                                    g[row] = makeEmptyRow();
-                                }
-                                g[row][col] = { value };
-                            });
-                        }
-                        setGrid(g);
-                    }}
+                    onCellsChanged={handleCellsChanged}
                 />
             </Grid>
             <Grid item>

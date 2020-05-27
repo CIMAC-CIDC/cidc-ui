@@ -30,15 +30,19 @@ const FormStepFooter: React.FC<ITrialFormFooterProps> = ({
                 )}
             </Grid>
             <Grid item>
-                {nextButton && (
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleSubmit(() => nextStep(getValues))}
-                    >
-                        save and continue
-                    </Button>
-                )}
+                <Grid container justify="flex-end" spacing={1}>
+                    <Grid item>
+                        {nextButton && (
+                            <Button
+                                onClick={handleSubmit(() =>
+                                    nextStep(getValues)
+                                )}
+                            >
+                                next
+                            </Button>
+                        )}
+                    </Grid>
+                </Grid>
             </Grid>
         </Grid>
     );

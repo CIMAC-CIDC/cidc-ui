@@ -1,6 +1,6 @@
 import React from "react";
-import { countBy } from "lodash";
-import { useTrialFormContext } from "./TrialForm";
+import { countBy, isEqual } from "lodash";
+import { useTrialFormContext, useTrialFormSaver } from "./TrialForm";
 import { useForm, FormContext } from "react-hook-form";
 import { Grid } from "@material-ui/core";
 import FormStepHeader from "./_FormStepHeader";
@@ -54,9 +54,11 @@ const makeRow = (participant?: any) => {
 };
 
 const ParticipantsStep: React.FC = () => {
-    const { trial } = useTrialFormContext();
+    const { trial, setHasChanged } = useTrialFormContext();
     const formInstance = useForm({ mode: "onChange" });
     const { getValues } = formInstance;
+
+    useTrialFormSaver(formInstance.getValues);
 
     const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
         const headers = makeHeaderRow(Object.values(attrToHeader));
@@ -80,6 +82,12 @@ const ParticipantsStep: React.FC = () => {
             return isUnique || `${attrToHeader[attr]}s must be unique`;
         };
     };
+
+    React.useEffect(() => {
+        setHasChanged(
+            !isEqual(getValues({ nest: true })[KEY_NAME], trial[KEY_NAME])
+        );
+    }, [grid, trial, getValues, setHasChanged]);
 
     return (
         <FormContext {...formInstance}>

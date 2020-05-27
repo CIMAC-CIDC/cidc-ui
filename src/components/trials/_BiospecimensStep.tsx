@@ -83,6 +83,7 @@ const BiospecimensStep: React.FC = () => {
         ...rows
     ]);
 
+    // eslint-disable-next-line
     const gridWithInteractions = grid.map((row: any[], rowNum: number) => {
         if (rowNum === 0) {
             return row;
@@ -107,8 +108,6 @@ const BiospecimensStep: React.FC = () => {
 
         return [buttonCell, ...row.slice(1)];
     });
-
-    console.log(gridWithInteractions);
 
     // TODO: wire up react-hook-form
     // const dataSheet = (

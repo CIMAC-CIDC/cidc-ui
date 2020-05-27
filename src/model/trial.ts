@@ -1,6 +1,8 @@
 // tslint:disable-next-line:interface-name
 export interface Trial {
     _etag: string;
+    _updated?: string;
+    _created?: string;
     id: number;
     trial_id: string;
     metadata_json: any;
