@@ -27,7 +27,7 @@ const useStyles = makeStyles({
             width: "calc(100% - 1rem) !important",
             padding: "calc(.5em - 2px) !important"
         },
-        "& .cell:not(.read-only)": { minWidth: 200 }
+        "& .cell:not(.read-only)": { width: 175 }
     }
 });
 
@@ -89,6 +89,11 @@ export interface IFormStepDataSheetProps<T> {
     grid: IGridElement[][];
     colToAttr: { [k: number]: keyof T };
     rootObjectName: string;
+    addRowsButtonText?: string;
+    addRowsIncrement?: number;
+    preRowComponent?: React.FC<
+        ReactDataSheet.RowRendererProps<IGridElement, CellValue>
+    >;
     setGrid: (g: IGridElement[][]) => void;
     getCellName: (cell: Omit<ICellWithLocation<T>, "value">) => string;
     getCellValidation: (cell: ICellWithLocation<T>) => (value: any) => any;
@@ -100,6 +105,9 @@ function FormStepDataSheet<T>({
     grid: origGrid,
     colToAttr,
     rootObjectName,
+    preRowComponent,
+    addRowsIncrement,
+    addRowsButtonText,
     setGrid,
     getCellName,
     getCellValidation,
@@ -164,6 +172,7 @@ function FormStepDataSheet<T>({
 
         return (
             <tr>
+                {preRowComponent && preRowComponent(props)}
                 {props.children}
                 {props.row > 0 && (
                     <td>
@@ -191,10 +200,6 @@ function FormStepDataSheet<T>({
 
     const errs = form.errors[rootObjectName];
     const processedGrid = grid.map((row: any, rowNumWithHeader: number) => {
-        const rowNumCell = {
-            readOnly: true,
-            value: rowNumWithHeader === 0 ? "" : rowNumWithHeader
-        };
         const rowNum = rowNumWithHeader - 1;
         row.forEach((cell: IGridElement, colNum: number) => {
             const attr = colToAttr[colNum];
@@ -205,22 +210,13 @@ function FormStepDataSheet<T>({
                 row[colNum].error = undefined;
             }
         });
-        return [rowNumCell, ...row];
+        return row;
     });
 
     const handleCellsChanged: ReactDataSheet.CellsChangedHandler<
         IGridElement,
         CellValue
-    > = (changesWithRowNum, additionsWithRowNum) => {
-        // Adjust for added row numbers by shifting each change's
-        // column to the left by 1 cell.
-        const shiftLeft = (c: any) => ({
-            ...c,
-            col: c.col - 1
-        });
-        const changes = changesWithRowNum.map(shiftLeft);
-        const additions = additionsWithRowNum?.map(shiftLeft);
-
+    > = (changes, additions) => {
         changes.forEach(({ row, col, value }) => {
             grid[row][col] = {
                 ...grid[row][col],
@@ -254,8 +250,11 @@ function FormStepDataSheet<T>({
                 />
             </Grid>
             <Grid item>
-                <Button size="small" onClick={() => addRows(5)}>
-                    Add 5 Rows
+                <Button
+                    size="small"
+                    onClick={() => addRows(addRowsIncrement || 5)}
+                >
+                    {addRowsButtonText || "Add 5 Rows"}
                 </Button>
             </Grid>
         </Grid>

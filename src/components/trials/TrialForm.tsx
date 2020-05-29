@@ -250,16 +250,16 @@ const InnerTrialForm: React.FC = () => {
 };
 
 const TrialForm: React.FC = () => {
-    React.useEffect(() => {
-        const listener = (event: BeforeUnloadEvent) => {
-            // Cancel the event as stated by the standard.
-            event.preventDefault();
-            // Chrome requires returnValue to be set.
-            event.returnValue = "";
-        };
-        window.addEventListener("beforeunload", listener);
-        return () => window.removeEventListener("beforeunload", listener);
-    }, []);
+    // React.useEffect(() => {
+    //     const listener = (event: BeforeUnloadEvent) => {
+    //         // Cancel the event as stated by the standard.
+    //         event.preventDefault();
+    //         // Chrome requires returnValue to be set.
+    //         event.returnValue = "";
+    //     };
+    //     window.addEventListener("beforeunload", listener);
+    //     return () => window.removeEventListener("beforeunload", listener);
+    // }, []);
 
     return (
         <TrialFormProviderWithRouter>
