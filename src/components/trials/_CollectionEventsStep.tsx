@@ -92,7 +92,7 @@ const CollectionEventsStep: React.FC = () => {
         const eventTrees = map(
             eventGroups,
             (specimens: IFlatCollectionEvent[], event) => {
-                let nodeMap: { [specimenType: string]: ISpecimenTree } = {};
+                const nodeMap: { [specimenType: string]: ISpecimenTree } = {};
                 for (const specimen of specimens) {
                     const name = specimen.specimen_type;
                     nodeMap[name] = {
@@ -160,8 +160,10 @@ const CollectionEventsStep: React.FC = () => {
         attr
     }: ICellWithLocation<IFlatCollectionEvent>) => {
         return (value: any) => {
-            if (!value || isEqual(value, [""])) {
-                return "This is a required field";
+            if (attr === "specimen_type" || attr === "event_name") {
+                if (!value || isEqual(value, [""])) {
+                    return "This is a required field";
+                }
             }
         };
     };
@@ -222,6 +224,40 @@ const CollectionEventsStep: React.FC = () => {
         );
     };
 
+    const getDependentRows = (rowOffByOne: number) => {
+        const row = rowOffByOne - 1;
+        const events: IFlatCollectionEvent[] = getValues({ nest: true })[
+            KEY_NAME
+        ];
+        const formatName = (event: IFlatCollectionEvent) =>
+            `${event.event_name}.${event.specimen_type}`;
+        const formatParentName = (event: IFlatCollectionEvent) =>
+            event.parent_specimen_type
+                ? `${event.event_name}.${event.parent_specimen_type}`
+                : undefined;
+        const parentMap = events.reduce((pMap, event) => {
+            const child = formatName(event);
+            const parent = formatParentName(event);
+            return { ...pMap, [child]: parent };
+        }, {});
+        const target = formatName(events[row]);
+        const rows = events.reduce((acc, event, currRow) => {
+            if (currRow === row) {
+                return acc;
+            }
+            let parent = formatParentName(event);
+            while (parent && parent in parentMap) {
+                if (parent === target) {
+                    return [...acc, currRow];
+                }
+                parent = parentMap[parent];
+            }
+            return acc;
+        }, [] as number[]);
+        const adjustedRows = rows.map(r => r + 1);
+        return adjustedRows;
+    };
+
     const gridWithInferredEventNames = grid.map((row, i) => {
         if (i !== 0) {
             const parentName = row[attrToCol.parent_specimen_type].value;
@@ -260,7 +296,7 @@ const CollectionEventsStep: React.FC = () => {
                     </Grid>
                     <Grid item>
                         <FormStepDataSheet<IFlatCollectionEvent>
-                            grid={grid}
+                            grid={gridWithInferredEventNames}
                             setGrid={setGrid}
                             colToAttr={colToAttr}
                             rootObjectName={KEY_NAME}
@@ -271,6 +307,7 @@ const CollectionEventsStep: React.FC = () => {
                             getCellValidation={getCellValidation}
                             processCellValue={processCellValue}
                             makeEmptyRow={makeRow}
+                            getDependentRows={getDependentRows}
                         />
                     </Grid>
                 </Grid>

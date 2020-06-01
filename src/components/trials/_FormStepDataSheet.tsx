@@ -99,6 +99,7 @@ export interface IFormStepDataSheetProps<T> {
     getCellValidation: (cell: ICellWithLocation<T>) => (value: any) => any;
     processCellValue: (cell: ICellWithLocation<T>) => any;
     makeEmptyRow: () => IGridElement[];
+    getDependentRows?: (row: number) => number[];
 }
 
 function FormStepDataSheet<T>({
@@ -112,7 +113,8 @@ function FormStepDataSheet<T>({
     getCellName,
     getCellValidation,
     processCellValue,
-    makeEmptyRow
+    makeEmptyRow,
+    getDependentRows
 }: IFormStepDataSheetProps<T>) {
     const styles = useStyles();
     const form = useFormContext();
@@ -153,14 +155,18 @@ function FormStepDataSheet<T>({
             .map(() => makeEmptyRow());
         setGrid([...grid, ...newRows]);
     };
-    const removeRow = (row: number) => {
-        // Unregister the bottom row
-        Object.values(colToAttr).forEach(attr => {
-            const name = getCellName({ attr, row: grid.length - 2 });
-            form.unregister(name);
-            form.triggerValidation(name);
-        });
-        const newGrid = [...grid.slice(0, row), ...grid.slice(row + 1)];
+    const handleDelete = (row: number) => {
+        const removeRow = (g: IGridElement[][], rowToDelete: number) => {
+            // Unregister the bottom row
+            Object.values(colToAttr).forEach(attr => {
+                const name = getCellName({ attr, row: g.length - 2 });
+                form.unregister(name);
+                form.triggerValidation(name);
+            });
+            return [...g.slice(0, row), ...g.slice(row + 1)];
+        };
+        const rows = getDependentRows ? [row, ...getDependentRows(row)] : [row];
+        const newGrid = rows.reduce((g, r) => removeRow(g, r), grid);
         setGrid(newGrid);
     };
 
@@ -189,7 +195,7 @@ function FormStepDataSheet<T>({
                             open={alertOpen}
                             title="Are you sure you want to delete this row?"
                             description="This will invalidate any other data that depends on this row."
-                            onAccept={() => removeRow(props.row)}
+                            onAccept={() => handleDelete(props.row)}
                             onCancel={() => setAlertOpen(false)}
                         />
                     </td>

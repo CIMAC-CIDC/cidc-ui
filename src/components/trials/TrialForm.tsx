@@ -18,7 +18,7 @@ import TrialInfoStep from "./_TrialInfoStep";
 import CollectionEventsStep from "./_CollectionEventsStep";
 import ParticipantsStep from "./_ParticipantsStep";
 import BiospecimensStep from "./_BiospecimensStep";
-import { mergeWith, isArray, pickBy, Dictionary, isEqual } from "lodash";
+import { mergeWith, isArray, pickBy, Dictionary } from "lodash";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 import { getTrial, updateTrialMetadata } from "../../api/api";
 import { AuthContext } from "../identity/AuthProvider";
@@ -82,8 +82,6 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
                 }
             }
         );
-        // console.log("updatedMetadata", updatedMetadata);
-        // console.log("hasChanged", hasChanged, "saveToDb", saveToDb);
         if (hasChanged) {
             if (saveToDb) {
                 getTrial(idToken, trial_id).then(({ _etag }) =>
