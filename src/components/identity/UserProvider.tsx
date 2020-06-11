@@ -85,10 +85,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         user.role &&
         ["cidc-biofx-user", "cidc-admin"].includes(user.role);
 
-    const showTrials =
-        user &&
-        user.role &&
-        ["nci-biobank-user", "cidc-admin"].includes(user.role);
+    const showTrials = user && user.role === "cidc-admin";
 
     const isUnactivatedPath = UNACTIVATED_PATHS.includes(
         props.location.pathname

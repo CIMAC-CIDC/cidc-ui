@@ -1,5 +1,5 @@
 import React from "react";
-import { countBy, isEqual, omit } from "lodash";
+import { countBy } from "lodash";
 import { useTrialFormContext, useTrialFormSaver } from "./TrialForm";
 import { useForm, FormContext } from "react-hook-form";
 import { Grid } from "@material-ui/core";
@@ -12,41 +12,54 @@ import FormStepDataSheet, {
     ICellWithLocation
 } from "./_FormStepDataSheet";
 
-const randomString = () =>
-    `CIDC-${Math.random()
+const CIMAC_PARTICIPANT_ID_REGEX = /^C[A-Z0-9]{3}[A-Z0-9]{3}$/;
+
+const randomString = (trialId: string) =>
+    `CIDC-${trialId}-${Math.random()
         .toString(36)
         .substring(2, 5)}`;
 
 const KEY_NAME = "participants";
 
 interface IParticipant {
+    cidc_participant_id: string;
     cimac_participant_id: string;
     participant_id: string;
+    cohort_name?: string;
 }
 
 const attrToHeader = {
     cidc_participant_id: "CIDC Participant ID",
     cimac_participant_id: "CIMAC Participant ID",
-    participant_id: "Trial Participant ID"
+    participant_id: "Trial Participant ID",
+    cohort_name: "Cohort Name"
 };
 
 const colToAttr: IFormStepDataSheetProps<IParticipant>["colToAttr"] = {
+    0: "cidc_participant_id",
     1: "cimac_participant_id",
-    2: "participant_id"
+    2: "participant_id",
+    3: "cohort_name"
 };
 
 const getCellName = ({ row, attr }: any) => `${KEY_NAME}[${row}].${attr}`;
 
-const makeRow = (participant?: any) => {
+const makeRow = (trialId: string, participant?: any) => {
     if (participant) {
         return [
-            { readOnly: true, value: randomString(), header: true },
+            {
+                readOnly: true,
+                value: participant.cidc_participant_id,
+                header: true
+            },
             { value: participant.cimac_participant_id },
-            { value: participant.participant_id }
+            { value: participant.participant_id },
+            { value: participant.cohort_name }
         ];
     } else {
         return [
-            { readOnly: true, value: randomString(), header: true },
+            { readOnly: true, value: randomString(trialId), header: true },
+            { value: "" },
             { value: "" },
             { value: "" }
         ];
@@ -54,46 +67,56 @@ const makeRow = (participant?: any) => {
 };
 
 const ParticipantsStep: React.FC = () => {
-    const { trial, hasChanged, setHasChanged } = useTrialFormContext();
+    const { trial, setHasChanged } = useTrialFormContext();
     const formInstance = useForm({ mode: "onChange" });
-    const { getValues } = formInstance;
+    const { getValues, handleSubmit } = formInstance;
+    const getParticipants = () => getValues({ nest: true });
 
-    useTrialFormSaver(getValues);
+    useTrialFormSaver(getParticipants);
 
     const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
         const headers = makeHeaderRow(Object.values(attrToHeader));
         const defaultValues = trial[KEY_NAME];
         if (!!defaultValues && defaultValues.length > 0) {
-            return [headers, ...defaultValues.map((e: any) => makeRow(e))];
+            return [
+                headers,
+                ...defaultValues.map((e: any) =>
+                    makeRow(trial.protocol_identifier, e)
+                )
+            ];
         } else {
-            return [headers, makeRow(1)];
+            return [headers, makeRow(trial.protocol_identifier)];
         }
     });
 
     const getCellValidation = ({ attr }: ICellWithLocation<IParticipant>) => {
         return (value: any) => {
-            if (!value) {
+            if (attr === "participant_id" && !value) {
                 return "This is a required field";
             }
-            const participants: IParticipant[] = getValues({
-                nest: true
-            })[KEY_NAME];
-            const isUnique = countBy(participants, attr)[value] === 1;
-            return isUnique || `${attrToHeader[attr]}s must be unique`;
+            if (attr === "cimac_participant_id" && !!value) {
+                const invalidCimacId = !CIMAC_PARTICIPANT_ID_REGEX.test(value);
+                if (invalidCimacId) {
+                    return "Invalid CIMAC participant id";
+                }
+            }
+            if (attr === "cohort_name" && !!value) {
+                const unknownCohortName = !trial.allowed_cohort_names.includes(
+                    value
+                );
+                if (unknownCohortName) {
+                    return "Unknown cohort name";
+                }
+            }
+            if (attr !== "cohort_name") {
+                const participants: IParticipant[] = getValues({
+                    nest: true
+                })[KEY_NAME];
+                const isUnique = countBy(participants, attr)[value] === 1;
+                return isUnique || `${attrToHeader[attr]}s must be unique`;
+            }
         };
     };
-
-    React.useEffect(() => {
-        if (!hasChanged) {
-            // Only compare participant-level fields
-            const currParticipants = trial[KEY_NAME].map((p: any) =>
-                omit(p, "samples")
-            );
-            setHasChanged(
-                !isEqual(getValues({ nest: true })[KEY_NAME], currParticipants)
-            );
-        }
-    }, [grid, trial, getValues, hasChanged, setHasChanged]);
 
     return (
         <FormContext {...formInstance}>
@@ -113,17 +136,27 @@ const ParticipantsStep: React.FC = () => {
                     <Grid item>
                         <FormStepDataSheet<IParticipant>
                             grid={grid}
-                            setGrid={setGrid}
+                            setGrid={g => {
+                                setHasChanged(true);
+                                setGrid(g);
+                            }}
                             colToAttr={colToAttr}
                             getCellName={getCellName}
                             getCellValidation={getCellValidation}
                             rootObjectName={KEY_NAME}
                             processCellValue={v => v.value}
-                            makeEmptyRow={makeRow}
+                            makeEmptyRow={() =>
+                                makeRow(trial.protocol_identifier)
+                            }
                         />
                     </Grid>
                 </Grid>
-                <FormStepFooter backButton nextButton />
+                <FormStepFooter
+                    backButton
+                    nextButton
+                    getValues={getParticipants}
+                    handleSubmit={handleSubmit}
+                />
             </form>
         </FormContext>
     );

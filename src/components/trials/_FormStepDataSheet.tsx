@@ -1,5 +1,4 @@
 import React from "react";
-import { cloneDeep } from "lodash";
 import {
     makeStyles,
     Tooltip,
@@ -50,24 +49,10 @@ const attributesRenderer = (cell: IGridElement) => {
 const ShiftedTooltip = withStyles(() => ({
     tooltip: {
         backgroundColor: "#f50057",
-        margin: -13
+        margin: -13,
+        maxWidth: 170
     }
 }))(Tooltip);
-
-const cellRenderer: ReactDataSheet.CellRenderer<
-    IGridElement,
-    CellValue
-> = props => {
-    const cell = <Cell {...props} />;
-
-    return !!props.cell.error ? (
-        <ShiftedTooltip open title={props.cell.error} style={{ margin: -13 }}>
-            {cell}
-        </ShiftedTooltip>
-    ) : (
-        cell
-    );
-};
 
 type CellValue = number | string | null;
 
@@ -96,14 +81,14 @@ export interface IFormStepDataSheetProps<T> {
     >;
     setGrid: (g: IGridElement[][]) => void;
     getCellName: (cell: Omit<ICellWithLocation<T>, "value">) => string;
-    getCellValidation: (cell: ICellWithLocation<T>) => (value: any) => any;
     processCellValue: (cell: ICellWithLocation<T>) => any;
-    makeEmptyRow: () => IGridElement[];
+    getCellValidation?: (cell: ICellWithLocation<T>) => (value: any) => any;
+    makeEmptyRow?: () => IGridElement[];
     getDependentRows?: (row: number) => number[];
 }
 
 function FormStepDataSheet<T>({
-    grid: origGrid,
+    grid,
     colToAttr,
     rootObjectName,
     preRowComponent,
@@ -118,42 +103,15 @@ function FormStepDataSheet<T>({
 }: IFormStepDataSheetProps<T>) {
     const styles = useStyles();
     const form = useFormContext();
-
-    const grid = cloneDeep(origGrid);
-
-    React.useEffect(() => {
-        const rows = grid.slice(1);
-        rows.forEach((cells, row) => {
-            cells.forEach(({ value }, col) => {
-                const attr = colToAttr[col];
-                if (attr) {
-                    const cell = { row, attr, value };
-                    const name = getCellName(cell);
-                    const validate = getCellValidation(cell);
-                    const processedValue = processCellValue(cell);
-
-                    form.register({ name }, { validate });
-                    form.setValue(name, processedValue);
-                    if (!!cell.value) {
-                        form.triggerValidation(name);
-                    }
-                }
-            });
-        });
-    }, [
-        grid,
-        colToAttr,
-        form,
-        getCellName,
-        getCellValidation,
-        processCellValue
-    ]);
+    const errs = form.errors[rootObjectName];
 
     const addRows = (num: number) => {
-        const newRows = Array(num)
-            .fill(null)
-            .map(() => makeEmptyRow());
-        setGrid([...grid, ...newRows]);
+        if (makeEmptyRow) {
+            const newRows = Array(num)
+                .fill(null)
+                .map(() => makeEmptyRow());
+            setGrid([...grid, ...newRows]);
+        }
     };
     const handleDelete = (row: number) => {
         const removeRow = (g: IGridElement[][], rowToDelete: number) => {
@@ -168,6 +126,57 @@ function FormStepDataSheet<T>({
         const rows = getDependentRows ? [row, ...getDependentRows(row)] : [row];
         const newGrid = rows.reduce((g, r) => removeRow(g, r), grid);
         setGrid(newGrid);
+    };
+
+    const CellRenderer: ReactDataSheet.CellRenderer<
+        IGridElement,
+        CellValue
+    > = props => {
+        const {
+            row,
+            col,
+            cell: { forceComponent, value }
+        } = props;
+        const attr = colToAttr[col];
+        const cellWithLoc = { row: row - 1, attr, value };
+        const name = getCellName(cellWithLoc);
+        const validate = getCellValidation
+            ? getCellValidation(cellWithLoc)
+            : undefined;
+        const processedValue = processCellValue(cellWithLoc);
+
+        const storedValue = form.getValues()[name] || "";
+
+        React.useEffect(() => {
+            if (row > 0 && !storedValue && !forceComponent) {
+                form.register({ name }, { validate });
+            }
+            // eslint-disable-next-line
+        }, []);
+
+        React.useEffect(() => {
+            if (row > 0 && storedValue !== processedValue && !forceComponent) {
+                form.setValue(name, processedValue);
+                if (!!storedValue || !!processedValue) {
+                    form.triggerValidation(name);
+                }
+            }
+            // eslint-disable-next-line
+        }, [storedValue, processedValue]);
+
+        const cell = <Cell {...props} />;
+
+        return !!props.cell.error ? (
+            <ShiftedTooltip
+                open
+                title={props.cell.error}
+                style={{ margin: -13 }}
+            >
+                {cell}
+            </ShiftedTooltip>
+        ) : (
+            cell
+        );
     };
 
     const RowRenderer: React.FC<ReactDataSheet.RowRendererProps<
@@ -204,10 +213,12 @@ function FormStepDataSheet<T>({
         );
     };
 
-    const errs = form.errors[rootObjectName];
     const processedGrid = grid.map((row: any, rowNumWithHeader: number) => {
         const rowNum = rowNumWithHeader - 1;
         row.forEach((cell: IGridElement, colNum: number) => {
+            if (cell.readOnly) {
+                return;
+            }
             const attr = colToAttr[colNum];
             const error = errs && attr && errs[rowNum] && errs[rowNum][attr];
             if (error) {
@@ -233,10 +244,13 @@ function FormStepDataSheet<T>({
         // If additional data beyond the current bounds of the spreadsheet
         // was pasted, created and fill new cells with that data.
         additions?.forEach(({ row, col, value }) => {
-            if (!grid[row]) {
+            if (!grid[row] && makeEmptyRow) {
                 grid[row] = makeEmptyRow();
             }
-            grid[row][col] = { value };
+            // Only allow in-bounds columns
+            if (col < grid[0].length && grid[row]) {
+                grid[row][col] = { value };
+            }
         });
 
         setGrid(grid);
@@ -248,7 +262,7 @@ function FormStepDataSheet<T>({
                 <ReactDataSheet<IGridElement, CellValue>
                     className={styles.datasheet}
                     data={processedGrid}
-                    cellRenderer={cellRenderer}
+                    cellRenderer={CellRenderer}
                     rowRenderer={RowRenderer}
                     attributesRenderer={attributesRenderer}
                     valueRenderer={cell => cell.value}
@@ -256,12 +270,14 @@ function FormStepDataSheet<T>({
                 />
             </Grid>
             <Grid item>
-                <Button
-                    size="small"
-                    onClick={() => addRows(addRowsIncrement || 5)}
-                >
-                    {addRowsButtonText || "Add 5 Rows"}
-                </Button>
+                {makeEmptyRow && (
+                    <Button
+                        size="small"
+                        onClick={() => addRows(addRowsIncrement || 5)}
+                    >
+                        {addRowsButtonText || "Add 5 Rows"}
+                    </Button>
+                )}
             </Grid>
         </Grid>
     );

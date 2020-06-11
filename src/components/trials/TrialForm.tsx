@@ -13,7 +13,6 @@ import {
     Typography,
     CircularProgress
 } from "@material-ui/core";
-import { Control } from "react-hook-form";
 import TrialInfoStep from "./_TrialInfoStep";
 import CollectionEventsStep from "./_CollectionEventsStep";
 import ParticipantsStep from "./_ParticipantsStep";
@@ -23,6 +22,7 @@ import { withRouter, RouteComponentProps } from "react-router-dom";
 import { getTrial, updateTrialMetadata } from "../../api/api";
 import { AuthContext } from "../identity/AuthProvider";
 import { Save } from "@material-ui/icons";
+import CohortNamesStep from "./_CohortNamesStep";
 
 export interface ITrialMetadata extends Dictionary<any> {}
 
@@ -33,8 +33,8 @@ const TrialFormContext = React.createContext<{
     activeStep: number;
     hasChanged: boolean;
     setHasChanged: (v: boolean) => void;
-    nextStep: (getValues: Control["getValues"]) => void;
-    prevStep: (getValues: Control["getValues"]) => void;
+    nextStep: (getValues: () => Partial<ITrialMetadata>) => void;
+    prevStep: (getValues: () => Partial<ITrialMetadata>) => void;
     shouldSave: boolean;
     triggerSave: () => void;
 } | null>(null);
@@ -107,16 +107,16 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
     const isFirstStep = activeStep === 0;
     const isLastStep = activeStep === steps.length - 1;
 
-    const nextStep = (getValues: Control["getValues"]) => {
+    const nextStep = (getValues: () => Partial<ITrialMetadata>) => {
         const newStep = isLastStep ? activeStep : activeStep + 1;
         setStep(newStep);
-        updateTrial(getValues({ nest: true }));
+        updateTrial(getValues(), true);
     };
 
-    const prevStep = (getValues: Control["getValues"]) => {
+    const prevStep = (getValues: () => Partial<ITrialMetadata>) => {
         const newStep = isFirstStep ? activeStep : activeStep - 1;
         setStep(newStep);
-        updateTrial(getValues({ nest: true }));
+        updateTrial(getValues());
     };
 
     return trial ? (
@@ -140,12 +140,12 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
 };
 const TrialFormProviderWithRouter = withRouter(TrialFormProvider);
 
-export const useTrialFormSaver = (getValues: Control["getValues"]) => {
-    const { shouldSave, hasChanged, updateTrial } = useTrialFormContext();
+export const useTrialFormSaver = (getValues: () => Partial<ITrialMetadata>) => {
+    const { shouldSave, updateTrial } = useTrialFormContext();
 
     React.useEffect(() => {
         if (shouldSave) {
-            updateTrial(getValues({ nest: true }), true);
+            updateTrial(getValues(), true);
         }
     }, [shouldSave, updateTrial, getValues]);
 };
@@ -153,6 +153,7 @@ export const useTrialFormSaver = (getValues: Control["getValues"]) => {
 const steps = [
     <TrialInfoStep />,
     <CollectionEventsStep />,
+    <CohortNamesStep />,
     <ParticipantsStep />,
     <BiospecimensStep />
 ];
@@ -167,8 +168,6 @@ const SaveButton: React.FC = () => {
     }, [hasChanged]);
 
     const lastUpdatedText = moment.utc(lastUpdated).fromNow();
-
-    console.log("hasChanged", hasChanged, "isSaving", isSaving);
 
     return (
         <Grid container spacing={2} alignItems="baseline">
@@ -206,7 +205,7 @@ const InnerTrialForm: React.FC = () => {
     const { activeStep, trial } = useTrialFormContext();
 
     return (
-        <Card>
+        <Card style={{ width: "100%" }}>
             <CardHeader
                 title={
                     <Grid container justify="space-between" alignItems="center">
@@ -227,6 +226,9 @@ const InnerTrialForm: React.FC = () => {
                         </Step>
                         <Step>
                             <StepLabel>Collection Events</StepLabel>
+                        </Step>
+                        <Step>
+                            <StepLabel>Cohort Names</StepLabel>
                         </Step>
                         <Step>
                             <StepLabel>Participants</StepLabel>

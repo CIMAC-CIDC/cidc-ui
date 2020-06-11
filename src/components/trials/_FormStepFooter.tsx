@@ -1,19 +1,24 @@
 import React from "react";
 import { Grid, Button } from "@material-ui/core";
-import { useFormContext } from "react-hook-form";
-import { useTrialFormContext } from "./TrialForm";
+import { useTrialFormContext, ITrialMetadata } from "./TrialForm";
+import { FormContextValues } from "react-hook-form";
 
 export interface ITrialFormFooterProps {
     backButton?: boolean;
     nextButton?: boolean;
+    handleSubmit?: FormContextValues["handleSubmit"];
+    getValues: () => ITrialMetadata;
 }
 
 const FormStepFooter: React.FC<ITrialFormFooterProps> = ({
     backButton,
-    nextButton
+    nextButton,
+    getValues,
+    handleSubmit
 }) => {
-    const { getValues, handleSubmit } = useFormContext();
     const { prevStep, nextStep } = useTrialFormContext();
+    const goToPrevStep = () => prevStep(getValues);
+    const goToNextStep = () => nextStep(getValues);
 
     return (
         <Grid
@@ -24,7 +29,13 @@ const FormStepFooter: React.FC<ITrialFormFooterProps> = ({
         >
             <Grid item>
                 {backButton && (
-                    <Button onClick={handleSubmit(() => prevStep(getValues))}>
+                    <Button
+                        onClick={
+                            handleSubmit
+                                ? handleSubmit(goToPrevStep)
+                                : goToPrevStep
+                        }
+                    >
                         back
                     </Button>
                 )}
@@ -34,11 +45,13 @@ const FormStepFooter: React.FC<ITrialFormFooterProps> = ({
                     <Grid item>
                         {nextButton && (
                             <Button
-                                onClick={handleSubmit(() =>
-                                    nextStep(getValues)
-                                )}
+                                onClick={
+                                    handleSubmit
+                                        ? handleSubmit(goToNextStep)
+                                        : goToNextStep
+                                }
                             >
-                                next
+                                save and continue
                             </Button>
                         )}
                     </Grid>

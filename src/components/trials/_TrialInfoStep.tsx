@@ -124,8 +124,9 @@ const fieldComponents = fields.map(field => {
 const TrialInfoStep: React.FC = () => {
     const { nextStep, setHasChanged } = useTrialFormContext();
     const formInstance = useForm({ mode: "onBlur" });
+    const getInfo = () => formInstance.getValues({ nest: true });
 
-    useTrialFormSaver(formInstance.getValues);
+    useTrialFormSaver(() => formInstance.getValues({ nest: true }));
 
     return (
         <FormContext {...formInstance}>
@@ -144,7 +145,11 @@ const TrialInfoStep: React.FC = () => {
                     </Grid>
                     {fieldComponents}
                 </Grid>
-                <FormStepFooter nextButton />
+                <FormStepFooter
+                    nextButton
+                    getValues={getInfo}
+                    handleSubmit={formInstance.handleSubmit}
+                />
             </form>
         </FormContext>
     );

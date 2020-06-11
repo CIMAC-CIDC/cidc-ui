@@ -3,13 +3,11 @@ import { Grid } from "@material-ui/core";
 import { Route } from "react-router-dom";
 import TrialsTable from "./TrialsTable";
 import TrialsForm from "./TrialForm";
-import { useRootStyles } from "../../rootStyles";
+import { widths } from "../../rootStyles";
 
 const TrialsPage: React.FC = () => {
-    const classes = useRootStyles();
-
     return (
-        <Grid container className={classes.centeredPage} justify="center">
+        <Grid container style={{ minWidth: widths.pageWidth }} justify="center">
             <Route path="/trials" exact>
                 <TrialsTable />
             </Route>

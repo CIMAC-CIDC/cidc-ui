@@ -81,10 +81,33 @@ const makeRow = (event?: Partial<IFlatCollectionEvent>) => {
 
 const getCellName = ({ row, attr }: any) => `${KEY_NAME}[${row}].${attr}`;
 
+export const flattenCollectionEvents = (
+    events: ICollectionEvent[]
+): IFlatCollectionEvent[] => {
+    return (events || []).flatMap(event => {
+        const flattenSpecimenTree = (parentName: string) => (
+            s: ISpecimenTree
+        ): IFlatCollectionEvent[] => {
+            const flatSpecimen = {
+                event_name: event.event_name,
+                parent_specimen_type: parentName,
+                ...omit(s, "derivatives")
+            };
+            return [
+                flatSpecimen,
+                ...(s.derivatives?.flatMap(
+                    flattenSpecimenTree(s.specimen_type)
+                ) || [])
+            ];
+        };
+        return event.specimen_types.flatMap(flattenSpecimenTree(""));
+    });
+};
+
 const CollectionEventsStep: React.FC = () => {
-    const { trial, hasChanged, setHasChanged } = useTrialFormContext();
+    const { trial, setHasChanged } = useTrialFormContext();
     const formInstance = useForm({ mode: "onBlur" });
-    const { getValues } = formInstance;
+    const { getValues, handleSubmit } = formInstance;
 
     const getCollectionEventTree = () => {
         const flatEvents = getValues({ nest: true })[KEY_NAME];
@@ -120,30 +143,13 @@ const CollectionEventsStep: React.FC = () => {
                 return { event_name: event, specimen_types: rootSpecimens };
             }
         );
-        return { [KEY_NAME]: eventTrees };
+        const collectionEventNames = map(eventTrees, "event_name");
+        return {
+            [KEY_NAME]: eventTrees,
+            allowed_collection_event_names: collectionEventNames
+        };
     };
     useTrialFormSaver(getCollectionEventTree);
-
-    const flattenCollectionEvents = (events: ICollectionEvent[]) => {
-        return events.flatMap(event => {
-            const flattenSpecimenTree = (parentName: string) => (
-                s: ISpecimenTree
-            ): IFlatCollectionEvent[] => {
-                const flatSpecimen = {
-                    event_name: event.event_name,
-                    parent_specimen_type: parentName,
-                    ...omit(s, "derivatives")
-                };
-                return [
-                    flatSpecimen,
-                    ...(s.derivatives?.flatMap(
-                        flattenSpecimenTree(s.specimen_type)
-                    ) || [])
-                ];
-            };
-            return event.specimen_types.flatMap(flattenSpecimenTree(""));
-        });
-    };
 
     const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
         const headers = makeHeaderRow(Object.values(attrToHeader));
@@ -174,12 +180,10 @@ const CollectionEventsStep: React.FC = () => {
     }: ICellWithLocation<IFlatCollectionEvent>) => {
         switch (attr) {
             case "intended_assays":
-                if (v === "") {
+                if (!v) {
                     return undefined;
                 }
-                const splitted = (v || "")
-                    .toString()
-                    .split(ASSAY_LIST_DELIMITER);
+                const splitted = v.toString().split(ASSAY_LIST_DELIMITER);
                 const trimmed = splitted.map(s => s.trim());
                 return trimmed;
             default:
@@ -269,14 +273,6 @@ const CollectionEventsStep: React.FC = () => {
         return row;
     });
 
-    React.useEffect(() => {
-        if (!hasChanged) {
-            setHasChanged(
-                !isEqual(getValues({ nest: true })[KEY_NAME], trial[KEY_NAME])
-            );
-        }
-    }, [grid, trial, getValues, hasChanged, setHasChanged]);
-
     return (
         <FormContext {...formInstance}>
             <form>
@@ -297,7 +293,10 @@ const CollectionEventsStep: React.FC = () => {
                     <Grid item>
                         <FormStepDataSheet<IFlatCollectionEvent>
                             grid={gridWithInferredEventNames}
-                            setGrid={setGrid}
+                            setGrid={g => {
+                                setHasChanged(true);
+                                setGrid(g);
+                            }}
                             colToAttr={colToAttr}
                             rootObjectName={KEY_NAME}
                             preRowComponent={preRowComponent}
@@ -311,7 +310,12 @@ const CollectionEventsStep: React.FC = () => {
                         />
                     </Grid>
                 </Grid>
-                <FormStepFooter backButton nextButton />
+                <FormStepFooter
+                    backButton
+                    nextButton
+                    getValues={getCollectionEventTree}
+                    handleSubmit={handleSubmit}
+                />
             </form>
         </FormContext>
     );
