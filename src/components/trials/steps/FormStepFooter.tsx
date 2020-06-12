@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, Button } from "@material-ui/core";
-import { useTrialFormContext, ITrialMetadata } from "./TrialForm";
+import { useTrialFormContext, ITrialMetadata } from "../TrialForm";
 import { FormContextValues } from "react-hook-form";
 
 export interface ITrialFormFooterProps {

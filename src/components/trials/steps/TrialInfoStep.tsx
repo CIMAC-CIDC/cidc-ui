@@ -10,9 +10,9 @@ import {
     GridProps
 } from "@material-ui/core";
 import { useFormContext, useForm, FormContext } from "react-hook-form";
-import FormStepHeader from "./_FormStepHeader";
-import { useTrialFormContext, useTrialFormSaver } from "./TrialForm";
-import FormStepFooter from "./_FormStepFooter";
+import FormStepHeader from "./FormStepHeader";
+import { useTrialFormContext, useTrialFormSaver } from "../TrialForm";
+import FormStepFooter from "./FormStepFooter";
 
 function makeInputField(name: string, label: string, isArray?: boolean) {
     return () => {

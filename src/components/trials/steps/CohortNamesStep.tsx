@@ -1,13 +1,13 @@
 import React from "react";
 import { Grid } from "@material-ui/core";
-import { useTrialFormContext, useTrialFormSaver } from "./TrialForm";
+import { useTrialFormContext, useTrialFormSaver } from "../TrialForm";
 import { useForm, FormContext } from "react-hook-form";
 import FormStepDataSheet, {
     IGridElement,
     makeHeaderRow
-} from "./_FormStepDataSheet";
-import FormStepHeader from "./_FormStepHeader";
-import FormStepFooter from "./_FormStepFooter";
+} from "./FormStepDataSheet";
+import FormStepHeader from "./FormStepHeader";
+import FormStepFooter from "./FormStepFooter";
 
 const KEY_NAME = "allowed_cohort_names";
 

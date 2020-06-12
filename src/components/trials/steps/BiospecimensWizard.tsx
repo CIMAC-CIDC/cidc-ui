@@ -1,5 +1,14 @@
 import React from "react";
-import { invert, some, isEmpty, groupBy, map, mapValues, uniq } from "lodash";
+import {
+    invert,
+    some,
+    isEmpty,
+    groupBy,
+    map,
+    mapValues,
+    uniq,
+    pick
+} from "lodash";
 import {
     Stepper,
     Step,
@@ -17,29 +26,66 @@ import {
 import FormStepDataSheet, {
     IGridElement,
     makeHeaderRow
-} from "./_FormStepDataSheet";
-import { useTrialFormContext } from "./TrialForm";
-import { useFormContext, FormContext, useForm } from "react-hook-form";
+} from "./FormStepDataSheet";
+import { useTrialFormContext } from "../TrialForm";
+import {
+    useFormContext,
+    FormContext,
+    useForm,
+    FormContextValues
+} from "react-hook-form";
 import { Close } from "@material-ui/icons";
-import { flattenCollectionEvents } from "./_CollectionEventsStep";
+import { flattenCollectionEvents } from "./CollectionEventsStep";
+
+const KEY_NAME = "biospecimens";
 
 interface IWizardStepProps {
     nextStep: () => void;
 }
 
-const ImportData: React.FC<IWizardStepProps> = ({ nextStep }) => {
-    const rootObjectName = "participants";
-    const colToAttr = {
-        0: "cidc_participant_id",
-        1: "participant_id",
-        2: "processed_sample_id"
-    };
-    const attrToHeader = {
-        cidc_participant_id: "CIDC Participant ID",
-        participant_id: "Trial Participant ID",
-        processed_sample_id: "Trial Biospecimen ID"
-    };
+interface IFlatBiospecimen {
+    cidc_participant_id: string;
+    participant_id: string;
+    processed_sample_id: string;
+    cidc_id: string;
+    collection_event: string;
+    type_of_sample: string;
+    parent_sample_id: string;
+    intended_assay: string;
+}
+
+const fullAttrToHeader: IFlatBiospecimen = {
+    cidc_participant_id: "CIDC Participant ID",
+    participant_id: "Trial Participant ID",
+    processed_sample_id: "Trial Biospecimen ID",
+    cidc_id: "CIDC Biospecimen ID",
+    collection_event: "Collection Event",
+    type_of_sample: "Specimen Type",
+    parent_sample_id: "Parent Sample ID",
+    intended_assay: "Intended Assay"
+};
+
+const fullColToAttr = Object.keys(fullAttrToHeader) as Array<
+    keyof IFlatBiospecimen
+>;
+
+const getDataSheetConfig = (keys: Array<keyof IFlatBiospecimen>) => {
+    const colToAttr = fullColToAttr.filter(attr => keys.includes(attr));
     const attrToCol = invert(colToAttr);
+    const attrToHeader = pick(fullAttrToHeader, keys);
+
+    return { colToAttr, attrToCol, attrToHeader };
+};
+
+const getCellName = (cell: any) => `${KEY_NAME}[${cell.row}].${cell.attr}`;
+
+const ImportData: React.FC<IWizardStepProps> = ({ nextStep }) => {
+    const attrs: Array<keyof IFlatBiospecimen> = [
+        "cidc_participant_id",
+        "participant_id",
+        "processed_sample_id"
+    ];
+    const { colToAttr, attrToCol, attrToHeader } = getDataSheetConfig(attrs);
     const makeEmptyRow = () => {
         return [
             { value: "", readOnly: true, header: true },
@@ -102,10 +148,8 @@ const ImportData: React.FC<IWizardStepProps> = ({ nextStep }) => {
                     grid={gridWithMappedIds}
                     setGrid={setGrid}
                     colToAttr={colToAttr}
-                    rootObjectName={rootObjectName}
-                    getCellName={cell =>
-                        `${rootObjectName}[${cell.row}].${cell.attr}`
-                    }
+                    rootObjectName={KEY_NAME}
+                    getCellName={getCellName}
                     getCellValidation={({ attr }) => value => {
                         if (!value) {
                             return "This is a required field";
@@ -130,48 +174,56 @@ const makeFakeCIDCid = (participantId: string) => {
         .substring(2, 5)}`;
 };
 
+const getDefaultGrid = (
+    getValues: FormContextValues["getValues"],
+    attrToHeader: { [k: string]: string },
+    makeRow: (spec: IFlatBiospecimen, ...args: any[]) => IGridElement[]
+) => {
+    const specimens = getValues({ nest: true })[KEY_NAME];
+    return [
+        makeHeaderRow(Object.values(attrToHeader)),
+        ...specimens.map(makeRow)
+    ];
+};
+
+const makeReadOnlyCells = (
+    specimen: Partial<IFlatBiospecimen>,
+    keys: Array<keyof IFlatBiospecimen>
+) => {
+    return keys.map(key => ({
+        value: specimen[key] || "",
+        readOnly: true,
+        header: true
+    }));
+};
+
 const AssignEvents: React.FC<IWizardStepProps> = ({ nextStep }) => {
-    const rootObjectName = "participants";
-    const colToAttr = {
-        0: "cidc_participant_id",
-        1: "participant_id",
-        2: "processed_sample_id",
-        3: "cidc_id",
-        4: "collection_event"
-    };
-    const attrToHeader = {
-        cidc_participant_id: "CIDC Participant ID",
-        participant_id: "Trial Participant ID",
-        processed_sample_id: "Trial Biospecimen ID",
-        cidc_id: "CIDC Biospecimen ID",
-        collection_event: "Collection Event"
-    };
-    const attrToCol = invert(colToAttr);
+    const attrs: Array<keyof IFlatBiospecimen> = [
+        "cidc_participant_id",
+        "participant_id",
+        "processed_sample_id",
+        "cidc_id",
+        "collection_event"
+    ];
+    const { colToAttr, attrToCol, attrToHeader } = getDataSheetConfig(attrs);
 
     const { trial } = useTrialFormContext();
     const { getValues, errors } = useFormContext();
 
-    const makeRow = (p: any, row: number) => {
+    const makeRow = (specimen: IFlatBiospecimen, row: number) => {
+        const cidcId = makeFakeCIDCid(specimen.cidc_participant_id);
         return [
-            { value: p.cidc_participant_id, readOnly: true, header: true },
-            { value: p.participant_id, readOnly: true, header: true },
-            { value: p.processed_sample_id, readOnly: true, header: true },
-            {
-                value: makeFakeCIDCid(p.cidc_participant_id),
-                readOnly: true,
-                header: true
-            },
-            { value: p.collection_event }
+            ...makeReadOnlyCells(
+                { ...specimen, cidc_id: cidcId },
+                attrs.slice(0, -1)
+            ),
+            { value: specimen.collection_event }
         ];
     };
 
-    const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
-        const participants = getValues({ nest: true })[rootObjectName];
-        return [
-            makeHeaderRow(Object.values(attrToHeader)),
-            ...participants.map(makeRow)
-        ];
-    });
+    const [grid, setGrid] = React.useState<IGridElement[][]>(
+        getDefaultGrid(getValues, attrToHeader, makeRow)
+    );
 
     const eventNames: string[] = trial.collection_event_list.map(
         (e: any) => e.event_name
@@ -217,10 +269,8 @@ const AssignEvents: React.FC<IWizardStepProps> = ({ nextStep }) => {
                     grid={grid}
                     setGrid={setGrid}
                     colToAttr={colToAttr}
-                    rootObjectName={rootObjectName}
-                    getCellName={cell =>
-                        `${rootObjectName}[${cell.row}].${cell.attr}`
-                    }
+                    rootObjectName={KEY_NAME}
+                    getCellName={getCellName}
                     getCellValidation={({ attr }) => value => {
                         if (!value) {
                             return "This is a required field";
@@ -241,24 +291,15 @@ const AssignEvents: React.FC<IWizardStepProps> = ({ nextStep }) => {
 };
 
 const AssignSpecimenTypes: React.FC<IWizardStepProps> = ({ nextStep }) => {
-    const rootObjectName = "participants";
-    const colToAttr = {
-        0: "cidc_participant_id",
-        1: "participant_id",
-        2: "processed_sample_id",
-        3: "cidc_id",
-        4: "collection_event",
-        5: "type_of_sample"
-    };
-    const attrToHeader = {
-        cidc_participant_id: "CIDC Participant ID",
-        participant_id: "Trial Participant ID",
-        processed_sample_id: "Trial Biospecimen ID",
-        cidc_id: "CIDC Biospecimen ID",
-        collection_event: "Collection Event",
-        type_of_sample: "Specimen Type"
-    };
-    const attrToCol = invert(colToAttr);
+    const attrs: Array<keyof IFlatBiospecimen> = [
+        "cidc_participant_id",
+        "participant_id",
+        "processed_sample_id",
+        "cidc_id",
+        "collection_event",
+        "type_of_sample"
+    ];
+    const { colToAttr, attrToCol, attrToHeader } = getDataSheetConfig(attrs);
 
     const { trial } = useTrialFormContext();
     const { getValues, errors } = useFormContext();
@@ -271,24 +312,16 @@ const AssignSpecimenTypes: React.FC<IWizardStepProps> = ({ nextStep }) => {
         samples => map(samples, "specimen_type")
     );
 
-    const makeRow = (p: any, row: number) => {
+    const makeRow = (specimen: IFlatBiospecimen, row: number) => {
         return [
-            { value: p.cidc_participant_id, readOnly: true, header: true },
-            { value: p.participant_id, readOnly: true, header: true },
-            { value: p.processed_sample_id, readOnly: true, header: true },
-            { value: p.cidc_id, readOnly: true, header: true },
-            { value: p.collection_event, readOnly: true, header: true },
-            { value: p.type_of_sample }
+            ...makeReadOnlyCells(specimen, attrs.slice(0, -1)),
+            { value: specimen.type_of_sample }
         ];
     };
 
-    const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
-        const participants = getValues({ nest: true })[rootObjectName];
-        return [
-            makeHeaderRow(Object.values(attrToHeader)),
-            ...participants.map(makeRow)
-        ];
-    });
+    const [grid, setGrid] = React.useState<IGridElement[][]>(
+        getDefaultGrid(getValues, attrToHeader, makeRow)
+    );
 
     const showAcceptSpecimenTypes =
         isEmpty(errors) &&
@@ -301,7 +334,7 @@ const AssignSpecimenTypes: React.FC<IWizardStepProps> = ({ nextStep }) => {
                     Add a specimen type for each of these biospecimens.
                     Biospecimen types are restricted based on their specified
                     collection event, according to the collection event plan
-                    specified earlier in this form.
+                    created earlier in this form.
                 </Typography>
                 {map(sampleTypeMap, (types, event) => (
                     <Typography key={event} gutterBottom>
@@ -333,10 +366,8 @@ const AssignSpecimenTypes: React.FC<IWizardStepProps> = ({ nextStep }) => {
                     grid={grid}
                     setGrid={setGrid}
                     colToAttr={colToAttr}
-                    rootObjectName={rootObjectName}
-                    getCellName={cell =>
-                        `${rootObjectName}[${cell.row}].${cell.attr}`
-                    }
+                    rootObjectName={KEY_NAME}
+                    getCellName={getCellName}
                     getCellValidation={({ attr, row }) => value => {
                         if (!value) {
                             return "This is a required field";
@@ -393,50 +424,40 @@ const ParentSelector: React.FC<{
 };
 
 const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
-    const rootObjectName = "participants";
-    const colToAttr = {
-        0: "cidc_participant_id",
-        1: "participant_id",
-        2: "processed_sample_id",
-        3: "cidc_id",
-        4: "collection_event",
-        5: "type_of_sample",
-        6: "parent_sample_id"
-    };
-    const attrToHeader = {
-        cidc_participant_id: "CIDC Participant ID",
-        participant_id: "Trial Participant ID",
-        processed_sample_id: "Trial Biospecimen ID",
-        cidc_id: "CIDC Biospecimen ID",
-        collection_event: "Collection Event",
-        type_of_sample: "Specimen Type",
-        parent_sample_id: "Parent Sample ID"
-    };
-    const attrToCol = invert(colToAttr);
+    const attrs: Array<keyof IFlatBiospecimen> = [
+        "cidc_participant_id",
+        "participant_id",
+        "processed_sample_id",
+        "cidc_id",
+        "collection_event",
+        "type_of_sample",
+        "parent_sample_id"
+    ];
+    const { colToAttr, attrToCol, attrToHeader } = getDataSheetConfig(attrs);
 
     const { trial } = useTrialFormContext();
     const { getValues, setValue, register, errors } = useFormContext();
 
-    const [participants, dispatch] = React.useReducer(
+    const [specimens, dispatch] = React.useReducer(
         (state: any[], { type, payload }: any) => {
             switch (type) {
                 case "setParentId":
-                    const participant = {
+                    const specimen = {
                         ...state[payload.rowNum],
                         parent_sample_id: payload.parentId
                     };
                     return [
                         ...state.slice(0, payload.rowNum),
-                        participant,
+                        specimen,
                         ...state.slice(payload.rowNum + 1)
                     ];
-                case "addParticipant":
-                    return [...state, payload.participant];
+                case "addSpecimen":
+                    return [...state, payload.specimen];
                 default:
-                    throw new Error("unhandled participant update");
+                    throw new Error("unhandled specimen update");
             }
         },
-        getValues({ nest: true })[rootObjectName]
+        getValues({ nest: true })[KEY_NAME]
     );
 
     const rootSampleTypes: string[] = uniq(
@@ -459,7 +480,7 @@ const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
             ...typeMap,
             [event.specimen_type]: mapValues(
                 groupBy(
-                    participants.filter(
+                    specimens.filter(
                         (p: any) =>
                             p.type_of_sample === event.parent_specimen_type
                     ),
@@ -474,27 +495,16 @@ const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
         {}
     );
 
-    const makeRow = (p: any) => {
+    const makeRow = (specimen: Partial<IFlatBiospecimen>) => {
         return [
-            { value: p.cidc_participant_id, readOnly: true, header: true },
-            { value: p.participant_id, readOnly: true, header: true },
-            { value: p.processed_sample_id, readOnly: true, header: true },
-            { value: p.cidc_id, readOnly: true, header: true },
-            { value: p.collection_event, readOnly: true, header: true },
-            { value: p.type_of_sample, readOnly: true, header: true },
+            ...makeReadOnlyCells(specimen, attrs.slice(0, -1)),
             { value: "" }
         ];
     };
 
-    const getCellName = (cell: any) =>
-        `${rootObjectName}[${cell.row}].${String(cell.attr)}`;
-
-    const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
-        return [
-            makeHeaderRow(Object.values(attrToHeader)),
-            ...participants.map(makeRow)
-        ];
-    });
+    const [grid, setGrid] = React.useState<IGridElement[][]>(
+        getDefaultGrid(getValues, attrToHeader, makeRow)
+    );
 
     grid.forEach((row, rowNumWithHeader) => {
         if (rowNumWithHeader === 0) {
@@ -519,7 +529,7 @@ const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
                 value: "",
                 component: (
                     <ParentSelector
-                        value={participants[rowNum].parent_sample_id || ""}
+                        value={specimens[rowNum].parent_sample_id || ""}
                         validParents={validParents || []}
                         onChange={parentId => {
                             dispatch({
@@ -529,16 +539,16 @@ const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
                         }}
                         createNewParent={() => {
                             const cidcId = makeFakeCIDCid(participantId);
-                            const participant = {
+                            const specimen = {
                                 cidc_participant_id: participantId,
                                 cidc_id: cidcId,
                                 collection_event: collectionEvent,
                                 type_of_sample: typeToParentType[specimenType]
                             };
-                            setGrid([...grid, makeRow(participant)]);
+                            setGrid([...grid, makeRow(specimen)]);
                             dispatch({
-                                type: "addParticipant",
-                                payload: { participant }
+                                type: "addSpecimen",
+                                payload: { specimen }
                             });
                             return cidcId;
                         }}
@@ -553,10 +563,10 @@ const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
     const showAcceptParentSamples =
         isEmpty(errors) &&
         !some(
-            participants.map(
-                participant =>
-                    !participant.parent_sample_id &&
-                    !rootSampleTypes.includes(participant.type_of_sample)
+            specimens.map(
+                specimen =>
+                    !specimen.parent_sample_id &&
+                    !rootSampleTypes.includes(specimen.type_of_sample)
             )
         );
 
@@ -593,8 +603,8 @@ const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
                         variant="contained"
                         color="primary"
                         onClick={() => {
-                            register({ name: rootObjectName });
-                            setValue(rootObjectName, participants);
+                            register({ name: KEY_NAME });
+                            setValue(KEY_NAME, specimens);
                             nextStep();
                         }}
                     >
@@ -607,7 +617,7 @@ const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
                     grid={grid}
                     setGrid={setGrid}
                     colToAttr={colToAttr}
-                    rootObjectName={rootObjectName}
+                    rootObjectName={KEY_NAME}
                     getCellName={getCellName}
                     processCellValue={cell =>
                         cell.value === noParentText ? "" : cell.value
@@ -619,29 +629,17 @@ const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
 };
 
 const AssignAssays: React.FC<IWizardStepProps> = ({ nextStep }) => {
-    const rootObjectName = "participants";
-    const colToAttr = {
-        0: "cidc_participant_id",
-        1: "participant_id",
-        2: "processed_sample_id",
-        3: "cidc_id",
-        4: "collection_event",
-        5: "type_of_sample",
-        6: "parent_sample_id",
-        7: "intended_assay"
-    };
-    const attrToHeader = {
-        cidc_participant_id: "CIDC Participant ID",
-        participant_id: "Trial Participant ID",
-        processed_sample_id: "Trial Biospecimen ID",
-        cidc_id: "CIDC Biospecimen ID",
-        collection_event: "Collection Event",
-        type_of_sample: "Specimen Type",
-        parent_sample_id: "Parent Sample ID",
-        intended_assay: "Intended Assay"
-    };
-    const attrToCol = invert(colToAttr);
-
+    const attrs: Array<keyof IFlatBiospecimen> = [
+        "cidc_participant_id",
+        "participant_id",
+        "processed_sample_id",
+        "cidc_id",
+        "collection_event",
+        "type_of_sample",
+        "parent_sample_id",
+        "intended_assay"
+    ];
+    const { colToAttr, attrToCol, attrToHeader } = getDataSheetConfig(attrs);
     const { trial } = useTrialFormContext();
     const { getValues, errors } = useFormContext();
 
@@ -659,31 +657,21 @@ const AssignAssays: React.FC<IWizardStepProps> = ({ nextStep }) => {
         {}
     );
 
-    const makeRow = (p: any) => {
+    const makeRow = (specimen: IFlatBiospecimen) => {
         const allowedAssaysCell =
-            validAssayMap[p.type_of_sample] &&
-            !!validAssayMap[p.type_of_sample][p.collection_event]
+            validAssayMap[specimen.type_of_sample] &&
+            !!validAssayMap[specimen.type_of_sample][specimen.collection_event]
                 ? { value: "" }
                 : { value: "(none)", readOnly: true };
         return [
-            { value: p.cidc_participant_id, readOnly: true, header: true },
-            { value: p.participant_id, readOnly: true, header: true },
-            { value: p.processed_sample_id, readOnly: true, header: true },
-            { value: p.cidc_id, readOnly: true, header: true },
-            { value: p.collection_event, readOnly: true, header: true },
-            { value: p.type_of_sample, readOnly: true, header: true },
-            { value: p.parent_sample_id, readOnly: true, header: true },
+            ...makeReadOnlyCells(specimen, attrs.slice(0, -1)),
             allowedAssaysCell
         ];
     };
 
-    const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
-        const participants = getValues({ nest: true })[rootObjectName];
-        return [
-            makeHeaderRow(Object.values(attrToHeader)),
-            ...participants.map(makeRow)
-        ];
-    });
+    const [grid, setGrid] = React.useState<IGridElement[][]>(
+        getDefaultGrid(getValues, attrToHeader, makeRow)
+    );
 
     const showAcceptIntendedAssays =
         isEmpty(errors) &&
@@ -693,24 +681,11 @@ const AssignAssays: React.FC<IWizardStepProps> = ({ nextStep }) => {
         <Grid container direction="column" alignItems="center" spacing={1}>
             <Grid item>
                 <Typography gutterBottom>
-                    Add a specimen type for each of these biospecimens.
-                    Biospecimen types are restricted based on their specified
-                    collection event, according to the collection event plan
-                    specified earlier in this form.
+                    Add the intended assay for each of these biospecimens.
+                    Intended assay types are restricted based on the specified
+                    biospecimen type, according to the collection event plan
+                    created earlier in this form.
                 </Typography>
-                {/* {map(sampleTypeMap, (types, event) => (
-                    <Typography key={event} gutterBottom>
-                        Allowed types for <strong>{event}</strong>:
-                        {types.map(specimen_type => (
-                            <Chip
-                                key={specimen_type}
-                                style={{ marginLeft: ".3rem" }}
-                                label={specimen_type}
-                                variant="outlined"
-                            />
-                        ))}
-                    </Typography>
-                ))} */}
             </Grid>
             <Grid item>
                 {showAcceptIntendedAssays && (
@@ -728,10 +703,8 @@ const AssignAssays: React.FC<IWizardStepProps> = ({ nextStep }) => {
                     grid={grid}
                     setGrid={setGrid}
                     colToAttr={colToAttr}
-                    rootObjectName={rootObjectName}
-                    getCellName={cell =>
-                        `${rootObjectName}[${cell.row}].${cell.attr}`
-                    }
+                    rootObjectName={KEY_NAME}
+                    getCellName={getCellName}
                     getCellValidation={({ attr, row }) => value => {
                         if (!value) {
                             return "This is a required field";

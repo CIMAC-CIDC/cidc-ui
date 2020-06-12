@@ -13,16 +13,16 @@ import {
     Typography,
     CircularProgress
 } from "@material-ui/core";
-import TrialInfoStep from "./_TrialInfoStep";
-import CollectionEventsStep from "./_CollectionEventsStep";
-import ParticipantsStep from "./_ParticipantsStep";
-import BiospecimensStep from "./_BiospecimensStep";
+import TrialInfoStep from "./steps/TrialInfoStep";
+import CollectionEventsStep from "./steps/CollectionEventsStep";
+import ParticipantsStep from "./steps/ParticipantsStep";
+import BiospecimensStep from "./steps/BiospecimensStep";
 import { mergeWith, isArray, pickBy, Dictionary } from "lodash";
 import { withRouter, RouteComponentProps } from "react-router-dom";
 import { getTrial, updateTrialMetadata } from "../../api/api";
 import { AuthContext } from "../identity/AuthProvider";
 import { Save } from "@material-ui/icons";
-import CohortNamesStep from "./_CohortNamesStep";
+import CohortNamesStep from "./steps/CohortNamesStep";
 
 export interface ITrialMetadata extends Dictionary<any> {}
 

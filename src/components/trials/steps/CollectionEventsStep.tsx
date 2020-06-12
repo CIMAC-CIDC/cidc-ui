@@ -2,15 +2,15 @@ import React from "react";
 import { groupBy, isEqual, invert, map, omit } from "lodash";
 import { Grid, Tooltip, IconButton } from "@material-ui/core";
 import { useForm, FormContext } from "react-hook-form";
-import FormStepHeader from "./_FormStepHeader";
-import FormStepFooter from "./_FormStepFooter";
-import { useTrialFormContext, useTrialFormSaver } from "./TrialForm";
+import FormStepHeader from "./FormStepHeader";
+import FormStepFooter from "./FormStepFooter";
+import { useTrialFormContext, useTrialFormSaver } from "../TrialForm";
 import FormStepDataSheet, {
     IGridElement,
     makeHeaderRow,
     IFormStepDataSheetProps,
     ICellWithLocation
-} from "./_FormStepDataSheet";
+} from "./FormStepDataSheet";
 import { Add } from "@material-ui/icons";
 
 const KEY_NAME = "collection_event_list";

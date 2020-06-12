@@ -1,16 +1,16 @@
 import React from "react";
 import { countBy } from "lodash";
-import { useTrialFormContext, useTrialFormSaver } from "./TrialForm";
+import { useTrialFormContext, useTrialFormSaver } from "../TrialForm";
 import { useForm, FormContext } from "react-hook-form";
 import { Grid } from "@material-ui/core";
-import FormStepHeader from "./_FormStepHeader";
-import FormStepFooter from "./_FormStepFooter";
+import FormStepHeader from "./FormStepHeader";
+import FormStepFooter from "./FormStepFooter";
 import FormStepDataSheet, {
     IGridElement,
     makeHeaderRow,
     IFormStepDataSheetProps,
     ICellWithLocation
-} from "./_FormStepDataSheet";
+} from "./FormStepDataSheet";
 
 const CIMAC_PARTICIPANT_ID_REGEX = /^C[A-Z0-9]{3}[A-Z0-9]{3}$/;
 

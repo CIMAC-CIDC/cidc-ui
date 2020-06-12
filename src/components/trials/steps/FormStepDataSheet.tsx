@@ -12,7 +12,7 @@ import ReactDataSheet, { Cell } from "react-datasheet";
 import "react-datasheet/lib/react-datasheet.css";
 import { withStyles } from "@material-ui/styles";
 import { Delete } from "@material-ui/icons";
-import Alert from "../generic/Alert";
+import Alert from "../../generic/Alert";
 
 export const makeHeaderRow = (headers: string[]) =>
     headers.map(h => ({ readOnly: true, value: h, header: true }));

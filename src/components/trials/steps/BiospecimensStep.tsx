@@ -1,9 +1,9 @@
 import React from "react";
 import { Grid, Button } from "@material-ui/core";
-import FormStepHeader from "./_FormStepHeader";
-import FormStepFooter from "./_FormStepFooter";
-import BiospecimensWizard from "./_BiospecimensWizard";
-import Alert from "../generic/Alert";
+import FormStepHeader from "./FormStepHeader";
+import FormStepFooter from "./FormStepFooter";
+import BiospecimensWizard from "./BiospecimensWizard";
+import Alert from "../../generic/Alert";
 
 const BiospecimensStep: React.FC = () => {
     const [alertOpen, setAlertOpen] = React.useState<boolean>(false);
