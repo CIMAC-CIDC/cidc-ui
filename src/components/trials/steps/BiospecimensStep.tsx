@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Button } from "@material-ui/core";
+import { Grid, Button, Typography } from "@material-ui/core";
 import FormStepHeader from "./FormStepHeader";
 import FormStepFooter from "./FormStepFooter";
 import BiospecimensWizard from "./BiospecimensWizard";
@@ -14,11 +14,15 @@ const BiospecimensStep: React.FC = () => {
             <Grid container direction="column" spacing={1} alignItems="center">
                 <Grid item>
                     <FormStepHeader
-                        title="Define Biospecimens"
+                        title="Valiate Biospecimens"
                         subtitle={
-                            "Add biospecimens collected over the course of this trial. Each row in this table represents either a biospecimen derived directly from study participants (i.e., biospecimens with no parent) or a biospecimen derived from another biospecimen (i.e., biospecimens with a parent)."
+                            "Check metadata constraints on biospecimens collected over the course of this trial. Each row in this table represents either a biospecimen derived directly from study participants (i.e., biospecimens with no parent) or a biospecimen derived from another biospecimen (i.e., biospecimens with a parent)."
                         }
                     />
+                    <Typography>
+                        <strong>Note:</strong> it isn't yet possible to save new
+                        biospecimens through this step of the form.
+                    </Typography>
                 </Grid>
                 <Grid item>
                     {showWizard ? (
@@ -33,7 +37,7 @@ const BiospecimensStep: React.FC = () => {
                             variant="contained"
                             onClick={() => setShowWizard(true)}
                         >
-                            add new biospecimens
+                            open the biospecimen validator
                         </Button>
                     )}
                 </Grid>

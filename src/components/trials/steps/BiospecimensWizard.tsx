@@ -34,7 +34,7 @@ import {
     useForm,
     FormContextValues
 } from "react-hook-form";
-import { Close } from "@material-ui/icons";
+import { Close, Check } from "@material-ui/icons";
 import { flattenCollectionEvents } from "./CollectionEventsStep";
 
 const KEY_NAME = "biospecimens";
@@ -689,13 +689,12 @@ const AssignAssays: React.FC<IWizardStepProps> = ({ nextStep }) => {
             </Grid>
             <Grid item>
                 {showAcceptIntendedAssays && (
-                    <Button
-                        variant="contained"
+                    <Chip
+                        variant="outlined"
                         color="primary"
-                        onClick={() => nextStep()}
-                    >
-                        Accept Intended Assays And Commit Samples To Trial
-                    </Button>
+                        icon={<Check />}
+                        label="Congratulations! These biospecimens are valid."
+                    ></Chip>
                 )}
             </Grid>
             <Grid item>
@@ -766,7 +765,7 @@ const BiospecimensWizard: React.FC<IBiospecimensWizardProps> = ({
                                 >
                                     <Grid item>
                                         <Typography variant="h6">
-                                            Add new biospecimens
+                                            Check biospecimen constraints
                                         </Typography>
                                     </Grid>
                                     <Grid item>
