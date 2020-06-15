@@ -11,13 +11,9 @@ import FormStepDataSheet, {
     IFormStepDataSheetProps,
     ICellWithLocation
 } from "./FormStepDataSheet";
+import { generateParticipantID } from "./idGeneration";
 
 const CIMAC_PARTICIPANT_ID_REGEX = /^C[A-Z0-9]{3}[A-Z0-9]{3}$/;
-
-const randomString = (trialId: string) =>
-    `CIDC-${trialId}-${Math.random()
-        .toString(36)
-        .substring(2, 5)}`;
 
 const KEY_NAME = "participants";
 
@@ -44,28 +40,6 @@ const colToAttr: IFormStepDataSheetProps<IParticipant>["colToAttr"] = {
 
 const getCellName = ({ row, attr }: any) => `${KEY_NAME}[${row}].${attr}`;
 
-const makeRow = (trialId: string, participant?: any) => {
-    if (participant) {
-        return [
-            {
-                readOnly: true,
-                value: participant.cidc_participant_id,
-                header: true
-            },
-            { value: participant.cimac_participant_id },
-            { value: participant.participant_id },
-            { value: participant.cohort_name }
-        ];
-    } else {
-        return [
-            { readOnly: true, value: randomString(trialId), header: true },
-            { value: "" },
-            { value: "" },
-            { value: "" }
-        ];
-    }
-};
-
 const ParticipantsStep: React.FC = () => {
     const { trial, setHasChanged } = useTrialFormContext();
     const formInstance = useForm({ mode: "onChange" });
@@ -74,18 +48,48 @@ const ParticipantsStep: React.FC = () => {
 
     useTrialFormSaver(getParticipants);
 
+    const idSet = new Set<string>();
+    const makeRow = (participant?: any) => {
+        console.log(makeRow, participant);
+        if (participant) {
+            idSet.add(participant.cidc_participant_id);
+            return [
+                {
+                    readOnly: true,
+                    value: participant.cidc_participant_id,
+                    header: true
+                },
+                { value: participant.cimac_participant_id },
+                { value: participant.participant_id },
+                { value: participant.cohort_name }
+            ];
+        } else {
+            const cidcParticipantId = generateParticipantID(
+                trial.protocol_identifier,
+                idSet
+            );
+            idSet.add(cidcParticipantId);
+            return [
+                { readOnly: true, value: cidcParticipantId, header: true },
+                { value: "" },
+                { value: "" },
+                { value: "" }
+            ];
+        }
+    };
+
     const [grid, setGrid] = React.useState<IGridElement[][]>(() => {
         const headers = makeHeaderRow(Object.values(attrToHeader));
         const defaultValues = trial[KEY_NAME];
         if (!!defaultValues && defaultValues.length > 0) {
             return [
                 headers,
-                ...defaultValues.map((e: any) =>
-                    makeRow(trial.protocol_identifier, e)
+                ...defaultValues.map((participant: IParticipant) =>
+                    makeRow(participant)
                 )
             ];
         } else {
-            return [headers, makeRow(trial.protocol_identifier)];
+            return [headers, makeRow()];
         }
     });
 
@@ -145,9 +149,7 @@ const ParticipantsStep: React.FC = () => {
                             getCellValidation={getCellValidation}
                             rootObjectName={KEY_NAME}
                             processCellValue={v => v.value}
-                            makeEmptyRow={() =>
-                                makeRow(trial.protocol_identifier)
-                            }
+                            makeEmptyRow={() => makeRow()}
                         />
                     </Grid>
                 </Grid>

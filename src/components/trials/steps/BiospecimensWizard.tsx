@@ -36,6 +36,7 @@ import {
 } from "react-hook-form";
 import { Close, Check } from "@material-ui/icons";
 import { flattenCollectionEvents } from "./CollectionEventsStep";
+import { generateBiospecimenID } from "./idGeneration";
 
 const KEY_NAME = "biospecimens";
 
@@ -168,12 +169,6 @@ const ImportData: React.FC<IWizardStepProps> = ({ nextStep }) => {
     );
 };
 
-const makeFakeCIDCid = (participantId: string) => {
-    return `${participantId}-${Math.random()
-        .toString(36)
-        .substring(2, 5)}`;
-};
-
 const getDefaultGrid = (
     getValues: FormContextValues["getValues"],
     attrToHeader: { [k: string]: string },
@@ -210,8 +205,13 @@ const AssignEvents: React.FC<IWizardStepProps> = ({ nextStep }) => {
     const { trial } = useTrialFormContext();
     const { getValues, errors } = useFormContext();
 
+    const idSet = new Set<string>();
     const makeRow = (specimen: IFlatBiospecimen, row: number) => {
-        const cidcId = makeFakeCIDCid(specimen.cidc_participant_id);
+        let cidcId = specimen.cidc_id;
+        if (!cidcId) {
+            cidcId = generateBiospecimenID(specimen.cidc_participant_id, idSet);
+        }
+        idSet.add(cidcId);
         return [
             ...makeReadOnlyCells(
                 { ...specimen, cidc_id: cidcId },
@@ -495,7 +495,11 @@ const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
         {}
     );
 
+    const idSet = new Set<string>();
     const makeRow = (specimen: Partial<IFlatBiospecimen>) => {
+        if (specimen.cidc_id) {
+            idSet.add(specimen.cidc_id);
+        }
         return [
             ...makeReadOnlyCells(specimen, attrs.slice(0, -1)),
             { value: "" }
@@ -538,7 +542,11 @@ const AssignParentSpecimens: React.FC<IWizardStepProps> = ({ nextStep }) => {
                             });
                         }}
                         createNewParent={() => {
-                            const cidcId = makeFakeCIDCid(participantId);
+                            const cidcId = generateBiospecimenID(
+                                participantId,
+                                idSet
+                            );
+                            idSet.add(cidcId);
                             const specimen = {
                                 cidc_participant_id: participantId,
                                 cidc_id: cidcId,
