@@ -23,19 +23,25 @@ import { getTrial, updateTrialMetadata } from "../../api/api";
 import { AuthContext } from "../identity/AuthProvider";
 import { Save } from "@material-ui/icons";
 import CohortNamesStep from "./steps/CohortNamesStep";
+import Alert from "../generic/Alert";
 
 export interface ITrialMetadata extends Dictionary<any> {}
 
 const TrialFormContext = React.createContext<{
     trial: ITrialMetadata;
     lastUpdated?: string;
-    updateTrial: (updates: Partial<ITrialMetadata>, saveToDb?: boolean) => void;
+    updateTrial: (
+        updates: Partial<ITrialMetadata>,
+        saveToDb?: boolean
+    ) => Promise<any>;
     activeStep: number;
     hasChanged: boolean;
     setHasChanged: (v: boolean) => void;
     nextStep: (getValues: () => Partial<ITrialMetadata>) => void;
     prevStep: (getValues: () => Partial<ITrialMetadata>) => void;
     shouldSave: boolean;
+    saveErrors: string[];
+    clearSaveErrors: () => void;
     triggerSave: () => void;
 } | null>(null);
 
@@ -51,6 +57,7 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
 }) => {
     const { idToken } = React.useContext(AuthContext)!;
     const [shouldSave, setShouldSave] = React.useState<boolean>(false);
+    const [saveErrors, setSaveErrors] = React.useState<string[]>([]);
     const triggerSave = () => setShouldSave(true);
 
     const [trial, setTrial] = React.useState<ITrialMetadata | undefined>();
@@ -63,6 +70,7 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
     }, [idToken, trial_id]);
 
     const [hasChanged, setHasChanged] = React.useState<boolean>(false);
+    useBeforeUnloadWarning(hasChanged);
 
     const updateTrial = (
         updates: Partial<ITrialMetadata>,
@@ -84,21 +92,30 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
         );
         if (hasChanged) {
             if (saveToDb) {
-                getTrial(idToken, trial_id).then(({ _etag }) =>
+                return getTrial(idToken, trial_id).then(({ _etag }) =>
                     updateTrialMetadata(idToken, _etag, {
                         trial_id,
                         metadata_json: updatedMetadata
-                    }).then(({ _updated, metadata_json }) => {
-                        setLastUpdated(_updated);
-                        setShouldSave(false);
-                        setTrial(metadata_json);
-                        setHasChanged(false);
                     })
+                        .then(({ _updated, metadata_json }) => {
+                            setLastUpdated(_updated);
+                            setShouldSave(false);
+                            setTrial(metadata_json);
+                            setHasChanged(false);
+                        })
+                        .catch(({ response: { data } }) => {
+                            setSaveErrors(data._error.message.errors);
+                            setShouldSave(false);
+                            return Promise.reject(
+                                "couldn't save trial metadata"
+                            );
+                        })
                 );
             } else {
                 setTrial(updatedMetadata);
             }
         }
+        return Promise.resolve();
     };
 
     const [step, setStep] = useQueryParam("step", NumberParam);
@@ -109,14 +126,12 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
 
     const nextStep = (getValues: () => Partial<ITrialMetadata>) => {
         const newStep = isLastStep ? activeStep : activeStep + 1;
-        setStep(newStep);
-        updateTrial(getValues(), true);
+        updateTrial(getValues()).then(() => setStep(newStep));
     };
 
     const prevStep = (getValues: () => Partial<ITrialMetadata>) => {
         const newStep = isFirstStep ? activeStep : activeStep - 1;
-        setStep(newStep);
-        updateTrial(getValues());
+        updateTrial(getValues()).then(() => setStep(newStep));
     };
 
     return trial ? (
@@ -131,6 +146,8 @@ const TrialFormProvider: React.FC<RouteComponentProps<{
                 nextStep,
                 prevStep,
                 shouldSave,
+                saveErrors,
+                clearSaveErrors: () => setSaveErrors([]),
                 triggerSave
             }}
         >
@@ -159,7 +176,13 @@ const steps = [
 ];
 
 const SaveButton: React.FC = () => {
-    const { hasChanged, triggerSave, lastUpdated } = useTrialFormContext();
+    const {
+        hasChanged,
+        triggerSave,
+        saveErrors,
+        clearSaveErrors,
+        lastUpdated
+    } = useTrialFormContext();
     const [isSaving, setIsSaving] = React.useState<boolean>(false);
     React.useEffect(() => {
         if (!hasChanged) {
@@ -197,6 +220,15 @@ const SaveButton: React.FC = () => {
                     Save Changes
                 </Button>
             </Grid>
+            <Alert
+                title="Encountered errors while trying to save metadata"
+                description={saveErrors.toString()}
+                open={!!saveErrors.length}
+                onAccept={() => {
+                    setIsSaving(false);
+                    clearSaveErrors();
+                }}
+            />
         </Grid>
     );
 };
@@ -249,18 +281,26 @@ const InnerTrialForm: React.FC = () => {
     );
 };
 
-const TrialForm: React.FC = () => {
-    // React.useEffect(() => {
-    //     const listener = (event: BeforeUnloadEvent) => {
-    //         // Cancel the event as stated by the standard.
-    //         event.preventDefault();
-    //         // Chrome requires returnValue to be set.
-    //         event.returnValue = "";
-    //     };
-    //     window.addEventListener("beforeunload", listener);
-    //     return () => window.removeEventListener("beforeunload", listener);
-    // }, []);
+/* Warn the user before they leave the page */
+const useBeforeUnloadWarning = (issueWarning: boolean) => {
+    const unloadListener = (event: BeforeUnloadEvent) => {
+        // Cancel the "before unload" event.
+        event.preventDefault();
+        // Chrome requires returnValue to be set.
+        event.returnValue = "";
+    };
 
+    React.useEffect(() => {
+        if (issueWarning) {
+            window.addEventListener("beforeunload", unloadListener);
+        } else {
+            window.removeEventListener("beforeunload", unloadListener);
+        }
+        return () => window.removeEventListener("beforeunload", unloadListener);
+    }, [issueWarning]);
+};
+
+const TrialForm: React.FC = () => {
     return (
         <TrialFormProviderWithRouter>
             <InnerTrialForm />

@@ -51,7 +51,7 @@ const FormStepFooter: React.FC<ITrialFormFooterProps> = ({
                                         : goToNextStep
                                 }
                             >
-                                save and continue
+                                next
                             </Button>
                         )}
                     </Grid>

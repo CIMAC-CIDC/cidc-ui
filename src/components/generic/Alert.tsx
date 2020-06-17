@@ -13,7 +13,7 @@ export interface IAlertProps {
     description?: string;
     open?: boolean;
     onAccept: () => void;
-    onCancel: () => void;
+    onCancel?: () => void;
 }
 
 const Alert: React.FC<IAlertProps> = props => {
@@ -30,9 +30,11 @@ const Alert: React.FC<IAlertProps> = props => {
                 )}
             </DialogContent>
             <DialogActions>
-                <Button onClick={props.onCancel} color="secondary">
-                    Cancel
-                </Button>
+                {props.onCancel && (
+                    <Button onClick={props.onCancel} color="secondary">
+                        Cancel
+                    </Button>
+                )}
                 <Button onClick={props.onAccept} color="primary">
                     OK
                 </Button>
