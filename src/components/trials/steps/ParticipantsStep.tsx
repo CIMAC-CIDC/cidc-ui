@@ -50,7 +50,6 @@ const ParticipantsStep: React.FC = () => {
 
     const idSet = new Set<string>();
     const makeRow = (participant?: any) => {
-        console.log(makeRow, participant);
         if (participant) {
             idSet.add(participant.cidc_participant_id);
             return [
