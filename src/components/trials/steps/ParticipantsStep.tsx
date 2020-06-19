@@ -1,5 +1,5 @@
 import React from "react";
-import { countBy } from "lodash";
+import { countBy, omit } from "lodash";
 import { useTrialFormContext, useTrialFormSaver } from "../TrialForm";
 import { useForm, FormContext } from "react-hook-form";
 import { Grid } from "@material-ui/core";
@@ -44,7 +44,14 @@ const ParticipantsStep: React.FC = () => {
     const { trial, setHasChanged } = useTrialFormContext();
     const formInstance = useForm({ mode: "onChange" });
     const { getValues, handleSubmit } = formInstance;
-    const getParticipants = () => getValues({ nest: true });
+    const getParticipants = () => {
+        const participants = getValues({ nest: true })[KEY_NAME];
+        return {
+            [KEY_NAME]: participants.map((p: IParticipant) =>
+                !p.cohort_name ? omit(p, "cohort_name") : p
+            )
+        };
+    };
 
     useTrialFormSaver(getParticipants);
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { cloneDeep, some } from "lodash";
 import {
     makeStyles,
     Tooltip,
@@ -46,11 +47,11 @@ const attributesRenderer = (cell: IGridElement) => {
     return attrs;
 };
 
-const ShiftedTooltip = withStyles(() => ({
+const ErrorTooltip = withStyles(() => ({
     tooltip: {
         backgroundColor: "#f50057",
         margin: -13,
-        maxWidth: 170
+        maxWidth: 200
     }
 }))(Tooltip);
 
@@ -104,6 +105,7 @@ function FormStepDataSheet<T>({
     const styles = useStyles();
     const form = useFormContext();
     const errs = form.errors[rootObjectName];
+    const [registered, setRegistered] = React.useState<Set<string>>(new Set());
 
     const addRows = (num: number) => {
         if (makeEmptyRow) {
@@ -135,47 +137,30 @@ function FormStepDataSheet<T>({
         const {
             row,
             col,
-            cell: { forceComponent, value }
+            cell: { value }
         } = props;
         const attr = colToAttr[col];
         const cellWithLoc = { row: row - 1, attr, value };
         const name = getCellName(cellWithLoc);
-        const validate = getCellValidation
-            ? getCellValidation(cellWithLoc)
-            : undefined;
         const processedValue = processCellValue(cellWithLoc);
 
-        const storedValue = form.getValues()[name] || "";
-
         React.useEffect(() => {
-            if (row > 0 && !storedValue && !forceComponent) {
+            if (row > 0 && !registered.has(name) && !!processedValue) {
+                const validate = getCellValidation
+                    ? getCellValidation(cellWithLoc)
+                    : undefined;
                 form.register({ name }, { validate });
-            }
-            // eslint-disable-next-line
-        }, []);
-
-        React.useEffect(() => {
-            if (row > 0 && storedValue !== processedValue && !forceComponent) {
                 form.setValue(name, processedValue);
-                if (!!storedValue || !!processedValue) {
-                    form.triggerValidation(name);
-                }
+                setRegistered(registered.add(name));
             }
-            // eslint-disable-next-line
-        }, [storedValue, processedValue]);
-
-        const cell = <Cell {...props} />;
+        }, [name, row, cellWithLoc, processedValue]);
 
         return !!props.cell.error ? (
-            <ShiftedTooltip
-                open
-                title={props.cell.error}
-                style={{ margin: -13 }}
-            >
-                {cell}
-            </ShiftedTooltip>
+            <ErrorTooltip open title={props.cell.error} style={{ margin: -13 }}>
+                <Cell {...props} />
+            </ErrorTooltip>
         ) : (
-            cell
+            <Cell {...props} />
         );
     };
 
@@ -230,13 +215,21 @@ function FormStepDataSheet<T>({
         return row;
     });
 
+    const handleValueChange = (cell: ICellWithLocation<T>) => {
+        const name = getCellName(cell);
+        const value = processCellValue(cell);
+        form.setValue(name, value);
+    };
+
     const handleCellsChanged: ReactDataSheet.CellsChangedHandler<
         IGridElement,
         CellValue
     > = (changes, additions) => {
+        const newGrid = cloneDeep(grid);
         changes.forEach(({ row, col, value }) => {
-            grid[row][col] = {
-                ...grid[row][col],
+            handleValueChange({ row: row - 1, attr: colToAttr[col], value });
+            newGrid[row][col] = {
+                ...newGrid[row][col],
                 value
             };
         });
@@ -244,16 +237,17 @@ function FormStepDataSheet<T>({
         // If additional data beyond the current bounds of the spreadsheet
         // was pasted, created and fill new cells with that data.
         additions?.forEach(({ row, col, value }) => {
-            if (!grid[row] && makeEmptyRow) {
-                grid[row] = makeEmptyRow();
+            if (!newGrid[row] && makeEmptyRow) {
+                newGrid[row] = makeEmptyRow();
             }
             // Only allow in-bounds columns
-            if (col < grid[0].length && grid[row]) {
-                grid[row][col] = { value };
+            if (col < newGrid[0].length && newGrid[row]) {
+                newGrid[row][col] = { value };
             }
         });
 
-        setGrid(grid);
+        setGrid(newGrid);
+        form.triggerValidation();
     };
 
     return (
@@ -263,7 +257,36 @@ function FormStepDataSheet<T>({
                     className={styles.datasheet}
                     data={processedGrid}
                     cellRenderer={CellRenderer}
-                    rowRenderer={RowRenderer}
+                    rowRenderer={React.memo(
+                        RowRenderer,
+                        // Block row re-renders if data in the row hasn't changed
+                        (oldProps: any, newProps: any) => {
+                            const notActive = !some(
+                                oldProps.children,
+                                ({ props: oldChildProps }, index) => {
+                                    const newChildProps =
+                                        newProps.children[index].props;
+                                    return (
+                                        oldChildProps.editing ||
+                                        oldChildProps.selected ||
+                                        newChildProps.editing ||
+                                        newChildProps.selected
+                                    );
+                                }
+                            );
+
+                            const noErrors = !some(
+                                oldProps.cells,
+                                ({ error: oldError }, index) => {
+                                    const newError =
+                                        newProps.cells[index].error;
+                                    return !!oldError || !!newError;
+                                }
+                            );
+
+                            return notActive && noErrors;
+                        }
+                    )}
                     attributesRenderer={attributesRenderer}
                     valueRenderer={cell => cell.value}
                     onCellsChanged={handleCellsChanged}
