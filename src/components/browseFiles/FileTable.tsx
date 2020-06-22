@@ -200,7 +200,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         return (
             <MuiRouterLink
                 to={`/file-details/${row.id}`}
-                LinkProps={{ color: "initial" }}
+                LinkProps={{ color: "inherit" }}
             >
                 {parts.flatMap((part, i) => (
                     <React.Fragment key={part}>
