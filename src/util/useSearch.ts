@@ -5,19 +5,25 @@ const defaultSettings: CreateOptions = {
     tokenize: "full"
 };
 
-const useSearch = (query: string, data: string[]): string[] => {
-    const indexRef = React.useRef<Index<string>>(null);
-    if (indexRef.current === null) {
+/**
+ * A hook for searching simple client-side data.
+ */
+const useSearch = (
+    data: string[],
+    settings: CreateOptions = defaultSettings
+): ((query: string) => string[]) => {
+    const index = React.useState<Index<string>>(() => {
+        const newIndex = FlexSearch.create<string>(settings);
+        data.forEach((datum, i) => newIndex.add(i, datum));
+        return newIndex;
+    })[0];
+
+    return (query: string) => {
         // @ts-ignore
-        indexRef.current = FlexSearch.create(defaultSettings);
-        data.forEach((datum, i) => indexRef.current!.add(i, datum));
-    }
-
-    // @ts-ignore
-    const resultIds: string[] = indexRef.current!.search(query);
-    const results = resultIds.map(id => data[id]);
-
-    return results;
+        const resultIds: string[] = index.search(query);
+        const results = resultIds.map(id => data[id]);
+        return results;
+    };
 };
 
 export default useSearch;

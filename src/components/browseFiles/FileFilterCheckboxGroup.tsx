@@ -151,8 +151,8 @@ const Checkboxes = ({ options, checked, onChange }: IHelperProps) => {
 
 const BoxesWithSearch = ({ options, checked, onChange }: IHelperProps) => {
     const classes = useFilterStyles();
+    const searchOptions = useSearch(options);
     const [query, setQuery] = React.useState<string>("");
-    const filteredOptions = useSearch(query, options);
 
     return (
         <>
@@ -166,7 +166,7 @@ const BoxesWithSearch = ({ options, checked, onChange }: IHelperProps) => {
                 InputProps={{ endAdornment: <Search /> }}
             />
             <Checkboxes
-                options={filteredOptions}
+                options={searchOptions(query)}
                 checked={checked}
                 onChange={onChange}
             />
