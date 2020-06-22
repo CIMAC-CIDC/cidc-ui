@@ -66,6 +66,7 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                 {facets && facets.trial_id && (
                     <Grid item xs={12}>
                         <FileFilterCheckboxGroup
+                            searchable
                             title="Protocol Identifiers"
                             config={{
                                 options: facets.trial_id,
