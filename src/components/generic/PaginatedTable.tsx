@@ -92,9 +92,9 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                         </TableRow>
                     </TableHead>
                 )}
-                {props.data && props.data.length > 0 ? (
-                    <TableBody>
-                        {props.data.map(row => (
+                <TableBody>
+                    {props.data && props.data.length > 0 ? (
+                        props.data.map(row => (
                             <TableRow
                                 key={props.getRowKey(row)}
                                 className={classes.row}
@@ -121,18 +121,22 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                                           </TableCell>
                                       ))}
                             </TableRow>
-                        ))}
-                    </TableBody>
-                ) : (
-                    <Typography
-                        className={classes.message}
-                        color="textSecondary"
-                    >
-                        {props.data === undefined
-                            ? "Loading..."
-                            : "No data found for these filters."}
-                    </Typography>
-                )}
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell>
+                                <Typography
+                                    className={classes.message}
+                                    color="textSecondary"
+                                >
+                                    {props.data === undefined
+                                        ? "Loading..."
+                                        : "No data found for these filters."}
+                                </Typography>
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
             </Table>
             <TablePagination
                 component="div"
