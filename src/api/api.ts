@@ -1,7 +1,12 @@
 import { Account } from "../model/account";
 import { Trial, NewTrial } from "../model/trial";
 import { DataFile } from "../model/file";
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
+import axios, {
+    AxiosInstance,
+    AxiosResponse,
+    AxiosError,
+    CancelToken
+} from "axios";
 import Permission from "../model/permission";
 import { Dictionary } from "lodash";
 
@@ -69,10 +74,11 @@ export interface IDataWithMeta<D> {
 
 function getFiles(
     token: string,
-    params?: any
+    params?: any,
+    cancelToken?: CancelToken
 ): Promise<IDataWithMeta<DataFile[]>> {
     return getApiClient(token)
-        .get("downloadable_files", { params })
+        .get("downloadable_files", { params, cancelToken })
         .then(res => {
             const { _items, _meta: meta } = _extractItem(res);
             return { data: _items.map(_transformFile), meta };

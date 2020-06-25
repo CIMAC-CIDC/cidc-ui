@@ -18,6 +18,7 @@ import { getFiles, IDataWithMeta, getDownloadURL } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
 import { CloudDownload } from "@material-ui/icons";
+import axios, { CancelTokenSource } from "axios";
 
 const fileQueryDefaults = {
     page_size: 15
@@ -120,8 +121,11 @@ const BatchDownloadButton: React.FC<{
     );
 };
 
+const CANCEL_MESSAGE = "cancelling stale filter request";
+
 const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
+    const axiosCanceller = React.useRef<CancelTokenSource | undefined>();
 
     const filters = useQueryParams(filterConfig)[0];
 
@@ -159,30 +163,47 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             // A negative queryPage is invalid
             setQueryPage(0);
         } else {
-            getFiles(props.token, {
-                page_num: queryPage,
-                ...filterParamsFromFilters(filters),
-                ...sortParamsFromHeader(sortHeader),
-                ...fileQueryDefaults
-            }).then(files => {
-                // Check if queryPage is too high for the current filters.
-                if (
-                    queryPage * fileQueryDefaults.page_size >
-                    files.meta.total
-                ) {
-                    // queryPage is out of bounds, so reset to 0.
-                    setQueryPage(0);
-                } else {
-                    // De-select all selected files.
-                    setChecked([]);
+            // Cancel the previous request, if one is ongoing
+            if (axiosCanceller.current) {
+                axiosCanceller.current.cancel(CANCEL_MESSAGE);
+            }
 
-                    // Update the page in the file table.
-                    setTablePage(queryPage);
+            axiosCanceller.current = axios.CancelToken.source();
 
-                    // Push the new data to the table.
-                    setData(files);
-                }
-            });
+            getFiles(
+                props.token,
+                {
+                    page_num: queryPage,
+                    ...filterParamsFromFilters(filters),
+                    ...sortParamsFromHeader(sortHeader),
+                    ...fileQueryDefaults
+                },
+                axiosCanceller.current.token
+            )
+                .then(files => {
+                    // Check if queryPage is too high for the current filters.
+                    if (
+                        queryPage * fileQueryDefaults.page_size >
+                        files.meta.total
+                    ) {
+                        // queryPage is out of bounds, so reset to 0.
+                        setQueryPage(0);
+                    } else {
+                        // De-select all selected files.
+                        setChecked([]);
+
+                        // Update the page in the file table.
+                        setTablePage(queryPage);
+
+                        // Push the new data to the table.
+                        setData(files);
+                    }
+                })
+                .catch(err => {
+                    if (err.message !== CANCEL_MESSAGE) {
+                        console.error(err.message);
+                    }
+                });
         }
         // Track which page we're switching from.
         setPrevPage(queryPage);
