@@ -163,6 +163,9 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             // A negative queryPage is invalid
             setQueryPage(0);
         } else {
+            // Clear existing data, so the table shows a loading indicator
+            setData(undefined);
+
             // Cancel the previous request, if one is ongoing
             if (axiosCanceller.current) {
                 axiosCanceller.current.cancel(CANCEL_MESSAGE);
