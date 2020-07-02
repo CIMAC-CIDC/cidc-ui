@@ -8,7 +8,7 @@ import axios, {
     CancelToken
 } from "axios";
 import Permission from "../model/permission";
-import { Dictionary } from "lodash";
+import { IFacets } from "../components/browseFiles/FileFilter";
 
 const URL: string = process.env.REACT_APP_API_URL!;
 
@@ -262,7 +262,7 @@ function revokePermission(token: string, permissionID: number): Promise<any> {
     );
 }
 
-function getFilterFacets(token: string): Promise<Dictionary<string[]>> {
+function getFilterFacets(token: string): Promise<IFacets> {
     return getApiClient(token)
         .get("downloadable_files/filter_facets")
         .then(_extractItem);

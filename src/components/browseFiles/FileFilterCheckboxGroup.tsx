@@ -7,12 +7,20 @@ import {
     Grid,
     Chip,
     Button,
-    TextField
+    TextField,
+    Box,
+    IconButton
 } from "@material-ui/core";
 import Checkbox from "@material-ui/core/Checkbox";
 import * as React from "react";
-import { FilterList, Search } from "@material-ui/icons";
+import {
+    FilterList,
+    Search,
+    KeyboardArrowDown,
+    KeyboardArrowUp
+} from "@material-ui/icons";
 import useSearch from "../../util/useSearch";
+import { Dictionary, map } from "lodash";
 
 const searchBoxMargin = 15;
 
@@ -26,7 +34,8 @@ const useFilterStyles = makeStyles({
     },
     checkboxGroup: {
         flexWrap: "nowrap",
-        paddingLeft: 15
+        paddingLeft: 15,
+        paddingRight: 15
     },
     checkboxLabel: {
         "& .MuiFormControlLabel-label": {
@@ -47,25 +56,30 @@ const useFilterStyles = makeStyles({
 
 const NUM_INITIAL_FILTERS = 5;
 
-export interface IFilterConfig {
-    options: string[];
-    checked: string[] | undefined;
+type FacetOptions = string[] | Dictionary<string[]>;
+
+export interface IFilterConfig<T extends FacetOptions> {
+    options: T;
+    checked: T | undefined;
 }
 
-export interface IFileFilterCheckboxGroupProps {
+export interface IFileFilterCheckboxGroupProps<T extends FacetOptions> {
     title: string;
-    config: IFilterConfig;
+    config: IFilterConfig<T>;
+    noTopDivider?: boolean;
     searchable?: boolean;
-    onChange: (option: string) => void;
+    onChange: (option: string | [string, string]) => void;
 }
 
-const FileFilterCheckboxGroup: React.FunctionComponent<IFileFilterCheckboxGroupProps> = props => {
+function FileFilterCheckboxGroup<T extends FacetOptions>(
+    props: IFileFilterCheckboxGroupProps<T>
+) {
     const classes = useFilterStyles();
-    const checked = props.config.checked || [];
+    const checked = props.config.checked || ([] as string[]);
 
     return (
         <>
-            <Divider />
+            {props.noTopDivider || <Divider />}
             <Grid container direction="column" className={classes.header}>
                 <Grid item>
                     <Grid
@@ -88,45 +102,63 @@ const FileFilterCheckboxGroup: React.FunctionComponent<IFileFilterCheckboxGroupP
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item>
-                    <Grid container spacing={1}>
-                        {checked.map(checkedOpt => (
-                            <Grid item key={checkedOpt}>
-                                <Chip
-                                    label={checkedOpt}
-                                    size="small"
-                                    onDelete={() => props.onChange(checkedOpt)}
-                                />
-                            </Grid>
-                        ))}
+                {Array.isArray(checked) && (
+                    <Grid item>
+                        <Grid container spacing={1}>
+                            {map(checked, checkedOpt => (
+                                <Grid item key={checkedOpt}>
+                                    <Chip
+                                        label={checkedOpt}
+                                        size="small"
+                                        onDelete={() =>
+                                            props.onChange(checkedOpt)
+                                        }
+                                    />
+                                </Grid>
+                            ))}
+                        </Grid>
                     </Grid>
-                </Grid>
+                )}
             </Grid>
             <Divider />
-            {props.searchable ? (
-                <BoxesWithSearch
-                    checked={checked}
-                    options={props.config.options}
-                    onChange={props.onChange}
-                />
+            {Array.isArray(checked) && Array.isArray(props.config.options) ? (
+                props.searchable ? (
+                    <BoxesWithSearch
+                        checked={checked}
+                        options={props.config.options}
+                        onChange={props.onChange}
+                    />
+                ) : (
+                    <BoxesWithShowMore
+                        checked={checked}
+                        options={props.config.options}
+                        onChange={props.onChange}
+                    />
+                )
             ) : (
-                <BoxesWithShowMore
-                    checked={checked}
-                    options={props.config.options}
+                <NestedBoxes
+                    checked={checked as Dictionary<string[]>}
+                    options={props.config.options as Dictionary<string[]>}
                     onChange={props.onChange}
                 />
             )}
         </>
     );
-};
-
-interface IHelperProps {
-    options: string[];
-    checked: string[];
-    onChange: (opt: string) => void;
 }
 
-const Checkboxes = ({ options, checked, onChange }: IHelperProps) => {
+interface IHelperProps<T extends FacetOptions> {
+    options: T;
+    checked: T;
+    onChange: IFileFilterCheckboxGroupProps<T>["onChange"];
+}
+
+const Checkboxes = ({
+    options,
+    checked,
+    onChange
+}: Omit<IHelperProps<string[]>, "onChange"> & {
+    onChange: (opt: string) => void;
+}) => {
     const classes = useFilterStyles();
 
     return (
@@ -149,7 +181,11 @@ const Checkboxes = ({ options, checked, onChange }: IHelperProps) => {
     );
 };
 
-const BoxesWithSearch = ({ options, checked, onChange }: IHelperProps) => {
+const BoxesWithSearch = ({
+    options,
+    checked,
+    onChange
+}: IHelperProps<string[]>) => {
     const classes = useFilterStyles();
     const searchOptions = useSearch(options);
     const [query, setQuery] = React.useState<string>("");
@@ -174,7 +210,11 @@ const BoxesWithSearch = ({ options, checked, onChange }: IHelperProps) => {
     );
 };
 
-const BoxesWithShowMore = ({ options, checked, onChange }: IHelperProps) => {
+const BoxesWithShowMore = ({
+    options,
+    checked,
+    onChange
+}: IHelperProps<string[]>) => {
     const classes = useFilterStyles();
     const [showMore, setShowMore] = React.useState<boolean>(false);
     const showShowMore = options.length > NUM_INITIAL_FILTERS;
@@ -202,6 +242,108 @@ const BoxesWithShowMore = ({ options, checked, onChange }: IHelperProps) => {
                     </Button>
                 </Grid>
             )}
+        </>
+    );
+};
+
+const NestedBoxes = ({
+    checked,
+    options,
+    onChange
+}: IHelperProps<Dictionary<string[]>>) => {
+    const classes = useFilterStyles();
+    const topLevelOptions = Object.keys(options);
+    const [openOptions, setOpenOptions] = React.useState<string[]>(
+        Object.keys(checked)
+    );
+
+    return (
+        <>
+            {topLevelOptions.map(opt => {
+                const subchecked = checked[opt] || [];
+                const isOpen = openOptions.includes(opt);
+                const suboptions = options[opt];
+                const isChecked = suboptions.length === subchecked.length;
+
+                const TopCheckboxLabel = (
+                    <Grid container spacing={1} alignItems="center">
+                        <Grid item>{opt}</Grid>
+                        <Grid item>
+                            <Typography color="textSecondary" variant="caption">
+                                ({suboptions.length} file categories)
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                );
+
+                return (
+                    <FormGroup
+                        key={opt}
+                        className={classes.checkboxGroup}
+                        row={false}
+                    >
+                        <Grid
+                            container
+                            justify="space-between"
+                            alignItems="center"
+                        >
+                            <Grid item>
+                                <FormControlLabel
+                                    className={classes.checkboxLabel}
+                                    key={opt}
+                                    label={TopCheckboxLabel}
+                                    control={
+                                        <Checkbox
+                                            className={classes.checkbox}
+                                            checked={isChecked}
+                                            onClick={() => onChange(opt)}
+                                        />
+                                    }
+                                />
+                            </Grid>
+                            <Grid item>
+                                {isOpen ? (
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => {
+                                            setOpenOptions(
+                                                openOptions.filter(
+                                                    o => o !== opt
+                                                )
+                                            );
+                                        }}
+                                    >
+                                        <KeyboardArrowUp />
+                                    </IconButton>
+                                ) : (
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => {
+                                            setOpenOptions([
+                                                ...openOptions,
+                                                opt
+                                            ]);
+                                        }}
+                                    >
+                                        <KeyboardArrowDown />
+                                    </IconButton>
+                                )}
+                            </Grid>
+                        </Grid>
+                        {isOpen && (
+                            <Box marginLeft={1}>
+                                <Checkboxes
+                                    options={suboptions}
+                                    checked={subchecked}
+                                    onChange={fileType =>
+                                        onChange([opt, fileType])
+                                    }
+                                />
+                            </Box>
+                        )}
+                    </FormGroup>
+                );
+            })}
         </>
     );
 };

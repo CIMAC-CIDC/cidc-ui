@@ -58,16 +58,17 @@ export interface IFileTableProps {
     history: any;
 }
 
-export const filterParamsFromFilters = (filters: Filters) => {
+export const filterParams = (filters: Filters) => {
+    const stringifyIfDefined = (v?: any) => (v ? JSON.stringify(v) : undefined);
     return {
-        trial_ids: filters.trial_id?.join(","),
-        upload_types: filters.upload_type?.join(","),
-        analysis_friendly:
-            filters.raw_files === undefined ? true : !filters.raw_files
+        trial_ids: stringifyIfDefined(filters.trial_ids),
+        assay_types: stringifyIfDefined(filters.assay_types),
+        sample_types: stringifyIfDefined(filters.sample_types),
+        clinical_types: stringifyIfDefined(filters.clinical_types)
     };
 };
 
-export const sortParamsFromHeader = (header?: IHeader) => {
+export const sortParams = (header?: IHeader) => {
     return (
         header && {
             sort_field: header?.key,
@@ -177,8 +178,8 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                 props.token,
                 {
                     page_num: queryPage,
-                    ...filterParamsFromFilters(filters),
-                    ...sortParamsFromHeader(sortHeader),
+                    ...filterParams(filters),
+                    ...sortParams(sortHeader),
                     ...fileQueryDefaults
                 },
                 axiosCanceller.current.token
