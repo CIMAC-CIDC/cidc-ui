@@ -1,47 +1,27 @@
-import {
-    triggerBatchDownload,
-    filterParamsFromFilters,
-    sortParamsFromHeader
-} from "../FileTable";
+import { triggerBatchDownload, filterParams, sortParams } from "../FileTable";
 import { getDownloadURL } from "../../../api/api";
 jest.mock("../../../api/api");
 
-test("filterParamsFromFilters", () => {
-    expect(filterParamsFromFilters({})).toEqual({
-        analysis_friendly: true,
-        trial_ids: undefined,
-        upload_types: undefined
-    });
-    expect(filterParamsFromFilters({ raw_files: true })).toEqual({
-        analysis_friendly: false,
-        trial_ids: undefined,
-        upload_types: undefined
-    });
-    expect(
-        filterParamsFromFilters({ upload_type: [1, 2], raw_files: true })
-    ).toEqual({
-        analysis_friendly: false,
-        trial_ids: undefined,
-        upload_types: "1,2"
-    });
-    expect(
-        filterParamsFromFilters({
-            upload_type: [1, 2],
-            trial_id: ["a", "b"]
-        })
-    ).toEqual({
-        analysis_friendly: true,
-        trial_ids: "a,b",
-        upload_types: "1,2"
+test("filterParams", () => {
+    expect(filterParams({})).toEqual({});
+    const exampleFilters = {
+        trial_ids: ["a", "b"],
+        sample_types: undefined,
+        assay_types: { foo: ["a", "b"], bar: ["1", "2"] },
+        clinical_types: undefined
+    };
+    expect(filterParams(exampleFilters)).toEqual({
+        trial_ids: JSON.stringify(exampleFilters.trial_ids),
+        assay_types: JSON.stringify(exampleFilters.assay_types)
     });
 });
 
-test("sortParamsFromHeader", () => {
-    expect(sortParamsFromHeader({ key: "foo", direction: "asc" })).toEqual({
+test("sortParams", () => {
+    expect(sortParams({ key: "foo", direction: "asc" })).toEqual({
         sort_field: "foo",
         sort_direction: "asc"
     });
-    expect(sortParamsFromHeader({ key: "foo", direction: "desc" })).toEqual({
+    expect(sortParams({ key: "foo", direction: "desc" })).toEqual({
         sort_field: "foo",
         sort_direction: "desc"
     });
