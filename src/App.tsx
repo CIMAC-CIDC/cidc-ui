@@ -53,8 +53,8 @@ export default function App() {
                     <MuiThemeProvider theme={theme}>
                         <ErrorGuard>
                             <AuthProvider>
-                                <UserProvider>
-                                    <InfoProvider>
+                                <InfoProvider>
+                                    <UserProvider>
                                         <Header />
                                         <div className={classes.content}>
                                             <Switch>
@@ -108,8 +108,8 @@ export default function App() {
                                             </Switch>
                                         </div>
                                         <Footer />
-                                    </InfoProvider>
-                                </UserProvider>
+                                    </UserProvider>
+                                </InfoProvider>
                             </AuthProvider>
                         </ErrorGuard>
                     </MuiThemeProvider>

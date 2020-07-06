@@ -19,7 +19,7 @@ import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
 import { CloudDownload } from "@material-ui/icons";
 import axios, { CancelTokenSource } from "axios";
-import { mapValues } from "lodash";
+import { mapValues, isEmpty } from "lodash";
 
 const fileQueryDefaults = {
     page_size: 15
@@ -60,7 +60,8 @@ export interface IFileTableProps {
 }
 
 export const filterParams = (filters: Filters) => {
-    const stringifyIfDefined = (v?: any) => (v ? JSON.stringify(v) : undefined);
+    const stringifyIfDefined = (v?: any) =>
+        !isEmpty(v) ? JSON.stringify(v) : undefined;
     return mapValues(filters, stringifyIfDefined);
 };
 

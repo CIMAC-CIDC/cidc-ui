@@ -4,7 +4,7 @@ import FileFilterCheckboxGroup from "./FileFilterCheckboxGroup";
 import { ArrayParam, useQueryParams, JsonParam } from "use-query-params";
 import { withIdToken } from "../identity/AuthProvider";
 import { getFilterFacets } from "../../api/api";
-import { Dictionary } from "lodash";
+import { Dictionary, omit } from "lodash";
 
 export interface IFacets {
     trial_ids: string[];
@@ -49,7 +49,7 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                 const allFileTypes = facets![k][v];
                 vals =
                     currentFileTypes.length === allFileTypes.length
-                        ? { ...currentAssayTypes, [v]: [] }
+                        ? omit(currentAssayTypes, v)
                         : { ...currentAssayTypes, [v]: allFileTypes };
             }
         } else {

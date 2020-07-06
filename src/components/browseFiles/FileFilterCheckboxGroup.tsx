@@ -9,9 +9,10 @@ import {
     Button,
     TextField,
     Box,
-    IconButton
+    IconButton,
+    Tooltip
 } from "@material-ui/core";
-import Checkbox from "@material-ui/core/Checkbox";
+import Checkbox, { CheckboxProps } from "@material-ui/core/Checkbox";
 import * as React from "react";
 import {
     FilterList,
@@ -20,7 +21,8 @@ import {
     KeyboardArrowUp
 } from "@material-ui/icons";
 import useSearch from "../../util/useSearch";
-import { Dictionary, map } from "lodash";
+import { Dictionary, map, some } from "lodash";
+import { useUserContext } from "../identity/UserProvider";
 
 const searchBoxMargin = 15;
 
@@ -146,6 +148,55 @@ function FileFilterCheckboxGroup<T extends FacetOptions>(
     );
 }
 
+interface IPermsAwareCheckboxProps extends CheckboxProps {
+    facetType: string;
+    facetSubtype?: string;
+    label?: React.ReactNode;
+}
+
+const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
+    label,
+    facetType,
+    facetSubtype,
+    ...checkboxProps
+}) => {
+    const classes = useFilterStyles();
+    const { permissions, role } = useUserContext();
+
+    const hasPermission =
+        role === "cidc-admin" ||
+        some(
+            permissions || [],
+            p => p.trial_id === facetType || p.upload_type.startsWith(facetType)
+        );
+
+    const { checked, onClick, ...otherCheckboxProps } = checkboxProps;
+
+    const control = (
+        <FormControlLabel
+            className={classes.checkboxLabel}
+            label={label || facetSubtype || facetType}
+            disabled={!hasPermission}
+            control={
+                <Checkbox
+                    className={classes.checkbox}
+                    checked={checked}
+                    onClick={hasPermission ? onClick : undefined}
+                    {...otherCheckboxProps}
+                />
+            }
+        />
+    );
+
+    return hasPermission ? (
+        control
+    ) : (
+        <Tooltip title="unauthorized to view" placement="right">
+            {control}
+        </Tooltip>
+    );
+};
+
 interface IHelperProps<T extends FacetOptions> {
     options: T;
     checked: T;
@@ -155,8 +206,10 @@ interface IHelperProps<T extends FacetOptions> {
 const Checkboxes = ({
     options,
     checked,
-    onChange
+    onChange,
+    parentType
 }: Omit<IHelperProps<string[]>, "onChange"> & {
+    parentType?: string;
     onChange: (opt: string) => void;
 }) => {
     const classes = useFilterStyles();
@@ -164,17 +217,12 @@ const Checkboxes = ({
     return (
         <FormGroup className={classes.checkboxGroup} row={false}>
             {options.map(opt => (
-                <FormControlLabel
-                    className={classes.checkboxLabel}
+                <PermsAwareCheckbox
                     key={opt}
-                    label={opt}
-                    control={
-                        <Checkbox
-                            className={classes.checkbox}
-                            checked={checked.includes(opt)}
-                            onClick={() => onChange(opt)}
-                        />
-                    }
+                    facetType={parentType || opt}
+                    facetSubtype={parentType ? opt : undefined}
+                    checked={checked.includes(opt)}
+                    onClick={() => onChange(opt)}
                 />
             ))}
         </FormGroup>
@@ -288,17 +336,11 @@ const NestedBoxes = ({
                             alignItems="center"
                         >
                             <Grid item>
-                                <FormControlLabel
-                                    className={classes.checkboxLabel}
-                                    key={opt}
+                                <PermsAwareCheckbox
+                                    facetType={opt}
                                     label={TopCheckboxLabel}
-                                    control={
-                                        <Checkbox
-                                            className={classes.checkbox}
-                                            checked={isChecked}
-                                            onClick={() => onChange(opt)}
-                                        />
-                                    }
+                                    checked={isChecked}
+                                    onClick={() => onChange(opt)}
                                 />
                             </Grid>
                             <Grid item>
@@ -333,6 +375,7 @@ const NestedBoxes = ({
                         {isOpen && (
                             <Box marginLeft={1}>
                                 <Checkboxes
+                                    parentType={opt}
                                     options={suboptions}
                                     checked={subchecked}
                                     onChange={fileType =>
