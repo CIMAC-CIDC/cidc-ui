@@ -6,13 +6,11 @@ test("filterParams", () => {
     expect(filterParams({})).toEqual({});
     const exampleFilters = {
         trial_ids: ["a", "b"],
-        sample_types: undefined,
-        assay_types: { foo: ["a", "b"], bar: ["1", "2"] },
-        clinical_types: undefined
+        facets: ["foo|a|1", "foo|a|2", "bar|1", "bar|2"]
     };
     expect(filterParams(exampleFilters)).toEqual({
-        trial_ids: JSON.stringify(exampleFilters.trial_ids),
-        assay_types: JSON.stringify(exampleFilters.assay_types)
+        trial_ids: "a,b",
+        facets: "foo|a|1,foo|a|2,bar|1,bar|2"
     });
 });
 

@@ -40,7 +40,7 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
 
         if (Array.isArray(v)) {
             const [category, facet, subfacet] = v;
-            if (subfacet || Array.isArray(facets[facet])) {
+            if (subfacet || Array.isArray(facets[k][category])) {
                 toggleFilter(k, v.join(ARRAY_PARAM_DELIM));
             } else {
                 const keyFilters = filters[k] || [];
@@ -111,17 +111,26 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                                                 options,
                                                 checked
                                             }}
-                                            onChange={args =>
-                                                Array.isArray(args)
-                                                    ? updateFilters("facets")([
-                                                          facetHeader,
-                                                          ...args
-                                                      ])
-                                                    : updateFilters("facets")([
-                                                          facetHeader,
-                                                          args
-                                                      ])
-                                            }
+                                            onChange={args => {
+                                                let facetValues: string[];
+                                                if (Array.isArray(args)) {
+                                                    facetValues = args;
+                                                } else {
+                                                    const splitArgs = args.split(
+                                                        ARRAY_PARAM_DELIM
+                                                    );
+                                                    if (splitArgs.length > 1) {
+                                                        facetValues = splitArgs;
+                                                    } else {
+                                                        facetValues = [args];
+                                                    }
+                                                }
+
+                                                return updateFilters("facets")([
+                                                    facetHeader,
+                                                    ...facetValues
+                                                ]);
+                                            }}
                                         />
                                     </Grid>
                                 );
