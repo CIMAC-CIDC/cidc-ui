@@ -44,17 +44,15 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                 toggleFilter(k, v.join(ARRAY_PARAM_DELIM));
             } else {
                 const keyFilters = filters[k] || [];
-                const facetFamily = v.slice(0, 2).join(ARRAY_PARAM_DELIM);
+                const facetFamily = [category, facet].join(ARRAY_PARAM_DELIM);
                 const facetsInFamily = facets[k][category][
                     facet
                 ].map((f: string) => [facetFamily, f].join(ARRAY_PARAM_DELIM));
-                const isInFacetFamily = (f: string) =>
-                    f.startsWith(facetFamily);
                 const hasAllFilters =
-                    keyFilters.filter(f => isInFacetFamily(f)).length ===
+                    keyFilters.filter(f => f.startsWith(facetFamily)).length ===
                     facetsInFamily.length;
                 const newFilters = hasAllFilters
-                    ? keyFilters.filter(f => !isInFacetFamily(f))
+                    ? keyFilters.filter(f => !f.startsWith(facetFamily))
                     : uniq([...keyFilters, ...facetsInFamily]);
                 setFilters({ [k]: newFilters });
             }

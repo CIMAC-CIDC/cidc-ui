@@ -19,7 +19,6 @@ import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
 import { CloudDownload } from "@material-ui/icons";
 import axios, { CancelTokenSource } from "axios";
-import { mapValues, isEmpty } from "lodash";
 
 const fileQueryDefaults = {
     page_size: 15
