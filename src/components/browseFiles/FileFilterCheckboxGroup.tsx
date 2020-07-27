@@ -23,6 +23,7 @@ import {
 import useSearch from "../../util/useSearch";
 import { Dictionary, map, some } from "lodash";
 import { useUserContext } from "../identity/UserProvider";
+import { withStyles } from "@material-ui/styles";
 
 const searchBoxMargin = 15;
 
@@ -154,6 +155,12 @@ interface IPermsAwareCheckboxProps extends CheckboxProps {
     label?: React.ReactNode;
 }
 
+const PermsTooltip = withStyles(() => ({
+    tooltip: {
+        margin: -5
+    }
+}))(Tooltip);
+
 const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
     label,
     facetType,
@@ -193,9 +200,7 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
     return hasPermission ? (
         control
     ) : (
-        <Tooltip title="unauthorized to view" placement="right">
-            {control}
-        </Tooltip>
+        <PermsTooltip title="unauthorized to view">{control}</PermsTooltip>
     );
 };
 
