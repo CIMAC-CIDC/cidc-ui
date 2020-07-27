@@ -62,7 +62,7 @@ type FacetOptions = string[] | Dictionary<string[]>;
 
 export interface IFilterConfig<T extends FacetOptions> {
     options: T;
-    checked: T | undefined;
+    checked: string[] | undefined;
 }
 
 export interface IFileFilterCheckboxGroupProps<T extends FacetOptions> {
@@ -70,7 +70,7 @@ export interface IFileFilterCheckboxGroupProps<T extends FacetOptions> {
     config: IFilterConfig<T>;
     noTopDivider?: boolean;
     searchable?: boolean;
-    onChange: (option: string | [string, string]) => void;
+    onChange: (option: string | string[]) => void;
 }
 
 function FileFilterCheckboxGroup<T extends FacetOptions>(
@@ -123,7 +123,7 @@ function FileFilterCheckboxGroup<T extends FacetOptions>(
                 )}
             </Grid>
             <Divider />
-            {Array.isArray(checked) && Array.isArray(props.config.options) ? (
+            {Array.isArray(props.config.options) ? (
                 props.searchable ? (
                     <BoxesWithSearch
                         checked={checked}
@@ -139,7 +139,7 @@ function FileFilterCheckboxGroup<T extends FacetOptions>(
                 )
             ) : (
                 <NestedBoxes
-                    checked={checked as Dictionary<string[]>}
+                    checked={checked}
                     options={props.config.options as Dictionary<string[]>}
                     onChange={props.onChange}
                 />
@@ -167,7 +167,9 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
         role === "cidc-admin" ||
         some(
             permissions || [],
-            p => p.trial_id === facetType || p.upload_type.startsWith(facetType)
+            p =>
+                p.trial_id === facetType ||
+                p.upload_type.startsWith(facetType.toLowerCase())
         );
 
     const { checked, onClick, ...otherCheckboxProps } = checkboxProps;
@@ -199,7 +201,7 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
 
 interface IHelperProps<T extends FacetOptions> {
     options: T;
-    checked: T;
+    checked: string[];
     onChange: IFileFilterCheckboxGroupProps<T>["onChange"];
 }
 
@@ -216,15 +218,19 @@ const Checkboxes = ({
 
     return (
         <FormGroup className={classes.checkboxGroup} row={false}>
-            {options.map(opt => (
-                <PermsAwareCheckbox
-                    key={opt}
-                    facetType={parentType || opt}
-                    facetSubtype={parentType ? opt : undefined}
-                    checked={checked.includes(opt)}
-                    onClick={() => onChange(opt)}
-                />
-            ))}
+            {options.map(opt => {
+                return (
+                    <PermsAwareCheckbox
+                        key={opt}
+                        facetType={parentType || opt}
+                        facetSubtype={parentType ? opt : undefined}
+                        checked={checked.includes(
+                            parentType ? `${parentType}|${opt}` : opt
+                        )}
+                        onClick={() => onChange(opt)}
+                    />
+                );
+            })}
         </FormGroup>
     );
 };
@@ -301,15 +307,17 @@ const NestedBoxes = ({
 }: IHelperProps<Dictionary<string[]>>) => {
     const classes = useFilterStyles();
     const topLevelOptions = Object.keys(options);
-    const [openOptions, setOpenOptions] = React.useState<string[]>(
-        Object.keys(checked)
-    );
+    const [openOptions, setOpenOptions] = React.useState<string[]>(checked);
 
     return (
         <>
             {topLevelOptions.map(opt => {
-                const subchecked = checked[opt] || [];
-                const isOpen = openOptions.includes(opt);
+                const subchecked = checked.filter(check =>
+                    check.startsWith(opt)
+                );
+                const isOpen =
+                    openOptions.filter(openOpt => openOpt.startsWith(opt))
+                        .length > 0;
                 const suboptions = options[opt];
                 const isChecked = suboptions.length === subchecked.length;
 

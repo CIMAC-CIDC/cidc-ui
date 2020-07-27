@@ -1,25 +1,23 @@
 import * as React from "react";
 import { Grid, Card, Typography, Box } from "@material-ui/core";
 import FileFilterCheckboxGroup from "./FileFilterCheckboxGroup";
-import { ArrayParam, useQueryParams, JsonParam } from "use-query-params";
+import { ArrayParam, useQueryParams } from "use-query-params";
 import { withIdToken } from "../identity/AuthProvider";
 import { getFilterFacets } from "../../api/api";
-import { Dictionary, omit } from "lodash";
+import { Dictionary, uniq } from "lodash";
 
 export interface IFacets {
     trial_ids: string[];
-    assay_types: Dictionary<string[]>;
-    clinical_types: string[];
-    sample_types: string[];
+    facets: Dictionary<Dictionary<string[]> | string[]>;
 }
 
 export const filterConfig = {
     trial_ids: ArrayParam,
-    assay_types: JsonParam,
-    clinical_types: ArrayParam,
-    sample_types: ArrayParam
+    facets: ArrayParam
 };
 export type Filters = ReturnType<typeof useQueryParams>[0];
+
+const ARRAY_PARAM_DELIM = "|";
 
 const FileFilter: React.FunctionComponent<{ token: string }> = props => {
     const [facets, setFacets] = React.useState<IFacets | undefined>();
@@ -28,37 +26,41 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
     }, [props.token]);
 
     const [filters, setFilters] = useQueryParams(filterConfig);
-    const updateFilters = (k: keyof IFacets) => (
-        v: [string, string] | string
-    ) => {
-        let vals;
-        if (k === "assay_types") {
-            const currentAssayTypes = filters[k] || {};
-            if (Array.isArray(v)) {
-                const [assayType, fileType] = v;
-                const currentFileTypes: string[] =
-                    currentAssayTypes[assayType] || [];
-                vals = {
-                    ...currentAssayTypes,
-                    [assayType]: currentFileTypes.includes(fileType)
-                        ? currentFileTypes.filter(t => t !== fileType)
-                        : [...currentFileTypes, fileType]
-                };
+    const toggleFilter = (k: keyof IFacets, v: string) => {
+        const currentValues = filters[k] || [];
+        const updatedValues = currentValues.includes(v)
+            ? currentValues.filter(cv => cv !== v)
+            : [...currentValues, v];
+        setFilters({ [k]: updatedValues });
+    };
+    const updateFilters = (k: keyof IFacets) => (v: string | string[]) => {
+        if (!facets) {
+            return;
+        }
+
+        if (Array.isArray(v)) {
+            const [category, facet, subfacet] = v;
+            if (subfacet || Array.isArray(facets[facet])) {
+                toggleFilter(k, v.join(ARRAY_PARAM_DELIM));
             } else {
-                const currentFileTypes = currentAssayTypes[v] || [];
-                const allFileTypes = facets![k][v];
-                vals =
-                    currentFileTypes.length === allFileTypes.length
-                        ? omit(currentAssayTypes, v)
-                        : { ...currentAssayTypes, [v]: allFileTypes };
+                const keyFilters = filters[k] || [];
+                const facetFamily = v.slice(0, 2).join(ARRAY_PARAM_DELIM);
+                const facetsInFamily = facets[k][category][
+                    facet
+                ].map((f: string) => [facetFamily, f].join(ARRAY_PARAM_DELIM));
+                const isInFacetFamily = (f: string) =>
+                    f.startsWith(facetFamily);
+                const hasAllFilters =
+                    keyFilters.filter(f => isInFacetFamily(f)).length ===
+                    facetsInFamily.length;
+                const newFilters = hasAllFilters
+                    ? keyFilters.filter(f => !isInFacetFamily(f))
+                    : uniq([...keyFilters, ...facetsInFamily]);
+                setFilters({ [k]: newFilters });
             }
         } else {
-            const currentVals = (filters[k] as string[]) || ([] as string[]);
-            vals = currentVals.includes(v as string)
-                ? currentVals.filter(val => val !== v)
-                : [...currentVals, v];
+            toggleFilter(k, v);
         }
-        setFilters({ [k]: vals });
     };
 
     if (!facets) {
@@ -88,42 +90,43 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                             />
                         </Grid>
                     )}
-                    {facets.assay_types && (
-                        <Grid item xs={12}>
-                            <FileFilterCheckboxGroup
-                                title="Assay Types"
-                                config={{
-                                    options: facets.assay_types,
-                                    checked: filters.assay_types
-                                }}
-                                onChange={updateFilters("assay_types")}
-                            />
-                        </Grid>
-                    )}
-                    {facets.sample_types && (
-                        <Grid item xs={12}>
-                            <FileFilterCheckboxGroup
-                                title="Sample Types"
-                                config={{
-                                    options: facets.sample_types,
-                                    checked: filters.sample_types
-                                }}
-                                onChange={updateFilters("sample_types")}
-                            />
-                        </Grid>
-                    )}
-                    {facets.clinical_types && (
-                        <Grid item xs={12}>
-                            <FileFilterCheckboxGroup
-                                title="Clinical Types"
-                                config={{
-                                    options: facets.clinical_types,
-                                    checked: filters.clinical_types
-                                }}
-                                onChange={updateFilters("clinical_types")}
-                            />
-                        </Grid>
-                    )}
+                    {facets.facets &&
+                        Object.entries(facets.facets).map(
+                            ([facetHeader, options]) => {
+                                const checked = filters.facets
+                                    ?.filter(facet =>
+                                        facet.startsWith(facetHeader)
+                                    )
+                                    .map(facet => {
+                                        return facet
+                                            .split(ARRAY_PARAM_DELIM)
+                                            .slice(1)
+                                            .join(ARRAY_PARAM_DELIM);
+                                    });
+                                return (
+                                    <Grid key={facetHeader} item xs={12}>
+                                        <FileFilterCheckboxGroup
+                                            title={facetHeader}
+                                            config={{
+                                                options,
+                                                checked
+                                            }}
+                                            onChange={args =>
+                                                Array.isArray(args)
+                                                    ? updateFilters("facets")([
+                                                          facetHeader,
+                                                          ...args
+                                                      ])
+                                                    : updateFilters("facets")([
+                                                          facetHeader,
+                                                          args
+                                                      ])
+                                            }
+                                        />
+                                    </Grid>
+                                );
+                            }
+                        )}
                 </Grid>
             </Card>
         </>

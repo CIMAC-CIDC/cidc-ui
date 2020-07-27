@@ -60,9 +60,10 @@ export interface IFileTableProps {
 }
 
 export const filterParams = (filters: Filters) => {
-    const stringifyIfDefined = (v?: any) =>
-        !isEmpty(v) ? JSON.stringify(v) : undefined;
-    return mapValues(filters, stringifyIfDefined);
+    return {
+        trial_ids: filters.trial_ids?.join(","),
+        facets: filters.facets?.join(",")
+    };
 };
 
 export const sortParams = (header?: IHeader) => {
