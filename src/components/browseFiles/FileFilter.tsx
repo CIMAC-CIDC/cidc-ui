@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Grid, Card, Typography, Box } from "@material-ui/core";
+import { Grid, Card, Typography, Box, Button } from "@material-ui/core";
 import FileFilterCheckboxGroup from "./FileFilterCheckboxGroup";
 import { ArrayParam, useQueryParams } from "use-query-params";
 import { withIdToken } from "../identity/AuthProvider";
 import { getFilterFacets } from "../../api/api";
-import { Dictionary, uniq } from "lodash";
+import { Dictionary, uniq, isEmpty } from "lodash";
 
 export interface IFacets {
     trial_ids: string[];
@@ -26,6 +26,13 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
     }, [props.token]);
 
     const [filters, setFilters] = useQueryParams(filterConfig);
+    const hasFilters =
+        Object.values(filters).filter(fs => {
+            return fs && fs.length > 0;
+        }).length > 0;
+    const clearFilters = () => {
+        Object.keys(filters).forEach(k => setFilters({ [k]: undefined }));
+    };
     const toggleFilter = (k: keyof IFacets, v: string) => {
         const currentValues = filters[k] || [];
         const updatedValues = currentValues.includes(v)
@@ -68,16 +75,37 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
     return (
         <>
             <Box marginBottom={1}>
-                <Typography color="textSecondary" variant="caption">
-                    Refine your search
-                </Typography>
+                <Grid
+                    container
+                    justify="space-between"
+                    alignItems="baseline"
+                    wrap="nowrap"
+                >
+                    <Grid item>
+                        <Box margin={1}>
+                            <Typography color="textSecondary" variant="caption">
+                                Refine your search
+                            </Typography>
+                        </Box>
+                    </Grid>
+                    <Grid item>
+                        {hasFilters && (
+                            <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => clearFilters()}
+                            >
+                                Clear All
+                            </Button>
+                        )}
+                    </Grid>
+                </Grid>
             </Box>
             <Card>
                 <Grid container direction="column">
                     {facets.trial_ids && (
                         <Grid item xs={12}>
                             <FileFilterCheckboxGroup<string[]>
-                                searchable
                                 noTopDivider
                                 title="Protocol Identifiers"
                                 config={{

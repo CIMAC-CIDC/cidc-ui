@@ -6,7 +6,6 @@ import {
     Divider,
     Grid,
     Button,
-    TextField,
     Box,
     IconButton,
     Tooltip
@@ -15,12 +14,10 @@ import Checkbox, { CheckboxProps } from "@material-ui/core/Checkbox";
 import * as React from "react";
 import {
     FilterList,
-    Search,
     KeyboardArrowDown,
     KeyboardArrowUp
 } from "@material-ui/icons";
-import useSearch from "../../util/useSearch";
-import { Dictionary, some } from "lodash";
+import { Dictionary, some, partition } from "lodash";
 import { useUserContext } from "../identity/UserProvider";
 import { withStyles } from "@material-ui/styles";
 
@@ -69,7 +66,6 @@ export interface IFileFilterCheckboxGroupProps<T extends FacetOptions> {
     title: string;
     config: IFilterConfig<T>;
     noTopDivider?: boolean;
-    searchable?: boolean;
     onChange: (option: string | string[]) => void;
 }
 
@@ -104,19 +100,11 @@ function FileFilterCheckboxGroup<T extends FacetOptions>(
             </Grid>
             <Divider />
             {Array.isArray(props.config.options) ? (
-                props.searchable ? (
-                    <BoxesWithSearch
-                        checked={checked}
-                        options={props.config.options}
-                        onChange={props.onChange}
-                    />
-                ) : (
-                    <BoxesWithShowMore
-                        checked={checked}
-                        options={props.config.options}
-                        onChange={props.onChange}
-                    />
-                )
+                <BoxesWithShowMore
+                    checked={checked}
+                    options={props.config.options}
+                    onChange={props.onChange}
+                />
             ) : (
                 <NestedBoxes
                     checked={checked}
@@ -199,52 +187,22 @@ const Checkboxes = ({
     onChange: (opt: string) => void;
 }) => {
     const classes = useFilterStyles();
+    const sortedOptions = options.sort();
 
     return (
         <FormGroup className={classes.checkboxGroup} row={false}>
-            {options.map(opt => {
-                return (
-                    <PermsAwareCheckbox
-                        key={opt}
-                        facetType={parentType || opt}
-                        facetSubtype={parentType ? opt : undefined}
-                        checked={checked.includes(
-                            parentType ? `${parentType}|${opt}` : opt
-                        )}
-                        onClick={() => onChange(opt)}
-                    />
-                );
-            })}
+            {sortedOptions.map((opt: string) => (
+                <PermsAwareCheckbox
+                    key={opt}
+                    facetType={parentType || opt}
+                    facetSubtype={parentType ? opt : undefined}
+                    checked={checked.includes(
+                        parentType ? `${parentType}|${opt}` : opt
+                    )}
+                    onClick={() => onChange(opt)}
+                />
+            ))}
         </FormGroup>
-    );
-};
-
-const BoxesWithSearch = ({
-    options,
-    checked,
-    onChange
-}: IHelperProps<string[]>) => {
-    const classes = useFilterStyles();
-    const searchOptions = useSearch(options);
-    const [query, setQuery] = React.useState<string>("");
-
-    return (
-        <>
-            <TextField
-                className={classes.search}
-                size="small"
-                label="Search Protocol IDs"
-                variant="outlined"
-                value={query}
-                onChange={e => setQuery(e.currentTarget.value)}
-                InputProps={{ endAdornment: <Search /> }}
-            />
-            <Checkboxes
-                options={searchOptions(query)}
-                checked={checked}
-                onChange={onChange}
-            />
-        </>
     );
 };
 
@@ -256,15 +214,27 @@ const BoxesWithShowMore = ({
     const classes = useFilterStyles();
     const [showMore, setShowMore] = React.useState<boolean>(false);
     const showShowMore = options.length > NUM_INITIAL_FILTERS;
-    const truncatedOptions =
+    const [checkedOptions, uncheckedOptions] = partition(options, o =>
+        checked.includes(o)
+    );
+    const truncatedUncheckedOptions =
         showShowMore && showMore
-            ? options
-            : options.slice(0, NUM_INITIAL_FILTERS);
+            ? uncheckedOptions
+            : uncheckedOptions.slice(0, NUM_INITIAL_FILTERS);
 
     return (
         <>
             <Checkboxes
-                options={truncatedOptions}
+                options={checkedOptions}
+                checked={checked}
+                onChange={onChange}
+            />
+            {checkedOptions.length > 0 &&
+                truncatedUncheckedOptions.length > 0 && (
+                    <Divider variant="middle" />
+                )}
+            <Checkboxes
+                options={truncatedUncheckedOptions}
                 checked={checked}
                 onChange={onChange}
             />
