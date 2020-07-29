@@ -5,7 +5,6 @@ import {
     Typography,
     Divider,
     Grid,
-    Chip,
     Button,
     TextField,
     Box,
@@ -21,7 +20,7 @@ import {
     KeyboardArrowUp
 } from "@material-ui/icons";
 import useSearch from "../../util/useSearch";
-import { Dictionary, map, some } from "lodash";
+import { Dictionary, some } from "lodash";
 import { useUserContext } from "../identity/UserProvider";
 import { withStyles } from "@material-ui/styles";
 
@@ -83,45 +82,25 @@ function FileFilterCheckboxGroup<T extends FacetOptions>(
     return (
         <>
             {props.noTopDivider || <Divider />}
-            <Grid container direction="column" className={classes.header}>
+            <Grid
+                className={classes.header}
+                container
+                alignItems="center"
+                wrap="nowrap"
+                spacing={1}
+            >
                 <Grid item>
-                    <Grid
-                        container
-                        alignItems="center"
-                        wrap="nowrap"
-                        spacing={1}
-                    >
-                        <Grid item>
-                            <FilterList />
-                        </Grid>
-                        <Grid item>
-                            <Typography
-                                className={classes.title}
-                                variant="overline"
-                                gutterBottom
-                            >
-                                {props.title}
-                            </Typography>
-                        </Grid>
-                    </Grid>
+                    <FilterList />
                 </Grid>
-                {Array.isArray(checked) && (
-                    <Grid item>
-                        <Grid container spacing={1}>
-                            {map(checked, checkedOpt => (
-                                <Grid item key={checkedOpt}>
-                                    <Chip
-                                        label={checkedOpt}
-                                        size="small"
-                                        onDelete={() =>
-                                            props.onChange(checkedOpt)
-                                        }
-                                    />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Grid>
-                )}
+                <Grid item>
+                    <Typography
+                        className={classes.title}
+                        variant="overline"
+                        gutterBottom
+                    >
+                        {props.title}
+                    </Typography>
+                </Grid>
             </Grid>
             <Divider />
             {Array.isArray(props.config.options) ? (
@@ -320,9 +299,10 @@ const NestedBoxes = ({
                 const subchecked = checked.filter(check =>
                     check.startsWith(opt)
                 );
+                const hasCheckedSuboptions = subchecked.length > 0;
                 const isOpen =
-                    openOptions.filter(openOpt => openOpt.startsWith(opt))
-                        .length > 0;
+                    hasCheckedSuboptions ||
+                    openOptions.filter(o => o.startsWith(opt)).length > 0;
                 const suboptions = options[opt];
                 const isChecked = suboptions.length === subchecked.length;
 
@@ -360,10 +340,11 @@ const NestedBoxes = ({
                                 {isOpen ? (
                                     <IconButton
                                         size="small"
+                                        disabled={hasCheckedSuboptions}
                                         onClick={() => {
                                             setOpenOptions(
                                                 openOptions.filter(
-                                                    o => o !== opt
+                                                    o => !o.startsWith(opt)
                                                 )
                                             );
                                         }}
