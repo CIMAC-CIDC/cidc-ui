@@ -120,6 +120,7 @@ interface IPermsAwareCheckboxProps extends CheckboxProps {
     facetType: string;
     facetSubtype?: string;
     label?: React.ReactNode;
+    onClickLabel?: () => void;
 }
 
 const PermsTooltip = withStyles(() => ({
@@ -132,6 +133,7 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
     label,
     facetType,
     facetSubtype,
+    onClickLabel,
     ...checkboxProps
 }) => {
     const classes = useFilterStyles();
@@ -151,7 +153,19 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
     const control = (
         <FormControlLabel
             className={classes.checkboxLabel}
-            label={label || facetSubtype || facetType}
+            label={
+                <Typography
+                    variant="body2"
+                    onClick={e => {
+                        if (onClickLabel) {
+                            e.preventDefault();
+                            onClickLabel();
+                        }
+                    }}
+                >
+                    {label || facetSubtype || facetType}
+                </Typography>
+            }
             disabled={!hasPermission}
             control={
                 <Checkbox
@@ -262,6 +276,17 @@ const NestedBoxes = ({
     const classes = useFilterStyles();
     const topLevelOptions = Object.keys(options);
     const [openOptions, setOpenOptions] = React.useState<string[]>(checked);
+    const addOpenOption = (opt: string) => {
+        setOpenOptions([...openOptions, opt]);
+    };
+    const removeOpenOption = (opt: string) => {
+        setOpenOptions(openOptions.filter(o => !o.startsWith(opt)));
+    };
+    const toggleOpenOption = (opt: string) => {
+        openOptions.filter(o => o.startsWith(opt)).length > 0
+            ? removeOpenOption(opt)
+            : addOpenOption(opt);
+    };
 
     return (
         <>
@@ -302,6 +327,7 @@ const NestedBoxes = ({
                                 <PermsAwareCheckbox
                                     facetType={opt}
                                     label={TopCheckboxLabel}
+                                    onClickLabel={() => toggleOpenOption(opt)}
                                     checked={isChecked}
                                     onClick={() => onChange(opt)}
                                 />
@@ -311,25 +337,14 @@ const NestedBoxes = ({
                                     <IconButton
                                         size="small"
                                         disabled={hasCheckedSuboptions}
-                                        onClick={() => {
-                                            setOpenOptions(
-                                                openOptions.filter(
-                                                    o => !o.startsWith(opt)
-                                                )
-                                            );
-                                        }}
+                                        onClick={() => removeOpenOption(opt)}
                                     >
                                         <KeyboardArrowUp />
                                     </IconButton>
                                 ) : (
                                     <IconButton
                                         size="small"
-                                        onClick={() => {
-                                            setOpenOptions([
-                                                ...openOptions,
-                                                opt
-                                            ]);
-                                        }}
+                                        onClick={() => addOpenOption(opt)}
                                     >
                                         <KeyboardArrowDown />
                                     </IconButton>
