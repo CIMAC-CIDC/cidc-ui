@@ -4,7 +4,7 @@ import FileFilterCheckboxGroup from "./FileFilterCheckboxGroup";
 import { ArrayParam, useQueryParams } from "use-query-params";
 import { withIdToken } from "../identity/AuthProvider";
 import { getFilterFacets } from "../../api/api";
-import { Dictionary, uniq, isEmpty } from "lodash";
+import { Dictionary, uniq } from "lodash";
 
 export interface IFacets {
     trial_ids: string[];
