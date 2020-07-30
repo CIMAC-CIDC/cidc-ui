@@ -19,6 +19,7 @@ import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
 import { CloudDownload } from "@material-ui/icons";
 import axios, { CancelTokenSource } from "axios";
+import filesize from "filesize";
 
 const fileQueryDefaults = {
     page_size: 15
@@ -141,6 +142,10 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         {
             key: "object_url",
             label: "File"
+        },
+        {
+            key: "file_size_bytes",
+            label: "Size"
         },
         {
             key: "uploaded_timestamp",
@@ -276,6 +281,9 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                                     </TableCell>
                                     <TableCell>
                                         {formatObjectURL(row)}
+                                    </TableCell>
+                                    <TableCell>
+                                        {filesize(row.file_size_bytes)}
                                     </TableCell>
                                     <TableCell>
                                         {formatUploadTimestamp(row)}
