@@ -6,9 +6,13 @@ import { withIdToken } from "../identity/AuthProvider";
 import { getFilterFacets } from "../../api/api";
 import { Dictionary, uniq } from "lodash";
 
+export interface IFacetInfo {
+    label: string;
+    description?: string;
+}
 export interface IFacets {
     trial_ids: string[];
-    facets: Dictionary<Dictionary<string[]> | string[]>;
+    facets: Dictionary<Dictionary<IFacetInfo[]> | IFacetInfo[]>;
 }
 
 export const filterConfig = {
@@ -105,11 +109,13 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                 <Grid container direction="column">
                     {facets.trial_ids && (
                         <Grid item xs={12}>
-                            <FileFilterCheckboxGroup<string[]>
+                            <FileFilterCheckboxGroup
                                 noTopDivider
                                 title="Protocol Identifiers"
                                 config={{
-                                    options: facets.trial_ids,
+                                    options: facets.trial_ids.map(label => ({
+                                        label
+                                    })),
                                     checked: filters.trial_ids
                                 }}
                                 onChange={updateFilters("trial_ids")}

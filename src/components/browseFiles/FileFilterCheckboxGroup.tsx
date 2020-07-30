@@ -17,9 +17,11 @@ import {
     KeyboardArrowDown,
     KeyboardArrowUp
 } from "@material-ui/icons";
-import { Dictionary, some, partition } from "lodash";
+import { Dictionary, some, partition, sortBy } from "lodash";
 import { useUserContext } from "../identity/UserProvider";
 import { withStyles } from "@material-ui/styles";
+import { IFacetInfo } from "./FileFilter";
+import InfoTooltip from "../generic/InfoTooltip";
 
 const searchBoxMargin = 15;
 
@@ -55,23 +57,19 @@ const useFilterStyles = makeStyles({
 
 const NUM_INITIAL_FILTERS = 5;
 
-type FacetOptions = string[] | Dictionary<string[]>;
-
-export interface IFilterConfig<T extends FacetOptions> {
-    options: T;
+export interface IFilterConfig {
+    options: IFacetInfo[] | Dictionary<IFacetInfo[]>;
     checked: string[] | undefined;
 }
 
-export interface IFileFilterCheckboxGroupProps<T extends FacetOptions> {
+export interface IFileFilterCheckboxGroupProps {
     title: string;
-    config: IFilterConfig<T>;
+    config: IFilterConfig;
     noTopDivider?: boolean;
     onChange: (option: string | string[]) => void;
 }
 
-function FileFilterCheckboxGroup<T extends FacetOptions>(
-    props: IFileFilterCheckboxGroupProps<T>
-) {
+function FileFilterCheckboxGroup(props: IFileFilterCheckboxGroupProps) {
     const classes = useFilterStyles();
     const checked = props.config.checked || ([] as string[]);
 
@@ -108,7 +106,7 @@ function FileFilterCheckboxGroup<T extends FacetOptions>(
             ) : (
                 <NestedBoxes
                     checked={checked}
-                    options={props.config.options as Dictionary<string[]>}
+                    options={props.config.options as Dictionary<IFacetInfo[]>}
                     onChange={props.onChange}
                 />
             )}
@@ -185,10 +183,10 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
     );
 };
 
-interface IHelperProps<T extends FacetOptions> {
+interface IHelperProps<T extends IFilterConfig["options"]> {
     options: T;
     checked: string[];
-    onChange: IFileFilterCheckboxGroupProps<T>["onChange"];
+    onChange: IFileFilterCheckboxGroupProps["onChange"];
 }
 
 const Checkboxes = ({
@@ -196,24 +194,33 @@ const Checkboxes = ({
     checked,
     onChange,
     parentType
-}: Omit<IHelperProps<string[]>, "onChange"> & {
+}: Omit<IHelperProps<IFacetInfo[]>, "onChange"> & {
     parentType?: string;
     onChange: (opt: string) => void;
 }) => {
     const classes = useFilterStyles();
-    const sortedOptions = options.sort();
+    const sortedOptions = sortBy(options, "label");
 
     return (
         <FormGroup className={classes.checkboxGroup} row={false}>
-            {sortedOptions.map((opt: string) => (
+            {sortedOptions.map(({ label, description }) => (
                 <PermsAwareCheckbox
-                    key={opt}
-                    facetType={parentType || opt}
-                    facetSubtype={parentType ? opt : undefined}
+                    key={label}
+                    label={
+                        description ? (
+                            <InfoTooltip text={description}>
+                                {label}
+                            </InfoTooltip>
+                        ) : (
+                            label
+                        )
+                    }
+                    facetType={parentType || label}
+                    facetSubtype={parentType ? label : undefined}
                     checked={checked.includes(
-                        parentType ? `${parentType}|${opt}` : opt
+                        parentType ? `${parentType}|${label}` : label
                     )}
-                    onClick={() => onChange(opt)}
+                    onClick={() => onChange(label)}
                 />
             ))}
         </FormGroup>
@@ -224,12 +231,12 @@ const BoxesWithShowMore = ({
     options,
     checked,
     onChange
-}: IHelperProps<string[]>) => {
+}: IHelperProps<IFacetInfo[]>) => {
     const classes = useFilterStyles();
     const [showMore, setShowMore] = React.useState<boolean>(false);
     const showShowMore = options.length > NUM_INITIAL_FILTERS;
-    const [checkedOptions, uncheckedOptions] = partition(options, o =>
-        checked.includes(o)
+    const [checkedOptions, uncheckedOptions] = partition(options, ({ label }) =>
+        checked.includes(label)
     );
     const truncatedUncheckedOptions =
         showShowMore && showMore
@@ -272,7 +279,7 @@ const NestedBoxes = ({
     checked,
     options,
     onChange
-}: IHelperProps<Dictionary<string[]>>) => {
+}: IHelperProps<Dictionary<IFacetInfo[]>>) => {
     const classes = useFilterStyles();
     const topLevelOptions = Object.keys(options);
     const [openOptions, setOpenOptions] = React.useState<string[]>(checked);
