@@ -313,7 +313,8 @@ const NestedBoxes = ({
                         <Grid item>{opt}</Grid>
                         <Grid item>
                             <Typography color="textSecondary" variant="caption">
-                                ({suboptions.length} file categories)
+                                ({suboptions.length} file categor
+                                {suboptions.length === 1 ? "y" : "ies"})
                             </Typography>
                         </Grid>
                     </Grid>
