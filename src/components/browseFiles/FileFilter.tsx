@@ -56,9 +56,11 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
             } else {
                 const keyFilters = filters[k] || [];
                 const facetFamily = [category, facet].join(ARRAY_PARAM_DELIM);
-                const facetsInFamily = facets[k][category][
+                const facetsInFamily: string[] = facets[k][category][
                     facet
-                ].map((f: string) => [facetFamily, f].join(ARRAY_PARAM_DELIM));
+                ].map((f: IFacetInfo) =>
+                    [facetFamily, f.label].join(ARRAY_PARAM_DELIM)
+                );
                 const hasAllFilters =
                     keyFilters.filter(f => f.startsWith(facetFamily)).length ===
                     facetsInFamily.length;
