@@ -7,13 +7,14 @@ const useStyles = makeStyles({
     link: { cursor: "pointer" }
 });
 
-const MuiRouterLink: React.FC<
-    RouteComponentProps & { LinkProps: LinkProps; to: string }
-> = props => {
+const MuiRouterLink: React.FC<RouteComponentProps & {
+    LinkProps?: LinkProps;
+    to: string;
+}> = props => {
     const classes = useStyles();
     return (
         <Link
-            {...props.LinkProps}
+            {...(props.LinkProps || {})}
             className={classes.link}
             onClick={() => props.history.push(props.to)}
         >

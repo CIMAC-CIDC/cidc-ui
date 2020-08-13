@@ -9,15 +9,14 @@ import {
     Checkbox,
     Button,
     CircularProgress,
-    Grid,
-    Box
+    Grid
 } from "@material-ui/core";
 import { filterConfig, Filters } from "./FileFilter";
 import { useQueryParams, useQueryParam, NumberParam } from "use-query-params";
 import { getFiles, IDataWithMeta, getDownloadURL } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
-import { CloudDownload, OpenInNewOutlined } from "@material-ui/icons";
+import { CloudDownload } from "@material-ui/icons";
 import axios, { CancelTokenSource } from "axios";
 import filesize from "filesize";
 
@@ -143,7 +142,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             key: "trial_id",
             label: "Protocol ID"
         },
-        { key: "file_ext", label: "Ext." },
+        { key: "file_ext", label: "Data Format" },
         {
             key: "file_size_bytes",
             label: "Size"
@@ -223,15 +222,15 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     }, [props.token, filters, sortHeader, queryPage, setQueryPage]);
 
     const formatObjectURL = (row: DataFile) => {
+        const paths = row.object_url.split("/");
+        const fileName = paths[paths.length - 1];
+        const prefix = paths.slice(0, paths.length - 1).join("/");
         return (
-            <MuiRouterLink
-                to={`/file-details/${row.id}`}
-                LinkProps={{ color: "inherit" }}
-            >
-                <Box display="flex" alignItems="center">
-                    <Box marginRight={0.5}>{row.object_url}</Box>
-                    <OpenInNewOutlined fontSize="inherit" color="primary" />
-                </Box>
+            <MuiRouterLink to={`/file-details/${row.id}`}>
+                <div style={{ textDecoration: "underline" }}>
+                    <div>{prefix}/</div>
+                    <div>{fileName}</div>
+                </div>
             </MuiRouterLink>
         );
     };
