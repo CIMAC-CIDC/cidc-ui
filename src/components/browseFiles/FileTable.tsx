@@ -5,19 +5,19 @@ import { colors } from "../../rootStyles";
 import PaginatedTable, { IHeader } from "../generic/PaginatedTable";
 import {
     makeStyles,
-    Typography,
     TableCell,
     Checkbox,
     Button,
     CircularProgress,
-    Grid
+    Grid,
+    Box
 } from "@material-ui/core";
 import { filterConfig, Filters } from "./FileFilter";
 import { useQueryParams, useQueryParam, NumberParam } from "use-query-params";
 import { getFiles, IDataWithMeta, getDownloadURL } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
-import { CloudDownload } from "@material-ui/icons";
+import { CloudDownload, OpenInNewOutlined } from "@material-ui/icons";
 import axios, { CancelTokenSource } from "axios";
 import filesize from "filesize";
 
@@ -42,10 +42,6 @@ const useStyles = makeStyles({
         "& .MuiTableRow-root": {
             cursor: "pointer"
         }
-    },
-    forwardSlash: {
-        fontSize: "inherit",
-        display: "inline"
     },
     checkbox: {
         padding: 0
@@ -141,7 +137,11 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         { key: "", label: "", disableSort: true },
         {
             key: "object_url",
-            label: "File"
+            label: "File Name"
+        },
+        {
+            key: "trial_id",
+            label: "Protocol ID"
         },
         { key: "file_ext", label: "Ext." },
         {
@@ -223,27 +223,15 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     }, [props.token, filters, sortHeader, queryPage, setQueryPage]);
 
     const formatObjectURL = (row: DataFile) => {
-        const parts = row.object_url.split("/");
-        const lastPartIndex = parts.length - 1;
         return (
             <MuiRouterLink
                 to={`/file-details/${row.id}`}
                 LinkProps={{ color: "inherit" }}
             >
-                {parts.flatMap((part, i) => (
-                    <React.Fragment key={part}>
-                        {part}
-                        {i !== lastPartIndex && (
-                            <Typography
-                                className={classes.forwardSlash}
-                                color="textSecondary"
-                            >
-                                {" "}
-                                /{" "}
-                            </Typography>
-                        )}
-                    </React.Fragment>
-                ))}
+                <Box display="flex" alignItems="center">
+                    <Box marginRight={0.5}>{row.object_url}</Box>
+                    <OpenInNewOutlined fontSize="inherit" color="primary" />
+                </Box>
             </MuiRouterLink>
         );
     };
@@ -283,6 +271,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                                     <TableCell>
                                         {formatObjectURL(row)}
                                     </TableCell>
+                                    <TableCell>{row.trial_id}</TableCell>
                                     <TableCell>{row.file_ext}</TableCell>
                                     <TableCell>
                                         {filesize(row.file_size_bytes)}

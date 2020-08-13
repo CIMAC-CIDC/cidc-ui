@@ -8,7 +8,8 @@ import {
     TableSortLabel,
     TablePagination,
     Typography,
-    makeStyles
+    makeStyles,
+    Box
 } from "@material-ui/core";
 
 const useStyles = makeStyles({
@@ -65,28 +66,34 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                         <TableRow className={classes.row}>
                             {props.headers.map(header => (
                                 <TableCell key={header.key}>
-                                    {props.onClickHeader ? (
-                                        header.disableSort ? (
-                                            header.label
+                                    <Box whiteSpace="nowrap">
+                                        {props.onClickHeader ? (
+                                            header.disableSort ? (
+                                                header.label
+                                            ) : (
+                                                <TableSortLabel
+                                                    active={header.active}
+                                                    direction={header.direction}
+                                                    onClick={() => {
+                                                        if (
+                                                            props.onClickHeader
+                                                        ) {
+                                                            setDataWillChange(
+                                                                true
+                                                            );
+                                                            props.onClickHeader(
+                                                                header
+                                                            );
+                                                        }
+                                                    }}
+                                                >
+                                                    {header.label}
+                                                </TableSortLabel>
+                                            )
                                         ) : (
-                                            <TableSortLabel
-                                                active={header.active}
-                                                direction={header.direction}
-                                                onClick={() => {
-                                                    if (props.onClickHeader) {
-                                                        setDataWillChange(true);
-                                                        props.onClickHeader(
-                                                            header
-                                                        );
-                                                    }
-                                                }}
-                                            >
-                                                {header.label}
-                                            </TableSortLabel>
-                                        )
-                                    ) : (
-                                        header.label
-                                    )}
+                                            header.label
+                                        )}
+                                    </Box>
                                 </TableCell>
                             ))}
                         </TableRow>
