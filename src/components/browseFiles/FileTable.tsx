@@ -142,7 +142,8 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             key: "trial_id",
             label: "Protocol ID"
         },
-        { key: "file_ext", label: "Data Format" },
+        { key: "file_ext", label: "Format" },
+        { key: "data_category", label: "Category" },
         {
             key: "file_size_bytes",
             label: "Size"
@@ -272,6 +273,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                                     </TableCell>
                                     <TableCell>{row.trial_id}</TableCell>
                                     <TableCell>{row.file_ext}</TableCell>
+                                    <TableCell>{row.data_category}</TableCell>
                                     <TableCell>
                                         {filesize(row.file_size_bytes)}
                                     </TableCell>
