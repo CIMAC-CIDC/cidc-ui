@@ -5,6 +5,7 @@ import history from "./History";
 import { AuthContext } from "./AuthProvider";
 import UserProvider from "./UserProvider";
 import { Router } from "react-router";
+import ErrorGuard from "../errors/ErrorGuard";
 jest.mock("../../api/api");
 
 const ChildComponent = () => <div data-testid="children" />;
@@ -14,20 +15,22 @@ const TOKEN = "blah";
 function renderWithMockedAuthContext(authData: boolean) {
     return render(
         <Router history={history}>
-            <AuthContext.Provider
-                value={
-                    authData
-                        ? {
-                              idToken: TOKEN,
-                              user: { email: "" }
-                          }
-                        : undefined
-                }
-            >
-                <UserProvider>
-                    <ChildComponent />
-                </UserProvider>
-            </AuthContext.Provider>
+            <ErrorGuard>
+                <AuthContext.Provider
+                    value={
+                        authData
+                            ? {
+                                  idToken: TOKEN,
+                                  user: { email: "" }
+                              }
+                            : undefined
+                    }
+                >
+                    <UserProvider>
+                        <ChildComponent />
+                    </UserProvider>
+                </AuthContext.Provider>
+            </ErrorGuard>
         </Router>
     );
 }
@@ -55,4 +58,18 @@ it("handles an approved user", async () => {
     const { getByTestId } = renderWithMockedAuthContext(true);
     const children = await waitForElement(() => getByTestId("children"));
     expect(children).toBeInTheDocument();
+});
+
+it("handles a disabled user", async () => {
+    const user = { id: 1, approval_date: Date.now(), disabled: true };
+    getAccountInfo.mockImplementation((token: string) => {
+        expect(token).toBe(TOKEN);
+
+        return Promise.resolve(user);
+    });
+
+    const { getByTestId } = renderWithMockedAuthContext(true);
+    const error = await waitForElement(() => getByTestId("error-message"));
+    expect(error).toBeInTheDocument();
+    expect(error.textContent).toContain(/account disabled/i);
 });

@@ -6,6 +6,7 @@ import { ErrorOutline } from "@material-ui/icons";
 export interface IError {
     type: "Network Error" | "Login Error";
     message?: string;
+    description?: React.ReactElement;
     details?: {
         // TODO: we can get more specific as we decide what's useful
         [k: string]: any;
@@ -53,8 +54,15 @@ const ErrorGuard: React.FunctionComponent = ({ children }) => {
                                 title={title}
                             />
                             <CardContent>
-                                The CIDC Portal encountered a problem. Please{" "}
-                                <ContactAnAdmin lower /> if this issue persists.
+                                {error.description ? (
+                                    error.description
+                                ) : (
+                                    <>
+                                        The CIDC Portal encountered a problem.
+                                        Please <ContactAnAdmin lower /> if this
+                                        issue persists.
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
                     </Grid>

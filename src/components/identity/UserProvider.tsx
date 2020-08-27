@@ -6,6 +6,7 @@ import { getAccountInfo, getPermissionsForUser } from "../../api/api";
 import history from "./History";
 import { ErrorContext } from "../errors/ErrorGuard";
 import Permission from "../../model/permission";
+import ContactAnAdmin from "../generic/ContactAnAdmin";
 
 export interface IAccountWithExtraContext extends Account {
     permissions?: Permission[];
@@ -67,6 +68,20 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                     setPermissions(perms)
                 );
             }
+        }
+
+        // Show an informative message if the user is disabled
+        if (user && user.disabled) {
+            setError({
+                type: "Login Error",
+                message: "Account Disabled",
+                description: (
+                    <>
+                        Your CIDC account has been disabled due to inactivity.{" "}
+                        <ContactAnAdmin /> to reactivate your account.
+                    </>
+                )
+            });
         }
     }, [idToken, setError, user, permissions]);
 
