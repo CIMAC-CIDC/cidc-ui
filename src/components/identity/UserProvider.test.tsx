@@ -71,5 +71,5 @@ it("handles a disabled user", async () => {
     const { getByTestId } = renderWithMockedAuthContext(true);
     const error = await waitForElement(() => getByTestId("error-message"));
     expect(error).toBeInTheDocument();
-    expect(error.textContent).toContain(/account disabled/i);
+    expect(error.textContent).toContain("Account Disabled");
 });
