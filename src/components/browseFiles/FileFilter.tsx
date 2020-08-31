@@ -97,11 +97,10 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                     <Grid item>
                         {hasFilters && (
                             <Button
-                                size="small"
                                 variant="outlined"
                                 onClick={() => clearFilters()}
                             >
-                                Clear All
+                                Clear Filters
                             </Button>
                         )}
                     </Grid>

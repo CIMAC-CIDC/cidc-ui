@@ -94,6 +94,19 @@ function getSingleFile(
     );
 }
 
+function getFilelist(token: string, fileIds: number[]): Promise<Blob> {
+    return getApiClient(token)
+        .get("downloadable_files/filelist", {
+            params: { file_ids: fileIds.join(",") }
+        })
+        .then(
+            ({ data }) =>
+                new Blob([data], {
+                    type: "text/tab-separated-values"
+                })
+        );
+}
+
 function getDownloadURL(
     token: string,
     fileID: string | number
@@ -310,6 +323,7 @@ export {
     getApiClient,
     getFiles,
     getSingleFile,
+    getFilelist,
     getDownloadURL,
     getAccountInfo,
     getTrials,

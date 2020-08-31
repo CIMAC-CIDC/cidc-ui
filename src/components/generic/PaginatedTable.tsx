@@ -9,8 +9,10 @@ import {
     TablePagination,
     Typography,
     makeStyles,
-    Box
+    Box,
+    Checkbox
 } from "@material-ui/core";
+import { intersection, union, difference } from "lodash";
 
 const useStyles = makeStyles({
     message: {
@@ -18,36 +20,63 @@ const useStyles = makeStyles({
     },
     row: {
         cursor: "auto !important"
+    },
+    checkbox: {
+        padding: 0
+    },
+    checkboxCell: {
+        paddingRight: 0
     }
 });
 
-export interface IPaginatedTableProps {
+export interface IRowWithId {
+    id: number;
+}
+
+export interface IPaginatedTableProps<T extends IRowWithId> {
     headers?: IHeader[];
-    data?: DataRow[];
+    data?: T[];
     count: number;
     page: number;
     rowsPerPage: number;
-    getRowKey: (row: DataRow) => string | number;
+    getRowKey: (row: T) => string | number;
     onChangePage: (page: number) => void;
     onClickHeader?: (header: IHeader) => void;
-    onClickRow?: (row: DataRow) => void;
-    renderRowContents?: (row: DataRow) => React.ReactElement;
+    onClickRow?: (row: T) => void;
+    renderRowContents?: (row: T) => React.ReactElement;
+    selectedRowIds?: number[];
+    setSelectedRowIds?: (rows: number[]) => void;
 }
 
 export interface IHeader {
     key: string;
-    label: string;
+    label: string | React.ReactElement;
     format?: (v: any) => string | React.ReactElement;
     active?: boolean;
     direction?: "asc" | "desc";
     disableSort?: boolean;
 }
 
-// TODO (maybe): refine this type
-export type DataRow = any;
-
-const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
+function PaginatedTable<T extends IRowWithId>(props: IPaginatedTableProps<T>) {
     const classes = useStyles();
+
+    const pageIds = props.data ? props.data.map(d => d.id) : undefined;
+    const selectedPageIds =
+        props.selectedRowIds && pageIds
+            ? intersection(props.selectedRowIds, pageIds)
+            : [];
+    const allSelected = selectedPageIds?.length === props.rowsPerPage;
+    const toggleSelectAll = () => {
+        if (props.selectedRowIds && props.setSelectedRowIds && pageIds) {
+            if (allSelected) {
+                props.setSelectedRowIds(
+                    difference(props.selectedRowIds, pageIds)
+                );
+            } else {
+                props.setSelectedRowIds(union(pageIds, props.selectedRowIds));
+            }
+        }
+    };
 
     const [dataWillChange, setDataWillChange] = React.useState<boolean>(true);
     React.useEffect(() => setDataWillChange(false), [props.data]);
@@ -64,6 +93,18 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                 {props.headers && (
                     <TableHead>
                         <TableRow className={classes.row}>
+                            {props.selectedRowIds !== undefined && (
+                                <TableCell>
+                                    {props.data && (
+                                        <Checkbox
+                                            className={classes.checkbox}
+                                            size="small"
+                                            onChange={() => toggleSelectAll()}
+                                            checked={allSelected}
+                                        />
+                                    )}
+                                </TableCell>
+                            )}
                             {props.headers.map(header => (
                                 <TableCell key={header.key}>
                                     <Box whiteSpace="nowrap">
@@ -110,6 +151,17 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
                                     props.onClickRow && props.onClickRow(row)
                                 }
                             >
+                                {props.selectedRowIds !== undefined && (
+                                    <TableCell className={classes.checkboxCell}>
+                                        <Checkbox
+                                            className={classes.checkbox}
+                                            size="small"
+                                            checked={selectedPageIds.includes(
+                                                row.id
+                                            )}
+                                        />
+                                    </TableCell>
+                                )}
                                 {props.renderRowContents
                                     ? props.renderRowContents(row)
                                     : props.headers
@@ -160,6 +212,6 @@ const PaginatedTable: React.FC<IPaginatedTableProps> = props => {
             />
         </>
     );
-};
+}
 
 export default PaginatedTable;

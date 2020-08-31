@@ -6,17 +6,20 @@ import PaginatedTable, { IHeader } from "../generic/PaginatedTable";
 import {
     makeStyles,
     TableCell,
-    Checkbox,
     Button,
-    CircularProgress,
-    Grid
+    Grid,
+    Box,
+    Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from "@material-ui/core";
 import { filterConfig, Filters } from "./FileFilter";
 import { useQueryParams, useQueryParam, NumberParam } from "use-query-params";
-import { getFiles, IDataWithMeta, getDownloadURL } from "../../api/api";
+import { getFiles, IDataWithMeta, getFilelist } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
-import { CloudDownload } from "@material-ui/icons";
 import axios, { CancelTokenSource } from "axios";
 import filesize from "filesize";
 
@@ -70,48 +73,85 @@ export const sortParams = (header?: IHeader) => {
     );
 };
 
-export const triggerBatchDownload = async (
-    token: string,
-    fileIds: string[],
-    callback: () => void = () => null
-) => {
-    const urls = await Promise.all(
-        fileIds.map(id => getDownloadURL(token, id))
-    );
-
-    urls.map(url => window.open(url, "_blank"));
-    callback();
-};
-
 const BatchDownloadButton: React.FC<{
-    ids: string[];
+    ids: number[];
     token: string;
-    onComplete: () => void;
-}> = ({ ids, token, onComplete }) => {
-    const [downloading, setDownloading] = React.useState<boolean>(false);
+    clearIds: () => void;
+}> = ({ ids, token, clearIds }) => {
+    const [openDialog, setOpenDialog] = React.useState<boolean>(false);
+
+    const filePluralized = `file${ids.length > 1 ? "s" : ""}`;
 
     return (
-        <Button
-            variant="contained"
-            color="primary"
-            disabled={!ids.length || downloading}
-            disableRipple
-            onClick={() => {
-                setDownloading(true);
-                triggerBatchDownload(token, ids).then(() => {
-                    onComplete();
-                    setDownloading(false);
-                });
-            }}
-            startIcon={<CloudDownload />}
-            endIcon={
-                downloading && <CircularProgress size={12} color="inherit" />
-            }
-        >
-            {ids.length
-                ? `Download ${ids.length} file${ids.length > 1 ? "s" : ""}`
-                : "Select files for batch download"}
-        </Button>
+        <Grid container spacing={1}>
+            <Grid item>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={ids.length === 0}
+                    disableRipple
+                    onClick={() => {
+                        setOpenDialog(true);
+                    }}
+                >
+                    {ids.length > 0
+                        ? `Download ${ids.length} ${filePluralized}`
+                        : "No files selected"}
+                </Button>
+            </Grid>
+            {ids.length > 0 && (
+                <Grid item>
+                    <Button variant="outlined" onClick={() => clearIds()}>
+                        Clear Selection
+                    </Button>
+                </Grid>
+            )}
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                <DialogTitle>Batch Download</DialogTitle>
+                <DialogContent>
+                    <Typography paragraph>
+                        You've selected{" "}
+                        <strong>
+                            {ids.length} {filePluralized}
+                        </strong>{" "}
+                        for batch download. Download the "filelist.tsv" file for
+                        this file batch, and run the following in the desired
+                        download directory:
+                    </Typography>
+                    <Typography paragraph>
+                        <code>
+                            cat filelist.tsv | xargs -n 2 -P 8 gsutil cp
+                        </code>
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Grid container justify="space-between">
+                        <Grid item>
+                            <Button>Cancel</Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                color="primary"
+                                variant="contained"
+                                onClick={() => {
+                                    getFilelist(token, ids).then(blob => {
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement("a");
+                                        a.href = url;
+                                        a.download = "filelist.tsv";
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        URL.revokeObjectURL(url);
+                                    });
+                                }}
+                            >
+                                Download Filelist.tsv
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </DialogActions>
+            </Dialog>
+        </Grid>
     );
 };
 
@@ -131,9 +171,9 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const [data, setData] = React.useState<
         IDataWithMeta<DataFile[]> | undefined
     >(undefined);
-    const [checked, setChecked] = React.useState<string[]>([]);
+    const [selectedFileIds, setSelectedFileIds] = React.useState<number[]>([]);
+
     const [headers, setHeaders] = React.useState<IHeader[]>([
-        { key: "", label: "", disableSort: true },
         {
             key: "object_url",
             label: "File Name"
@@ -196,9 +236,6 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                         // queryPage is out of bounds, so reset to 0.
                         setQueryPage(0);
                     } else {
-                        // De-select all selected files.
-                        setChecked([]);
-
                         // Update the page in the file table.
                         setTablePage(queryPage);
 
@@ -243,11 +280,25 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         <div className={classes.root}>
             <Grid container direction="column" spacing={1}>
                 <Grid item>
-                    <BatchDownloadButton
-                        ids={checked}
-                        token={props.token}
-                        onComplete={() => setChecked([])}
-                    />
+                    <Grid container spacing={1}>
+                        <Grid item>
+                            <Box margin={1}>
+                                <Typography
+                                    color="textSecondary"
+                                    variant="caption"
+                                >
+                                    Select files for batch download
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Grid item>
+                            <BatchDownloadButton
+                                ids={selectedFileIds}
+                                token={props.token}
+                                clearIds={() => setSelectedFileIds([])}
+                            />
+                        </Grid>
+                    </Grid>
                 </Grid>
                 <Grid item>
                     <PaginatedTable
@@ -261,13 +312,6 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                         renderRowContents={row => {
                             return (
                                 <>
-                                    <TableCell className={classes.checkboxCell}>
-                                        <Checkbox
-                                            className={classes.checkbox}
-                                            size="small"
-                                            checked={checked.includes(row.id)}
-                                        />
-                                    </TableCell>
                                     <TableCell>
                                         {formatObjectURL(row)}
                                     </TableCell>
@@ -283,11 +327,15 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                                 </>
                             );
                         }}
-                        onClickRow={row => {
-                            const newChecked = checked.includes(row.id)
-                                ? checked.filter(id => id !== row.id)
-                                : [...checked, row.id];
-                            setChecked(newChecked);
+                        selectedRowIds={selectedFileIds}
+                        setSelectedRowIds={setSelectedFileIds}
+                        onClickRow={file => {
+                            const newSelectedFileIds = selectedFileIds.includes(
+                                file.id
+                            )
+                                ? selectedFileIds.filter(id => id !== file.id)
+                                : [...selectedFileIds, file.id];
+                            setSelectedFileIds(newSelectedFileIds);
                         }}
                         onClickHeader={header => {
                             const newHeaders = headers.map(h => {
