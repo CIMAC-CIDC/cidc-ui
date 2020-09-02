@@ -10,7 +10,8 @@ import {
     Typography,
     makeStyles,
     Box,
-    Checkbox
+    Checkbox,
+    Tooltip
 } from "@material-ui/core";
 import { intersection, union, difference } from "lodash";
 
@@ -96,12 +97,20 @@ function PaginatedTable<T extends IRowWithId>(props: IPaginatedTableProps<T>) {
                             {props.selectedRowIds !== undefined && (
                                 <TableCell>
                                     {props.data && (
-                                        <Checkbox
-                                            className={classes.checkbox}
-                                            size="small"
-                                            onChange={() => toggleSelectAll()}
-                                            checked={allSelected}
-                                        />
+                                        <Tooltip
+                                            title={`${
+                                                allSelected ? "Des" : "S"
+                                            }elect all rows on this page`}
+                                        >
+                                            <Checkbox
+                                                className={classes.checkbox}
+                                                size="small"
+                                                onChange={() =>
+                                                    toggleSelectAll()
+                                                }
+                                                checked={allSelected}
+                                            />
+                                        </Tooltip>
                                     )}
                                 </TableCell>
                             )}
