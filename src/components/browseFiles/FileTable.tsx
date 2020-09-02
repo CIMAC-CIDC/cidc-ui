@@ -22,6 +22,7 @@ import { withIdToken } from "../identity/AuthProvider";
 import MuiRouterLink from "../generic/MuiRouterLink";
 import axios, { CancelTokenSource } from "axios";
 import filesize from "filesize";
+import ReactMarkdown from "react-markdown";
 
 const fileQueryDefaults = {
     page_size: 15
@@ -107,27 +108,34 @@ const BatchDownloadButton: React.FC<{
                 </Grid>
             )}
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-                <DialogTitle>Batch Download</DialogTitle>
+                <DialogTitle>
+                    Batch download{" "}
+                    <strong>
+                        {ids.length} {filePluralized}
+                    </strong>
+                </DialogTitle>
                 <DialogContent>
-                    <Typography paragraph>
-                        You've selected{" "}
-                        <strong>
-                            {ids.length} {filePluralized}
-                        </strong>{" "}
-                        for batch download. Download the "filelist.tsv" file for
-                        this file batch, and run the following in the desired
-                        download directory:
-                    </Typography>
-                    <Typography paragraph>
-                        <code>
-                            cat filelist.tsv | xargs -n 2 -P 8 gsutil cp
-                        </code>
-                    </Typography>
+                    <ReactMarkdown
+                        className="markdown-body"
+                        source={[
+                            `Download the "filelist.tsv" file for this file batch, and run this command in the desired download directory:`,
+                            "```bash",
+                            "cat filelist.tsv | xargs -n 2 -P 8 gsutil cp",
+                            "```",
+                            "If you haven't logged in with `gcloud` recently, you'll need to run `gcloud auth login` first.",
+                            "",
+                            "This command requires a [`gsutil`](https://cloud.google.com/storage/docs/gsutil_install) installation and a shell that supports `cat` and `xargs`.",
+                            "",
+                            "Note: Batch downloads are resumable. If you cancel an ongoing download (e.g., using control+c), you can resume that download by rerunning the download command."
+                        ].join("\n")}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Grid container justify="space-between">
                         <Grid item>
-                            <Button>Cancel</Button>
+                            <Button onClick={() => setOpenDialog(false)}>
+                                Cancel
+                            </Button>
                         </Grid>
                         <Grid item>
                             <Button
