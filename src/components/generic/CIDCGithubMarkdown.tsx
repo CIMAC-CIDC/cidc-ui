@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import "github-markdown-css/github-markdown.css";
 import { AuthContext } from "../identity/AuthProvider";
 import { useRootStyles } from "../../rootStyles";
-import Loader from "../generic/Loader";
+import Loader from "./Loader";
 
 export interface ICIDCGithubMarkdownProps {
     path: string;

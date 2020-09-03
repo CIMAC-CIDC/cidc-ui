@@ -1,5 +1,5 @@
 import * as React from "react";
-import CIDCGithubMarkdown from "./CIDCGithubMarkdown";
+import CIDCGithubMarkdown from "../generic/CIDCGithubMarkdown";
 import TemplateDownloadButton from "../generic/TemplateDownloadButton";
 import { withIdToken, AuthContext } from "../identity/AuthProvider";
 import { Grid, Typography, Divider } from "@material-ui/core";

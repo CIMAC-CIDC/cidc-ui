@@ -23,6 +23,8 @@ import {
     AnalysesDocsPage
 } from "./components/uploadDocs/UploadDocsPages";
 import TrialsPage from "./components/trials/TrialsPage";
+import SchemaPage from "./components/schema/SchemaPage";
+import PipelinesPage from "./components/pipelines/PipelinesPage";
 
 export const theme = createMuiTheme({
     overrides: {
@@ -86,6 +88,14 @@ export default function App() {
                                                 <Route
                                                     path="/trials"
                                                     component={TrialsPage}
+                                                />
+                                                <Route
+                                                    path="/pipelines"
+                                                    component={PipelinesPage}
+                                                />
+                                                <Route
+                                                    path="/schema"
+                                                    component={SchemaPage}
                                                 />
                                                 <Route
                                                     path="/privacy-security"
