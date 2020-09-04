@@ -126,22 +126,15 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
     }
 
     let selectedTab: string | false = props.location.pathname;
-    if (selectedTab.startsWith("/assays")) {
-        selectedTab = "/assays";
-    } else if (selectedTab.startsWith("/analyses")) {
-        selectedTab = "/analyses";
-    } else if (selectedTab.startsWith("/trials")) {
-        selectedTab = "/trials";
-    } else if (selectedTab.startsWith("/browse-files")) {
-        selectedTab = "/browse-files";
-    } else if (selectedTab.startsWith("/manifests")) {
-        selectedTab = "/manifests";
-    } else if (["/", "/privacy-security"].includes(selectedTab)) {
+
+    if (["/", "/privacy-security"].includes(selectedTab)) {
         selectedTab = false;
     } else if (
         ["/register", "/unactivated", "/callback"].includes(selectedTab)
     ) {
         return null;
+    } else {
+        selectedTab = `/${selectedTab.split("/")[1]}`;
     }
 
     return (
