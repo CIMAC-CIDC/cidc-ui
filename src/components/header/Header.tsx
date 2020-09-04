@@ -5,10 +5,11 @@ import {
     Card,
     Typography,
     Link as MuiLink,
-    Divider,
     Grid,
     withStyles,
-    makeStyles
+    makeStyles,
+    Breadcrumbs,
+    Box
 } from "@material-ui/core";
 import {
     withRouter,
@@ -16,9 +17,11 @@ import {
     Link as RouterLink
 } from "react-router-dom";
 import logo from "../../logo.png";
-import { AccountCircle, Search, TableChart } from "@material-ui/icons";
 import { useUserContext } from "../identity/UserProvider";
 import { colors, widths } from "../../rootStyles";
+import { theme } from "../../App";
+import MuiRouterLink from "../generic/MuiRouterLink";
+import { TableChart, Search, AccountCircle } from "@material-ui/icons";
 
 const ENV = process.env.REACT_APP_ENV;
 
@@ -49,6 +52,35 @@ const EnvBanner: React.FunctionComponent = () =>
             </Typography>
         </Card>
     ) : null;
+
+const CIDCBreadcrumbs = withRouter(props => {
+    const parts = props.location.pathname.split("/").slice(1);
+    const labels = ["CIDC", ...parts.map(p => p.replace(/-/g, " "))];
+    const linkLabels = labels.slice(0, labels.length - 1);
+    const lastLabel = labels[labels.length - 1];
+
+    return (
+        <Box px={3} bgcolor={theme.palette.grey["100"]}>
+            <Breadcrumbs>
+                {linkLabels.map((label, i) => {
+                    return (
+                        <MuiRouterLink
+                            LinkProps={{ color: "inherit" }}
+                            to={"/" + parts.slice(0, i).join("/")}
+                        >
+                            <Typography variant="overline" key={label}>
+                                {label}
+                            </Typography>
+                        </MuiRouterLink>
+                    );
+                })}
+                <Typography variant="overline" color="textPrimary">
+                    {lastLabel}
+                </Typography>
+            </Breadcrumbs>
+        </Box>
+    );
+});
 
 interface IStyledTabsProps {
     value: string | false;
@@ -94,7 +126,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
         selectedTab = "/analyses";
     } else if (selectedTab.startsWith("/trials")) {
         selectedTab = "/trials";
-    } else if (selectedTab.startsWith("/file-details")) {
+    } else if (selectedTab.startsWith("/browse-files")) {
         selectedTab = "/browse-files";
     } else if (selectedTab.startsWith("/manifests")) {
         selectedTab = "/manifests";
@@ -157,14 +189,14 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                     icon={<TableChart />}
                                 />
                             )}
-                            {user && user.showTrials && (
+                            {/* {user && user.showTrials && (
                                 <Tab
                                     disableRipple={true}
                                     value="/trials"
                                     label="Trials"
                                     icon={<TableChart />}
                                 />
-                            )}
+                            )} */}
                             <Tab
                                 disableRipple={true}
                                 value="/user-account"
@@ -175,8 +207,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                     </Grid>
                 </Grid>
             </div>
-
-            <Divider light />
+            {selectedTab && <CIDCBreadcrumbs />}
         </div>
     );
 };

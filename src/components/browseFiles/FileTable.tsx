@@ -272,7 +272,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         const fileName = paths[paths.length - 1];
         const prefix = paths.slice(0, paths.length - 1).join("/");
         return (
-            <MuiRouterLink to={`/file-details/${row.id}`}>
+            <MuiRouterLink to={`/browse-files/${row.id}`}>
                 <div style={{ textDecoration: "underline" }}>
                     <div>{prefix}/</div>
                     <div>{fileName}</div>

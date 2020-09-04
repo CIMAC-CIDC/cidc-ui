@@ -73,9 +73,9 @@ const DownloadURL: React.FunctionComponent<{
     );
 };
 
-const FileDetailsPage: React.FunctionComponent<
-    RouteComponentProps<{ fileId: string }>
-> = props => {
+const FileDetailsPage: React.FunctionComponent<RouteComponentProps<{
+    fileId: string;
+}>> = props => {
     const authData = React.useContext(AuthContext);
     const [file, setFile] = React.useState<DataFile | undefined>(undefined);
 
@@ -105,7 +105,7 @@ const FileDetailsPage: React.FunctionComponent<
                 <Loader />
             ) : showVis ? (
                 <Route
-                    path="/file-details/:fileId/clustergrammer"
+                    path="/browse-files/:fileId/clustergrammer"
                     render={routeProps => (
                         <ClustergrammerPage file={file} {...routeProps} />
                     )}

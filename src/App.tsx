@@ -24,7 +24,7 @@ import {
 } from "./components/uploadDocs/UploadDocsPages";
 import TrialsPage from "./components/trials/TrialsPage";
 
-const theme = createMuiTheme({
+export const theme = createMuiTheme({
     overrides: {
         MuiCard: {
             root: {
@@ -72,6 +72,10 @@ export default function App() {
                                                     component={AnalysesDocsPage}
                                                 />
                                                 <Route
+                                                    path="/browse-files/:fileId"
+                                                    component={FileDetailsPage}
+                                                />
+                                                <Route
                                                     path="/browse-files"
                                                     component={BrowseFilesPage}
                                                 />
@@ -92,10 +96,6 @@ export default function App() {
                                                 <Route
                                                     path="/user-account"
                                                     component={UserAccountPage}
-                                                />
-                                                <Route
-                                                    path="/file-details/:fileId"
-                                                    component={FileDetailsPage}
                                                 />
                                                 <Route
                                                     path="/register"

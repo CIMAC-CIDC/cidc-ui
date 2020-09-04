@@ -9,7 +9,6 @@ const maxTableWidth = 1500;
 const useStyles = makeStyles({
     container: {
         margin: "auto",
-        padding: 20,
         maxWidth: filterWidth + maxTableWidth
     },
     filters: { width: filterWidth },

@@ -1,12 +1,13 @@
 import * as React from "react";
-import { Link as MuiLink, Grid } from "@material-ui/core";
+import { Link as MuiLink, Grid, Box } from "@material-ui/core";
 import { withRouter, RouteComponentProps } from "react-router";
 import MuiRouterLink from "../generic/MuiRouterLink";
+import { theme } from "../../App";
 
 class Footer extends React.Component<RouteComponentProps, {}> {
     public render() {
         return (
-            <div>
+            <Box bgcolor={theme.palette.grey["100"]} width="100vw">
                 <Grid container justify="center" spacing={5}>
                     <Grid item>
                         &copy; {new Date().getFullYear()} CIDC @ Dana-Farber
@@ -46,7 +47,7 @@ class Footer extends React.Component<RouteComponentProps, {}> {
                         </Grid>
                     </Grid>
                 </Grid>
-            </div>
+            </Box>
         );
     }
 }

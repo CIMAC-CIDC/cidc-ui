@@ -23,7 +23,8 @@ export const useRootStyles = makeStyles({
     content: {
         padding: "1em 3em 3em",
         minHeight: 960,
-        background: "white"
+        background: "white",
+        overflowX: "scroll"
     },
     centeredPage: {
         width: widths.pageWidth,

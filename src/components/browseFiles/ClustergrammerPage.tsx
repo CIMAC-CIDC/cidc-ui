@@ -20,7 +20,7 @@ const ClustergrammerPage: React.FC<IClustergrammerPageProps> = ({
 
     const backButton = (
         <Button
-            onClick={() => history.push(`/file-details/${file.id}`)}
+            onClick={() => history.push(`/browse-files/${file.id}`)}
             variant="contained"
         >
             Back to File Details
