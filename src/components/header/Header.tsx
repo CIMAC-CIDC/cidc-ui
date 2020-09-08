@@ -61,7 +61,9 @@ const EnvBanner: React.FunctionComponent = () =>
 
 const CIDCBreadcrumbs = withRouter(props => {
     const parts = props.location.pathname.split("/").slice(1);
-    const labels = ["CIDC", ...parts.map(p => p.replace(/-/g, " "))];
+    const labels = ["CIDC", ...parts.map(p => p.replace(/-/g, " "))].filter(
+        l => l !== ""
+    );
     const linkLabels = labels.slice(0, labels.length - 1);
     const lastLabel = labels[labels.length - 1];
 
