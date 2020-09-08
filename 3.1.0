@@ -1,0 +1,6 @@
++ handlebars@4.7.6
++ dot-prop@5.3.0
++ serialize-javascript@4.0.0
+added 5 packages from 2 contributors, updated 3 packages and audited 1886 packages in 10.073s
+found 42270 vulnerabilities (42245 low, 20 moderate, 5 high)
+  run `npm audit fix` to fix them, or `npm audit` for details
