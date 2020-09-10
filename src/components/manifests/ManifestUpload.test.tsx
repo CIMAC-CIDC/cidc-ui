@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-    render,
-    fireEvent,
-    waitForElement,
-    RenderResult
-} from "@testing-library/react";
+import { render, fireEvent, RenderResult } from "@testing-library/react";
 import ManifestUpload from "./ManifestUpload";
 import { XLSX_MIMETYPE } from "../../util/constants";
 import { getManifestValidationErrors, uploadManifest } from "../../api/api";
@@ -39,16 +34,21 @@ async function selectValueMUI(
     select: Element,
     value: string
 ) {
-    const { getAllByRole, getByText } = renderResult;
+    const { getAllByRole, findByText } = renderResult;
     const selectButton = getAllByRole("button", { container: select })[0];
     fireEvent.click(selectButton);
-    const valueButton = await waitForElement(() => getByText(value));
+    const valueButton = await findByText(value);
     fireEvent.click(valueButton);
 }
 
 test("manifest validation", async () => {
     const renderResult = renderWithMockedAuthContext();
-    const { queryByTestId, getByTestId, getByText } = renderResult;
+    const {
+        queryByTestId,
+        getByTestId,
+        getByText,
+        findByTestId
+    } = renderResult;
     const pbmcRadio = getByTestId("radio-pbmc");
     const manifestFileInput = getByTestId("manifest-file-input");
     const submitButton = getByTestId("submit-button");
@@ -84,7 +84,7 @@ test("manifest validation", async () => {
 
         expect(submitButton).toHaveAttribute("disabled");
 
-        await waitForElement(() => queryByTestId(element)!);
+        await findByTestId(element);
         expect(queryByTestId("unset")).not.toBeInTheDocument();
     }
 
@@ -104,32 +104,51 @@ test("manifest validation", async () => {
 
 test("manifest submission", async () => {
     const renderResult = renderWithMockedAuthContext();
-    const { getByTestId, queryByTestId } = renderResult;
+    const {
+        findByTestId,
+        queryByTestId,
+        queryByText,
+        getByTestId
+    } = renderResult;
     const pbmcRadio = getByTestId("radio-pbmc");
     const manifestFileInput = getByTestId("manifest-file-input");
     const submitButton = getByTestId("submit-button");
+
+    const uploadFile = async () => {
+        fireEvent.click(manifestFileInput);
+        const fakePBMCFile = new File(["foo"], "pbmc.xlsx", {
+            type: XLSX_MIMETYPE
+        });
+        fireEvent.change(manifestFileInput, {
+            target: { files: [fakePBMCFile] }
+        });
+
+        expect(await findByTestId("validationSuccess")).toBeInTheDocument();
+    };
 
     // Select a manifest type
     fireEvent.click(pbmcRadio);
 
     // Select a file to upload and wait for validations to complete
     getManifestValidationErrors.mockResolvedValue([]);
-    fireEvent.click(manifestFileInput);
-    const fakePBMCFile = new File(["foo"], "pbmc.xlsx", {
-        type: XLSX_MIMETYPE
-    });
-    fireEvent.change(manifestFileInput, {
-        target: { files: [fakePBMCFile] }
-    });
-    await waitForElement(() => getByTestId("validationSuccess")!);
+    await uploadFile();
 
-    // Submit the manifest
+    // Failed submission
+    const errorMessage = "uh oh!";
+    uploadManifest.mockImplementation(async () => {
+        throw errorMessage;
+    });
+    fireEvent.click(submitButton);
+    expect(await findByTestId("uploadErrors")).toBeInTheDocument();
+    expect(queryByText(new RegExp(errorMessage, "i"))).toBeInTheDocument();
+
+    // Successful submission
+    await uploadFile();
     uploadManifest.mockResolvedValue({
         metadata_json_patch: { protocol_id: "CIMAC-12345" }
     });
-    fireEvent.click(submitButton);
     expect(queryByTestId("uploadSuccess")).not.toBeInTheDocument();
-    const result = await waitForElement(() => getByTestId("uploadSuccess"));
-    expect(result).toBeInTheDocument();
+    fireEvent.click(submitButton);
+    expect(await findByTestId("uploadSuccess")).toBeInTheDocument();
     expect(submitButton).toHaveAttribute("disabled");
 });

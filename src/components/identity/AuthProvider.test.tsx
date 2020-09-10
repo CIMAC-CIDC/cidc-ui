@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, waitForElement } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import AuthProvider, {
     auth0Client,
     setSession,
@@ -45,11 +45,9 @@ it("triggers login and doesn't render the app", () => {
 });
 
 it("handles requests to '/callback' as expected", async () => {
-    const { getByTestId } = renderWithChild();
+    const { findByTestId } = renderWithChild();
     history.replace("/callback");
-    const callbackLoader = await waitForElement(() =>
-        getByTestId("callback-loader")
-    );
+    const callbackLoader = await findByTestId("callback-loader");
     expect(callbackLoader).toBeInTheDocument();
     expect(auth0Client.parseHash).toBeCalledTimes(1);
 });

@@ -18,12 +18,18 @@ import CIDCGithubMarkdown from "../generic/CIDCGithubMarkdown";
 
 const pipelineMarkdowns = {
     wes: (
-        <CIDCGithubMarkdown path={`cidc-ngs-pipeline-api/master/wes/wes.md`} />
+        <div role="document" id="wes-docs">
+            <CIDCGithubMarkdown
+                path={`cidc-ngs-pipeline-api/master/wes/wes.md`}
+            />
+        </div>
     ),
     rna_level1: (
-        <CIDCGithubMarkdown
-            path={`cidc-ngs-pipeline-api/master/rna/rna_level1.md`}
-        />
+        <div role="document" id="rna-docs">
+            <CIDCGithubMarkdown
+                path={`cidc-ngs-pipeline-api/master/rna/rna_level1.md`}
+            />
+        </div>
     )
 };
 

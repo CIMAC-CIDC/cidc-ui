@@ -53,17 +53,13 @@ const CIDCGithubMarkdown: React.FunctionComponent<ICIDCGithubMarkdownProps> = pr
             });
     }, [fullURL, idToken, props.trimLeadingHeader]);
 
-    return (
-        <div>
-            {markdown ? (
-                <ReactMarkdown
-                    source={markdown}
-                    className={`markdown-body ${markdownClass}`}
-                />
-            ) : (
-                <Loader />
-            )}
-        </div>
+    return markdown ? (
+        <ReactMarkdown
+            source={markdown}
+            className={`markdown-body ${markdownClass}`}
+        />
+    ) : (
+        <Loader />
     );
 };
 

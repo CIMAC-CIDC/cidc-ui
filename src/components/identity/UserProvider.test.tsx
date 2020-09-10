@@ -1,6 +1,6 @@
 import * as React from "react";
 import { getAccountInfo, getPermissionsForUser } from "../../api/api";
-import { render, waitForElement } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import history from "./History";
 import { AuthContext } from "./AuthProvider";
 import UserProvider from "./UserProvider";
@@ -55,8 +55,8 @@ it("handles an approved user", async () => {
         return Promise.resolve([]);
     });
 
-    const { getByTestId } = renderWithMockedAuthContext(true);
-    const children = await waitForElement(() => getByTestId("children"));
+    const { findByTestId } = renderWithMockedAuthContext(true);
+    const children = await findByTestId("children");
     expect(children).toBeInTheDocument();
 });
 
@@ -68,8 +68,8 @@ it("handles a disabled user", async () => {
         return Promise.resolve(user);
     });
 
-    const { getByTestId } = renderWithMockedAuthContext(true);
-    const error = await waitForElement(() => getByTestId("error-message"));
+    const { findByTestId } = renderWithMockedAuthContext(true);
+    const error = await findByTestId("error-message");
     expect(error).toBeInTheDocument();
     expect(error.textContent).toContain("Account Disabled");
 });

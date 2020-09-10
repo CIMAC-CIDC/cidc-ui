@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, fireEvent, waitForElement } from "@testing-library/react";
+import { render, fireEvent } from "@testing-library/react";
 import {
     grantPermission,
     revokePermission,
@@ -65,24 +65,24 @@ function getNativeCheckbox(muiCheckbox): HTMLInputElement {
 }
 
 it("renders existing permissions", async () => {
-    const { getByTestId } = doRender();
+    const { findByTestId } = doRender();
 
     // Check that the permissions the user has been granted show up as checked
     for (const perm of PERMISSIONS) {
         const testId = `checkbox-${perm.trial_id}-${perm.upload_type}`;
-        const checkbox = await waitForElement(() => getByTestId(testId));
+        const checkbox = await findByTestId(testId);
         expect(checkbox).toBeInTheDocument();
         expect(getNativeCheckbox(checkbox).checked).toBe(true);
     }
 });
 
 it("handles permissions granting", async done => {
-    const { getByTestId } = doRender();
+    const { findByTestId } = doRender();
     // User doesn't yet have permission to view cytof for this trial
     const checkboxId = `checkbox-${TRIAL.trial_id}-cytof`;
 
     // User doesn't have this permission, so box should be unchecked
-    const muiCheckbox = await waitForElement(() => getByTestId(checkboxId));
+    const muiCheckbox = await findByTestId(checkboxId);
     const nativeCheckbox = getNativeCheckbox(muiCheckbox);
     expect(nativeCheckbox.checked).toBe(false);
 
@@ -105,12 +105,12 @@ it("handles permissions granting", async done => {
 });
 
 it("handles permission revocation", async done => {
-    const { getByTestId } = doRender();
+    const { findByTestId } = doRender();
     // User has permission to view wes for this trial
     const checkboxId = `checkbox-${TRIAL.trial_id}-wes`;
 
     // User has this permission, so box should be checked
-    const muiCheckbox = await waitForElement(() => getByTestId(checkboxId));
+    const muiCheckbox = await findByTestId(checkboxId);
     const nativeCheckbox = getNativeCheckbox(muiCheckbox);
     expect(nativeCheckbox.checked).toBe(true);
 

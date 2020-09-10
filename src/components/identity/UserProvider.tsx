@@ -118,7 +118,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
     return (
         <UserContext.Provider value={value}>
             {((user || isUnactivatedPath) && <>{props.children}</>) || (
-                <div data-testid="loader">
+                <div>
                     <AuthLoader />
                 </div>
             )}

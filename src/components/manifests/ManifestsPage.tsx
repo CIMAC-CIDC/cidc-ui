@@ -2,10 +2,9 @@ import * as React from "react";
 import { Grid } from "@material-ui/core";
 import ManifestTemplateDownload from "./ManifestTemplateDownload";
 import ManifestUpload from "./ManifestUpload";
-import { RouteComponentProps } from "react-router";
 import { useRootStyles } from "../../rootStyles";
 
-export default (props: RouteComponentProps) => {
+const ManifestsPage: React.FC = () => {
     const classes = useRootStyles();
 
     const manifestCardStyle = { width: "80%", margin: "auto" };
@@ -21,3 +20,5 @@ export default (props: RouteComponentProps) => {
         </Grid>
     );
 };
+
+export default ManifestsPage;

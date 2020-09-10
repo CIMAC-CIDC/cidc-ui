@@ -5,7 +5,7 @@ import { CircularProgressProps } from "@material-ui/core/CircularProgress";
 const Loader: React.FunctionComponent<CircularProgressProps> = props => (
     <Grid container alignContent="center" justify="center">
         <Grid item>
-            <CircularProgress {...props} />
+            <CircularProgress data-testid="loader" {...props} />
         </Grid>
     </Grid>
 );
