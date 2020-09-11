@@ -1,6 +1,7 @@
 import React from "react";
 import PipelinesPage from "./PipelinesPage";
 import { fireEvent } from "@testing-library/react";
+import { act } from "react-dom/test-utils";
 
 it("PipelinesPage renders without crashing", () => {
     const { queryByText } = renderWithRouter(<PipelinesPage />);
@@ -14,10 +15,14 @@ it("Switches between documentation tabs", () => {
     expect(queryByRole("document").id).toBe("rna-docs");
 
     // WES docs display after click
-    fireEvent.click(getByText(/WES/));
+    act(() => {
+        fireEvent.click(getByText(/WES/));
+    });
     expect(queryByRole("document").id).toBe("wes-docs");
 
     // RNA docs display after click
-    fireEvent.click(getByText(/RIMA/));
+    act(() => {
+        fireEvent.click(getByText(/RIMA/));
+    });
     expect(queryByRole("document").id).toBe("rna-docs");
 });

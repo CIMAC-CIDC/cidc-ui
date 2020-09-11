@@ -13,7 +13,6 @@ export interface IAccountWithExtraContext extends Account {
     showAssays?: boolean;
     showAnalyses?: boolean;
     showManifests?: boolean;
-    showTrials?: boolean;
 }
 
 export const UserContext = React.createContext<
@@ -100,8 +99,6 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         user.role &&
         ["cidc-biofx-user", "cidc-admin"].includes(user.role);
 
-    const showTrials = user && user.role === "cidc-admin";
-
     const isUnactivatedPath = UNACTIVATED_PATHS.includes(
         props.location.pathname
     );
@@ -111,8 +108,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         permissions,
         showAssays,
         showManifests,
-        showAnalyses,
-        showTrials
+        showAnalyses
     };
 
     return (

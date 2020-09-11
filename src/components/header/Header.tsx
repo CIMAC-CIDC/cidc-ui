@@ -31,7 +31,7 @@ import {
 
 const ENV = process.env.REACT_APP_ENV;
 
-const EnvBanner: React.FunctionComponent = () =>
+export const EnvBanner: React.FunctionComponent = () =>
     ENV !== "prod" ? (
         <Card
             style={{
@@ -59,7 +59,7 @@ const EnvBanner: React.FunctionComponent = () =>
         </Card>
     ) : null;
 
-const CIDCBreadcrumbs = withRouter(props => {
+export const CIDCBreadcrumbs = withRouter(props => {
     const parts = props.location.pathname.split("/").slice(1);
     const labels = ["CIDC", ...parts.map(p => p.replace(/-/g, " "))].filter(
         l => l !== ""
@@ -73,6 +73,7 @@ const CIDCBreadcrumbs = withRouter(props => {
                 {linkLabels.map((label, i) => {
                     return (
                         <MuiRouterLink
+                            key={label}
                             LinkProps={{ color: "inherit" }}
                             to={"/" + parts.slice(0, i).join("/")}
                         >
@@ -190,14 +191,6 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                     icon={<TableChart />}
                                 />
                             )}
-                            {/* {user && user.showTrials && (
-                                <Tab
-                                    disableRipple={true}
-                                    value="/trials"
-                                    label="Trials"
-                                    icon={<TableChart />}
-                                />
-                            )} */}
                             <Tab
                                 disableRipple={true}
                                 value="/pipelines"

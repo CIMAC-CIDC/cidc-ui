@@ -19,7 +19,9 @@ const InfoTooltip: React.FC<IInfoTooltipProps> = ({ text, children }) => (
             <Typography variant="body2">{children}</Typography>
         </Box>
         <LargeFontTooltip title={text} placement="bottom-start">
-            <InfoOutlined color="primary" fontSize="inherit" />
+            <div role="tooltip">
+                <InfoOutlined color="primary" fontSize="inherit" />
+            </div>
         </LargeFontTooltip>
     </Box>
 );

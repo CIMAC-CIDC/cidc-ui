@@ -18,9 +18,7 @@ export interface IFileDetailsTableProps {
     values: Array<{ name: string; value: string }>;
 }
 
-const FileDetailsTable: React.FunctionComponent<
-    IFileDetailsTableProps
-> = props => {
+const FileDetailsTable: React.FunctionComponent<IFileDetailsTableProps> = props => {
     return (
         <Card>
             <CardHeader title={props.title} />
@@ -71,7 +69,7 @@ export const AdditionalMetadataTable: React.FunctionComponent<{
 export const CoreDetailsTable: React.FunctionComponent<{
     file: DataFile;
 }> = props => {
-    const value = (name: string, v: string) => ({ name, value: v });
+    const value = (name: string, v?: string) => ({ name, value: v || "N/A" });
 
     return (
         <FileDetailsTable
@@ -80,7 +78,7 @@ export const CoreDetailsTable: React.FunctionComponent<{
                 value("File Name", props.file.object_url),
                 value("Protocol Identifier", props.file.trial_id),
                 value("Type", props.file.upload_type),
-                value("Format", props.file.data_format),
+                value("Format", props.file.file_ext),
                 value("File Size", filesize(props.file.file_size_bytes)),
                 value(
                     "Date/Time Uploaded",

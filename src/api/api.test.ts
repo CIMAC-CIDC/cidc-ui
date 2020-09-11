@@ -7,9 +7,20 @@ import {
     getApiClient,
     getAccountInfo,
     getManifestValidationErrors,
-    updateRole
+    updateRole,
+    getFiles,
+    getSingleFile,
+    getFilelist,
+    getDownloadURL,
+    getTrials,
+    getFilterFacets,
+    getSupportedAssays,
+    getSupportedManifests,
+    getSupportedAnalyses,
+    getExtraDataTypes
 } from "./api";
 import { XLSX_MIMETYPE } from "../util/constants";
+import { SSL_OP_TLS_BLOCK_PADDING_BUG } from "constants";
 
 const axiosMock = new MockAdapter(axios);
 
@@ -129,4 +140,83 @@ test("getManifestValidationErrors", done => {
     getManifestValidationErrors(TOKEN, formData)
         .then(errors => expect(errors).toEqual(response.errors))
         .then(done);
+});
+
+test("getFiles", async () => {
+    const response = {
+        _items: [
+            { id: 1, trial_id: "10021" },
+            { id: 2, trial_id: "E4412" }
+        ],
+        _meta: { total: 10 }
+    };
+    axiosMock.onGet("downloadable_files").reply(200, response);
+
+    const files = await getFiles(TOKEN);
+    expect(files.data).toEqual(response._items);
+    expect(files.meta).toEqual(response._meta);
+});
+
+test("getFileList", async () => {
+    const filelist = "a\tb\nc\td\n";
+    const fileIds = [1, 2, 3, 4, 5, 6];
+    axiosMock.onGet("downloadable_files/filelist").reply(config => {
+        expect(config.params?.file_ids).toBe("1,2,3,4,5,6");
+        return [200, "a\tb\nc\td\n"];
+    });
+
+    expect(await getFilelist(TOKEN, fileIds)).toBeInstanceOf(Blob);
+});
+
+test("getDownloadURL", async () => {
+    const url = "fake/url";
+    const fileId = 1;
+    axiosMock.onGet("downloadable_files/download_url").reply(config => {
+        expect(config.params?.id).toBe(fileId);
+        return [200, url];
+    });
+
+    expect(await getDownloadURL(TOKEN, fileId)).toBe(url);
+});
+
+test("getTrials", async () => {
+    const response = {
+        _items: [
+            { id: 1, trial_id: "10021" },
+            { id: 2, trial_id: "E4412" }
+        ],
+        _meta: { total: 10 }
+    };
+    axiosMock.onGet("trial_metadata").reply(config => {
+        expect(config.params.sort_field).toBe("trial_id");
+        expect(config.params.sort_direction).toBe("asc");
+        return [200, response];
+    });
+
+    expect(await getTrials(TOKEN)).toEqual(response._items);
+});
+
+test("simple GET endpoints", async () => {
+    const testConfigs = [
+        { route: "users/self", endpoint: getAccountInfo },
+        { route: "downloadable_files", endpoint: getSingleFile, withId: true },
+        {
+            route: "downloadable_files/filter_facets",
+            endpoint: getFilterFacets
+        },
+        { route: "/info/assays", endpoint: getSupportedAssays },
+        { route: "/info/manifests", endpoint: getSupportedManifests },
+        { route: "/info/analyses", endpoint: getSupportedAnalyses },
+        { route: "/info/extra_data_types", endpoint: getExtraDataTypes }
+    ];
+
+    await Promise.all(
+        testConfigs.map(async ({ route, endpoint, withId }: any) => {
+            const data = { some: "data" };
+            const id = 1;
+            axiosMock.onGet(withId ? `${route}/${id}` : route).reply(200, data);
+            const result = await endpoint(TOKEN, id);
+            expect(data).toEqual(data);
+        })
+    );
 });

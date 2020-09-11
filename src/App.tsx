@@ -22,7 +22,6 @@ import {
     AssayDocsPage,
     AnalysesDocsPage
 } from "./components/uploadDocs/UploadDocsPages";
-import TrialsPage from "./components/trials/TrialsPage";
 import SchemaPage from "./components/schema/SchemaPage";
 import PipelinesPage from "./components/pipelines/PipelinesPage";
 import NotFoundRoute from "./components/generic/NotFoundRoute";
@@ -88,11 +87,6 @@ export default function App() {
                                                     exact
                                                     path="/manifests"
                                                     component={ManifestsPage}
-                                                />
-                                                <Route
-                                                    exact
-                                                    path="/trials"
-                                                    component={TrialsPage}
                                                 />
                                                 <Route
                                                     path="/pipelines"

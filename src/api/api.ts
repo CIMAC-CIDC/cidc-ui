@@ -61,10 +61,6 @@ function _getItems<T>(token: string, endpoint: string): Promise<T[]> {
         .then(_extractItems);
 }
 
-function _transformFile(file: DataFile): DataFile {
-    return { ...file, data_format: file.data_format.toLowerCase() };
-}
-
 export interface IDataWithMeta<D> {
     data: D;
     meta: {
@@ -81,17 +77,15 @@ function getFiles(
         .get("downloadable_files", { params, cancelToken })
         .then(res => {
             const { _items, _meta: meta } = _extractItem(res);
-            return { data: _items.map(_transformFile), meta };
+            return { data: _items, meta };
         });
 }
 
 function getSingleFile(
     token: string,
-    itemID: string
+    itemID: number | string
 ): Promise<DataFile | undefined> {
-    return _getItem<DataFile>(token, "downloadable_files", itemID).then(
-        _transformFile
-    );
+    return _getItem<DataFile>(token, "downloadable_files", itemID);
 }
 
 function getFilelist(token: string, fileIds: number[]): Promise<Blob> {
@@ -305,17 +299,6 @@ function getExtraDataTypes(): Promise<string[]> {
         .then(_extractItem);
 }
 
-// ----------- Old API methods (not currently supported) ----------- //
-
-async function deleteUser(
-    token: string,
-    itemID: string,
-    etag: string
-): Promise<Account | undefined> {
-    console.error("not currently supported");
-    return;
-}
-
 export {
     _getItem,
     _getItems,
@@ -333,7 +316,6 @@ export {
     createUser,
     getAllAccounts,
     updateRole,
-    deleteUser,
     getUserEtag,
     uploadManifest,
     getManifestValidationErrors,
