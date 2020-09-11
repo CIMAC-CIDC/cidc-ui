@@ -106,7 +106,7 @@ export default function App() {
                                                 />
                                                 <Route
                                                     exact
-                                                    path="/user-account"
+                                                    path="/profile"
                                                     component={UserAccountPage}
                                                 />
                                                 <Route

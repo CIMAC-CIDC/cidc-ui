@@ -37,7 +37,7 @@ export const EnvBanner: React.FunctionComponent = () =>
             style={{
                 background:
                     "repeating-linear-gradient(45deg, #ffcc00, #ffcc00 10px, black 10px, black 20px)",
-                padding: ENV === "staging" ? "1em" : "0",
+                padding: "1em",
                 textAlign: "center"
             }}
         >
@@ -120,6 +120,8 @@ const useHeaderStyles = makeStyles({
     logo: { height: 87, padding: 5 }
 });
 
+export const DONT_RENDER_PATHS = ["/register", "/unactivated", "/callback"];
+
 const Header: React.FunctionComponent<RouteComponentProps> = props => {
     const classes = useHeaderStyles();
     const user = useUserContext();
@@ -132,16 +134,14 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
 
     if (["/", "/privacy-security"].includes(selectedTab)) {
         selectedTab = false;
-    } else if (
-        ["/register", "/unactivated", "/callback"].includes(selectedTab)
-    ) {
+    } else if (DONT_RENDER_PATHS.includes(selectedTab)) {
         return null;
     } else {
         selectedTab = `/${selectedTab.split("/")[1]}`;
     }
 
     return (
-        <div style={{ minWidth: widths.pageWidth }}>
+        <div data-testid="header" style={{ minWidth: widths.pageWidth }}>
             <EnvBanner />
             <div className={classes.tabs}>
                 <Grid
@@ -205,7 +205,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                             />
                             <Tab
                                 disableRipple={true}
-                                value="/user-account"
+                                value="/profile"
                                 label="Profile"
                                 icon={<AccountCircle />}
                             />

@@ -1,12 +1,17 @@
 import React from "react";
 import { render, cleanup, fireEvent } from "@testing-library/react";
-import Header, { EnvBanner, CIDCBreadcrumbs } from "./Header";
+import Header, {
+    EnvBanner,
+    CIDCBreadcrumbs,
+    DONT_RENDER_PATHS
+} from "./Header";
 import {
     IAccountWithExtraContext,
     UserContext
 } from "../identity/UserProvider";
 import history from "../identity/History";
 import { Account } from "../../model/account";
+import { act } from "react-dom/test-utils";
 
 const user: Account = {
     id: 1,
@@ -25,7 +30,7 @@ const renderWithUserContext = (u: IAccountWithExtraContext) => {
     );
 };
 
-describe("Header tab visibility", () => {
+describe("Header", () => {
     const checkVisibility = (
         queryByText: (q: RegExp) => void,
         visible: string[],
@@ -124,6 +129,46 @@ describe("Header tab visibility", () => {
             ],
             []
         );
+    });
+
+    it("navigates on tab click", () => {
+        history.push("/");
+        const { getByText } = renderWithUserContext({
+            ...user,
+            showAssays: true,
+            showAnalyses: true,
+            showManifests: true
+        });
+
+        [
+            "browse-files",
+            "pipelines",
+            "schema",
+            "profile",
+            "assays",
+            "analyses",
+            "manifests"
+        ].forEach(path => {
+            act(() => {
+                fireEvent.click(
+                    getByText(new RegExp(path.replace("-", " "), "i"))
+                );
+            });
+            expect(history.location.pathname).toContain(path);
+        });
+    });
+
+    it("doesn't render on certain pathnames", () => {
+        const { queryByTestId } = renderWithUserContext({
+            ...user,
+            showAssays: true,
+            showAnalyses: true,
+            showManifests: true
+        });
+        DONT_RENDER_PATHS.forEach(pathname => {
+            history.push(pathname);
+            expect(queryByTestId(/header/i)).not.toBeInTheDocument();
+        });
     });
 });
 

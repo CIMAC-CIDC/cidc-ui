@@ -75,7 +75,7 @@ const HomePage: React.FunctionComponent = () => {
                         Upload a shipping/receiving manifest
                     </ListLink>
                 )}
-                <ListLink icon={<AccountCircle />} href="/user-account">
+                <ListLink icon={<AccountCircle />} href="/profile">
                     View your account info and data access permissions
                 </ListLink>
                 <ListLink icon={<Security />} href="/privacy-security">
