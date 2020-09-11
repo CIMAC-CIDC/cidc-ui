@@ -4,19 +4,13 @@ import {
     Button,
     FormControl,
     Select,
-    MenuItem,
-    Dialog,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
-    Fab
+    MenuItem
 } from "@material-ui/core";
 import autobind from "autobind-decorator";
-import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import UserPermissionsDialog from "./UserPermissionsDialog";
 import { ORGANIZATION_NAME_MAP, ROLES } from "../../util/constants";
-import { updateRole, deleteUser, getUserEtag } from "../../api/api";
+import { updateRole, getUserEtag } from "../../api/api";
 
 export default class UserTableRow extends React.Component<any, {}> {
     state = {
@@ -25,10 +19,6 @@ export default class UserTableRow extends React.Component<any, {}> {
         trialsDialogOpen: false,
         deleteDialogOpen: false
     };
-
-    private openDeleteDialog() {
-        this.setState({ deleteDialogOpen: true });
-    }
 
     private openTrials() {
         this.setState({ trialsDialogOpen: true });
@@ -53,22 +43,6 @@ export default class UserTableRow extends React.Component<any, {}> {
     @autobind
     private handleTrialCancel() {
         this.setState({ trialsDialogOpen: false });
-    }
-
-    @autobind
-    private handleDeleteCancel() {
-        this.setState({ deleteDialogOpen: false });
-    }
-
-    @autobind
-    private handleDeleteUser() {
-        getUserEtag(this.props.token, this.props.account.id).then(results => {
-            deleteUser(this.props.token, this.props.account.id, results!).then(
-                result => {
-                    this.props.reloadUsers();
-                }
-            );
-        });
     }
 
     public render() {
@@ -116,43 +90,6 @@ export default class UserTableRow extends React.Component<any, {}> {
                         token={this.props.token}
                         onCancel={this.handleTrialCancel}
                     />
-                </TableCell>
-                <TableCell>
-                    <Fab
-                        size="small"
-                        color="secondary"
-                        // tslint:disable-next-line:jsx-no-lambda
-                        onClick={() => this.openDeleteDialog()}
-                    >
-                        <DeleteIcon />
-                    </Fab>
-                    <Dialog
-                        open={this.state.deleteDialogOpen}
-                        onClose={this.handleDeleteCancel}
-                        fullWidth={true}
-                        maxWidth="md"
-                    >
-                        <DialogContent>
-                            <DialogContentText>
-                                Are you sure you want to delete the account of{" "}
-                                {this.props.account.email}?
-                            </DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button
-                                onClick={this.handleDeleteCancel}
-                                color="primary"
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={this.handleDeleteUser}
-                                color="primary"
-                            >
-                                Delete
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
                 </TableCell>
             </>
         );
