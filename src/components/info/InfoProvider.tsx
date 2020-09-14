@@ -32,6 +32,7 @@ const InfoProvider: React.FunctionComponent = props => {
     >(undefined);
 
     React.useEffect(() => {
+        // TODO: what if one of these requests fail?
         getSupportedAssays().then(setAssays);
         getSupportedManifests().then(setManifests);
         getSupportedAnalyses().then(setAnalyses);

@@ -8,7 +8,7 @@ import axios, {
     CancelToken
 } from "axios";
 import Permission from "../model/permission";
-import { IFacets } from "../components/browseFiles/FileFilter";
+import { IFacets } from "../components/browse-files/FileFilter";
 
 const URL: string = process.env.REACT_APP_API_URL!;
 
@@ -19,7 +19,7 @@ function getApiClient(token?: string): AxiosInstance {
     });
 }
 
-function _itemURL(endpoint: string, itemID: string): string {
+function _itemURL(endpoint: string, itemID: number): string {
     return `${endpoint}/${itemID}`;
 }
 
@@ -48,10 +48,10 @@ function _extractErrorMessage(error: AxiosError): never {
 function _getItem<T>(
     token: string,
     endpoint: string,
-    itemID: string | number
+    itemID: number
 ): Promise<T> {
     return getApiClient(token)
-        .get(_itemURL(endpoint, itemID.toString()))
+        .get(_itemURL(endpoint, itemID))
         .then(_extractItem);
 }
 
@@ -126,7 +126,7 @@ function getTrials(token: string): Promise<Trial[]> {
         .then(_extractItems);
 }
 
-function getTrial(token: string, trialId: string): Promise<Trial> {
+function getTrial(token: string, trialId: number): Promise<Trial> {
     return _getItem<Trial>(token, "trial_metadata", trialId);
 }
 
@@ -162,7 +162,7 @@ function getAllAccounts(token: string): Promise<Account[]> {
 
 function updateRole(
     token: string,
-    itemID: string,
+    itemID: number,
     etag: string,
     role: string
 ): Promise<Account> {
@@ -303,6 +303,7 @@ export {
     _getItem,
     _getItems,
     _extractErrorMessage,
+    _makeManifestRequest,
     getApiClient,
     getFiles,
     getSingleFile,

@@ -35,6 +35,7 @@ const Clustergrammer: React.FC<IClustergrammerProps> = props => {
 
     return cgHTML ? (
         <Frame
+            title="clustergrammer-iframe"
             initialContent={cgHTML}
             width={props.width || 1000}
             height={props.height || 600}

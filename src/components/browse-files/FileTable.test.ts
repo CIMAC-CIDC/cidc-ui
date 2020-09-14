@@ -1,6 +1,5 @@
-import { triggerBatchDownload, filterParams, sortParams } from "../FileTable";
-import { getDownloadURL } from "../../../api/api";
-jest.mock("../../../api/api");
+import { filterParams, sortParams } from "./FileTable";
+jest.mock("../../api/api");
 
 test("filterParams", () => {
     expect(filterParams({})).toEqual({});

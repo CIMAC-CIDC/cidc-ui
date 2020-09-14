@@ -1,13 +1,13 @@
 import * as React from "react";
-import BrowseFilesPage from "./components/browseFiles/BrowseFilesPage";
-import FileDetailsPage from "./components/browseFiles/FileDetailsPage";
+import BrowseFilesPage from "./components/browse-files/BrowseFilesPage";
+import FileDetailsPage from "./components/browse-files/FileDetailsPage";
 import { Router, Switch, Route } from "react-router-dom";
 import Header from "./components/header/Header";
 import Footer from "./components/footer/Footer";
 import HomePage from "./components/home/HomePage";
 import ManifestsPage from "./components/manifests/ManifestsPage";
-import PrivacyAndSecurityPage from "./components/privacyAndSecurity/PrivacyAndSecurityPage";
-import UserAccountPage from "./components/userAccount/UserAccountPage";
+import PrivacyAndSecurityPage from "./components/privacy-and-security/PrivacyAndSecurityPage";
+import UserAccountPage from "./components/profile/UserAccountPage";
 import Register from "./components/identity/Register";
 import Unactivated from "./components/identity/Unactivated";
 import history from "./components/identity/History";
@@ -21,7 +21,7 @@ import { QueryParamProvider } from "use-query-params";
 import {
     AssayDocsPage,
     AnalysesDocsPage
-} from "./components/uploadDocs/UploadDocsPages";
+} from "./components/upload-docs/UploadDocsPages";
 import SchemaPage from "./components/schema/SchemaPage";
 import PipelinesPage from "./components/pipelines/PipelinesPage";
 import NotFoundRoute from "./components/generic/NotFoundRoute";

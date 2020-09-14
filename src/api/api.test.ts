@@ -17,10 +17,11 @@ import {
     getSupportedAssays,
     getSupportedManifests,
     getSupportedAnalyses,
-    getExtraDataTypes
+    getExtraDataTypes,
+    updateTrialMetadata,
+    _makeManifestRequest
 } from "./api";
 import { XLSX_MIMETYPE } from "../util/constants";
-import { SSL_OP_TLS_BLOCK_PADDING_BUG } from "constants";
 
 const axiosMock = new MockAdapter(axios);
 
@@ -194,6 +195,66 @@ test("getTrials", async () => {
     });
 
     expect(await getTrials(TOKEN)).toEqual(response._items);
+});
+
+test("updateTrialMetadata", async () => {
+    const etag = "test-etag";
+    const trial = { trial_id: "10021", metadata_json: { foo: "bar" } };
+    const response = { id: 1, ...trial };
+    axiosMock.onPatch("trial_metadata/10021").reply(config => {
+        expect(JSON.parse(config.data)).toEqual({
+            metadata_json: trial.metadata_json
+        });
+        expect(config.headers["if-match"]).toBe(etag);
+        return [200, response];
+    });
+    expect(await updateTrialMetadata(TOKEN, etag, trial)).toEqual(response);
+});
+
+test("updateRole", async () => {
+    const etag = "test-etag";
+    const user = { id: 1, role: "cidc-biofx-user" };
+    axiosMock.onPatch(`users/${user.id}`).reply(config => {
+        expect(JSON.parse(config.data)).toEqual({ role: user.role });
+        expect(config.headers["if-match"]).toBe(etag);
+        return [200, user];
+    });
+    expect(await updateRole(TOKEN, user.id, etag, user.role)).toEqual(user);
+});
+
+test("_makeManifestRequest", async () => {
+    const endpoint = "manifest-endpoint";
+    const form = {
+        schema: "plasma",
+        template: new File(["foo"], "plasma.xlsx", { type: XLSX_MIMETYPE })
+    };
+    axiosMock.onPost(endpoint).reply(config => {
+        expect(config.data.get("schema")).toBe(form.schema);
+        expect(config.data.get("template")).toBe(form.template);
+        return [200, "ok"];
+    });
+    await _makeManifestRequest(endpoint, TOKEN, form);
+});
+
+test("getManifestValidationErrors", async () => {
+    const form = { schema: "", template: new File([""], "") };
+    const errors200 = ["some", "errors"];
+    const errors403 = ["some", "other", "errors"];
+    axiosMock
+        .onPost("ingestion/validate")
+        .replyOnce(200, { errors: errors200 });
+    expect(await getManifestValidationErrors(TOKEN, form)).toEqual(errors200);
+
+    axiosMock.onPost("ingestion/validate").replyOnce(403, {
+        _status: "ERR",
+        _error: { message: { errors: errors403 } }
+    });
+    expect(await getManifestValidationErrors(TOKEN, form)).toEqual(errors403);
+
+    axiosMock.onPost("ingestion/validate").replyOnce(403, errors403);
+    expect(await getManifestValidationErrors(TOKEN, form)).toEqual([
+        errors403.toString()
+    ]);
 });
 
 test("simple GET endpoints", async () => {
