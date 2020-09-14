@@ -83,7 +83,7 @@ function getFiles(
 
 function getSingleFile(
     token: string,
-    itemID: number | string
+    itemID: number
 ): Promise<DataFile | undefined> {
     return _getItem<DataFile>(token, "downloadable_files", itemID);
 }

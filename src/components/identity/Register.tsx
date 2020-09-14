@@ -9,7 +9,6 @@ import {
     OutlinedInput,
     MenuItem,
     Typography,
-    CircularProgress,
     makeStyles
 } from "@material-ui/core";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";

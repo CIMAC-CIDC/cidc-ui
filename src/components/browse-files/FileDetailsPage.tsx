@@ -13,7 +13,7 @@ import ClustergrammerPage from "./ClustergrammerPage";
 import IHCBarplot from "../visualizations/IHCBarplot";
 
 const DownloadURL: React.FunctionComponent<{
-    fileId: string;
+    fileId: number;
     idToken: string;
 }> = props => {
     const [url, setURL] = React.useState<string | undefined>(undefined);
@@ -81,16 +81,17 @@ const FileDetailsPage: React.FunctionComponent<RouteComponentProps<{
 
     const idToken = authData && authData.idToken;
     const fileId = props.match.params.fileId;
+    const fileIdInt = parseInt(fileId, 10);
 
     React.useEffect(() => {
         if (idToken) {
-            getSingleFile(idToken, fileId).then(fileRes => setFile(fileRes));
+            getSingleFile(idToken, fileIdInt).then(fileRes => setFile(fileRes));
         }
-    }, [idToken, fileId]);
+    }, [idToken, fileIdInt]);
 
     const doDownload = () => {
         if (idToken && file) {
-            getDownloadURL(idToken, fileId).then(url => {
+            getDownloadURL(idToken, fileIdInt).then(url => {
                 window.location.href = url;
             });
         }
@@ -155,7 +156,7 @@ const FileDetailsPage: React.FunctionComponent<RouteComponentProps<{
                                             <Grid item>
                                                 <DownloadURL
                                                     idToken={idToken}
-                                                    fileId={fileId}
+                                                    fileId={fileIdInt}
                                                 />
                                             </Grid>
                                             {file.clustergrammer && (
