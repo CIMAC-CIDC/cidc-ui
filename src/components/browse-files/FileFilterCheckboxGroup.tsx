@@ -139,6 +139,7 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
 
     const hasPermission =
         role === "cidc-admin" ||
+        role === "nci-biobank-user" ||
         some(
             permissions || [],
             p =>

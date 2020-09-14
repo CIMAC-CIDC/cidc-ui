@@ -25,6 +25,7 @@ export default function UserAccountPage() {
     const userAccount = useUserContext();
 
     const isAdmin = userAccount && userAccount.role === "cidc-admin";
+    const isNCI = userAccount && userAccount.role === "nci-biobank-user";
     const permissions = userAccount && userAccount.permissions;
     const hasPerms = permissions && permissions.length > 0;
 
@@ -46,7 +47,10 @@ export default function UserAccountPage() {
                                                 justify="space-between"
                                                 alignItems="center"
                                             >
-                                                <Typography variant="h6">
+                                                <Typography
+                                                    variant="h6"
+                                                    color="textSecondary"
+                                                >
                                                     Personal Info
                                                 </Typography>
                                                 <Link href="/logout">
@@ -62,29 +66,17 @@ export default function UserAccountPage() {
                                             direction="column"
                                         >
                                             <Grid item>
-                                                <Typography
-                                                    variant="h6"
-                                                    color="textSecondary"
-                                                    paragraph
-                                                >
+                                                <Typography paragraph>
                                                     {`${userAccount.first_n} ${userAccount.last_n}`}
                                                 </Typography>
                                             </Grid>
                                             <Grid item>
-                                                <Typography
-                                                    variant="h6"
-                                                    color="textSecondary"
-                                                    paragraph
-                                                >
+                                                <Typography paragraph>
                                                     {userAccount.email}
                                                 </Typography>
                                             </Grid>
                                             <Grid item>
-                                                <Typography
-                                                    variant="h6"
-                                                    color="textSecondary"
-                                                    paragraph
-                                                >
+                                                <Typography paragraph>
                                                     {
                                                         ORGANIZATION_NAME_MAP[
                                                             userAccount
@@ -94,11 +86,7 @@ export default function UserAccountPage() {
                                                 </Typography>
                                             </Grid>
                                             <Grid item>
-                                                <Typography
-                                                    variant="h6"
-                                                    color="textSecondary"
-                                                    paragraph
-                                                >
+                                                <Typography paragraph>
                                                     Joined on{" "}
                                                     {new Date(
                                                         userAccount._created
@@ -114,7 +102,10 @@ export default function UserAccountPage() {
                                     <CardHeader
                                         avatar={<FolderShared />}
                                         title={
-                                            <Typography variant="h6">
+                                            <Typography
+                                                variant="h6"
+                                                color="textSecondary"
+                                            >
                                                 Dataset Access
                                             </Typography>
                                         }
@@ -122,16 +113,17 @@ export default function UserAccountPage() {
                                     <CardContent>
                                         <div>
                                             <Grid container spacing={2}>
-                                                {isAdmin ? (
+                                                {isAdmin || isNCI ? (
                                                     <Grid item>
-                                                        <Typography
-                                                            variant="h6"
-                                                            color="textSecondary"
-                                                            paragraph
-                                                        >
-                                                            As an admin, you
-                                                            have access to all
-                                                            datasets.
+                                                        <Typography paragraph>
+                                                            Your role (
+                                                            <code>
+                                                                {
+                                                                    userAccount.role
+                                                                }
+                                                            </code>
+                                                            ) gives you access
+                                                            to all datasets.
                                                         </Typography>
                                                     </Grid>
                                                 ) : hasPerms ? (
