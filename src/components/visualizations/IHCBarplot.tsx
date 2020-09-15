@@ -15,8 +15,10 @@ import {
     Radio,
     CardHeader,
     Select,
-    MenuItem
+    MenuItem,
+    Typography
 } from "@material-ui/core";
+import ContactAnAdmin from "../generic/ContactAnAdmin";
 
 export interface IHCBarplotProps {
     data: DataFile["ihc_combined_plot"];
@@ -38,6 +40,62 @@ const IHC_CONFIG = {
     ]
 };
 
+const IHCPlotControls: React.FC<{
+    dataColumns: string[];
+    dataColumn: string;
+    facet: string;
+    setDataColumn: (c: string) => void;
+    setFacet: (f: string) => void;
+}> = props => {
+    return (
+        <Card>
+            <CardContent>
+                <Grid container direction="column" spacing={3}>
+                    <Grid item>
+                        <FormControl component="fieldset">
+                            <FormLabel>Y-Axis</FormLabel>
+                            <Select
+                                value={props.dataColumn}
+                                onChange={e =>
+                                    props.setDataColumn(
+                                        e.target.value as string
+                                    )
+                                }
+                            >
+                                {props.dataColumns.map(c => {
+                                    return (
+                                        <MenuItem key={c} value={c}>
+                                            {c}
+                                        </MenuItem>
+                                    );
+                                })}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item>
+                        <FormControl component="fieldset">
+                            <FormLabel>Color by</FormLabel>
+                            <RadioGroup
+                                value={props.facet}
+                                onChange={(_, v) => props.setFacet(v)}
+                            >
+                                {IHC_CONFIG.facets.map(f => (
+                                    <FormControlLabel
+                                        key={f.value}
+                                        value={f.value}
+                                        control={<Radio />}
+                                        label={f.label}
+                                    />
+                                ))}
+                            </RadioGroup>
+                        </FormControl>
+                    </Grid>
+                </Grid>
+            </CardContent>
+        </Card>
+    );
+};
+
 const IHCBarplot: React.FC<IHCBarplotProps> = props => {
     const [facet, setFacet] = React.useState<string>(
         IHC_CONFIG.facets[0].value
@@ -47,7 +105,9 @@ const IHCBarplot: React.FC<IHCBarplotProps> = props => {
     const dataColumns = IHC_CONFIG.possibleDataColumns.filter(c =>
         columns.has(c)
     );
-    const [dataColumn, setDataColumn] = React.useState<string>(dataColumns[0]);
+    const [dataColumn, setDataColumn] = React.useState<string>(
+        dataColumns.length > 0 ? dataColumns[0] : ""
+    );
 
     const facetGroups = groupBy(props.data, facet);
     const colors = chroma.brewer.Set1.slice();
@@ -59,90 +119,56 @@ const IHCBarplot: React.FC<IHCBarplotProps> = props => {
         name: key
     }));
 
+    const plot = (
+        <Grid container direction="row" wrap="nowrap" spacing={1}>
+            <Grid item>
+                <IHCPlotControls
+                    dataColumn={dataColumn}
+                    dataColumns={dataColumns}
+                    setDataColumn={setDataColumn}
+                    facet={facet}
+                    setFacet={setFacet}
+                />
+            </Grid>
+            <Grid item>
+                <Plot
+                    data={data}
+                    layout={{
+                        showlegend: true,
+                        yaxis: {
+                            anchor: "x",
+                            title: { text: dataColumn }
+                        },
+                        xaxis: {
+                            anchor: "y",
+                            title: {
+                                text: "Sample<br>(hover to view CIMAC ID)"
+                            },
+                            categorymode: "array",
+                            categoryarray: map(props.data, "cimac_id"),
+                            showticklabels: false
+                        },
+                        margin: { t: 10 }
+                    }}
+                    config={{ displaylogo: false }}
+                />
+            </Grid>
+        </Grid>
+    );
+
+    const noDataColumnsMessage = (
+        <Typography color="textSecondary">
+            Oops! The portal failed to build an IHC expression distribution
+            visualization for this data. Please <ContactAnAdmin lower /> to let
+            us know about this issue.
+        </Typography>
+    );
+
     return (
         <Card>
             <CardHeader title="IHC Expression Distribution" />
             <CardContent>
-                <Grid
-                    container
-                    direction="row"
-                    alignItems="center"
-                    wrap="nowrap"
-                >
-                    <Grid item>
-                        <Grid container direction="column" spacing={1}>
-                            <Grid item>
-                                <Card>
-                                    <CardContent>
-                                        <FormControl component="fieldset">
-                                            <FormLabel>Y-Axis</FormLabel>
-                                            <Select
-                                                value={dataColumn}
-                                                onChange={e =>
-                                                    setDataColumn(
-                                                        e.target.value as string
-                                                    )
-                                                }
-                                            >
-                                                {dataColumns.map(c => {
-                                                    return (
-                                                        <MenuItem
-                                                            key={c}
-                                                            value={c}
-                                                        >
-                                                            {c}
-                                                        </MenuItem>
-                                                    );
-                                                })}
-                                            </Select>
-                                        </FormControl>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                            <Grid item>
-                                <Card>
-                                    <CardContent>
-                                        <FormControl component="fieldset">
-                                            <FormLabel>Color by</FormLabel>
-                                            <RadioGroup
-                                                value={facet}
-                                                onChange={(_, v) => setFacet(v)}
-                                            >
-                                                {IHC_CONFIG.facets.map(f => (
-                                                    <FormControlLabel
-                                                        key={f.value}
-                                                        value={f.value}
-                                                        control={<Radio />}
-                                                        label={f.label}
-                                                    />
-                                                ))}
-                                            </RadioGroup>
-                                        </FormControl>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <Grid item>
-                        <Plot
-                            data={data}
-                            layout={{
-                                showlegend: true,
-                                yaxis: {
-                                    anchor: "x",
-                                    title: { text: dataColumn }
-                                },
-                                xaxis: {
-                                    anchor: "y",
-                                    title: { text: "CIMAC ID" },
-                                    categorymode: "array",
-                                    categoryarray: map(props.data, "cimac_id")
-                                }
-                            }}
-                            config={{ displaylogo: false }}
-                        />
-                    </Grid>
-                </Grid>
+                {dataColumns.length > 0 ? plot : noDataColumnsMessage}
             </CardContent>
         </Card>
     );
