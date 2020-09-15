@@ -3,6 +3,7 @@ import ClustergrammerPage from "./ClustergrammerPage";
 import clustergrammer from "../__data__/clustergrammerNetwork.json";
 import history from "../identity/History";
 import { fireEvent } from "@testing-library/react";
+import { renderWithRouter } from "../../../test/helpers";
 
 const file = {
     id: 1,

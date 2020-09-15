@@ -73,7 +73,7 @@
         "start-dev": "REACT_APP_NODE_ENV='dev' react-scripts start",
         "build": "react-scripts --expose-gc --max-old-space-size=8192 build",
         "build-upload": "react-scripts build ; ./google-deploy.sh",
-        "test": "REACT_APP_NODE_ENV='dev' react-scripts test --env=jest-environment-jsdom-sixteen",
+        "test": "REACT_APP_NODE_ENV='test' react-scripts test --env=jest-environment-jsdom-sixteen",
         "eject": "react-scripts eject",
         "lint": "tslint -p tsconfig.json"
     },

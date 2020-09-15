@@ -12,6 +12,7 @@ import {
 import history from "../identity/History";
 import { Account } from "../../model/account";
 import { act } from "react-dom/test-utils";
+import { renderWithRouter } from "../../../test/helpers";
 
 const user: Account = {
     id: 1,
@@ -26,7 +27,8 @@ const renderWithUserContext = (u: IAccountWithExtraContext) => {
     return renderWithRouter(
         <UserContext.Provider value={u}>
             <Header />
-        </UserContext.Provider>
+        </UserContext.Provider>,
+        { history }
     );
 };
 
@@ -207,22 +209,25 @@ describe("CIDCBreadcrumbs", () => {
     };
 
     it("handles the index path", () => {
-        history.replace("/");
-        const { queryByText } = renderWithRouter(<CIDCBreadcrumbs />);
+        const { queryByText } = renderWithRouter(<CIDCBreadcrumbs />, {
+            route: "/"
+        });
 
         checkPath(queryByText, ["cidc"]);
     });
 
     it("handles a nested path", () => {
-        history.replace("/assays/wes");
-        const { queryByText } = renderWithRouter(<CIDCBreadcrumbs />);
+        const { queryByText } = renderWithRouter(<CIDCBreadcrumbs />, {
+            route: "/assays/wes"
+        });
 
         checkPath(queryByText, ["cidc", "assays", "wes"]);
     });
 
     it("handles a path with dashed parts", () => {
-        history.replace("/browse-files");
-        const { queryByText } = renderWithRouter(<CIDCBreadcrumbs />);
+        const { queryByText } = renderWithRouter(<CIDCBreadcrumbs />, {
+            route: "/browse-files"
+        });
 
         checkPath(queryByText, ["cidc", "browse files"]);
     });
@@ -230,7 +235,8 @@ describe("CIDCBreadcrumbs", () => {
     it("provides links in the breadcrumb hierarchy", () => {
         history.replace("/browse-files/123");
         const { getByText, queryByText } = renderWithRouter(
-            <CIDCBreadcrumbs />
+            <CIDCBreadcrumbs />,
+            { history }
         );
 
         // navigate up one level

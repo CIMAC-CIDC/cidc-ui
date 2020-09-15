@@ -2,6 +2,7 @@ import React from "react";
 import PipelinesPage from "./PipelinesPage";
 import { fireEvent } from "@testing-library/react";
 import axios from "axios";
+import { renderWithRouter } from "../../../test/helpers";
 jest.mock("axios");
 axios.get.mockResolvedValue("");
 
