@@ -74,6 +74,7 @@ export default function App() {
                                                     component={AnalysesDocsPage}
                                                 />
                                                 <Route
+                                                    exact
                                                     path="/browse-files/:fileId"
                                                     component={FileDetailsPage}
                                                 />

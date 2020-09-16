@@ -4,13 +4,13 @@ import { Grid, Button, Card, CardContent, CardHeader } from "@material-ui/core";
 import { AdditionalMetadataTable, CoreDetailsTable } from "./FileDetails";
 import { AuthContext } from "../identity/AuthProvider";
 import { DataFile } from "../../model/file";
-import { RouteComponentProps, Route } from "react-router";
+import { RouteComponentProps } from "react-router";
 import { CloudDownload, Link, Refresh } from "@material-ui/icons";
 import CopyToClipboardButton from "../generic/CopyToClipboardButton";
 import { ButtonProps } from "@material-ui/core/Button";
 import Loader from "../generic/Loader";
-import ClustergrammerPage from "./ClustergrammerPage";
 import IHCBarplot from "../visualizations/IHCBarplot";
+import ClustergrammerCard from "../visualizations/ClustergrammerCard";
 
 const DownloadURL: React.FunctionComponent<{
     fileId: number;
@@ -97,20 +97,10 @@ const FileDetailsPage: React.FunctionComponent<RouteComponentProps<{
         }
     };
 
-    const showVis = fileId && !props.location.pathname.endsWith(fileId);
-    const clustergrammerPath = props.location.pathname + "/clustergrammer";
-
     return (
         <div>
             {!file || !idToken ? (
                 <Loader />
-            ) : showVis ? (
-                <Route
-                    path="/browse-files/:fileId/clustergrammer"
-                    render={routeProps => (
-                        <ClustergrammerPage file={file} {...routeProps} />
-                    )}
-                ></Route>
             ) : (
                 <Grid
                     container
@@ -125,10 +115,10 @@ const FileDetailsPage: React.FunctionComponent<RouteComponentProps<{
                             direction="row"
                             wrap="nowrap"
                         >
-                            <Grid item>
+                            <Grid item md={6}>
                                 <CoreDetailsTable file={file} />
                             </Grid>
-                            <Grid item>
+                            <Grid item md={6}>
                                 <Card>
                                     <CardHeader title="Available Actions"></CardHeader>
                                     <CardContent>
@@ -159,38 +149,25 @@ const FileDetailsPage: React.FunctionComponent<RouteComponentProps<{
                                                     fileId={fileIdInt}
                                                 />
                                             </Grid>
-                                            {file.clustergrammer && (
-                                                <Grid item>
-                                                    <Button
-                                                        fullWidth
-                                                        variant="contained"
-                                                        color="primary"
-                                                        onClick={() =>
-                                                            props.history.push(
-                                                                clustergrammerPath
-                                                            )
-                                                        }
-                                                        disabled={!idToken}
-                                                    >
-                                                        Visualize with
-                                                        Clustergrammer
-                                                    </Button>
-                                                </Grid>
-                                            )}
                                         </Grid>
                                     </CardContent>
                                 </Card>
                             </Grid>
                         </Grid>
                     </Grid>
-                    {file.additional_metadata && (
-                        <Grid item>
-                            <AdditionalMetadataTable file={file} />
-                        </Grid>
-                    )}
                     {file.ihc_combined_plot && (
                         <Grid item>
                             <IHCBarplot data={file.ihc_combined_plot} />
+                        </Grid>
+                    )}
+                    {file.clustergrammer && (
+                        <Grid item>
+                            <ClustergrammerCard file={file} />
+                        </Grid>
+                    )}
+                    {file.additional_metadata && (
+                        <Grid item>
+                            <AdditionalMetadataTable file={file} />
                         </Grid>
                     )}
                 </Grid>

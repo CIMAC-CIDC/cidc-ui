@@ -3,8 +3,8 @@ import { getSingleFile, getDownloadURL } from "../../api/api";
 import FileDetailsPage from "./FileDetailsPage";
 import { renderAsRouteComponent } from "../../../test/helpers";
 import { fireEvent, act } from "@testing-library/react";
-import history from "../identity/History";
 jest.mock("../../api/api");
+jest.mock("../../util/useRawFile");
 
 const idToken = "test-token";
 const downloadURL = "do-a-download";
@@ -23,12 +23,11 @@ it("renders a loader at first", () => {
     expect(queryByTestId("loader")).toBeInTheDocument();
 });
 
-const renderFileDetails = (config = {}) =>
+const renderFileDetails = () =>
     renderAsRouteComponent(FileDetailsPage, {
         path: "/:fileId",
         route: `/${file.id}`,
-        authData: { idToken },
-        ...config
+        authData: { idToken }
     });
 
 it("renders details when a file is provided", async () => {
@@ -89,22 +88,16 @@ it("generates download URLs and performs direct downloads", async done => {
     expect(getDownloadURL.mock.calls.length).toBe(2);
 });
 
-it("shows a clustergrammer button when file has appropriate data", async () => {
+it("shows a clustergrammer card when file has appropriate data", async () => {
     getSingleFile.mockResolvedValue({
         ...file,
-        clustergrammer: { foo: "bar" }
+        clustergrammer: {}
     });
 
-    history.push(`/${file.id}`);
-    const { findByText, getByText } = renderFileDetails({ history });
-    expect(await findByText(/clustergrammer/i)).toBeInTheDocument();
-
-    // Check that navigating to the clustergrammer page works
-    act(() => {
-        fireEvent.click(getByText(/clustergrammer/i));
-    });
-
-    expect(history.location.pathname).toContain("clustergrammer");
+    const { findByText } = renderFileDetails();
+    expect(
+        await findByText(/visualize with clustergrammer/i)
+    ).toBeInTheDocument();
 });
 
 it("shows an IHC plot when file has appropriate data", async () => {
