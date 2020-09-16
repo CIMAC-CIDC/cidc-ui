@@ -92,7 +92,7 @@ const FileDetailsPage: React.FunctionComponent<RouteComponentProps<{
     const doDownload = () => {
         if (idToken && file) {
             getDownloadURL(idToken, fileIdInt).then(url => {
-                window.location.href = url;
+                window.location.assign(url);
             });
         }
     };
