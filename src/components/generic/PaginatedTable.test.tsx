@@ -1,4 +1,5 @@
 import { fireEvent, render } from "@testing-library/react";
+import { cleanup } from "@testing-library/react-hooks";
 import React from "react";
 import PaginatedTable, {
     IHeader,
@@ -20,18 +21,34 @@ const data: IDataType[] = [
 const renderPaginatedTable = (
     props?: Partial<IPaginatedTableProps<IDataType>>
 ) => {
-    return render(
+    const defaultProps = {
+        count: 0,
+        page: 0,
+        rowsPerPage: 3,
+        getRowKey: r => r.id,
+        onChangePage: jest.fn()
+    };
+    const { rerender, ...res } = render(
         <PaginatedTable<IDataType>
             {...{
-                count: 0,
-                page: 0,
-                rowsPerPage: 3,
-                getRowKey: r => r.id,
-                onChangePage: jest.fn(),
+                ...defaultProps,
                 ...(props || {})
             }}
         />
     );
+
+    return {
+        ...res,
+        rerender: (p?: Partial<IPaginatedTableProps<IDataType>>) =>
+            rerender(
+                <PaginatedTable<IDataType>
+                    {...{
+                        ...defaultProps,
+                        ...(p || {})
+                    }}
+                />
+            )
+    };
 };
 
 it("shows a loading message if data is undefined", () => {
@@ -58,15 +75,16 @@ it("fires an event on row clicks", () => {
     expect(onClickRow).toHaveBeenCalledWith(data[0]);
 });
 
+const headers: IHeader[] = [
+    { label: "Cool Column", key: "a", disableSort: true },
+    {
+        label: "Square Column",
+        key: "b",
+        format: (v: string) => `${v} with format`
+    }
+];
+
 it("renders headers based on header configs", () => {
-    const headers: IHeader[] = [
-        { label: "Cool Column", key: "a", disableSort: true },
-        {
-            label: "Square Column",
-            key: "b",
-            format: (v: string) => `${v} with format`
-        }
-    ];
     const onClickHeader = jest.fn();
     const { queryByText, getByText } = renderPaginatedTable({
         headers,
@@ -86,4 +104,33 @@ it("renders headers based on header configs", () => {
     expect(onClickHeader).not.toHaveBeenCalled();
     fireEvent.click(getByText(/square column/i));
     expect(onClickHeader).toHaveBeenCalledWith(headers[1]);
+});
+
+test("selection checkboxes behave as expected", () => {
+    const setSelectedRowIds = jest.fn();
+    const { getByTestId, rerender } = renderPaginatedTable({
+        data,
+        headers,
+        selectedRowIds: [1],
+        setSelectedRowIds
+    });
+
+    // Row with id 1 renders checked
+    const row1Checkbox = getByTestId(/select 1/i).querySelector(
+        'input[type="checkbox"]'
+    );
+    expect(row1Checkbox).toHaveProperty("checked", true);
+
+    // Select all
+    fireEvent.click(
+        getByTestId(/select all/i).querySelector('input[type="checkbox"]')!
+    );
+    expect(setSelectedRowIds).toHaveBeenCalledWith([0, 1, 2]);
+
+    // Deselect all
+    rerender({ data, headers, selectedRowIds: [0, 1, 2], setSelectedRowIds });
+    fireEvent.click(
+        getByTestId(/select all/i).querySelector('input[type="checkbox"]')!
+    );
+    expect(setSelectedRowIds).toHaveBeenCalledWith([]);
 });

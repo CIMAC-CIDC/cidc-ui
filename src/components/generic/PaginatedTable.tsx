@@ -103,6 +103,7 @@ function PaginatedTable<T extends IRowWithId>(props: IPaginatedTableProps<T>) {
                                             }elect all rows on this page`}
                                         >
                                             <Checkbox
+                                                data-testid="select all"
                                                 className={classes.checkbox}
                                                 size="small"
                                                 onChange={() =>
@@ -163,6 +164,7 @@ function PaginatedTable<T extends IRowWithId>(props: IPaginatedTableProps<T>) {
                                 {props.selectedRowIds !== undefined && (
                                     <TableCell className={classes.checkboxCell}>
                                         <Checkbox
+                                            data-testid={`select ${row.id}`}
                                             className={classes.checkbox}
                                             size="small"
                                             checked={selectedPageIds.includes(
