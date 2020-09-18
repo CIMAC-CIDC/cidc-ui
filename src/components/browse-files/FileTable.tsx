@@ -81,7 +81,7 @@ const BatchDownloadButton: React.FC<{
 }> = ({ ids, token, clearIds }) => {
     const [openDialog, setOpenDialog] = React.useState<boolean>(false);
 
-    const filePluralized = `file${ids.length > 1 ? "s" : ""}`;
+    const filePluralized = `file${ids.length !== 1 ? "s" : ""}`;
 
     return (
         <Grid container spacing={1}>

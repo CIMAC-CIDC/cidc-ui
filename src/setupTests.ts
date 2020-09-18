@@ -9,4 +9,5 @@ const localStorageMock = {
 (global as any).localStorage = localStorageMock;
 
 window.URL.createObjectURL = jest.fn();
+window.URL.revokeObjectURL = jest.fn();
 HTMLCanvasElement.prototype.getContext = jest.fn();
