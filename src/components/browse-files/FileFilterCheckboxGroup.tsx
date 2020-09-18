@@ -207,6 +207,7 @@ const Checkboxes = ({
             {sortedOptions.map(({ label, description }) => (
                 <PermsAwareCheckbox
                     key={label}
+                    data-testid={label}
                     label={
                         description ? (
                             <InfoTooltip text={description}>
@@ -310,15 +311,13 @@ const NestedBoxes = ({
                 const isChecked = suboptions.length === subchecked.length;
 
                 const TopCheckboxLabel = (
-                    <Grid container spacing={1} alignItems="center">
-                        <Grid item>{opt}</Grid>
-                        <Grid item>
-                            <Typography color="textSecondary" variant="caption">
-                                ({suboptions.length} file categor
-                                {suboptions.length === 1 ? "y" : "ies"})
-                            </Typography>
-                        </Grid>
-                    </Grid>
+                    <>
+                        <span style={{ marginRight: 5 }}>{opt}</span>
+                        <Typography color="textSecondary" variant="caption">
+                            ({suboptions.length} file categor
+                            {suboptions.length === 1 ? "y" : "ies"})
+                        </Typography>
+                    </>
                 );
 
                 return (
@@ -334,6 +333,7 @@ const NestedBoxes = ({
                         >
                             <Grid item>
                                 <PermsAwareCheckbox
+                                    data-testid={opt}
                                     facetType={opt}
                                     label={TopCheckboxLabel}
                                     onClickLabel={() => toggleOpenOption(opt)}
@@ -342,22 +342,22 @@ const NestedBoxes = ({
                                 />
                             </Grid>
                             <Grid item>
-                                {isOpen ? (
-                                    <IconButton
-                                        size="small"
-                                        disabled={hasCheckedSuboptions}
-                                        onClick={() => removeOpenOption(opt)}
-                                    >
+                                <IconButton
+                                    data-testid={`toggle open ${opt}`}
+                                    size="small"
+                                    disabled={hasCheckedSuboptions}
+                                    onClick={() =>
+                                        isOpen
+                                            ? removeOpenOption(opt)
+                                            : addOpenOption(opt)
+                                    }
+                                >
+                                    {isOpen ? (
                                         <KeyboardArrowUp />
-                                    </IconButton>
-                                ) : (
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => addOpenOption(opt)}
-                                    >
+                                    ) : (
                                         <KeyboardArrowDown />
-                                    </IconButton>
-                                )}
+                                    )}
+                                </IconButton>
                             </Grid>
                         </Grid>
                         {isOpen && (

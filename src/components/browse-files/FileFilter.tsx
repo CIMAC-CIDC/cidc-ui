@@ -22,12 +22,11 @@ export const filterConfig = {
 export type Filters = ReturnType<typeof useQueryParams>[0];
 
 const ARRAY_PARAM_DELIM = "|";
-
-const FileFilter: React.FunctionComponent<{ token: string }> = props => {
+const useFileFilterFacets = (token: string) => {
     const [facets, setFacets] = React.useState<IFacets | undefined>();
     React.useEffect(() => {
-        getFilterFacets(props.token).then(setFacets);
-    }, [props.token]);
+        getFilterFacets(token).then(setFacets);
+    }, [token]);
 
     const [filters, setFilters] = useQueryParams(filterConfig);
     const hasFilters =
@@ -74,9 +73,79 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
         }
     };
 
+    return { facets, filters, hasFilters, clearFilters, updateFilters };
+};
+
+const FileFilter: React.FunctionComponent<{ token: string }> = props => {
+    const {
+        facets,
+        filters,
+        hasFilters,
+        clearFilters,
+        updateFilters
+    } = useFileFilterFacets(props.token);
+
     if (!facets) {
         return null;
     }
+
+    const trialIdCheckboxes = (
+        <Grid item xs={12}>
+            <FileFilterCheckboxGroup
+                noTopDivider
+                title="Protocol Identifiers"
+                config={{
+                    options: facets.trial_ids.map(label => ({
+                        label
+                    })),
+                    checked: filters.trial_ids
+                }}
+                onChange={updateFilters("trial_ids")}
+            />
+        </Grid>
+    );
+
+    const otherFacetCheckboxes = Object.entries(facets.facets).map(
+        ([facetHeader, options]) => {
+            const checked = filters.facets
+                ?.filter(facet => facet.startsWith(facetHeader))
+                .map(facet => {
+                    return facet
+                        .split(ARRAY_PARAM_DELIM)
+                        .slice(1)
+                        .join(ARRAY_PARAM_DELIM);
+                });
+            return (
+                <Grid key={facetHeader} item xs={12}>
+                    <FileFilterCheckboxGroup
+                        title={facetHeader}
+                        config={{
+                            options,
+                            checked
+                        }}
+                        onChange={args => {
+                            let facetValues: string[];
+                            if (Array.isArray(args)) {
+                                facetValues = args;
+                            } else {
+                                const splitArgs = args.split(ARRAY_PARAM_DELIM);
+                                if (splitArgs.length > 1) {
+                                    facetValues = splitArgs;
+                                } else {
+                                    facetValues = [args];
+                                }
+                            }
+
+                            return updateFilters("facets")([
+                                facetHeader,
+                                ...facetValues
+                            ]);
+                        }}
+                    />
+                </Grid>
+            );
+        }
+    );
 
     return (
         <>
@@ -108,67 +177,12 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
             </Box>
             <Card>
                 <Grid container direction="column">
-                    {facets.trial_ids && (
-                        <Grid item xs={12}>
-                            <FileFilterCheckboxGroup
-                                noTopDivider
-                                title="Protocol Identifiers"
-                                config={{
-                                    options: facets.trial_ids.map(label => ({
-                                        label
-                                    })),
-                                    checked: filters.trial_ids
-                                }}
-                                onChange={updateFilters("trial_ids")}
-                            />
-                        </Grid>
+                    {facets && (
+                        <>
+                            {trialIdCheckboxes}
+                            {otherFacetCheckboxes}
+                        </>
                     )}
-                    {facets.facets &&
-                        Object.entries(facets.facets).map(
-                            ([facetHeader, options]) => {
-                                const checked = filters.facets
-                                    ?.filter(facet =>
-                                        facet.startsWith(facetHeader)
-                                    )
-                                    .map(facet => {
-                                        return facet
-                                            .split(ARRAY_PARAM_DELIM)
-                                            .slice(1)
-                                            .join(ARRAY_PARAM_DELIM);
-                                    });
-                                return (
-                                    <Grid key={facetHeader} item xs={12}>
-                                        <FileFilterCheckboxGroup
-                                            title={facetHeader}
-                                            config={{
-                                                options,
-                                                checked
-                                            }}
-                                            onChange={args => {
-                                                let facetValues: string[];
-                                                if (Array.isArray(args)) {
-                                                    facetValues = args;
-                                                } else {
-                                                    const splitArgs = args.split(
-                                                        ARRAY_PARAM_DELIM
-                                                    );
-                                                    if (splitArgs.length > 1) {
-                                                        facetValues = splitArgs;
-                                                    } else {
-                                                        facetValues = [args];
-                                                    }
-                                                }
-
-                                                return updateFilters("facets")([
-                                                    facetHeader,
-                                                    ...facetValues
-                                                ]);
-                                            }}
-                                        />
-                                    </Grid>
-                                );
-                            }
-                        )}
                 </Grid>
             </Card>
         </>

@@ -6,6 +6,10 @@ import {
     IAuthData,
     AuthContext
 } from "../src/components/identity/AuthProvider";
+import {
+    IAccountWithExtraContext,
+    UserContext
+} from "../src/components/identity/UserProvider";
 
 export const renderWithRouter = (
     element: React.ReactElement,
@@ -47,4 +51,21 @@ export const renderAsRouteComponent = (
             out
         )
     );
+};
+
+export const renderWithUserContext = (
+    element: React.ReactElement,
+    user?: Partial<IAccountWithExtraContext>
+) => {
+    return render(
+        // @ts-ignore
+        <UserContext.Provider value={user}>{element}</UserContext.Provider>
+    );
+};
+
+export const getNativeCheckbox = (
+    muiCheckbox: HTMLElement
+): HTMLInputElement => {
+    // @ts-ignore
+    return muiCheckbox.querySelector('input[type="checkbox"]');
 };

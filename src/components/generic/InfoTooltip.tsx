@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography, Tooltip, Box } from "@material-ui/core";
+import { Tooltip } from "@material-ui/core";
 import { InfoOutlined } from "@material-ui/icons";
 import { withStyles } from "@material-ui/styles";
 
@@ -14,16 +14,14 @@ const LargeFontTooltip = withStyles({
 })(Tooltip);
 
 const InfoTooltip: React.FC<IInfoTooltipProps> = ({ text, children }) => (
-    <Box display="flex" alignItems="center">
-        <Box marginRight={0.5}>
-            <Typography variant="body2">{children}</Typography>
-        </Box>
+    <span style={{ display: "flex", alignItems: "center" }}>
+        <span style={{ marginRight: 0.5 }}>{children}</span>
         <LargeFontTooltip title={text} placement="bottom-start">
-            <div role="tooltip">
+            <span role="tooltip">
                 <InfoOutlined color="primary" fontSize="inherit" />
-            </div>
+            </span>
         </LargeFontTooltip>
-    </Box>
+    </span>
 );
 
 export default InfoTooltip;

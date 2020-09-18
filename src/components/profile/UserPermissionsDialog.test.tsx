@@ -11,6 +11,7 @@ import { Trial } from "../../model/trial";
 import { InfoContext } from "../info/InfoProvider";
 import UserPermissionsDialogWithInfo from "./UserPermissionsDialog";
 import { UserContext } from "../identity/UserProvider";
+import { getNativeCheckbox } from "../../../test/helpers";
 jest.mock("../../api/api");
 
 const TOKEN = "test-token";
@@ -58,10 +59,6 @@ function doRender() {
             </UserContext.Provider>
         </InfoContext.Provider>
     );
-}
-
-function getNativeCheckbox(muiCheckbox): HTMLInputElement {
-    return muiCheckbox.querySelector('input[type="checkbox"]');
 }
 
 it("renders existing permissions", async () => {
