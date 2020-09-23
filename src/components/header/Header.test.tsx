@@ -50,7 +50,7 @@ describe("Header", () => {
         const { queryByText } = renderWithRouter(<Header />);
         checkVisibility(
             queryByText,
-            ["browse files", "pipelines", "schema", "profile"],
+            ["browse data", "pipelines", "schema", "profile"],
             ["manifests", "assays", "analyses"]
         );
     });
@@ -62,7 +62,7 @@ describe("Header", () => {
         });
         checkVisibility(
             q1,
-            ["browse files", "pipelines", "schema", "profile"],
+            ["browse data", "pipelines", "schema", "profile"],
             ["manifests", "assays", "analyses"]
         );
         cleanup();
@@ -74,7 +74,7 @@ describe("Header", () => {
         });
         checkVisibility(
             q2,
-            ["browse files", "pipelines", "schema", "profile", "assays"],
+            ["browse data", "pipelines", "schema", "profile", "assays"],
             ["manifests", "analyses"]
         );
         cleanup();
@@ -86,7 +86,7 @@ describe("Header", () => {
         });
         checkVisibility(
             q3,
-            ["browse files", "pipelines", "schema", "profile", "manifests"],
+            ["browse data", "pipelines", "schema", "profile", "manifests"],
             ["assays", "analyses"]
         );
         cleanup();
@@ -100,7 +100,7 @@ describe("Header", () => {
         checkVisibility(
             q4,
             [
-                "browse files",
+                "browse data",
                 "pipelines",
                 "schema",
                 "profile",
@@ -121,7 +121,7 @@ describe("Header", () => {
         checkVisibility(
             q5,
             [
-                "browse files",
+                "browse data",
                 "pipelines",
                 "schema",
                 "profile",
@@ -143,7 +143,7 @@ describe("Header", () => {
         });
 
         [
-            "browse-files",
+            "browse-data",
             "pipelines",
             "schema",
             "profile",
@@ -226,29 +226,29 @@ describe("CIDCBreadcrumbs", () => {
 
     it("handles a path with dashed parts", () => {
         const { queryByText } = renderWithRouter(<CIDCBreadcrumbs />, {
-            route: "/browse-files"
+            route: "/browse-data"
         });
 
-        checkPath(queryByText, ["cidc", "browse files"]);
+        checkPath(queryByText, ["cidc", "browse data"]);
     });
 
     it("provides links in the breadcrumb hierarchy", () => {
-        history.replace("/browse-files/123");
+        history.replace("/browse-data/123");
         const { getByText, queryByText } = renderWithRouter(
             <CIDCBreadcrumbs />,
             { history }
         );
 
         // navigate up one level
-        fireEvent.click(getByText(/browse files/i));
-        expect(history.location.pathname).toBe("/browse-files");
+        fireEvent.click(getByText(/browse data/i));
+        expect(history.location.pathname).toBe("/browse-data");
         expect(queryByText(/123/i)).not.toBeInTheDocument();
 
         // navigate up two levels
         history.goBack();
         fireEvent.click(getByText(/cidc/i));
         expect(history.location.pathname).toBe("/");
-        expect(queryByText(/browse files/i)).not.toBeInTheDocument();
+        expect(queryByText(/browse data/i)).not.toBeInTheDocument();
         expect(queryByText(/123/i)).not.toBeInTheDocument();
     });
 });

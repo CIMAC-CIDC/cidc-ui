@@ -9,8 +9,8 @@ import {
     CardHeader,
     CardContent
 } from "@material-ui/core";
-import { DataFile } from "../../model/file";
-import { LOCALE, DATE_OPTIONS } from "../../util/constants";
+import { DataFile } from "../../../model/file";
+import { LOCALE, DATE_OPTIONS } from "../../../util/constants";
 import filesize from "filesize";
 
 export interface IFileDetailsTableProps {

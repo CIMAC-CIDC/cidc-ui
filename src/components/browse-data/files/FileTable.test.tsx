@@ -1,12 +1,12 @@
 import { fireEvent } from "@testing-library/react";
 import { range } from "lodash";
 import React from "react";
-import { renderWithRouter } from "../../../test/helpers";
-import { getFiles, getFilelist } from "../../api/api";
-import { DataFile } from "../../model/file";
-import { AuthContext } from "../identity/AuthProvider";
+import { renderWithRouter } from "../../../../test/helpers";
+import { getFiles, getFilelist } from "../../../api/api";
+import { DataFile } from "../../../model/file";
+import { AuthContext } from "../../identity/AuthProvider";
 import FileTable, { filterParams, sortParams } from "./FileTable";
-jest.mock("../../api/api");
+jest.mock("../../../api/api");
 
 test("filterParams", () => {
     expect(filterParams({})).toEqual({});

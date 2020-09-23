@@ -1,16 +1,16 @@
 import * as React from "react";
-import { getSingleFile, getDownloadURL } from "../../api/api";
+import { getSingleFile, getDownloadURL } from "../../../api/api";
 import { Grid, Button, Card, CardContent, CardHeader } from "@material-ui/core";
 import { AdditionalMetadataTable, CoreDetailsTable } from "./FileDetails";
-import { AuthContext } from "../identity/AuthProvider";
-import { DataFile } from "../../model/file";
+import { AuthContext } from "../../identity/AuthProvider";
+import { DataFile } from "../../../model/file";
 import { RouteComponentProps } from "react-router";
 import { CloudDownload, Link, Refresh } from "@material-ui/icons";
-import CopyToClipboardButton from "../generic/CopyToClipboardButton";
+import CopyToClipboardButton from "../../generic/CopyToClipboardButton";
 import { ButtonProps } from "@material-ui/core/Button";
-import Loader from "../generic/Loader";
-import IHCBarplot from "../visualizations/IHCBarplot";
-import ClustergrammerCard from "../visualizations/ClustergrammerCard";
+import Loader from "../../generic/Loader";
+import IHCBarplot from "../../visualizations/IHCBarplot";
+import ClustergrammerCard from "../../visualizations/ClustergrammerCard";
 
 const DownloadURL: React.FunctionComponent<{
     fileId: number;

@@ -18,10 +18,10 @@ import {
     KeyboardArrowUp
 } from "@material-ui/icons";
 import { Dictionary, some, partition, sortBy } from "lodash";
-import { useUserContext } from "../identity/UserProvider";
+import { useUserContext } from "../../identity/UserProvider";
 import { withStyles } from "@material-ui/styles";
-import { IFacetInfo } from "./FileFilter";
-import InfoTooltip from "../generic/InfoTooltip";
+import InfoTooltip from "../../generic/InfoTooltip";
+import { IFacetInfo } from "./useFilterFacets";
 
 const searchBoxMargin = 15;
 

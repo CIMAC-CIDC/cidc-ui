@@ -1,6 +1,6 @@
 import * as React from "react";
-import BrowseFilesPage from "./components/browse-files/BrowseFilesPage";
-import FileDetailsPage from "./components/browse-files/FileDetailsPage";
+import BrowseDataPage from "./components/browse-data/BrowseDataPage";
+import FileDetailsPage from "./components/browse-data/files/FileDetailsPage";
 import { Router, Switch, Route } from "react-router-dom";
 import Header from "./components/header/Header";
 import Footer from "./components/footer/Footer";
@@ -75,13 +75,13 @@ export default function App() {
                                                 />
                                                 <Route
                                                     exact
-                                                    path="/browse-files/:fileId"
+                                                    path="/browse-data/:fileId"
                                                     component={FileDetailsPage}
                                                 />
                                                 <Route
                                                     exact
-                                                    path="/browse-files"
-                                                    component={BrowseFilesPage}
+                                                    path="/browse-data"
+                                                    component={BrowseDataPage}
                                                 />
                                                 <Route
                                                     exact

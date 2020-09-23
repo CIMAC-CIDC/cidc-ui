@@ -57,7 +57,7 @@ const HomePage: React.FunctionComponent = () => {
             <Divider style={{ margin: "2em 0" }} />
             <Typography gutterBottom>On this site, you can</Typography>
             <List>
-                <ListLink icon={<Search />} href="/browse-files">
+                <ListLink icon={<Search />} href="/browse-data">
                     Browse ingested data
                 </ListLink>
                 {user && user.showAssays && (

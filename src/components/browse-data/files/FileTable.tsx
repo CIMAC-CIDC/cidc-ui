@@ -1,8 +1,8 @@
 import React from "react";
-import { DataFile } from "../../model/file";
-import { LOCALE, DATE_OPTIONS } from "../../util/constants";
-import { colors } from "../../rootStyles";
-import PaginatedTable, { IHeader } from "../generic/PaginatedTable";
+import { DataFile } from "../../../model/file";
+import { LOCALE, DATE_OPTIONS } from "../../../util/constants";
+import { colors } from "../../../rootStyles";
+import PaginatedTable, { IHeader } from "../../generic/PaginatedTable";
 import {
     makeStyles,
     TableCell,
@@ -15,14 +15,14 @@ import {
     DialogContent,
     DialogActions
 } from "@material-ui/core";
-import { filterConfig, Filters } from "./FileFilter";
-import { useQueryParams, useQueryParam, NumberParam } from "use-query-params";
-import { getFiles, IDataWithMeta, getFilelist } from "../../api/api";
-import { withIdToken } from "../identity/AuthProvider";
-import MuiRouterLink from "../generic/MuiRouterLink";
+import { useQueryParam, NumberParam } from "use-query-params";
+import { getFiles, IDataWithMeta, getFilelist } from "../../../api/api";
+import { withIdToken } from "../../identity/AuthProvider";
+import MuiRouterLink from "../../generic/MuiRouterLink";
 import axios, { CancelTokenSource } from "axios";
 import filesize from "filesize";
 import ReactMarkdown from "react-markdown";
+import useFilterFacets, { Filters } from "../shared/useFilterFacets";
 
 const fileQueryDefaults = {
     page_size: 15
@@ -169,7 +169,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
     const axiosCanceller = React.useRef<CancelTokenSource | undefined>();
 
-    const filters = useQueryParams(filterConfig)[0];
+    const { filters } = useFilterFacets(props.token, { loadFacets: false });
 
     const [maybeQueryPage, setQueryPage] = useQueryParam("page", NumberParam);
     const queryPage = maybeQueryPage || 0;
@@ -272,7 +272,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         const fileName = paths[paths.length - 1];
         const prefix = paths.slice(0, paths.length - 1).join("/");
         return (
-            <MuiRouterLink to={`/browse-files/${row.id}`}>
+            <MuiRouterLink to={`/browse-data/${row.id}`}>
                 <div style={{ textDecoration: "underline" }}>
                     <div>{prefix}/</div>
                     <div>{fileName}</div>

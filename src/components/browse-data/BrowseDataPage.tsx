@@ -1,7 +1,7 @@
 import { Grid, makeStyles } from "@material-ui/core";
 import * as React from "react";
-import FileFilter from "./FileFilter";
-import FileTable from "./FileTable";
+import FileFilter from "./files/FileFilter";
+import FileTable from "./files/FileTable";
 import { RouteComponentProps } from "react-router";
 
 const filterWidth = 300;
@@ -15,7 +15,7 @@ const useStyles = makeStyles({
     table: { maxWidth: maxTableWidth, width: `calc(100% - ${filterWidth}px)` }
 });
 
-const BrowseFilesPage: React.FC<RouteComponentProps> = props => {
+const BrowseDataPage: React.FC<RouteComponentProps> = props => {
     const classes = useStyles();
 
     return (
@@ -32,4 +32,4 @@ const BrowseFilesPage: React.FC<RouteComponentProps> = props => {
     );
 };
 
-export default BrowseFilesPage;
+export default BrowseDataPage;

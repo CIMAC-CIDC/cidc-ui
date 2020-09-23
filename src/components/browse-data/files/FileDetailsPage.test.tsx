@@ -1,10 +1,10 @@
 import React from "react";
-import { getSingleFile, getDownloadURL } from "../../api/api";
+import { getSingleFile, getDownloadURL } from "../../../api/api";
 import FileDetailsPage from "./FileDetailsPage";
-import { renderAsRouteComponent } from "../../../test/helpers";
+import { renderAsRouteComponent } from "../../../../test/helpers";
 import { fireEvent, act } from "@testing-library/react";
-jest.mock("../../api/api");
-jest.mock("../../util/useRawFile");
+jest.mock("../../../api/api");
+jest.mock("../../../util/useRawFile");
 
 const idToken = "test-token";
 const downloadURL = "do-a-download";

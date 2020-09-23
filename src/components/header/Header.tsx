@@ -163,8 +163,8 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                         <StyledTabs value={selectedTab} onChange={handleChange}>
                             <Tab
                                 disableRipple={true}
-                                value="/browse-files"
-                                label="Browse Files"
+                                value="/browse-data"
+                                label="browse data"
                                 icon={<Search />}
                             />
                             {user && user.showAssays && (

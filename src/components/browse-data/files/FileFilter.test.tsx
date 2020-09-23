@@ -3,13 +3,14 @@ import React from "react";
 import {
     getNativeCheckbox,
     renderWithUserContext
-} from "../../../test/helpers";
-import { getFilterFacets } from "../../api/api";
-import FileFilter, { IFacets } from "./FileFilter";
+} from "../../../../test/helpers";
+import { getFilterFacets } from "../../../api/api";
+import FileFilter from "./FileFilter";
 import { QueryParamProvider } from "use-query-params";
-import history from "../identity/History";
+import history from "../../identity/History";
 import { Route, Router } from "react-router-dom";
-jest.mock("../../api/api");
+import { IFacets } from "../shared/useFilterFacets";
+jest.mock("../../../api/api");
 
 const facets: IFacets = {
     trial_ids: ["test-trial-1", "test-trial-2"],
