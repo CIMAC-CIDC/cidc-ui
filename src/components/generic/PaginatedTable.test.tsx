@@ -51,9 +51,9 @@ const renderPaginatedTable = (
     };
 };
 
-it("shows a loading message if data is undefined", () => {
-    const { queryByText } = renderPaginatedTable();
-    expect(queryByText(/loading/i)).toBeInTheDocument();
+it("shows a placeholder if data is undefined", () => {
+    const { queryAllByTestId } = renderPaginatedTable();
+    expect(queryAllByTestId(/placeholder-row/i).length).toBeGreaterThan(0);
 });
 
 it("shows an appropriate message if data is empty", () => {

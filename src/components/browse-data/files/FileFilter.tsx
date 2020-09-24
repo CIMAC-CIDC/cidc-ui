@@ -1,8 +1,10 @@
 import * as React from "react";
 import { Grid, Card, Typography, Box, Button } from "@material-ui/core";
-import FileFilterCheckboxGroup from "../shared/FileFilterCheckboxGroup";
+import FileFilterCheckboxGroup, {
+    FileFilterCheckboxGroupPlaceholder
+} from "../shared/FileFilterCheckboxGroup";
 import { withIdToken } from "../../identity/AuthProvider";
-import useFilterFacets, { ARRAY_PARAM_DELIM } from "../shared/useFilterFacets";
+import { useFilterFacets, ARRAY_PARAM_DELIM } from "../shared/FilterProvider";
 
 const FileFilter: React.FunctionComponent<{ token: string }> = props => {
     const {
@@ -11,30 +13,30 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
         hasFilters,
         clearFilters,
         updateFilters
-    } = useFilterFacets(props.token);
-
-    if (!facets) {
-        return null;
-    }
+    } = useFilterFacets();
 
     const trialIdCheckboxes = (
         <Grid item xs={12}>
-            <FileFilterCheckboxGroup
-                noTopDivider
-                title="Protocol Identifiers"
-                config={{
-                    options: facets.trial_ids.map(label => ({
-                        label
-                    })),
-                    checked: filters.trial_ids
-                }}
-                onChange={updateFilters("trial_ids")}
-            />
+            {facets ? (
+                <FileFilterCheckboxGroup
+                    noTopDivider
+                    title="Protocol Identifiers"
+                    config={{
+                        options: facets.trial_ids.map(label => ({
+                            label
+                        })),
+                        checked: filters.trial_ids
+                    }}
+                    onChange={updateFilters("trial_ids")}
+                />
+            ) : (
+                <FileFilterCheckboxGroupPlaceholder />
+            )}
         </Grid>
     );
 
-    const otherFacetCheckboxes = Object.entries(facets.facets).map(
-        ([facetHeader, options]) => {
+    const otherFacetCheckboxes = facets ? (
+        Object.entries(facets.facets).map(([facetHeader, options]) => {
             const checked = filters.facets
                 ?.filter(facet => facet.startsWith(facetHeader))
                 .map(facet => {
@@ -72,7 +74,11 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                     />
                 </Grid>
             );
-        }
+        })
+    ) : (
+        <Grid item>
+            <FileFilterCheckboxGroupPlaceholder />
+        </Grid>
     );
 
     return (
@@ -105,12 +111,8 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
             </Box>
             <Card>
                 <Grid container direction="column">
-                    {facets && (
-                        <>
-                            {trialIdCheckboxes}
-                            {otherFacetCheckboxes}
-                        </>
-                    )}
+                    {trialIdCheckboxes}
+                    {otherFacetCheckboxes}
                 </Grid>
             </Card>
         </>

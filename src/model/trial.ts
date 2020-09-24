@@ -6,8 +6,36 @@ export interface Trial {
     id: number;
     trial_id: string;
     metadata_json: any;
+    file_bundle?: IFileBundle;
     // TODO: implement role-based access to Trial resources in the new API.
     // TODO: add missing fields (e.g., assays, participants) to this object.
 }
 
 export type NewTrial = Omit<Omit<Trial, "_etag">, "id">;
+
+export interface IFileBundle {
+    [assay: string]: {
+        source?: number[];
+        analysis?: number[];
+        clinical?: number[];
+        miscellaneous?: number[];
+    };
+}
+
+interface ITrialInfo {
+    participants: any[];
+    summary?: string;
+    organization?: string;
+    ctDotGovID?: string;
+}
+
+/**
+ * Extract info from trial metadata. Since the shape of `Trial["metadata_json"]`
+ * might change, this function is the safe way to access information stored there.
+ * */
+export const getTrialInfo = (trial: Trial): ITrialInfo => {
+    return {
+        participants: trial.metadata_json.participants
+        /* TODO: extract other attributes */
+    };
+};

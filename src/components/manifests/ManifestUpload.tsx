@@ -183,9 +183,7 @@ const ManifestUpload: React.FunctionComponent = () => {
                                                         status === "loading"
                                                     }
                                                     data-testid={`radio-${name}`}
-                                                >
-                                                    {name}
-                                                </FormControlLabel>
+                                                />
                                             )
                                         )}
                                 </RadioGroup>

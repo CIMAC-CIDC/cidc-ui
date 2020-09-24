@@ -2,6 +2,7 @@ import { Dictionary, uniq } from "lodash";
 import React from "react";
 import { ArrayParam, useQueryParams } from "use-query-params";
 import { getFilterFacets } from "../../../api/api";
+import { withIdToken } from "../../identity/AuthProvider";
 
 export interface IFacetInfo {
     label: string;
@@ -16,16 +17,48 @@ export const filterConfig = {
     trial_ids: ArrayParam,
     facets: ArrayParam
 };
-export type Filters = ReturnType<typeof useQueryParams>[0];
+
+export interface IFilters {
+    trial_ids?: string[];
+    facets?: string[];
+}
+
+export interface IFilterContext {
+    facets?: IFacets;
+    filters: IFilters;
+    hasFilters: boolean;
+    clearFilters: () => void;
+    updateFilters: (k: keyof IFacets) => (v: string | string[]) => void;
+}
+
+export const FilterContext = React.createContext<IFilterContext>({
+    facets: undefined,
+    filters: {},
+    hasFilters: false,
+    clearFilters: () => undefined,
+    updateFilters: () => () => undefined
+});
 
 export const ARRAY_PARAM_DELIM = "|";
-const useFilterFacets = (token: string, { loadFacets = true } = {}) => {
+
+export interface IFilterProviderProps {
+    trialView?: boolean;
+}
+
+const FilterProvider: React.FC<IFilterProviderProps & { token: string }> = ({
+    token,
+    trialView,
+    children
+}) => {
     const [facets, setFacets] = React.useState<IFacets | undefined>();
     React.useEffect(() => {
-        if (loadFacets) {
-            getFilterFacets(token).then(setFacets);
-        }
-    }, [token, loadFacets]);
+        getFilterFacets(token).then(setFacets);
+    }, [token]);
+    // For now, only show protocol identifier filters in the trial view
+    const maybeFilteredFacets =
+        trialView && facets
+            ? ({ trial_ids: facets.trial_ids, facets: {} } as IFacets)
+            : facets;
 
     const [filters, setFilters] = useQueryParams(filterConfig);
     const hasFilters =
@@ -72,7 +105,23 @@ const useFilterFacets = (token: string, { loadFacets = true } = {}) => {
         }
     };
 
-    return { facets, filters, hasFilters, clearFilters, updateFilters };
+    return (
+        <FilterContext.Provider
+            value={{
+                facets: maybeFilteredFacets,
+                filters,
+                hasFilters,
+                clearFilters,
+                updateFilters
+            }}
+        >
+            {children}
+        </FilterContext.Provider>
+    );
 };
 
-export default useFilterFacets;
+export const useFilterFacets = () => {
+    return React.useContext(FilterContext);
+};
+
+export default withIdToken<IFilterProviderProps>(FilterProvider);

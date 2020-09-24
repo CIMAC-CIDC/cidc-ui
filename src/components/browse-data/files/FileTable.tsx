@@ -8,21 +8,16 @@ import {
     TableCell,
     Button,
     Grid,
-    Box,
-    Typography,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions
+    Typography
 } from "@material-ui/core";
 import { useQueryParam, NumberParam } from "use-query-params";
-import { getFiles, IDataWithMeta, getFilelist } from "../../../api/api";
+import { getFiles, IDataWithMeta } from "../../../api/api";
 import { withIdToken } from "../../identity/AuthProvider";
 import MuiRouterLink from "../../generic/MuiRouterLink";
 import axios, { CancelTokenSource } from "axios";
 import filesize from "filesize";
-import ReactMarkdown from "react-markdown";
-import useFilterFacets, { Filters } from "../shared/useFilterFacets";
+import { Filters, useFilterFacets } from "../shared/FilterProvider";
+import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 
 const fileQueryDefaults = {
     page_size: 15
@@ -56,6 +51,7 @@ const useStyles = makeStyles({
 
 export interface IFileTableProps {
     history: any;
+    viewToggleButton: React.ReactElement;
 }
 
 export const filterParams = (filters: Filters) => {
@@ -81,8 +77,6 @@ const BatchDownloadButton: React.FC<{
 }> = ({ ids, token, clearIds }) => {
     const [openDialog, setOpenDialog] = React.useState<boolean>(false);
 
-    const filePluralized = `file${ids.length !== 1 ? "s" : ""}`;
-
     return (
         <Grid container spacing={1}>
             <Grid item>
@@ -96,7 +90,9 @@ const BatchDownloadButton: React.FC<{
                     }}
                 >
                     {ids.length > 0
-                        ? `Download ${ids.length} ${filePluralized}`
+                        ? `Download ${ids.length} file${
+                              ids.length !== 1 ? "s" : ""
+                          }`
                         : "No files selected"}
                 </Button>
             </Grid>
@@ -107,58 +103,12 @@ const BatchDownloadButton: React.FC<{
                     </Button>
                 </Grid>
             )}
-            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-                <DialogTitle>
-                    Batch download{" "}
-                    <strong>
-                        {ids.length} {filePluralized}
-                    </strong>
-                </DialogTitle>
-                <DialogContent>
-                    <ReactMarkdown
-                        className="markdown-body"
-                        source={[
-                            `Download the "filelist.tsv" file for this file batch, and run this command in the desired download directory:`,
-                            "```bash",
-                            "cat filelist.tsv | xargs -n 2 -P 8 gsutil cp",
-                            "```",
-                            "If you haven't logged in with `gcloud` recently, you'll need to run `gcloud auth login` first.",
-                            "",
-                            "This command requires a [`gsutil`](https://cloud.google.com/storage/docs/gsutil_install) installation and a shell that supports `cat` and `xargs`.",
-                            "",
-                            "Note: Batch downloads are resumable. If you cancel an ongoing download (e.g., using control+c), you can resume that download by rerunning the download command."
-                        ].join("\n")}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Grid container justify="space-between">
-                        <Grid item>
-                            <Button onClick={() => setOpenDialog(false)}>
-                                Cancel
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                color="primary"
-                                variant="contained"
-                                onClick={() => {
-                                    getFilelist(token, ids).then(blob => {
-                                        const url = URL.createObjectURL(blob);
-                                        const a = document.createElement("a");
-                                        a.href = url;
-                                        a.download = "filelist.tsv";
-                                        document.body.appendChild(a);
-                                        a.click();
-                                        URL.revokeObjectURL(url);
-                                    });
-                                }}
-                            >
-                                Download Filelist.tsv
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </DialogActions>
-            </Dialog>
+            <BatchDownloadDialog
+                ids={ids}
+                token={token}
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+            />
         </Grid>
     );
 };
@@ -169,7 +119,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
     const axiosCanceller = React.useRef<CancelTokenSource | undefined>();
 
-    const { filters } = useFilterFacets(props.token, { loadFacets: false });
+    const { filters } = useFilterFacets();
 
     const [maybeQueryPage, setQueryPage] = useQueryParam("page", NumberParam);
     const queryPage = maybeQueryPage || 0;
@@ -285,30 +235,38 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         new Date(row.uploaded_timestamp).toLocaleString(LOCALE, DATE_OPTIONS);
 
     return (
-        <div className={classes.root}>
-            <Grid container direction="column" spacing={1}>
-                <Grid item>
-                    <Grid container spacing={1}>
-                        <Grid item>
-                            <Box margin={1}>
+        <Grid container direction="column" spacing={1}>
+            <Grid item>
+                <Grid
+                    container
+                    justify="space-between"
+                    alignItems="center"
+                    spacing={1}
+                >
+                    <Grid item>
+                        <Grid container alignItems="center" spacing={1}>
+                            <Grid item>
                                 <Typography
                                     color="textSecondary"
                                     variant="caption"
                                 >
                                     Select files for batch download
                                 </Typography>
-                            </Box>
-                        </Grid>
-                        <Grid item>
-                            <BatchDownloadButton
-                                ids={selectedFileIds}
-                                token={props.token}
-                                clearIds={() => setSelectedFileIds([])}
-                            />
+                            </Grid>
+                            <Grid item>
+                                <BatchDownloadButton
+                                    ids={selectedFileIds}
+                                    token={props.token}
+                                    clearIds={() => setSelectedFileIds([])}
+                                />
+                            </Grid>
                         </Grid>
                     </Grid>
+                    <Grid item>{props.viewToggleButton}</Grid>
                 </Grid>
-                <Grid item>
+            </Grid>
+            <Grid item>
+                <div className={classes.root}>
                     <PaginatedTable
                         count={data ? data.meta.total : 0}
                         page={tablePage}
@@ -366,9 +324,9 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                             setHeaders(newHeaders);
                         }}
                     />
-                </Grid>
+                </div>
             </Grid>
-        </div>
+        </Grid>
     );
 };
 

@@ -8,7 +8,7 @@ import axios, {
     CancelToken
 } from "axios";
 import Permission from "../model/permission";
-import { IFacets } from "../components/browse-data/shared/useFilterFacets";
+import { IFacets } from "../components/browse-data/shared/FilterProvider";
 
 const URL: string = process.env.REACT_APP_API_URL!;
 

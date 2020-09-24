@@ -17,11 +17,12 @@ import {
     KeyboardArrowDown,
     KeyboardArrowUp
 } from "@material-ui/icons";
-import { Dictionary, some, partition, sortBy } from "lodash";
+import { Dictionary, some, partition, sortBy, range } from "lodash";
 import { useUserContext } from "../../identity/UserProvider";
 import { withStyles } from "@material-ui/styles";
 import InfoTooltip from "../../generic/InfoTooltip";
-import { IFacetInfo } from "./useFilterFacets";
+import { IFacetInfo } from "./FilterProvider";
+import { Skeleton } from "@material-ui/lab";
 
 const searchBoxMargin = 15;
 
@@ -113,6 +114,35 @@ function FileFilterCheckboxGroup(props: IFileFilterCheckboxGroupProps) {
         </>
     );
 }
+
+export const FileFilterCheckboxGroupPlaceholder: React.FC = () => {
+    const classes = useFilterStyles();
+
+    return (
+        <Grid
+            className={classes.header}
+            container
+            direction="column"
+            spacing={1}
+        >
+            <Grid item>
+                <Skeleton width={150} />
+            </Grid>
+            {range(5).map(i => (
+                <Grid key={i} item>
+                    <Grid container spacing={1}>
+                        <Grid item>
+                            <Skeleton width={25} />
+                        </Grid>
+                        <Grid item>
+                            <Skeleton width={100} />
+                        </Grid>
+                    </Grid>
+                </Grid>
+            ))}
+        </Grid>
+    );
+};
 
 interface IPermsAwareCheckboxProps extends CheckboxProps {
     facetType: string;

@@ -20,7 +20,7 @@ it("renders an error page for a component that errors and maintains route", () =
     history.replace(pathname);
 
     const testError = {
-        type: "Network Error",
+        type: "Request Error",
         message: "uh oh",
         details: {
             foo: "bar"
@@ -44,6 +44,6 @@ it("renders an error page for a component that errors and maintains route", () =
     );
     expect(queryByTestId("unhappy")).not.toBeInTheDocument();
     expect(queryByTestId("error-message")).toBeInTheDocument();
-    expect(getByText("Network Error - uh oh")).toBeInTheDocument();
+    expect(getByText("Request Error - uh oh")).toBeInTheDocument();
     expect(history.location.pathname).toBe(pathname);
 });

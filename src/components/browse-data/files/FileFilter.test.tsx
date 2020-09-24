@@ -9,7 +9,7 @@ import FileFilter from "./FileFilter";
 import { QueryParamProvider } from "use-query-params";
 import history from "../../identity/History";
 import { Route, Router } from "react-router-dom";
-import { IFacets } from "../shared/useFilterFacets";
+import FilterProvider, { IFacets } from "../shared/FilterProvider";
 jest.mock("../../../api/api");
 
 const facets: IFacets = {
@@ -42,10 +42,15 @@ const facets: IFacets = {
 
 it("renders expected facets based on getFilterFacets", async () => {
     getFilterFacets.mockResolvedValue(facets);
-    const { findByText, queryByText } = renderWithUserContext(<FileFilter />, {
-        id: 1,
-        role: "cidc-admin"
-    });
+    const { findByText, queryByText } = renderWithUserContext(
+        <FilterProvider>
+            <FileFilter />
+        </FilterProvider>,
+        {
+            id: 1,
+            role: "cidc-admin"
+        }
+    );
     expect(await findByText(/protocol id/i)).toBeInTheDocument();
     expect(queryByText(/test-trial-1/i)).toBeInTheDocument();
     expect(queryByText(/test-trial-2/i)).toBeInTheDocument();
@@ -61,7 +66,9 @@ it("handles checkbox selection as expected", async () => {
     const { findByTestId, getByTestId, getByText } = renderWithUserContext(
         <Router history={history}>
             <QueryParamProvider ReactRouterRoute={Route}>
-                <FileFilter />
+                <FilterProvider>
+                    <FileFilter />
+                </FilterProvider>
             </QueryParamProvider>
         </Router>,
         {

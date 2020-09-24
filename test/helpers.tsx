@@ -10,6 +10,7 @@ import {
     IAccountWithExtraContext,
     UserContext
 } from "../src/components/identity/UserProvider";
+import { QueryParamProvider } from "use-query-params";
 
 export const renderWithRouter = (
     element: React.ReactElement,
@@ -18,7 +19,13 @@ export const renderWithRouter = (
         history = createMemoryHistory({ initialEntries: [route] })
     } = {} as { route?: string; history?: History<any> }
 ) => {
-    return render(<Router history={history}>{element}</Router>);
+    return render(
+        <Router history={history}>
+            <QueryParamProvider ReactRouterRoute={Route}>
+                {element}
+            </QueryParamProvider>
+        </Router>
+    );
 };
 
 export const renderAsRouteComponent = (
@@ -26,18 +33,22 @@ export const renderAsRouteComponent = (
     {
         path = "/",
         route = "/",
-        history = createMemoryHistory({ initialEntries: [route] }),
+        history = createMemoryHistory({
+            initialEntries: route ? [route] : undefined
+        }),
         authData = {}
     } = {} as {
         path?: string;
-        route: string;
+        route?: string;
         history?: History;
         authData?: Partial<IAuthData>;
     }
 ) => {
     const out = (
         <Router history={history}>
-            <Route path={path} component={component} />
+            <QueryParamProvider ReactRouterRoute={Route}>
+                <Route path={path} component={component} />
+            </QueryParamProvider>
         </Router>
     );
     return render(

@@ -4,7 +4,7 @@ import ContactAnAdmin from "../generic/ContactAnAdmin";
 import { ErrorOutline } from "@material-ui/icons";
 
 export interface IError {
-    type: "Network Error" | "Login Error";
+    type: "Request Error" | "Login Error";
     message?: string;
     description?: React.ReactElement;
     details?: {

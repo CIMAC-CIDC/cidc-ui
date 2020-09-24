@@ -13,11 +13,13 @@ import {
     Checkbox,
     Tooltip
 } from "@material-ui/core";
-import { intersection, union, difference } from "lodash";
+import { intersection, union, difference, range } from "lodash";
+import { Skeleton } from "@material-ui/lab";
 
 const useStyles = makeStyles({
     message: {
-        margin: "1rem"
+        margin: "1rem",
+        minWidth: 300
     },
     row: {
         cursor: "auto !important"
@@ -29,6 +31,25 @@ const useStyles = makeStyles({
         paddingRight: 0
     }
 });
+
+const RowsPlaceholder: React.FC<{ numCols?: number }> = ({ numCols = 5 }) => {
+    return (
+        <>
+            {range(5).map(i => (
+                <TableRow key={i} data-testid="placeholder-row">
+                    <TableCell>
+                        <Skeleton width={10} />
+                    </TableCell>
+                    {range(numCols).map(c => (
+                        <TableCell key={c}>
+                            <Skeleton width={75} />
+                        </TableCell>
+                    ))}
+                </TableRow>
+            ))}
+        </>
+    );
+};
 
 export interface IRowWithId {
     id: number;
@@ -192,19 +213,19 @@ function PaginatedTable<T extends IRowWithId>(props: IPaginatedTableProps<T>) {
                                       ))}
                             </TableRow>
                         ))
-                    ) : (
+                    ) : props.data?.length === 0 ? (
                         <TableRow>
                             <TableCell>
                                 <Typography
                                     className={classes.message}
                                     color="textSecondary"
                                 >
-                                    {props.data === undefined
-                                        ? "Loading..."
-                                        : "No data found for these filters."}
+                                    No data found for these filters.
                                 </Typography>
                             </TableCell>
                         </TableRow>
+                    ) : (
+                        <RowsPlaceholder numCols={props.headers?.length} />
                     )}
                 </TableBody>
             </Table>

@@ -54,7 +54,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                     .catch(error => {
                         if (error.response === undefined) {
                             setError({
-                                type: "Network Error",
+                                type: "Request Error",
                                 message:
                                     "could not load user account information"
                             });
