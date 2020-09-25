@@ -76,7 +76,13 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
 
     const targetPath = useQueryParam(TARGET_PARAM, StringParam)[0];
     const onRedirectCallback = React.useCallback(() => {
-        props.history.push(targetPath || "/");
+        // Do not redirect to targetPath that starts with "/callback",
+        // since this would lead to recursive redirection.
+        if (targetPath && !targetPath.startsWith("/callback")) {
+            props.history.push(targetPath);
+        } else {
+            props.history.push("/");
+        }
     }, [props.history]);
 
     const isAuthenticated = authData !== undefined;

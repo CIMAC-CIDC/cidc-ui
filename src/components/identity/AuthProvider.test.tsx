@@ -96,17 +96,21 @@ it("redirects from the '/callback' route on successful login", async () => {
 
     // callback with no target URL
     history.replace("/callback");
-    const r1 = renderWithChild();
-    expect(await r1.findByTestId("children")).toBeInTheDocument();
+    await renderWithChild().findByTestId("children");
     expect(history.location.pathname).toBe("/");
     cleanup();
 
     // callback with target URL
-    const returnTo = "/some/path";
+    const returnTo = "/some/path?with=query";
     history.replace(`/callback?returnTo=${returnTo}`);
-    const r2 = renderWithChild();
-    expect(await r2.findByTestId("children")).toBeInTheDocument();
-    expect(history.location.pathname).toBe(returnTo);
+    await renderWithChild().findByTestId("children");
+    expect(history.location.pathname + history.location.search).toBe(returnTo);
+    cleanup();
+
+    // callback with bad target URL "/callback"
+    history.replace("/callback?returnTo=/callback");
+    await renderWithChild().findByTestId("children");
+    expect(history.location.pathname).toBe("/");
 });
 
 it("calls logout when pathname is '/logout'", async () => {
