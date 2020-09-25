@@ -1,126 +1,36 @@
 import * as React from "react";
 import { UnregisteredAccount } from "../../model/account";
 import auth0 from "auth0-js";
-import history from "./History";
 import nanoid from "nanoid";
 import { RouteComponentProps, withRouter } from "react-router";
-import { Location } from "history";
 import IdleTimer from "react-idle-timer";
 import Loader from "../generic/Loader";
 import { Grid } from "@material-ui/core";
-import { IError, ErrorContext } from "../errors/ErrorGuard";
+import { StringParam, useQueryParam } from "use-query-params";
 
-const CLIENT_ID: string = process.env.REACT_APP_AUTH0_CLIENT_ID!;
-const DOMAIN: string = process.env.REACT_APP_AUTH0_DOMAIN!;
-const IDLE_TIMEOUT: number = 1000 * 60 * 30;
+const CLIENT_ID = process.env.REACT_APP_AUTH0_CLIENT_ID!;
+const DOMAIN = process.env.REACT_APP_AUTH0_DOMAIN!;
+const IDLE_TIMEOUT = 1000 * 60 * 30;
+const REDIRECT_URI = `${window.location.origin}/callback`;
+const TARGET_PARAM = "returnTo";
 
 export const auth0Client = new auth0.WebAuth({
     domain: DOMAIN,
     clientID: CLIENT_ID,
-    redirectUri: window.location.origin + "/callback",
+    redirectUri: REDIRECT_URI,
     responseType: "token id_token",
     scope: "openid profile email"
 });
 
-const login = () => {
+export const login = () => {
     auth0Client.authorize({
-        redirectUri:
-            window.location.origin +
-            "/callback?next=" +
-            encodeURIComponent(
-                window.location.pathname + window.location.search
-            ),
+        redirectUri: `${REDIRECT_URI}?${TARGET_PARAM}=${window.location.pathname}${window.location.search}`,
         nonce: nanoid()
     });
 };
 
-const logout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("expiresAt");
-
-    auth0Client.logout({
-        returnTo: window.location.origin
-    });
-};
-
-export const handleAuthentication = (
-    location: Location,
-    sessionSetter: (
-        authResult: auth0.Auth0DecodedHash,
-        targetRoute: string
-    ) => void,
-    setError: (error: IError) => void
-) => {
-    auth0Client.parseHash((err, authResult) => {
-        if (authResult && authResult.accessToken && authResult.idToken) {
-            const targetRoute =
-                "search" in location
-                    ? new URLSearchParams(location.search).get("next") || "/"
-                    : "/";
-            sessionSetter(authResult, targetRoute);
-        } else {
-            if (err) {
-                console.error(err);
-            }
-            setError({
-                type: "Login Error",
-                message: "authentication failed"
-            });
-        }
-    });
-};
-
-export const setSession = (
-    setAuthData: React.Dispatch<React.SetStateAction<IAuthData | undefined>>,
-    onComplete: () => void,
-    setError: (error: IError) => void
-) => (
-    { idTokenPayload: tokenInfo, idToken }: auth0.Auth0DecodedHash,
-    targetRoute: string
-) => {
-    if (idToken && tokenInfo) {
-        if (
-            !tokenInfo.email ||
-            !tokenInfo.given_name ||
-            !tokenInfo.family_name
-        ) {
-            setError({
-                type: "Login Error",
-                message: "userinfo missing required scope(s)"
-            });
-
-            return;
-        }
-
-        localStorage.setItem("isLoggedIn", "true");
-
-        const expiresAt = tokenInfo.exp * 1000;
-        localStorage.setItem("expiresAt", String(expiresAt));
-
-        const user = {
-            email: tokenInfo.email,
-            first_n: tokenInfo.given_name,
-            last_n: tokenInfo.family_name
-        };
-
-        setAuthData({
-            idToken: idToken!,
-            user
-        });
-
-        history.replace(targetRoute);
-        onComplete();
-    } else {
-        setError({
-            type: "Login Error",
-            message: "cannot set session: missing id token"
-        });
-    }
-};
-
-const isTokenExpired = () => {
-    const expiresAt = localStorage.getItem("expiresAt");
-    return expiresAt && new Date().getTime() >= parseInt(expiresAt, 10);
+export const logout = () => {
+    auth0Client.logout({ returnTo: window.location.origin });
 };
 
 export interface IAuthData {
@@ -146,88 +56,51 @@ export const AuthLoader = () => (
 );
 
 const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
-    const setError = React.useContext(ErrorContext);
+    const [authData, setAuthData] = React.useState<IAuthData | undefined>();
 
-    const [authData, setAuthData] = React.useState<IAuthData | undefined>(
-        undefined
-    );
-    const [sessionIsSet, setSessionIsSet] = React.useState<boolean>(false);
-
-    const sessionSetter = setSession(
-        setAuthData,
-        () => setSessionIsSet(true),
-        setError
-    );
-    const tokenDidExpire = isTokenExpired();
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    React.useEffect(() => {
-        const isLoggingOut = props.location.pathname === "/logout";
-        if ((tokenDidExpire || !authData) && !isLoggingOut) {
-            if (isLoggedIn) {
-                auth0Client.checkSession({}, (err, authResult) => {
-                    if (
-                        authResult &&
-                        authResult.accessToken &&
-                        authResult.idToken
-                    ) {
-                        sessionSetter(
-                            authResult,
-                            props.location.pathname + props.location.search
-                        );
-                    } else {
-                        if (err) {
-                            console.error(err);
-                        }
-                        logout();
-                    }
-                });
+    const checkSession = React.useCallback(() => {
+        auth0Client.checkSession({}, (err, res) => {
+            if (err?.code === "login_required") {
+                login();
+                return;
             }
+
+            const { email, given_name, family_name } = res.idTokenPayload;
+
+            setAuthData({
+                idToken: res.idToken as string,
+                user: { email, first_n: given_name, last_n: family_name }
+            });
+        });
+    }, []);
+
+    const targetPath = useQueryParam(TARGET_PARAM, StringParam)[0];
+    const onRedirectCallback = React.useCallback(() => {
+        props.history.push(targetPath || "/");
+    }, [props.history]);
+
+    const isAuthenticated = authData !== undefined;
+    React.useEffect(() => {
+        if (props.location.pathname === "/logout") {
+            logout();
+            return;
         }
-    }, [tokenDidExpire, isLoggedIn, props.location, sessionSetter, authData]);
+        if (props.location.pathname === "/callback") {
+            onRedirectCallback();
+            return;
+        }
+        if (!isAuthenticated) {
+            checkSession();
+        }
+    }, [
+        props.location,
+        isAuthenticated,
+        props.location.pathname,
+        checkSession,
+        onRedirectCallback
+    ]);
 
-    const isCallback = props.location.pathname === "/callback";
-
-    // If the user is logged out, try to log them in, unless they
-    // are trying to access a public path
-    if (!isLoggedIn && !isCallback) {
-        login();
-        return null;
-    }
-
-    // Handle when the Auth0 authorization flow redirects to the callback endpoint
-    if (isCallback) {
-        return (
-            <div data-testid="callback-loader">
-                <AuthCallback
-                    onLoad={() =>
-                        handleAuthentication(
-                            props.location,
-                            sessionSetter,
-                            setError
-                        )
-                    }
-                />
-            </div>
-        );
-    }
-
-    // Log the user out
-    if (props.location.pathname === "/logout") {
-        logout();
-        return null;
-    }
-
-    // Session setup still in progress
-    if (!sessionIsSet) {
-        return (
-            <div data-testid="session-loader">
-                <AuthLoader data-testid="session-loader" />
-            </div>
-        );
-    }
-
-    // The user is authenticated, so render the app
-    return (
+    return isAuthenticated ? (
         <AuthContext.Provider value={authData}>
             <IdleTimer
                 ref={() => null}
@@ -236,6 +109,10 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
             />
             {props.children}
         </AuthContext.Provider>
+    ) : (
+        <div data-testid="session-loader">
+            <AuthLoader data-testid="session-loader" />
+        </div>
     );
 };
 
@@ -249,11 +126,4 @@ export function withIdToken<P>(
 
         return <Component {...props} token={authData && authData.idToken} />;
     };
-}
-
-function AuthCallback(props: { onLoad: () => void }) {
-    const onLoad = React.useCallback(props.onLoad, []);
-    React.useEffect(onLoad, []);
-
-    return <AuthLoader />;
 }
