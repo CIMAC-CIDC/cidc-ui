@@ -83,7 +83,7 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
         } else {
             props.history.push("/");
         }
-    }, [props.history]);
+    }, [props.history, targetPath]);
 
     const isAuthenticated = authData !== undefined;
     React.useEffect(() => {
