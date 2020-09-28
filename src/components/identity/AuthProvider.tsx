@@ -23,8 +23,11 @@ export const auth0Client = new auth0.WebAuth({
 });
 
 export const login = () => {
+    const returnToURL = encodeURIComponent(
+        `${window.location.pathname}${window.location.search}`
+    );
     auth0Client.authorize({
-        redirectUri: `${REDIRECT_URI}?${TARGET_PARAM}=${window.location.pathname}${window.location.search}`,
+        redirectUri: `${REDIRECT_URI}?${TARGET_PARAM}=${returnToURL}`,
         nonce: nanoid()
     });
 };

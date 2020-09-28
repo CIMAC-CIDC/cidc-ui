@@ -3,7 +3,8 @@ import { render, cleanup, act } from "@testing-library/react";
 import AuthProvider, {
     auth0Client,
     IAuthData,
-    AuthContext
+    AuthContext,
+    login
 } from "./AuthProvider";
 import auth0, { Auth0Callback } from "auth0-js";
 import { Router } from "react-router";
@@ -91,6 +92,16 @@ it("silently authenticates and provides userInfo and token to children", async d
     );
 });
 
+test("login URL-encodes the redirection target", done => {
+    const returnTo = "/some/path?with=multi&part=query&string";
+    auth0Client.authorize.mockImplementation(({ redirectUri }: any) => {
+        expect(redirectUri).toContain(encodeURIComponent(returnTo));
+        done();
+    });
+    history.push(returnTo);
+    login();
+});
+
 it("redirects from the '/callback' route on successful login", async () => {
     mockSignedIn();
 
@@ -102,7 +113,7 @@ it("redirects from the '/callback' route on successful login", async () => {
 
     // callback with target URL
     const returnTo = "/some/path?with=query";
-    history.replace(`/callback?returnTo=${returnTo}`);
+    history.replace(`/callback?returnTo=${encodeURIComponent(returnTo)}`);
     await renderWithChild().findByTestId("children");
     expect(history.location.pathname + history.location.search).toBe(returnTo);
     cleanup();
