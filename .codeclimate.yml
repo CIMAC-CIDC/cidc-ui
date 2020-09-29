@@ -4,6 +4,10 @@ exclude_patterns:
   - "public/"
   - "**/*.test.ts*"
 checks:
+  # Matches cidc-api-gae config: https://github.com/CIMAC-CIDC/cidc-api-gae/blob/master/.codeclimate.yml
+  method-complexity:
+    config:
+      threshold: 10
   # Don't complain if files are too long
   file-lines:
     enabled: false
