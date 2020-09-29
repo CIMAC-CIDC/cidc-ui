@@ -9,7 +9,7 @@ import {
 import { getAllAccounts } from "../../api/api";
 import autobind from "autobind-decorator";
 import { Account } from "../../model/account";
-import UserTableRow from "./UserTableRow";
+import UserTableRow from "./AdminUserTableRow";
 import { SupervisorAccount } from "@material-ui/icons";
 import orderBy from "lodash/orderBy";
 import PaginatedTable from "../generic/PaginatedTable";

@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core";
 import autobind from "autobind-decorator";
 import EditIcon from "@material-ui/icons/Edit";
-import UserPermissionsDialog from "./UserPermissionsDialog";
+import UserPermissionsDialog from "./AdminUserPermissionsDialog";
 import { ORGANIZATION_NAME_MAP, ROLES } from "../../util/constants";
 import { updateRole, getUserEtag } from "../../api/api";
 

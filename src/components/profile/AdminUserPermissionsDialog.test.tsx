@@ -9,7 +9,7 @@ import {
 import { Account } from "../../model/account";
 import { Trial } from "../../model/trial";
 import { InfoContext } from "../info/InfoProvider";
-import UserPermissionsDialogWithInfo from "./UserPermissionsDialog";
+import UserPermissionsDialogWithInfo from "./AdminUserPermissionsDialog";
 import { UserContext } from "../identity/UserProvider";
 import { getNativeCheckbox } from "../../../test/helpers";
 jest.mock("../../api/api");

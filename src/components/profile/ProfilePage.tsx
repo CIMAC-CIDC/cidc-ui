@@ -8,7 +8,7 @@ import {
     CardContent,
     Link
 } from "@material-ui/core";
-import UserManager from "./UserManager";
+import UserManager from "./AdminUserManager";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
 import { AuthContext } from "../identity/AuthProvider";
@@ -16,9 +16,9 @@ import { useUserContext } from "../identity/UserProvider";
 import { AccountCircle, FolderShared } from "@material-ui/icons";
 import Loader from "../generic/Loader";
 import { useRootStyles } from "../../rootStyles";
-import TrialManager from "./TrialManager";
+import TrialManager from "./AdminTrialManager";
 
-export default function UserAccountPage() {
+export default function ProfilePage() {
     const classes = useRootStyles();
 
     const authData = React.useContext(AuthContext);
@@ -168,7 +168,7 @@ export default function UserAccountPage() {
                     </Grid>
                     {userAccount &&
                         authData &&
-                        userAccount.role === "cidc-admin" && (
+                        userAccount?.role === "cidc-admin" && (
                             <>
                                 <Grid item>
                                     <TrialManager token={authData.idToken} />

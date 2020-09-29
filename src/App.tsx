@@ -7,7 +7,7 @@ import Footer from "./components/footer/Footer";
 import HomePage from "./components/home/HomePage";
 import ManifestsPage from "./components/manifests/ManifestsPage";
 import PrivacyAndSecurityPage from "./components/privacy-and-security/PrivacyAndSecurityPage";
-import UserAccountPage from "./components/profile/UserAccountPage";
+import ProfilePage from "./components/profile/ProfilePage";
 import Register from "./components/identity/Register";
 import Unactivated from "./components/identity/Unactivated";
 import history from "./components/identity/History";
@@ -107,7 +107,7 @@ export default function App() {
                                                 <Route
                                                     exact
                                                     path="/profile"
-                                                    component={UserAccountPage}
+                                                    component={ProfilePage}
                                                 />
                                                 <Route
                                                     exact
