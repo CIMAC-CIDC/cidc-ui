@@ -5,11 +5,11 @@ import {
     renderWithUserContext
 } from "../../../../test/helpers";
 import { getFilterFacets } from "../../../api/api";
-import FileFilter from "./FileFilter";
+import Filters from "./Filters";
 import { QueryParamProvider } from "use-query-params";
 import history from "../../identity/History";
 import { Route, Router } from "react-router-dom";
-import FilterProvider, { IFacets } from "../shared/FilterProvider";
+import FilterProvider, { IFacets } from "./FilterProvider";
 jest.mock("../../../api/api");
 
 const facets: IFacets = {
@@ -44,7 +44,7 @@ it("renders expected facets based on getFilterFacets", async () => {
     getFilterFacets.mockResolvedValue(facets);
     const { findByText, queryByText } = renderWithUserContext(
         <FilterProvider>
-            <FileFilter />
+            <Filters />
         </FilterProvider>,
         {
             id: 1,
@@ -67,7 +67,7 @@ it("handles checkbox selection as expected", async () => {
         <Router history={history}>
             <QueryParamProvider ReactRouterRoute={Route}>
                 <FilterProvider>
-                    <FileFilter />
+                    <Filters />
                 </FilterProvider>
             </QueryParamProvider>
         </Router>,

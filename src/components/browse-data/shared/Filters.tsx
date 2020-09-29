@@ -1,12 +1,11 @@
 import * as React from "react";
 import { Grid, Card, Typography, Box, Button } from "@material-ui/core";
-import FileFilterCheckboxGroup, {
-    FileFilterCheckboxGroupPlaceholder
-} from "../shared/FileFilterCheckboxGroup";
-import { withIdToken } from "../../identity/AuthProvider";
-import { useFilterFacets, ARRAY_PARAM_DELIM } from "../shared/FilterProvider";
+import FilterCheckboxGroup, {
+    FilterCheckboxGroupPlaceholder
+} from "./FilterCheckboxGroup";
+import { useFilterFacets, ARRAY_PARAM_DELIM } from "./FilterProvider";
 
-const FileFilter: React.FunctionComponent<{ token: string }> = props => {
+const Filters: React.FunctionComponent = () => {
     const {
         facets,
         filters,
@@ -18,7 +17,7 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
     const trialIdCheckboxes = (
         <Grid item xs={12}>
             {facets ? (
-                <FileFilterCheckboxGroup
+                <FilterCheckboxGroup
                     noTopDivider
                     title="Protocol Identifiers"
                     config={{
@@ -30,7 +29,7 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                     onChange={updateFilters("trial_ids")}
                 />
             ) : (
-                <FileFilterCheckboxGroupPlaceholder />
+                <FilterCheckboxGroupPlaceholder />
             )}
         </Grid>
     );
@@ -47,7 +46,7 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
                 });
             return (
                 <Grid key={facetHeader} item xs={12}>
-                    <FileFilterCheckboxGroup
+                    <FilterCheckboxGroup
                         title={facetHeader}
                         config={{
                             options,
@@ -77,7 +76,7 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
         })
     ) : (
         <Grid item>
-            <FileFilterCheckboxGroupPlaceholder />
+            <FilterCheckboxGroupPlaceholder />
         </Grid>
     );
 
@@ -119,4 +118,4 @@ const FileFilter: React.FunctionComponent<{ token: string }> = props => {
     );
 };
 
-export default withIdToken(FileFilter);
+export default Filters;

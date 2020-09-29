@@ -16,7 +16,7 @@ import { withIdToken } from "../../identity/AuthProvider";
 import MuiRouterLink from "../../generic/MuiRouterLink";
 import axios, { CancelTokenSource } from "axios";
 import filesize from "filesize";
-import { Filters, useFilterFacets } from "../shared/FilterProvider";
+import { IFilters, useFilterFacets } from "../shared/FilterProvider";
 import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 
 const fileQueryDefaults = {
@@ -54,7 +54,7 @@ export interface IFileTableProps {
     viewToggleButton: React.ReactElement;
 }
 
-export const filterParams = (filters: Filters) => {
+export const filterParams = (filters: IFilters) => {
     return {
         trial_ids: filters.trial_ids?.join(","),
         facets: filters.facets?.join(",")

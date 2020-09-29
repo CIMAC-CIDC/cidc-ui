@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
 import history from "../identity/History";
 import BrowseDataPage from "./BrowseDataPage";
 import { renderAsRouteComponent } from "../../../test/helpers";

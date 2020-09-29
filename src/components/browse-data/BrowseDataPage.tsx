@@ -1,6 +1,6 @@
 import { Button, ButtonGroup, Grid, makeStyles } from "@material-ui/core";
 import * as React from "react";
-import FileFilter from "./files/FileFilter";
+import Filters from "./shared/Filters";
 import FileTable from "./files/FileTable";
 import { RouteComponentProps } from "react-router";
 import TrialTable from "./trials/TrialTable";
@@ -57,7 +57,7 @@ const BrowseDataPage: React.FC<RouteComponentProps> = props => {
                 wrap="nowrap"
             >
                 <Grid item className={classes.filters}>
-                    <FileFilter />
+                    <Filters />
                 </Grid>
                 <Grid item className={classes.data}>
                     {showFileView ? (

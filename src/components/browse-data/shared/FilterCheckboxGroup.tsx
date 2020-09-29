@@ -63,14 +63,14 @@ export interface IFilterConfig {
     checked: string[] | undefined;
 }
 
-export interface IFileFilterCheckboxGroupProps {
+export interface IFilterCheckboxGroupProps {
     title: string;
     config: IFilterConfig;
     noTopDivider?: boolean;
     onChange: (option: string | string[]) => void;
 }
 
-function FileFilterCheckboxGroup(props: IFileFilterCheckboxGroupProps) {
+function FilterCheckboxGroup(props: IFilterCheckboxGroupProps) {
     const classes = useFilterStyles();
     const checked = props.config.checked || ([] as string[]);
 
@@ -115,7 +115,7 @@ function FileFilterCheckboxGroup(props: IFileFilterCheckboxGroupProps) {
     );
 }
 
-export const FileFilterCheckboxGroupPlaceholder: React.FC = () => {
+export const FilterCheckboxGroupPlaceholder: React.FC = () => {
     const classes = useFilterStyles();
 
     return (
@@ -217,7 +217,7 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
 interface IHelperProps<T extends IFilterConfig["options"]> {
     options: T;
     checked: string[];
-    onChange: IFileFilterCheckboxGroupProps["onChange"];
+    onChange: IFilterCheckboxGroupProps["onChange"];
 }
 
 const Checkboxes = ({
@@ -409,4 +409,4 @@ const NestedBoxes = ({
     );
 };
 
-export default FileFilterCheckboxGroup;
+export default FilterCheckboxGroup;
