@@ -4,5 +4,6 @@ exclude_patterns:
   - "public/"
   - "**/*.test.ts*"
 checks:
+  # Don't complain if files are too long
   file-lines:
     enabled: false
