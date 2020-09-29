@@ -1,4 +1,8 @@
 version: "2"
 exclude_patterns:
-    - "migrations/"
-    - "tests/"
+  - "tests/"
+  - "public/"
+  - "**/*.test.ts*"
+checks:
+  file-lines:
+    enabled: false
