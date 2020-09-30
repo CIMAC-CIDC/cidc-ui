@@ -8,7 +8,7 @@ import {
     CardContent,
     Link
 } from "@material-ui/core";
-import UserManager from "./AdminUserManager";
+import AdminUserManager from "./AdminUserManager";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
 import { AuthContext } from "../identity/AuthProvider";
@@ -16,7 +16,7 @@ import { useUserContext } from "../identity/UserProvider";
 import { AccountCircle, FolderShared } from "@material-ui/icons";
 import Loader from "../generic/Loader";
 import { useRootStyles } from "../../rootStyles";
-import TrialManager from "./AdminTrialManager";
+import AdminTrialManager from "./AdminTrialManager";
 
 export default function ProfilePage() {
     const classes = useRootStyles();
@@ -166,21 +166,19 @@ export default function ProfilePage() {
                             </Grid>
                         </Grid>
                     </Grid>
-                    {userAccount &&
-                        authData &&
-                        userAccount?.role === "cidc-admin" && (
-                            <>
-                                <Grid item>
-                                    <TrialManager token={authData.idToken} />
-                                </Grid>
-                                <Grid item>
-                                    <UserManager
-                                        token={authData.idToken}
-                                        userId={userAccount.id}
-                                    />
-                                </Grid>
-                            </>
-                        )}
+                    {authData && userAccount?.role === "cidc-admin" && (
+                        <>
+                            <Grid item>
+                                <AdminUserManager
+                                    token={authData.idToken}
+                                    userId={userAccount.id}
+                                />
+                            </Grid>
+                            <Grid item>
+                                <AdminTrialManager />
+                            </Grid>
+                        </>
+                    )}
                 </Grid>
             )}
         </div>

@@ -1,314 +1,439 @@
 import React from "react";
-import { getTrials, updateTrialMetadata, createTrial } from "../../api/api";
-import { Trial, NewTrial } from "../../model/trial";
+import {
+    getTrials,
+    createTrial,
+    updateTrialMetadata,
+    getTrial
+} from "../../api/api";
+import { Trial } from "../../model/trial";
 import {
     Card,
     CardHeader,
     Typography,
     CardContent,
     Grid,
-    Table,
-    TableRow,
-    TableCell,
-    TableHead,
-    TableBody,
-    IconButton,
-    Chip,
-    ButtonGroup,
     TextField,
-    Button
+    Button,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
+    CardActions,
+    FormControl,
+    FormLabel,
+    RadioGroup,
+    Radio,
+    FormControlLabel,
+    GridProps,
+    AccordionActions
 } from "@material-ui/core";
-import { LibraryAdd, Edit, Add } from "@material-ui/icons";
+import { LibraryAdd, Add, ExpandMore } from "@material-ui/icons";
+import { withIdToken } from "../identity/AuthProvider";
+import { FormContext, useForm, useFormContext } from "react-hook-form";
+import { isEmpty, omitBy, range } from "lodash";
+import { Skeleton } from "@material-ui/lab";
 
-export interface ITrialManagerProps {
-    token: string;
-}
-
-const TrialManager: React.FC<ITrialManagerProps> = ({ token }) => {
-    const [trials, setTrials] = React.useState<Trial[] | null>();
-    const [creating, setCreating] = React.useState<boolean>(false);
-
-    React.useEffect(() => {
-        getTrials(token).then(setTrials);
-    }, [token]);
-
-    const handleUpdate = (trial: Trial) => {
-        updateTrialMetadata(token, trial._etag, trial).then(() =>
-            getTrials(token).then(setTrials)
-        );
-    };
-
-    const handleCreate = (trial: Omit<Omit<Trial, "_etag">, "id">) => {
-        createTrial(token, trial).then(() => {
-            setCreating(false);
-            getTrials(token).then(setTrials);
-        });
-    };
-
-    return trials ? (
-        <Card>
-            <CardHeader
-                avatar={<LibraryAdd />}
-                title={
-                    <Grid container justify="space-between" alignItems="center">
-                        <Grid item>
-                            <Typography variant="h6">Manage Trials</Typography>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                endIcon={<Add />}
-                                onClick={() => setCreating(true)}
-                            >
-                                Add New Trial
-                            </Button>
-                        </Grid>
-                    </Grid>
-                }
-            />
-            <CardContent>
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Protocol Identifier</TableCell>
-                            <TableCell>Allowed Cohort Names</TableCell>
-                            <TableCell>
-                                Allowed Collection Event Names
-                            </TableCell>
-                            <TableCell />
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {creating && (
-                            <NewTrialTableRow
-                                onCreate={t => handleCreate(t)}
-                                onCancel={() => setCreating(false)}
-                            />
-                        )}
-                        {trials.map(trial => (
-                            <TrialTableRow
-                                key={trial.trial_id}
-                                trial={trial}
-                                onChange={t => handleUpdate(t)}
-                            />
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
-    ) : null;
-};
-
-interface INewTrialTableRowProps {
-    onCreate: (trial: NewTrial) => void;
-    onCancel: () => void;
-}
-
-const NewTrialTableRow: React.FC<INewTrialTableRowProps> = ({
-    onCreate,
-    onCancel
-}) => {
-    const [trialId, setTrialId] = React.useState<string>("");
-    const [cohortNames, setCohortNames] = React.useState<string[]>([]);
-    const [collectionEvents, setCollectionEvents] = React.useState<string[]>(
-        []
-    );
-
-    const handleCreate = () => {
-        const trial = {
-            trial_id: trialId,
-            metadata_json: {
-                participants: [],
-                protocol_identifier: trialId,
-                allowed_collection_event_names: collectionEvents,
-                allowed_cohort_names: cohortNames
-            }
-        };
-        onCreate(trial);
-    };
-
-    const isValid = trialId && cohortNames && collectionEvents;
-
-    return (
-        <TableRow>
-            <TableCell>
-                <TextField
-                    variant="outlined"
-                    label="Protocol Identifier"
-                    value={trialId}
-                    onChange={e => setTrialId(e.target.value)}
-                />
-            </TableCell>
-            <TableCell>
-                <EditableList
-                    editing={true}
-                    values={cohortNames}
-                    onChange={names => setCohortNames(names)}
-                />
-            </TableCell>
-            <TableCell>
-                <EditableList
-                    editing={true}
-                    values={collectionEvents}
-                    onChange={events => setCollectionEvents(events)}
-                />
-            </TableCell>
-            <TableCell>
-                <ButtonGroup>
-                    <Button
-                        color="primary"
-                        variant="contained"
-                        disabled={!isValid}
-                        onClick={() => handleCreate()}
-                    >
-                        Create
-                    </Button>
-                    <Button
-                        color="secondary"
-                        variant="contained"
-                        onClick={() => onCancel()}
-                    >
-                        Cancel
-                    </Button>
-                </ButtonGroup>
-            </TableCell>
-        </TableRow>
-    );
-};
-
-interface ITrialTableRowProps {
+const TrialTextField: React.FC<{
     trial: Trial;
-    onChange: (trial: Trial) => void;
-}
-
-const TrialTableRow: React.FC<ITrialTableRowProps> = ({ trial, onChange }) => {
-    const [editing, setEditing] = React.useState<boolean>(false);
-    const [cohortNames, setCohortNames] = React.useState<string[]>(
-        trial.metadata_json.allowed_cohort_names
-    );
-    const [collectionEvents, setCollectionEvents] = React.useState<string[]>(
-        trial.metadata_json.allowed_collection_event_names
-    );
-
-    const clearEdits = () => {
-        setEditing(false);
-        setCohortNames(trial.metadata_json.allowed_cohort_names);
-        setCollectionEvents(trial.metadata_json.allowed_collection_event_names);
-    };
-
-    const saveEdits = () => {
-        const newTrial = {
-            ...trial,
-            metadata_json: {
-                ...trial.metadata_json,
-                allowed_cohort_names: cohortNames,
-                allowed_collection_event_names: collectionEvents
-            }
-        };
-        onChange(newTrial);
-        setEditing(false);
-    };
+    name: string;
+    label: string;
+    width: GridProps["xs"];
+    isArray?: boolean;
+}> = ({ trial: { metadata_json }, name, label, isArray, width }) => {
+    const { register, setValue, getValues } = useFormContext();
+    React.useEffect(() => {
+        register({ name });
+    }, [register, name]);
 
     return (
-        <TableRow>
-            <TableCell>{trial.trial_id}</TableCell>
-            <TableCell>
-                <EditableList
-                    editing={editing}
-                    values={cohortNames}
-                    onChange={names => setCohortNames(names)}
-                />
-            </TableCell>
-            <TableCell>
-                <EditableList
-                    editing={editing}
-                    values={collectionEvents}
-                    onChange={events => setCollectionEvents(events)}
-                />
-            </TableCell>
-            <TableCell>
-                {editing ? (
-                    <ButtonGroup>
-                        <Button
-                            color="primary"
-                            variant="contained"
-                            onClick={() => saveEdits()}
-                        >
-                            Update
-                        </Button>
-                        <Button
-                            color="secondary"
-                            variant="contained"
-                            onClick={() => clearEdits()}
-                        >
-                            Cancel
-                        </Button>
-                    </ButtonGroup>
-                ) : (
-                    <IconButton onClick={() => setEditing(true)} size="small">
-                        <Edit />
-                    </IconButton>
-                )}
-            </TableCell>
-        </TableRow>
-    );
-};
-
-interface IEditableListProps {
-    editing: boolean;
-    values: string[];
-    onChange: (values: string[]) => void;
-}
-
-const EditableList: React.FC<IEditableListProps> = ({
-    editing,
-    values,
-    onChange
-}) => {
-    const [newValue, setNewValue] = React.useState<string>("");
-
-    return (
-        <Grid container spacing={1} alignItems="center">
-            {editing
-                ? values.map(value => (
-                      <Grid item key={value}>
-                          <Chip
-                              label={value}
-                              onDelete={() =>
-                                  onChange(values.filter(v => v !== value))
-                              }
-                          />
-                      </Grid>
-                  ))
-                : values.join(", ")}
-            {editing && (
-                <Grid item>
-                    <form
-                        onSubmit={e => {
-                            e.preventDefault();
-                            onChange([...values, newValue]);
-                            setNewValue("");
-                        }}
-                    >
-                        <Grid container alignItems="center" wrap="nowrap">
-                            <Grid item>
-                                <TextField
-                                    label="New Value"
-                                    variant="outlined"
-                                    value={newValue}
-                                    onChange={e => setNewValue(e.target.value)}
-                                />
-                            </Grid>
-                            <Grid item>
-                                <IconButton type="submit">
-                                    <Add />
-                                </IconButton>
-                            </Grid>
-                        </Grid>
-                    </form>
-                </Grid>
-            )}
+        <Grid item xs={width}>
+            <TextField
+                fullWidth
+                multiline
+                name={name}
+                label={label}
+                value={getValues[name]}
+                defaultValue={metadata_json[name]}
+                onChange={({ target: { value } }) => {
+                    if (isArray) {
+                        const values = value.split(",").map(v => v.trim());
+                        setValue(name, values);
+                    } else {
+                        setValue(name, value);
+                    }
+                }}
+            />
         </Grid>
     );
 };
 
-export default TrialManager;
+const TrialStatusField: React.FC<{ trial: Trial; width: GridProps["xs"] }> = ({
+    trial: { metadata_json },
+    width
+}) => {
+    const { register, getValues } = useFormContext();
+    const name = "trial_status";
+
+    return (
+        <Grid item xs={width}>
+            <FormControl component="fieldset">
+                <FormLabel>Trial Status</FormLabel>
+                <RadioGroup
+                    row
+                    name={name}
+                    value={getValues()[name]}
+                    defaultValue={metadata_json[name]}
+                >
+                    {["New", "Ongoing", "Completed"].map(v => (
+                        <FormControlLabel
+                            key={v}
+                            label={v}
+                            value={v}
+                            name={name}
+                            inputRef={register}
+                            control={<Radio size="small" />}
+                        />
+                    ))}
+                </RadioGroup>
+            </FormControl>
+        </Grid>
+    );
+};
+
+const TrialAccordion = withIdToken<{
+    trial: Trial;
+    onUpdatedTrial: (trial: Trial) => void;
+}>(({ trial, onUpdatedTrial, token }) => {
+    const [apiError, setApiError] = React.useState<string>("");
+
+    const formValues = useForm();
+    const submissionHandler = formValues.handleSubmit(async () => {
+        const cleanValues = omitBy(formValues.getValues(), v => !v);
+        const updatedMetadata = {
+            ...trial.metadata_json,
+            ...cleanValues
+        };
+        try {
+            const { _etag } = await getTrial(token, trial.trial_id);
+            const updatedTrial = await updateTrialMetadata(token, _etag, {
+                trial_id: trial.trial_id,
+                metadata_json: updatedMetadata
+            });
+            onUpdatedTrial(updatedTrial);
+            formValues.reset();
+        } catch ({ response: { data } }) {
+            setApiError(JSON.stringify(data));
+        }
+    });
+
+    return (
+        <FormContext {...formValues}>
+            <form onSubmit={submissionHandler}>
+                <Accordion variant="outlined">
+                    <AccordionSummary expandIcon={<ExpandMore />}>
+                        <Grid
+                            container
+                            justify="space-between"
+                            alignItems="center"
+                        >
+                            {trial.trial_id}
+                        </Grid>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Grid container spacing={1}>
+                            <TrialTextField
+                                isArray
+                                trial={trial}
+                                name="allowed_cohort_names"
+                                label="Cohort Names (comma-separated)"
+                                width={6}
+                            />
+                            <TrialTextField
+                                isArray
+                                trial={trial}
+                                name="allowed_collection_event_names"
+                                label="Collection Events Names (comma-separated)"
+                                width={6}
+                            />
+                            <TrialTextField
+                                trial={trial}
+                                name="trial_name"
+                                label="Trial Name"
+                                width={12}
+                            />
+                            <TrialTextField
+                                trial={trial}
+                                name="nci_id"
+                                label="NCI Identifier"
+                                width={4}
+                            />
+                            <TrialTextField
+                                trial={trial}
+                                name="nct_id"
+                                label="ClinicalTrials.gov ID (NCT number)"
+                                width={4}
+                            />
+                            <TrialTextField
+                                trial={trial}
+                                name="grant_of_affiliated_network"
+                                label="Grant or Affiliated network"
+                                width={4}
+                            />
+                            <TrialStatusField trial={trial} width={4} />
+                            <TrialTextField
+                                trial={trial}
+                                name="biobank"
+                                label="Biobank"
+                                width={8}
+                            />
+                            <TrialTextField
+                                trial={trial}
+                                name="lead_cimac_pis"
+                                label="Lead CIMAC PI(s)"
+                                isArray={true}
+                                width={4}
+                            />
+                            <TrialTextField
+                                trial={trial}
+                                name="lead_cimac_contacts"
+                                label="Lead CIMAC Contacts"
+                                isArray={true}
+                                width={4}
+                            />
+                            <TrialTextField
+                                trial={trial}
+                                name="lead_trial_staff"
+                                label="Lead Trial Staff"
+                                isArray={true}
+                                width={4}
+                            />
+                            <TrialTextField
+                                trial={trial}
+                                name="justification"
+                                label="Justification"
+                                width={12}
+                            />
+                            <TrialTextField
+                                trial={trial}
+                                name="biomarker_plan"
+                                label="Biomarker Plan"
+                                width={12}
+                            />
+                            <TrialTextField
+                                trial={trial}
+                                name="data_sharing_plan"
+                                label="Data Sharing Plan"
+                                width={12}
+                            />
+                            {apiError && (
+                                <Grid item xs={12}>
+                                    <Typography
+                                        variant="subtitle1"
+                                        color="secondary"
+                                    >
+                                        <code>{apiError}</code>
+                                    </Typography>
+                                </Grid>
+                            )}
+                        </Grid>
+                    </AccordionDetails>
+                    <AccordionActions>
+                        {formValues.formState.dirty && (
+                            <Button
+                                onClick={() => {
+                                    formValues.reset();
+                                    setApiError("");
+                                }}
+                            >
+                                discard changes
+                            </Button>
+                        )}
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            disabled={
+                                !formValues.formState.dirty ||
+                                formValues.formState.isSubmitting
+                            }
+                        >
+                            {!formValues.formState.dirty &&
+                            formValues.formState.isSubmitted
+                                ? "changes saved!"
+                                : "save changes"}
+                        </Button>
+                    </AccordionActions>
+                </Accordion>
+            </form>
+        </FormContext>
+    );
+});
+
+interface ICreateNewTrialProps {
+    onNewTrial: (trial: Trial) => void;
+}
+
+const CreateNewTrial = withIdToken<ICreateNewTrialProps>(
+    ({ token, onNewTrial }) => {
+        const [isCreating, setIsCreating] = React.useState<boolean>(false);
+
+        const {
+            register,
+            errors,
+            handleSubmit,
+            getValues,
+            formState: { isSubmitting }
+        } = useForm();
+        const inputName = "protocol_identifier";
+        const handleSuccess = (trial: Trial) => {
+            setIsCreating(false);
+            onNewTrial(trial);
+        };
+        const handleError = ({ response: { data } }: any) => {
+            const message = data._error.message;
+            if (
+                typeof message === "string" &&
+                message.includes("violates unique constraint")
+            ) {
+                setApiError(
+                    "A trial with this protocol identifier already exists"
+                );
+            } else {
+                setApiError(
+                    "Encountered an unexpected error handling your request"
+                );
+            }
+        };
+        const submissionHandler = handleSubmit(() => {
+            const trialId = getValues(inputName);
+            return createTrial(token, {
+                trial_id: trialId,
+                metadata_json: {
+                    protocol_identifier: trialId,
+                    participants: [],
+                    allowed_collection_event_names: [],
+                    allowed_cohort_names: []
+                }
+            })
+                .then(handleSuccess)
+                .catch(handleError);
+        });
+
+        const [apiError, setApiError] = React.useState<string | null>();
+        const hasError = !!errors[inputName] || !!apiError;
+        const errorMessage = errors[inputName]?.message || apiError;
+
+        return isCreating ? (
+            <Card>
+                <CardHeader
+                    title={<Typography>Create a New Trial</Typography>}
+                />
+                <CardContent>
+                    <form onSubmit={submissionHandler}>
+                        <Typography variant="body2">
+                            Please provide the unique identifier for this
+                            clinical trial used by the lead study organization.
+                            This is usually a short identifier, e.g., "E4412".
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            disabled={isSubmitting}
+                            name={inputName}
+                            label="Protocol Identifier"
+                            inputRef={register({
+                                required: "This is a required field"
+                            })}
+                            error={hasError}
+                            helperText={errorMessage}
+                            onChange={() => setApiError("")}
+                        />
+                    </form>
+                </CardContent>
+                <CardActions>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        disabled={isSubmitting}
+                    >
+                        Create
+                    </Button>
+                    <Button
+                        disabled={isSubmitting}
+                        onClick={() => setIsCreating(false)}
+                    >
+                        Cancel
+                    </Button>
+                </CardActions>
+            </Card>
+        ) : (
+            <Button
+                fullWidth
+                variant="outlined"
+                color="primary"
+                startIcon={<Add />}
+                onClick={() => setIsCreating(true)}
+            >
+                create a new trial
+            </Button>
+        );
+    }
+);
+
+const TrialManager: React.FC<{ token: string }> = ({ token }) => {
+    const [trials, setTrials] = React.useState<Trial[] | undefined>();
+    React.useEffect(() => {
+        // TODO: get smarter about pagination
+        getTrials(token, { page_size: 200 }).then(ts => setTrials(ts));
+    }, [token]);
+
+    return (
+        <Card>
+            <CardHeader
+                avatar={<LibraryAdd />}
+                title={<Typography variant="h6">Manage Trials</Typography>}
+            />
+            <CardContent>
+                <Grid container direction="column" spacing={1}>
+                    {trials ? (
+                        <>
+                            <Grid item>
+                                <CreateNewTrial
+                                    onNewTrial={trial =>
+                                        setTrials([trial, ...trials])
+                                    }
+                                />
+                            </Grid>
+                            {trials.map((trial, i) => {
+                                return (
+                                    <Grid item key={trial.trial_id}>
+                                        <TrialAccordion
+                                            trial={trial}
+                                            onUpdatedTrial={updatedTrial => {
+                                                const ts = trials.slice(
+                                                    0,
+                                                    trials.length
+                                                );
+                                                ts.splice(i, 1, updatedTrial);
+                                                setTrials(ts);
+                                            }}
+                                        />
+                                    </Grid>
+                                );
+                            })}
+                        </>
+                    ) : (
+                        <>
+                            {range(10).map(i => (
+                                <Grid key={i} item>
+                                    <Skeleton height={40} />
+                                </Grid>
+                            ))}
+                        </>
+                    )}
+                </Grid>
+            </CardContent>
+        </Card>
+    );
+};
+
+export default withIdToken(TrialManager);
