@@ -29,7 +29,7 @@ import {
 import { LibraryAdd, Add, ExpandMore } from "@material-ui/icons";
 import { withIdToken } from "../identity/AuthProvider";
 import { FormContext, useForm, useFormContext } from "react-hook-form";
-import { isEmpty, omitBy, range } from "lodash";
+import { omitBy, range } from "lodash";
 import { Skeleton } from "@material-ui/lab";
 
 const TrialTextField: React.FC<{
@@ -49,6 +49,7 @@ const TrialTextField: React.FC<{
             <TextField
                 fullWidth
                 multiline
+                id={name}
                 name={name}
                 label={label}
                 value={getValues[name]}
@@ -127,7 +128,7 @@ const TrialAccordion = withIdToken<{
 
     return (
         <FormContext {...formValues}>
-            <form onSubmit={submissionHandler}>
+            <form data-testid="trial-editing-form" onSubmit={submissionHandler}>
                 <Accordion variant="outlined">
                     <AccordionSummary expandIcon={<ExpandMore />}>
                         <Grid
@@ -151,7 +152,7 @@ const TrialAccordion = withIdToken<{
                                 isArray
                                 trial={trial}
                                 name="allowed_collection_event_names"
-                                label="Collection Events Names (comma-separated)"
+                                label="Collection Event Names (comma-separated)"
                                 width={6}
                             />
                             <TrialTextField
@@ -324,11 +325,12 @@ const CreateNewTrial = withIdToken<ICreateNewTrialProps>(
 
         return isCreating ? (
             <Card>
-                <CardHeader
-                    title={<Typography>Create a New Trial</Typography>}
-                />
+                <CardHeader title={<Typography>Trial Creation</Typography>} />
                 <CardContent>
-                    <form onSubmit={submissionHandler}>
+                    <form
+                        data-testid="trial-creation-form"
+                        onSubmit={submissionHandler}
+                    >
                         <Typography variant="body2">
                             Please provide the unique identifier for this
                             clinical trial used by the lead study organization.
@@ -337,6 +339,7 @@ const CreateNewTrial = withIdToken<ICreateNewTrialProps>(
                         <TextField
                             fullWidth
                             disabled={isSubmitting}
+                            id={inputName}
                             name={inputName}
                             label="Protocol Identifier"
                             inputRef={register({
@@ -354,8 +357,9 @@ const CreateNewTrial = withIdToken<ICreateNewTrialProps>(
                         variant="contained"
                         color="primary"
                         disabled={isSubmitting}
+                        onClick={() => console.log("clicked")}
                     >
-                        Create
+                        Submit
                     </Button>
                     <Button
                         disabled={isSubmitting}

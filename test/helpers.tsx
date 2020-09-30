@@ -70,7 +70,14 @@ export const renderWithUserContext = (
 ) => {
     return render(
         // @ts-ignore
-        <UserContext.Provider value={user}>{element}</UserContext.Provider>
+        <AuthContext.Provider value={{ idToken: "test-token" }}>
+            <UserContext.Provider
+                // @ts-ignore
+                value={user}
+            >
+                {element}
+            </UserContext.Provider>
+        </AuthContext.Provider>
     );
 };
 
