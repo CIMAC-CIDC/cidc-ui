@@ -165,3 +165,55 @@ it("handles trial editing and updates", async () => {
         "3"
     ]);
 });
+
+it("handles discarding trial edits", async () => {
+    getTrials.mockResolvedValue([trial1]);
+
+    const {
+        findByText,
+        getByText,
+        queryByText,
+        getByLabelText
+    } = renderTrialManager();
+    // expand the trial accordion
+    fireEvent.click(await findByText(new RegExp(trial1.trial_id, "i")));
+
+    // check that trial name is displayed
+    const trialNameInput = getByLabelText(/trial name/i);
+    expect(trialNameInput.value).toBe(trial1.metadata_json.trial_name);
+    const submitButton = getByText(/save changes/i).closest("button")!;
+    expect(submitButton.disabled).toBe(true);
+    expect(queryByText(/discard changes/i)).not.toBeInTheDocument();
+
+    // update the trial name
+    fireEvent.input(trialNameInput, { target: { value: "new trial name" } });
+    expect(trialNameInput.value).toBe("new trial name");
+    expect(submitButton.disabled).toBe(false);
+
+    // discard the changes
+    const discardButton = getByText(/discard changes/i);
+    fireEvent.click(discardButton);
+    expect(trialNameInput.value).toBe(trial1.metadata_json.trial_name);
+    expect(submitButton.disabled).toBe(true);
+    expect(discardButton).not.toBeInTheDocument();
+});
+
+it("displays API errors produced while editing trials", async () => {
+    getTrials.mockResolvedValue([trial1]);
+    getTrial.mockResolvedValue({ ...trial1, _etag: "some-etag" });
+    const errorMessage = "uh oh";
+    updateTrialMetadata.mockRejectedValue({ response: { data: errorMessage } });
+
+    const { findByText, getByTestId, getByLabelText } = renderTrialManager();
+    // expand the trial accordion
+    fireEvent.click(await findByText(new RegExp(trial1.trial_id, "i")));
+
+    // edit the some value
+    fireEvent.input(getByLabelText(/trial name/i), {
+        target: { value: "foo" }
+    });
+
+    // api error should display after submission
+    fireEvent.submit(getByTestId(/trial-editing-form/i));
+    expect(await findByText(new RegExp(errorMessage, "i"))).toBeInTheDocument();
+});

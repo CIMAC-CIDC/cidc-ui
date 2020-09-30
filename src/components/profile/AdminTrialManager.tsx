@@ -357,7 +357,6 @@ const CreateNewTrial = withIdToken<ICreateNewTrialProps>(
                         variant="contained"
                         color="primary"
                         disabled={isSubmitting}
-                        onClick={() => console.log("clicked")}
                     >
                         Submit
                     </Button>
