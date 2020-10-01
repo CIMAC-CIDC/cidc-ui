@@ -28,21 +28,21 @@ import {
 } from "@material-ui/core";
 import { LibraryAdd, Add, ExpandMore } from "@material-ui/icons";
 import { withIdToken } from "../identity/AuthProvider";
-import { FormContext, useForm, useFormContext } from "react-hook-form";
-import { omitBy, range } from "lodash";
+import {
+    Controller,
+    FormContext,
+    useForm,
+    useFormContext
+} from "react-hook-form";
+import { mapValues, omit, omitBy, range } from "lodash";
 import { Skeleton } from "@material-ui/lab";
 
 const TrialTextField: React.FC<{
-    trial: Trial;
     name: string;
     label: string;
     width: GridProps["xs"];
-    isArray?: boolean;
-}> = ({ trial: { metadata_json }, name, label, isArray, width }) => {
-    const { register, setValue, getValues } = useFormContext();
-    React.useEffect(() => {
-        register({ name });
-    }, [register, name]);
+}> = ({ name, label, width }) => {
+    const { register } = useFormContext();
 
     return (
         <Grid item xs={width}>
@@ -52,53 +52,49 @@ const TrialTextField: React.FC<{
                 id={name}
                 name={name}
                 label={label}
-                value={getValues[name]}
-                defaultValue={metadata_json[name]}
-                onChange={({ target: { value } }) => {
-                    if (isArray) {
-                        const values = value.split(",").map(v => v.trim());
-                        setValue(name, values);
-                    } else {
-                        setValue(name, value);
-                    }
-                }}
+                inputRef={register}
             />
         </Grid>
     );
 };
 
-const TrialStatusField: React.FC<{ trial: Trial; width: GridProps["xs"] }> = ({
-    trial: { metadata_json },
-    width
-}) => {
-    const { register, getValues } = useFormContext();
+const TrialStatusField: React.FC<{ width: GridProps["xs"] }> = ({ width }) => {
+    const { control } = useFormContext();
     const name = "trial_status";
 
     return (
         <Grid item xs={width}>
             <FormControl component="fieldset">
-                <FormLabel>Trial Status</FormLabel>
-                <RadioGroup
-                    row
+                <FormLabel component="legend">Trial Status</FormLabel>
+                <Controller
+                    as={
+                        <RadioGroup row>
+                            {["New", "Ongoing", "Completed"].map(v => (
+                                <FormControlLabel
+                                    key={v}
+                                    label={v}
+                                    value={v}
+                                    control={<Radio size="small" />}
+                                />
+                            ))}
+                        </RadioGroup>
+                    }
                     name={name}
-                    value={getValues()[name]}
-                    defaultValue={metadata_json[name]}
-                >
-                    {["New", "Ongoing", "Completed"].map(v => (
-                        <FormControlLabel
-                            key={v}
-                            label={v}
-                            value={v}
-                            name={name}
-                            inputRef={register}
-                            control={<Radio size="small" />}
-                        />
-                    ))}
-                </RadioGroup>
+                    control={control}
+                />
             </FormControl>
         </Grid>
     );
 };
+
+const excludeFields = ["participants", "assays", "analyses", "shipments"];
+const arrayFields = [
+    "allowed_cohort_names",
+    "allowed_collection_event_names",
+    "lead_cimac_pis",
+    "lead_cimac_contacts",
+    "lead_trial_staff"
+];
 
 const TrialAccordion = withIdToken<{
     trial: Trial;
@@ -106,12 +102,19 @@ const TrialAccordion = withIdToken<{
 }>(({ trial, onUpdatedTrial, token }) => {
     const [apiError, setApiError] = React.useState<string>("");
 
-    const formValues = useForm();
+    const formValues = useForm({
+        defaultValues: omit(trial.metadata_json, ...excludeFields)
+    });
     const submissionHandler = formValues.handleSubmit(async () => {
         const cleanValues = omitBy(formValues.getValues(), v => !v);
+        const parsedValues = mapValues(cleanValues, (v, k) => {
+            return arrayFields.includes(k)
+                ? v.split(",").map((p: string) => p.trim())
+                : v;
+        });
         const updatedMetadata = {
             ...trial.metadata_json,
-            ...cleanValues
+            ...parsedValues
         };
         try {
             const { _etag } = await getTrial(token, trial.trial_id);
@@ -142,85 +145,67 @@ const TrialAccordion = withIdToken<{
                     <AccordionDetails>
                         <Grid container spacing={1}>
                             <TrialTextField
-                                isArray
-                                trial={trial}
                                 name="allowed_cohort_names"
                                 label="Cohort Names (comma-separated)"
                                 width={6}
                             />
                             <TrialTextField
-                                isArray
-                                trial={trial}
                                 name="allowed_collection_event_names"
                                 label="Collection Event Names (comma-separated)"
                                 width={6}
                             />
                             <TrialTextField
-                                trial={trial}
                                 name="trial_name"
                                 label="Trial Name"
                                 width={12}
                             />
                             <TrialTextField
-                                trial={trial}
                                 name="nci_id"
                                 label="NCI Identifier"
                                 width={4}
                             />
                             <TrialTextField
-                                trial={trial}
                                 name="nct_id"
                                 label="ClinicalTrials.gov ID (NCT number)"
                                 width={4}
                             />
                             <TrialTextField
-                                trial={trial}
                                 name="grant_of_affiliated_network"
                                 label="Grant or Affiliated network"
                                 width={4}
                             />
-                            <TrialStatusField trial={trial} width={4} />
+                            <TrialStatusField width={4} />
                             <TrialTextField
-                                trial={trial}
                                 name="biobank"
                                 label="Biobank"
                                 width={8}
                             />
                             <TrialTextField
-                                trial={trial}
                                 name="lead_cimac_pis"
                                 label="Lead CIMAC PI(s)"
-                                isArray={true}
                                 width={4}
                             />
                             <TrialTextField
-                                trial={trial}
                                 name="lead_cimac_contacts"
                                 label="Lead CIMAC Contacts"
-                                isArray={true}
                                 width={4}
                             />
                             <TrialTextField
-                                trial={trial}
                                 name="lead_trial_staff"
                                 label="Lead Trial Staff"
-                                isArray={true}
                                 width={4}
                             />
                             <TrialTextField
-                                trial={trial}
                                 name="justification"
                                 label="Justification"
                                 width={12}
                             />
                             <TrialTextField
-                                trial={trial}
                                 name="biomarker_plan"
                                 label="Biomarker Plan"
                                 width={12}
                             />
                             <TrialTextField
-                                trial={trial}
                                 name="data_sharing_plan"
                                 label="Data Sharing Plan"
                                 width={12}

@@ -13,9 +13,12 @@ jest.mock("../../api/api");
 const trial1 = {
     trial_id: "test-trial-0",
     metadata_json: {
+        participants: [{}, {}, {}],
+        assays: [{}, {}, {}],
         protocol_identifier: "test-trial-0",
         trial_name: "trial testing something interesting!",
-        participants: [],
+        trial_status: "New",
+        biobank: "cool new biobank",
         allowed_collection_event_names: ["a", "b", "c"],
         allowed_cohort_names: []
     }
@@ -139,7 +142,7 @@ it("handles trial editing and updates", async () => {
     expect(submitButton.disabled).toBe(true);
 
     // update the collection events, add an NCT identifier, and set the trial status
-    fireEvent.input(collectionEvents, { target: { value: "1,2,3" } });
+    fireEvent.input(collectionEvents, { target: { value: "1, 2 ,  3 " } });
     fireEvent.input(getByLabelText(/nct number/i), {
         target: { value: "some nct id" }
     });
@@ -164,6 +167,13 @@ it("handles trial editing and updates", async () => {
         "2",
         "3"
     ]);
+
+    // unedited values weren't overwritten
+    expect(metadata_json.participants).toEqual(
+        trial1.metadata_json.participants
+    );
+    expect(metadata_json.assays).toEqual(trial1.metadata_json.assays);
+    expect(metadata_json.biobank).toEqual(trial1.metadata_json.biobank);
 });
 
 it("handles discarding trial edits", async () => {
@@ -178,22 +188,35 @@ it("handles discarding trial edits", async () => {
     // expand the trial accordion
     fireEvent.click(await findByText(new RegExp(trial1.trial_id, "i")));
 
-    // check that trial name is displayed
+    // check that trial name is displayed and trials status is unset
     const trialNameInput = getByLabelText(/trial name/i);
-    expect(trialNameInput.value).toBe(trial1.metadata_json.trial_name);
+    const [newRadio, ongoingRadio] = ["New", "Ongoing"].map(l =>
+        getByLabelText(l)
+    );
+    expect(newRadio.checked).toBe(true);
+    expect(ongoingRadio.checked).toBe(false);
     const submitButton = getByText(/save changes/i).closest("button")!;
     expect(submitButton.disabled).toBe(true);
     expect(queryByText(/discard changes/i)).not.toBeInTheDocument();
 
-    // update the trial name
+    // update the trial name and trial status
     fireEvent.input(trialNameInput, { target: { value: "new trial name" } });
     expect(trialNameInput.value).toBe("new trial name");
+    fireEvent.click(ongoingRadio);
+    expect(ongoingRadio.checked).toBe(true);
+    expect(newRadio.checked).toBe(false);
     expect(submitButton.disabled).toBe(false);
 
     // discard the changes
     const discardButton = getByText(/discard changes/i);
     fireEvent.click(discardButton);
+
+    // check that values were reset
     expect(trialNameInput.value).toBe(trial1.metadata_json.trial_name);
+    expect(ongoingRadio.checked).toBe(false);
+    expect(newRadio.checked).toBe(true);
+
+    // check that buttons were reset
     expect(submitButton.disabled).toBe(true);
     expect(discardButton).not.toBeInTheDocument();
 });
