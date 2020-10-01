@@ -57,7 +57,6 @@ it("triggers login when login is required", () => {
     const { queryByTestId } = renderWithChild();
     expect(auth0Client.checkSession).toHaveBeenCalled();
     expect(auth0Client.authorize).toHaveBeenCalled();
-    expect(queryByTestId("children")).not.toBeInTheDocument();
 });
 
 it("silently authenticates and provides userInfo and token to children", async done => {

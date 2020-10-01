@@ -1,5 +1,5 @@
 import * as React from "react";
-import { AuthContext, AuthLoader } from "./AuthProvider";
+import { AuthContext } from "./AuthProvider";
 import { Account } from "../../model/account";
 import { RouteComponentProps, withRouter } from "react-router";
 import { getAccountInfo, getPermissionsForUser } from "../../api/api";
@@ -24,8 +24,6 @@ export function useUserContext() {
 
     return user;
 }
-
-const UNACTIVATED_PATHS = ["/callback", "/register", "/unactivated"];
 
 const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
     const authData = React.useContext(AuthContext);
@@ -99,10 +97,6 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         user.role &&
         ["cidc-biofx-user", "cidc-admin"].includes(user.role);
 
-    const isUnactivatedPath = UNACTIVATED_PATHS.includes(
-        props.location.pathname
-    );
-
     const value = user && {
         ...user,
         permissions,
@@ -113,11 +107,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
 
     return (
         <UserContext.Provider value={value}>
-            {((user || isUnactivatedPath) && <>{props.children}</>) || (
-                <div>
-                    <AuthLoader />
-                </div>
-            )}
+            {props.children}
         </UserContext.Provider>
     );
 };

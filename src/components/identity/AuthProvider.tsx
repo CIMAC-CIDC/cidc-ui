@@ -4,8 +4,6 @@ import auth0 from "auth0-js";
 import nanoid from "nanoid";
 import { RouteComponentProps, withRouter } from "react-router";
 import IdleTimer from "react-idle-timer";
-import Loader from "../generic/Loader";
-import { Grid } from "@material-ui/core";
 import { StringParam, useQueryParam } from "use-query-params";
 
 const CLIENT_ID = process.env.REACT_APP_AUTH0_CLIENT_ID!;
@@ -43,19 +41,6 @@ export interface IAuthData {
 
 export const AuthContext = React.createContext<IAuthData | undefined>(
     undefined
-);
-
-export const AuthLoader = () => (
-    <Grid
-        container
-        justify="center"
-        alignItems="center"
-        style={{ height: "10vh" }}
-    >
-        <Grid item>
-            <Loader />
-        </Grid>
-    </Grid>
 );
 
 const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
@@ -109,7 +94,7 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
         onRedirectCallback
     ]);
 
-    return isAuthenticated ? (
+    return (
         <AuthContext.Provider value={authData}>
             <IdleTimer
                 ref={() => null}
@@ -118,10 +103,6 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
             />
             {props.children}
         </AuthContext.Provider>
-    ) : (
-        <div data-testid="session-loader">
-            <AuthLoader data-testid="session-loader" />
-        </div>
     );
 };
 

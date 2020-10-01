@@ -35,12 +35,6 @@ function renderUserProvider(authData: boolean, children?: React.ReactElement) {
     );
 }
 
-it("displays a loader if no auth data has loaded", () => {
-    const { queryByTestId } = renderUserProvider(false);
-    expect(queryByTestId("loader")).toBeInTheDocument();
-    expect(queryByTestId("children")).not.toBeInTheDocument();
-});
-
 it("handles an approved user", async () => {
     const user = { id: 1, approval_date: Date.now() };
     getAccountInfo.mockImplementation((token: string) => {
