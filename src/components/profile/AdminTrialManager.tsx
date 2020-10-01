@@ -131,7 +131,7 @@ const TrialAccordion = withIdToken<{
 
     return (
         <FormContext {...formValues}>
-            <form data-testid="trial-editing-form" onSubmit={submissionHandler}>
+            <form onSubmit={submissionHandler}>
                 <Accordion variant="outlined">
                     <AccordionSummary expandIcon={<ExpandMore />}>
                         <Grid
@@ -225,6 +225,7 @@ const TrialAccordion = withIdToken<{
                     <AccordionActions>
                         {formValues.formState.dirty && (
                             <Button
+                                type="reset"
                                 onClick={() => {
                                     formValues.reset();
                                     setApiError("");
@@ -309,13 +310,12 @@ const CreateNewTrial = withIdToken<ICreateNewTrialProps>(
         const errorMessage = errors[inputName]?.message || apiError;
 
         return isCreating ? (
-            <Card>
-                <CardHeader title={<Typography>Trial Creation</Typography>} />
-                <CardContent>
-                    <form
-                        data-testid="trial-creation-form"
-                        onSubmit={submissionHandler}
-                    >
+            <form onSubmit={submissionHandler}>
+                <Card>
+                    <CardHeader
+                        title={<Typography>Trial Creation</Typography>}
+                    />
+                    <CardContent>
                         <Typography variant="body2">
                             Please provide the unique identifier for this
                             clinical trial used by the lead study organization.
@@ -334,25 +334,25 @@ const CreateNewTrial = withIdToken<ICreateNewTrialProps>(
                             helperText={errorMessage}
                             onChange={() => setApiError("")}
                         />
-                    </form>
-                </CardContent>
-                <CardActions>
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        disabled={isSubmitting}
-                    >
-                        Submit
-                    </Button>
-                    <Button
-                        disabled={isSubmitting}
-                        onClick={() => setIsCreating(false)}
-                    >
-                        Cancel
-                    </Button>
-                </CardActions>
-            </Card>
+                    </CardContent>
+                    <CardActions>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            disabled={isSubmitting}
+                        >
+                            Submit
+                        </Button>
+                        <Button
+                            disabled={isSubmitting}
+                            onClick={() => setIsCreating(false)}
+                        >
+                            Cancel
+                        </Button>
+                    </CardActions>
+                </Card>
+            </form>
         ) : (
             <Button
                 fullWidth

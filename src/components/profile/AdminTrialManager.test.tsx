@@ -62,8 +62,7 @@ it("handles trial creation", async () => {
         findByText,
         queryByText,
         getByText,
-        getByLabelText,
-        getByTestId
+        getByLabelText
     } = renderTrialManager();
     const openFormButtonText = /create a new trial/i;
     const infoText = /please provide the unique identifier/i;
@@ -81,8 +80,8 @@ it("handles trial creation", async () => {
     fireEvent.click(getByText(openFormButtonText));
 
     // blocks submitting empty trial_ids
-    const creationForm = getByTestId("trial-creation-form");
-    fireEvent.submit(creationForm);
+    const submitButton = getByText(/submit/i);
+    fireEvent.submit(submitButton);
     expect(await findByText(/this is a required field/i)).toBeInTheDocument();
     expect(createTrial).not.toHaveBeenCalled();
 
@@ -93,19 +92,19 @@ it("handles trial creation", async () => {
 
     // displays api errors appropriately:
     // * non-unique error
-    fireEvent.submit(creationForm);
+    fireEvent.submit(submitButton);
     expect(
         await findByText(/protocol identifier already exists/i)
     ).toBeInTheDocument();
     expect(createTrial).toHaveBeenCalledTimes(1);
     // * unexpected error
-    fireEvent.submit(creationForm);
+    fireEvent.submit(submitButton);
     expect(await findByText(/unexpected error/i)).toBeInTheDocument();
     expect(createTrial).toHaveBeenCalledTimes(2);
 
     // successful submission closes the creation form and adds the new trial
     // to the trial manager list
-    fireEvent.submit(creationForm);
+    fireEvent.submit(submitButton);
     expect(await findByText(openFormButtonText)).toBeInTheDocument();
     expect(queryByText(infoText)).not.toBeInTheDocument();
     expect(queryByText(newTrialId)).toBeInTheDocument();
@@ -117,12 +116,7 @@ it("handles trial editing and updates", async () => {
     getTrial.mockResolvedValue({ ...trial1, _etag: "some-etag" });
     updateTrialMetadata.mockResolvedValue(trial1);
 
-    const {
-        findByText,
-        getByLabelText,
-        getByText,
-        getByTestId
-    } = renderTrialManager();
+    const { findByText, getByLabelText, getByText } = renderTrialManager();
     const trialAccordion = await findByText(new RegExp(trial1.trial_id, "i"));
     expect(trialAccordion).toBeInTheDocument();
 
@@ -150,7 +144,7 @@ it("handles trial editing and updates", async () => {
     expect(submitButton.disabled).toBe(false);
 
     // submit the changes
-    fireEvent.submit(getByTestId(/trial-editing-form/i));
+    fireEvent.submit(submitButton);
     expect(await findByText(/changes saved/i)).toBeInTheDocument();
 
     // after successful submit, submit button is disabled and reads "changes saved!"
@@ -227,7 +221,7 @@ it("displays API errors produced while editing trials", async () => {
     const errorMessage = "uh oh";
     updateTrialMetadata.mockRejectedValue({ response: { data: errorMessage } });
 
-    const { findByText, getByTestId, getByLabelText } = renderTrialManager();
+    const { findByText, getByText, getByLabelText } = renderTrialManager();
     // expand the trial accordion
     fireEvent.click(await findByText(new RegExp(trial1.trial_id, "i")));
 
@@ -237,6 +231,6 @@ it("displays API errors produced while editing trials", async () => {
     });
 
     // api error should display after submission
-    fireEvent.submit(getByTestId(/trial-editing-form/i));
+    fireEvent.submit(getByText(/save changes/i));
     expect(await findByText(new RegExp(errorMessage, "i"))).toBeInTheDocument();
 });
