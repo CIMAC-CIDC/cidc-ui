@@ -137,9 +137,8 @@ it("handles trial editing and updates", async () => {
 
     // update the collection events, add an NCT identifier, and set the trial status
     fireEvent.input(collectionEvents, { target: { value: "1, 2 ,  3 " } });
-    fireEvent.input(getByLabelText(/nct number/i), {
-        target: { value: "some nct id" }
-    });
+    const nctIdInput = getByLabelText(/nct number/i);
+    fireEvent.input(nctIdInput, { target: { value: "some nct id" } });
     fireEvent.click(getByLabelText(/ongoing/i));
     expect(submitButton.disabled).toBe(false);
 
@@ -168,6 +167,9 @@ it("handles trial editing and updates", async () => {
     );
     expect(metadata_json.assays).toEqual(trial1.metadata_json.assays);
     expect(metadata_json.biobank).toEqual(trial1.metadata_json.biobank);
+
+    // edited values still appear in the trial editing form
+    expect(nctIdInput.value).toBe("some nct id");
 });
 
 it("handles discarding trial edits", async () => {
