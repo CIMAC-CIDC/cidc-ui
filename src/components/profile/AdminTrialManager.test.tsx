@@ -114,7 +114,16 @@ it("handles trial creation", async () => {
 it("handles trial editing and updates", async () => {
     getTrials.mockResolvedValue([trial1]);
     getTrial.mockResolvedValue({ ...trial1, _etag: "some-etag" });
-    updateTrialMetadata.mockResolvedValue(trial1);
+    const updatedTrial = {
+        ...trial1,
+        metadata_json: {
+            ...trial1.metadata_json,
+            nct_id: "new nct id",
+            trial_status: "Ongoing",
+            allowed_collection_event_names: ["1", "2", "3"]
+        }
+    };
+    updateTrialMetadata.mockResolvedValue(updatedTrial);
 
     const { findByText, getByLabelText, getByText } = renderTrialManager();
     const trialAccordion = await findByText(new RegExp(trial1.trial_id, "i"));
@@ -138,9 +147,16 @@ it("handles trial editing and updates", async () => {
     // update the collection events, add an NCT identifier, and set the trial status
     fireEvent.input(collectionEvents, { target: { value: "1, 2 ,  3 " } });
     const nctIdInput = getByLabelText(/nct number/i);
-    fireEvent.input(nctIdInput, { target: { value: "some nct id" } });
-    fireEvent.click(getByLabelText(/ongoing/i));
+    fireEvent.input(nctIdInput, {
+        target: { value: updatedTrial.metadata_json.nct_id }
+    });
+    const ongoingRadio = getByLabelText(/ongoing/i);
+    fireEvent.click(ongoingRadio);
     expect(submitButton.disabled).toBe(false);
+
+    // ensure values were updated
+    expect(nctIdInput.value).toBe(updatedTrial.metadata_json.nct_id);
+    expect(ongoingRadio.checked).toBe(true);
 
     // submit the changes
     fireEvent.submit(submitButton);
@@ -153,23 +169,11 @@ it("handles trial editing and updates", async () => {
     // edited values were passed to the API correctly
     expect(updateTrialMetadata).toHaveBeenCalled();
     const { metadata_json } = updateTrialMetadata.mock.calls[0][2];
-    expect(metadata_json.nct_id).toBe("some nct id");
-    expect(metadata_json.trial_status).toBe("Ongoing");
-    expect(metadata_json.allowed_collection_event_names).toEqual([
-        "1",
-        "2",
-        "3"
-    ]);
-
-    // unedited values weren't overwritten
-    expect(metadata_json.participants).toEqual(
-        trial1.metadata_json.participants
-    );
-    expect(metadata_json.assays).toEqual(trial1.metadata_json.assays);
-    expect(metadata_json.biobank).toEqual(trial1.metadata_json.biobank);
+    expect(metadata_json).toEqual(updatedTrial.metadata_json);
 
     // edited values still appear in the trial editing form
-    expect(nctIdInput.value).toBe("some nct id");
+    expect(nctIdInput.value).toBe(updatedTrial.metadata_json.nct_id);
+    expect(ongoingRadio.checked).toBe(true);
 });
 
 it("handles discarding trial edits", async () => {

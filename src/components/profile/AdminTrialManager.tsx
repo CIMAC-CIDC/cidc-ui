@@ -106,7 +106,10 @@ const TrialAccordion = withIdToken<{
         defaultValues: omit(trial.metadata_json, ...excludeFields)
     });
     const submissionHandler = formValues.handleSubmit(async () => {
-        const cleanValues = omitBy(formValues.getValues(), v => !v);
+        const cleanValues = omitBy(formValues.getValues(), (_, k) => {
+            // omit fields that the user hasn't interacted with
+            return !formValues.formState.dirtyFields.has(k);
+        });
         const parsedValues = mapValues(cleanValues, (v, k) => {
             return arrayFields.includes(k)
                 ? v.split(",").map((p: string) => p.trim())
@@ -123,7 +126,11 @@ const TrialAccordion = withIdToken<{
                 metadata_json: updatedMetadata
             });
             onUpdatedTrial(updatedTrial);
-            formValues.reset();
+            const newFormValues = omit(
+                updatedTrial.metadata_json,
+                ...excludeFields
+            );
+            formValues.reset(newFormValues);
         } catch ({ response: { data } }) {
             setApiError(JSON.stringify(data));
         }
@@ -170,7 +177,7 @@ const TrialAccordion = withIdToken<{
                                 width={4}
                             />
                             <TrialTextField
-                                name="grant_of_affiliated_network"
+                                name="grant_or_affiliated_network"
                                 label="Grant or Affiliated network"
                                 width={4}
                             />
