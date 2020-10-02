@@ -55,9 +55,7 @@ it("handles an approved user", async () => {
 });
 
 it("handles unapproved users", async () => {
-    getAccountInfo.mockImplementation(() => {
-        return Promise.resolve({ id: 1 });
-    });
+    getAccountInfo.mockResolvedValue({ id: 1 });
 
     const { findByTestId } = renderUserProvider(true);
     await findByTestId("children");
@@ -65,8 +63,8 @@ it("handles unapproved users", async () => {
 });
 
 it("handles unregistered users", async () => {
-    getAccountInfo.mockImplementation(() => {
-        return Promise.resolve(undefined);
+    getAccountInfo.mockRejectedValue({
+        response: { data: { _error: { message: "is not registered." } } }
     });
 
     const { findByTestId } = renderUserProvider(true);
@@ -75,19 +73,13 @@ it("handles unregistered users", async () => {
 });
 
 it("handles endpoint errors", async () => {
-    getAccountInfo.mockImplementation(() => {
-        return Promise.reject({});
-    });
+    getAccountInfo.mockRejectedValue({ some: "other error" });
     const { findByTestId: fbti1, queryByText } = renderUserProvider(true);
     await fbti1("children");
-    expect(
-        queryByText(/could not load user account info/i)
-    ).toBeInTheDocument();
+    expect(queryByText(/error loading account info/i)).toBeInTheDocument();
     cleanup();
 
-    getAccountInfo.mockImplementation(() => {
-        return Promise.reject({ response: { data: "Not Found" } });
-    });
+    getAccountInfo.mockRejectedValue({ response: { data: "Not Found" } });
     const { findByTestId: fbti2 } = renderUserProvider(true);
     await fbti2("children");
     expect(history.location.pathname).toBe("/register");
@@ -95,11 +87,7 @@ it("handles endpoint errors", async () => {
 
 it("handles a disabled user", async () => {
     const user = { id: 1, approval_date: Date.now(), disabled: true };
-    getAccountInfo.mockImplementation((token: string) => {
-        expect(token).toBe(TOKEN);
-
-        return Promise.resolve(user);
-    });
+    getAccountInfo.mockResolvedValue(user);
 
     const { findByTestId } = renderUserProvider(true);
     const error = await findByTestId("error-message");
@@ -124,8 +112,10 @@ it("enables the correct tabs for each role", async () => {
         );
     };
     const mockWithRole = (role: string) => {
-        getAccountInfo.mockImplementation(() => {
-            return Promise.resolve({ id: 1, role, approval_date: Date.now() });
+        getAccountInfo.mockResolvedValue({
+            id: 1,
+            role,
+            approval_date: Date.now()
         });
     };
 

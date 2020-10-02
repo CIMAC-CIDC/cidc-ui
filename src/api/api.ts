@@ -112,7 +112,7 @@ function getDownloadURL(
         .then(_extractItem);
 }
 
-function getAccountInfo(token: string): Promise<Account | undefined> {
+function getAccountInfo(token: string): Promise<Account> {
     return getApiClient(token)
         .get("users/self")
         .then(_extractItem);
