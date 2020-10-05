@@ -88,6 +88,12 @@ function getSingleFile(
     return _getItem<DataFile>(token, "downloadable_files", itemID);
 }
 
+function getRelatedFiles(token: string, fileId: number): Promise<DataFile[]> {
+    return getApiClient(token)
+        .get(`downloadable_files/${fileId}/related_files`)
+        .then(_extractItems);
+}
+
 function getFilelist(token: string, fileIds: number[]): Promise<Blob> {
     return getApiClient(token)
         .get("downloadable_files/filelist", {
@@ -307,6 +313,7 @@ export {
     getApiClient,
     getFiles,
     getSingleFile,
+    getRelatedFiles,
     getFilelist,
     getDownloadURL,
     getAccountInfo,

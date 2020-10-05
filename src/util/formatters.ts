@@ -8,3 +8,7 @@ export const formatDate = (dateStr: string) => {
 export const formatFileSize = (bytes: number) => {
     return filesize(bytes);
 };
+
+export const formatDataCategory = (dataCategory: string) => {
+    return dataCategory.split("|").join(" ");
+};

@@ -16,7 +16,11 @@ import MuiRouterLink from "../../generic/MuiRouterLink";
 import axios, { CancelTokenSource } from "axios";
 import { IFilters, useFilterFacets } from "../shared/FilterProvider";
 import BatchDownloadDialog from "../shared/BatchDownloadDialog";
-import { formatDate, formatFileSize } from "../../../util/formatters";
+import {
+    formatDataCategory,
+    formatDate,
+    formatFileSize
+} from "../../../util/formatters";
 
 const fileQueryDefaults = {
     page_size: 15
@@ -279,7 +283,11 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                                     </TableCell>
                                     <TableCell>{row.trial_id}</TableCell>
                                     <TableCell>{row.file_ext}</TableCell>
-                                    <TableCell>{row.data_category}</TableCell>
+                                    <TableCell>
+                                        {formatDataCategory(
+                                            row.data_category || ""
+                                        )}
+                                    </TableCell>
                                     <TableCell>
                                         {formatFileSize(row.file_size_bytes)}
                                     </TableCell>

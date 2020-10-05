@@ -12,6 +12,7 @@ export interface DataFile {
     upload_type: string;
     file_ext?: string;
     data_category?: string;
+    data_category_prefix?: string;
     additional_metadata?: {
         [prop: string]: any;
     };
