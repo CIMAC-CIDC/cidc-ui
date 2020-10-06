@@ -16,7 +16,6 @@ import { AuthContext } from "../../identity/AuthProvider";
 import { DataFile } from "../../../model/file";
 import { RouteComponentProps } from "react-router";
 import {
-    ArrowBack,
     Category,
     CloudDownload,
     CloudUpload,
@@ -254,16 +253,6 @@ const FileDetailsPage: React.FC<RouteComponentProps<{
                     spacing={2}
                     style={{ width: 1050, margin: "auto" }}
                 >
-                    <Grid item xs={12}>
-                        <Button
-                            size="small"
-                            color="primary"
-                            startIcon={<ArrowBack />}
-                            onClick={() => props.history.goBack()}
-                        >
-                            back to file browser
-                        </Button>
-                    </Grid>
                     <Grid item xs={12}>
                         <FileHeader file={file} token={idToken} />
                     </Grid>

@@ -3,6 +3,7 @@ import { getSingleFile, getDownloadURL } from "../../../api/api";
 import FileDetailsPage, { AdditionalMetadataTable } from "./FileDetailsPage";
 import { renderAsRouteComponent } from "../../../../test/helpers";
 import { fireEvent, act, render, cleanup } from "@testing-library/react";
+import history from "../../identity/History";
 jest.mock("../../../api/api");
 jest.mock("../../../util/useRawFile");
 
@@ -25,8 +26,8 @@ it("renders a loader at first", () => {
 
 const renderFileDetails = () =>
     renderAsRouteComponent(FileDetailsPage, {
-        path: "/:fileId",
-        route: `/${file.id}`,
+        path: "/browse-data/:fileId",
+        route: `/browse-data/${file.id}`,
         authData: { idToken }
     });
 
