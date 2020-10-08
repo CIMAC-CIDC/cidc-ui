@@ -14,7 +14,8 @@ import {
     Table,
     TableBody,
     TableRow,
-    TableCell
+    TableCell,
+    Box
 } from "@material-ui/core";
 import { AuthContext } from "../../identity/AuthProvider";
 import { DataFile } from "../../../model/file";
@@ -38,8 +39,9 @@ import {
     formatDate,
     formatFileSize
 } from "../../../util/formatters";
-import { isEmpty, map, sortBy } from "lodash";
+import { isEmpty, map, range, sortBy } from "lodash";
 import BatchDownloadDialog from "../shared/BatchDownloadDialog";
+import { Skeleton } from "@material-ui/lab";
 
 const DownloadURL: React.FunctionComponent<{
     fileId: number;
@@ -237,7 +239,7 @@ export const AdditionalMetadataTable: React.FunctionComponent<{
     );
 };
 
-const RelatedSearchLinks: React.FC<{ file: DataFile; token: string }> = ({
+const RelatedFiles: React.FC<{ file: DataFile; token: string }> = ({
     token,
     file
 }) => {
@@ -249,37 +251,72 @@ const RelatedSearchLinks: React.FC<{ file: DataFile; token: string }> = ({
     >();
     React.useEffect(() => {
         getRelatedFiles(token, file.id).then(files => setRelatedFiles(files));
-    }, [token]);
+    }, [token, file.id]);
+
+    const header = (
+        <Grid
+            container
+            direction="row"
+            justify="space-between"
+            alignItems="center"
+        >
+            <Grid item>
+                <Typography variant="h6">
+                    Related {file.data_category_prefix} files within{" "}
+                    {file.trial_id}
+                </Typography>
+            </Grid>
+            <Grid item>
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    disabled={!relatedFiles || relatedFiles.length === 0}
+                    startIcon={<CloudDownload />}
+                    onClick={() => setBatchDownloadOpen(true)}
+                >
+                    download all related files
+                </Button>
+            </Grid>
+        </Grid>
+    );
+
+    const noRelatedFilesMessage = (
+        <Grid item>
+            <Typography color="textSecondary">
+                This file has no directly related files, but you can still{" "}
+                <a
+                    href={`/browse-data?file_view=1&trial_ids=${file.trial_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    browse all files in this trial{" "}
+                </a>
+                .
+            </Typography>
+        </Grid>
+    );
+
+    const relatedFilesList = relatedFiles && (
+        <>
+            {sortBy(relatedFiles, "object_url").map(({ id, object_url }) => {
+                return (
+                    <Grid item key={object_url}>
+                        <a
+                            href={`/browse-data/${id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {object_url}
+                        </a>
+                    </Grid>
+                );
+            })}
+        </>
+    );
 
     return (
         <Card>
-            <CardHeader
-                title={
-                    <Grid
-                        container
-                        direction="row"
-                        justify="space-between"
-                        alignItems="center"
-                    >
-                        <Grid item>
-                            <Typography variant="h6">
-                                Related {file.data_category_prefix} files within
-                                trial {file.trial_id}
-                            </Typography>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                variant="outlined"
-                                color="primary"
-                                startIcon={<CloudDownload />}
-                                onClick={() => setBatchDownloadOpen(true)}
-                            >
-                                download all related files
-                            </Button>
-                        </Grid>
-                    </Grid>
-                }
-            />
+            <CardHeader title={header} />
             <CardContent>
                 <BatchDownloadDialog
                     token={token}
@@ -288,24 +325,15 @@ const RelatedSearchLinks: React.FC<{ file: DataFile; token: string }> = ({
                     onClose={() => setBatchDownloadOpen(false)}
                 />
                 <Grid container direction="column" spacing={1}>
-                    {relatedFiles && (
-                        <>
-                            {sortBy(relatedFiles, "object_url").map(
-                                ({ id, object_url }) => {
-                                    return (
-                                        <Grid item key={id}>
-                                            <a
-                                                href={`/browse-data/${id}`}
-                                                target="_blank"
-                                            >
-                                                {object_url}
-                                            </a>
-                                        </Grid>
-                                    );
-                                }
-                            )}
-                        </>
-                    )}
+                    {relatedFiles
+                        ? relatedFiles.length > 0
+                            ? relatedFilesList
+                            : noRelatedFilesMessage
+                        : range(5).map(i => (
+                              <Grid item key={i}>
+                                  <Skeleton width="100%" height={25} />
+                              </Grid>
+                          ))}
                 </Grid>
             </CardContent>
         </Card>
@@ -360,7 +388,7 @@ const FileDetailsPage: React.FC<RouteComponentProps<{
                         </Grid>
                     )}
                     <Grid item xs={12}>
-                        <RelatedSearchLinks file={file} token={idToken} />
+                        <RelatedFiles file={file} token={idToken} />
                     </Grid>
                 </Grid>
             )}
