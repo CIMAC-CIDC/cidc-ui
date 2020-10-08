@@ -10,5 +10,8 @@ export const formatFileSize = (bytes: number) => {
 };
 
 export const formatDataCategory = (dataCategory: string) => {
-    return dataCategory.split("|").join(" ");
+    return dataCategory
+        .split("|")
+        .join(" ")
+        .trim();
 };
