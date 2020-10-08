@@ -14,8 +14,7 @@ import {
     Table,
     TableBody,
     TableRow,
-    TableCell,
-    Box
+    TableCell
 } from "@material-ui/core";
 import { AuthContext } from "../../identity/AuthProvider";
 import { DataFile } from "../../../model/file";
@@ -25,7 +24,6 @@ import {
     CloudDownload,
     CloudUpload,
     Link,
-    OpenInNew,
     Save
 } from "@material-ui/icons";
 import CopyToClipboardButton from "../../generic/CopyToClipboardButton";
