@@ -21,21 +21,3 @@ export interface IFileBundle {
         miscellaneous?: number[];
     };
 }
-
-interface ITrialInfo {
-    participants: any[];
-    summary?: string;
-    organization?: string;
-    ctDotGovID?: string;
-}
-
-/**
- * Extract info from trial metadata. Since the shape of `Trial["metadata_json"]`
- * might change, this function is the safe way to access information stored there.
- * */
-export const getTrialInfo = (trial: Trial): ITrialInfo => {
-    return {
-        participants: trial.metadata_json.participants
-        /* TODO: extract other attributes */
-    };
-};

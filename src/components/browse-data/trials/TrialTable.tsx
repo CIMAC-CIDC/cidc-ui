@@ -6,10 +6,17 @@ import {
     CardContent,
     Button,
     ButtonProps,
-    Box
+    Box,
+    Table,
+    TableBody,
+    TableRow,
+    TableCell,
+    TableHead,
+    Divider,
+    withStyles
 } from "@material-ui/core";
 import { getTrials } from "../../../api/api";
-import { getTrialInfo, IFileBundle, Trial } from "../../../model/trial";
+import { IFileBundle, Trial } from "../../../model/trial";
 import { withIdToken } from "../../identity/AuthProvider";
 import { flatMap, flatten, isEmpty, map, omitBy, pickBy, range } from "lodash";
 import { CloudDownload } from "@material-ui/icons";
@@ -29,7 +36,8 @@ const BatchDownloadButton: React.FC<{
                 size="small"
                 variant="outlined"
                 startIcon={<CloudDownload />}
-                onClick={e => {
+                disabled={!ids.length}
+                onClick={() => {
                     setOpen(true);
                 }}
                 children={children}
@@ -86,74 +94,89 @@ const isClinical = (_: any, key: string) =>
     ["Participants Info", "Samples Info"].includes(key);
 
 const AssayButton: React.FC<{
-    assay: string;
     purpose: keyof IFileBundle[keyof IFileBundle];
     bundle: IFileBundle[keyof IFileBundle];
     token: string;
-}> = ({ assay, purpose, bundle, token }) => {
-    const ids = bundle[purpose];
-    return ids ? (
-        <BatchDownloadButton token={token} ids={ids}>
-            {ids.length} {assay} {purpose} files
-        </BatchDownloadButton>
-    ) : (
-        <Box textAlign="center">
-            <Typography color="textSecondary">(no {purpose} files)</Typography>
+}> = ({ purpose, bundle, token }) => {
+    const ids = bundle[purpose] || [];
+    return (
+        <Box m={1}>
+            <BatchDownloadButton token={token} ids={ids}>
+                {ids.length} files
+            </BatchDownloadButton>
         </Box>
     );
 };
+
+const AssayTableCell = withStyles({
+    root: {
+        borderBottom: "none"
+    }
+})(TableCell);
 
 const AssayButtonTable: React.FC<{
     token: string;
     assayBundle: IFileBundle;
 }> = ({ token, assayBundle }) => {
     return (
-        <Grid container direction="column">
-            {Object.entries(assayBundle).map(([assay, bundle]) => {
-                if (assay === "other") {
-                    return null;
-                }
+        <Table size="small" padding="none">
+            <TableHead>
+                <TableRow>
+                    <AssayTableCell align="left">
+                        <Typography variant="overline" color="textSecondary">
+                            Assay
+                        </Typography>
+                    </AssayTableCell>
+                    <AssayTableCell align="center">
+                        <Typography variant="overline" color="textSecondary">
+                            Source Files
+                        </Typography>
+                    </AssayTableCell>
+                    <AssayTableCell align="center">
+                        <Typography variant="overline" color="textSecondary">
+                            Analysis Files
+                        </Typography>
+                    </AssayTableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {Object.entries(assayBundle).map(([assay, bundle]) => {
+                    if (assay === "other") {
+                        return null;
+                    }
 
-                return (
-                    <Grid item key={assay} style={{ height: "2.5rem" }}>
-                        <Grid
-                            container
-                            direction="row"
-                            justify="center"
-                            alignItems="center"
-                            spacing={2}
-                        >
-                            <Grid item xs={1}>
-                                <Typography variant="subtitle1">
-                                    <strong>{assay}</strong>
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={4}>
+                    return (
+                        <TableRow key={assay}>
+                            <AssayTableCell>{assay}</AssayTableCell>
+                            <AssayTableCell>
                                 <AssayButton
                                     token={token}
-                                    bundle={bundle}
                                     purpose={"source"}
-                                    assay={assay}
+                                    bundle={bundle}
                                 />
-                            </Grid>
-                            <Grid item xs={4}>
+                            </AssayTableCell>
+                            <AssayTableCell>
                                 <AssayButton
                                     token={token}
-                                    bundle={bundle}
                                     purpose={"analysis"}
-                                    assay={assay}
+                                    bundle={bundle}
                                 />
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                );
-            })}
-        </Grid>
+                            </AssayTableCell>
+                        </TableRow>
+                    );
+                })}
+            </TableBody>
+        </Table>
     );
 };
 
 const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
-    const { participants } = getTrialInfo(trial);
+    const {
+        participants,
+        trial_name,
+        nct_id,
+        trial_status
+    } = trial.metadata_json;
     const sampleCount = flatten(map(participants, "samples")).length;
 
     // `!` is unsafe, but `TrialTable` will only render this component
@@ -175,54 +198,90 @@ const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
         flatMap(bundle, v => v || [])
     );
 
-    const header = (
+    const trialInfo = (
         <>
-            <Typography variant="h5">
-                <strong>{trial.trial_id}</strong>
+            <Typography variant="h6">
+                <strong>{trial.trial_id}</strong>{" "}
             </Typography>
-            <Typography variant="subtitle2">
-                {participants.length} participants, {sampleCount} samples,{" "}
-                {Object.keys(assayBundle).length} assays
+            <small>
+                <Typography color="textSecondary">{nct_id}</Typography>
+            </small>
+            <Grid container spacing={2} wrap="nowrap">
+                {[
+                    ["status", trial_status],
+                    ["participants", participants.length],
+                    ["samples", sampleCount],
+                    ["assays", Object.keys(assayBundle).length]
+                ]
+                    .filter(([_, value]) => value !== undefined)
+                    .map(([label, value]) => (
+                        <Grid item key={label}>
+                            <Grid
+                                container
+                                spacing={1}
+                                wrap="nowrap"
+                                alignItems="center"
+                            >
+                                <Grid item>
+                                    <Typography
+                                        variant="overline"
+                                        color="textSecondary"
+                                    >
+                                        {label}
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="subtitle2">
+                                        {value}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    ))}
+            </Grid>
+            {trial_name && (
+                <Typography variant="subtitle2">{trial_name}</Typography>
+            )}
+        </>
+    );
+
+    const datasets = (
+        <>
+            <Typography variant="overline" color="textSecondary">
+                Clinical Data
             </Typography>
+            <BatchDownloadButton token={token} ids={clinicalIds}>
+                {clinicalIds.length} clinical overview files
+            </BatchDownloadButton>
+            {!isEmpty(assayBundle) && (
+                <Box paddingTop={1}>
+                    <AssayButtonTable token={token} assayBundle={assayBundle} />
+                </Box>
+            )}
         </>
     );
 
     return (
-        <Grid item>
-            <Card>
-                <CardContent>
-                    <Grid container direction="column" spacing={2}>
-                        <Grid item>
-                            <Grid
-                                container
-                                direction="row"
-                                justify="space-between"
-                                alignItems="stretch"
-                            >
-                                <Grid item>{header}</Grid>
-                                <Grid item>
-                                    <BatchDownloadButton
-                                        token={token}
-                                        ids={clinicalIds}
-                                    >
-                                        {clinicalIds.length} clinical summary
-                                        files
-                                    </BatchDownloadButton>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                        {!isEmpty(assayBundle) && (
-                            <Grid item>
-                                <AssayButtonTable
-                                    token={token}
-                                    assayBundle={assayBundle}
-                                />
-                            </Grid>
-                        )}
+        <Card>
+            <CardContent>
+                <Grid
+                    container
+                    direction="row"
+                    justify="space-between"
+                    wrap="nowrap"
+                >
+                    <Grid item xs={6}>
+                        {trialInfo}
                     </Grid>
-                </CardContent>
-            </Card>
-        </Grid>
+                    <Grid item>
+                        <Divider orientation="vertical" />
+                    </Grid>
+                    <Grid item xs={5}>
+                        {datasets}
+                    </Grid>
+                </Grid>
+            </CardContent>
+        </Card>
     );
 };
 

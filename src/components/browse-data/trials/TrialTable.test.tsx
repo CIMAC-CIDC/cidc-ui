@@ -27,6 +27,9 @@ const fileBundle = {
     }
 };
 const metadata = {
+    nct_id: "NCT11111111",
+    trial_name: "a fancy trial name",
+    trial_status: "Ongoing",
     participants: [
         { samples: range(5) },
         { samples: range(7) },
@@ -77,12 +80,23 @@ it("renders trials with no filters applied", async () => {
         ).toBeInTheDocument();
     });
 
-    // renders file bundles buttons
-    expect(queryAllByText(/3 cytof source files/i).length).toBe(10);
-    expect(queryAllByText(/4 cytof analysis files/i).length).toBe(10);
-    expect(queryAllByText(/2 ihc source files/i).length).toBe(10);
-    expect(queryAllByText(/no analysis files/i).length).toBe(10);
-    expect(queryAllByText(/2 clinical summary files/i).length).toBe(10);
+    // renders trial info
+    expect(queryAllByText(new RegExp(metadata.nct_id, "i")).length).toBe(10);
+    expect(queryAllByText(new RegExp(metadata.trial_name, "i")).length).toBe(
+        10
+    );
+    expect(queryAllByText(new RegExp(metadata.trial_status, "i")).length).toBe(
+        10
+    );
+
+    // renders batch download interface
+    expect(queryAllByText(/2 clinical overview files/i).length).toBe(10);
+    expect(queryAllByText(/cytof/i).length).toBe(10);
+    expect(queryAllByText(/4 files/i).length).toBe(10);
+    expect(queryAllByText(/3 files/i).length).toBe(10);
+    expect(queryAllByText(/ihc/i).length).toBe(10);
+    expect(queryAllByText(/2 files/i).length).toBe(10);
+    expect(queryAllByText(/0 files/i).length).toBe(10);
 });
 
 it("handles pagination as expected", async () => {
