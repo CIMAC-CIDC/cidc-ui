@@ -170,12 +170,34 @@ const AssayButtonTable: React.FC<{
     );
 };
 
+const LabelAndValue: React.FC<{ label: string; value: string }> = ({
+    label,
+    value
+}) => {
+    return (
+        <Grid container spacing={1} wrap="nowrap" alignItems="center">
+            <Grid item>
+                <Typography noWrap variant="overline" color="textSecondary">
+                    {label}
+                </Typography>
+            </Grid>
+            <Grid item>
+                <Typography noWrap variant="subtitle2">
+                    {value}
+                </Typography>
+            </Grid>
+        </Grid>
+    );
+};
+
 const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
     const {
         participants,
         trial_name,
         nct_id,
-        trial_status
+        trial_status,
+        biobank,
+        lead_cimac_pis
     } = trial.metadata_json;
     const sampleCount = flatten(map(participants, "samples")).length;
 
@@ -203,11 +225,25 @@ const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
             <Typography variant="h6">
                 <strong>{trial.trial_id}</strong>{" "}
             </Typography>
-            <small>
-                <Typography color="textSecondary">{nct_id}</Typography>
-            </small>
+            <Grid container direction="column">
+                {[
+                    ["nct number", nct_id],
+                    [
+                        "principal investigator(s)",
+                        lead_cimac_pis ? lead_cimac_pis.join(", ") : undefined
+                    ],
+                    ["biobank", biobank]
+                ]
+                    .filter(([_, value]) => value !== undefined)
+                    .map(([label, value]) => (
+                        <Grid item key={label}>
+                            <LabelAndValue label={label} value={value} />
+                        </Grid>
+                    ))}
+            </Grid>
             <Grid container spacing={2} wrap="nowrap">
                 {[
+                    // ["principal investigator(s)", ]
                     ["status", trial_status],
                     ["participants", participants.length],
                     ["samples", sampleCount],
@@ -216,31 +252,12 @@ const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
                     .filter(([_, value]) => value !== undefined)
                     .map(([label, value]) => (
                         <Grid item key={label}>
-                            <Grid
-                                container
-                                spacing={1}
-                                wrap="nowrap"
-                                alignItems="center"
-                            >
-                                <Grid item>
-                                    <Typography
-                                        variant="overline"
-                                        color="textSecondary"
-                                    >
-                                        {label}
-                                    </Typography>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="subtitle2">
-                                        {value}
-                                    </Typography>
-                                </Grid>
-                            </Grid>
+                            <LabelAndValue label={label} value={value} />
                         </Grid>
                     ))}
             </Grid>
             {trial_name && (
-                <Typography variant="subtitle2">{trial_name}</Typography>
+                <Typography variant="subtitle1">{trial_name}</Typography>
             )}
         </>
     );

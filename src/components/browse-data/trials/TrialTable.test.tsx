@@ -30,6 +30,8 @@ const metadata = {
     nct_id: "NCT11111111",
     trial_name: "a fancy trial name",
     trial_status: "Ongoing",
+    lead_cimac_pis: ["a", "b", "c"],
+    biobank: "nice biobank",
     participants: [
         { samples: range(5) },
         { samples: range(7) },
@@ -88,6 +90,8 @@ it("renders trials with no filters applied", async () => {
     expect(queryAllByText(new RegExp(metadata.trial_status, "i")).length).toBe(
         10
     );
+    expect(queryAllByText(new RegExp("a, b, c", "i")).length).toBe(10);
+    expect(queryAllByText(new RegExp("nice biobank", "i")).length).toBe(10);
 
     // renders batch download interface
     expect(queryAllByText(/2 clinical overview files/i).length).toBe(10);
