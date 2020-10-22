@@ -65,7 +65,9 @@ it("renders with no filters applied", async () => {
         queryAllByText
     } = renderFileTable();
     expect(queryAllByTestId(/placeholder-row/i).length).toBeGreaterThan(0);
-    expect((await findAllByText(/file\/url/i)).length).toBe(files.length);
+
+    expect((await findAllByText(/file\//i)).length).toBe(files.length);
+    expect(queryAllByText(/url/i).length).toBe(files.length);
     expect(queryAllByText(/participants info/i).length).toBe(files.length);
     expect(queryAllByText(/csv/i).length).toBe(files.length);
     expect(queryByText(/toggle file view/i)).toBeInTheDocument();
@@ -77,7 +79,7 @@ it("handles batch download requests", async () => {
     getFiles.mockResolvedValue(getFilesResult);
     getFilelist.mockResolvedValue("foo");
     const { findAllByText, getByText, queryByText } = renderFileTable();
-    const rows = await findAllByText(/file\/url/i);
+    const rows = await findAllByText(/url/i);
 
     expect(getByText(/select files for batch download/i)).toBeInTheDocument();
 
