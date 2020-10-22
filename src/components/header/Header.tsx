@@ -111,6 +111,12 @@ const StyledTabs = withStyles({
     <Tabs {...props} TabIndicatorProps={{ children: <div /> }} />
 ));
 
+const StyledTab = withStyles({
+    root: {
+        minWidth: 120
+    }
+})(Tab);
+
 const useHeaderStyles = makeStyles({
     tabs: {
         background: `linear-gradient(to right, white,${colors.LIGHT_BLUE} 300px, ${colors.LIGHT_BLUE})`,
@@ -144,12 +150,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
         <div data-testid="header" style={{ width: "100%" }}>
             <EnvBanner />
             <div className={classes.tabs}>
-                <Grid
-                    container
-                    alignItems="center"
-                    wrap="nowrap"
-                    style={{ width: "100%", paddingBottom: "0" }}
-                >
+                <Grid container alignItems="center" wrap="nowrap" spacing={1}>
                     <Grid item>
                         <RouterLink to="/">
                             <img
@@ -161,14 +162,14 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                     </Grid>
                     <Grid item>
                         <StyledTabs value={selectedTab} onChange={handleChange}>
-                            <Tab
+                            <StyledTab
                                 disableRipple={true}
                                 value="/browse-data"
                                 label="browse data"
                                 icon={<Search />}
                             />
                             {user && user.showAssays && (
-                                <Tab
+                                <StyledTab
                                     disableRipple={true}
                                     value="/assays"
                                     label="Assays"
@@ -176,7 +177,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                 />
                             )}
                             {user && user.showAnalyses && (
-                                <Tab
+                                <StyledTab
                                     disableRipple={true}
                                     value="/analyses"
                                     label="Analyses"
@@ -184,26 +185,26 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                 />
                             )}
                             {user && user.showManifests && (
-                                <Tab
+                                <StyledTab
                                     disableRipple={true}
                                     value="/manifests"
                                     label="Manifests"
                                     icon={<TableChart />}
                                 />
                             )}
-                            <Tab
+                            <StyledTab
                                 disableRipple={true}
                                 value="/pipelines"
                                 label="Pipelines"
                                 icon={<DeviceHub />}
                             />
-                            <Tab
+                            <StyledTab
                                 disableRipple={true}
                                 value="/schema"
                                 label="Schema"
                                 icon={<Code />}
                             />
-                            <Tab
+                            <StyledTab
                                 disableRipple={true}
                                 value="/profile"
                                 label="Profile"
