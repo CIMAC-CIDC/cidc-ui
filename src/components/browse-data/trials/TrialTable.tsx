@@ -175,16 +175,16 @@ const LabelAndValue: React.FC<{ label: string; value: string }> = ({
     value
 }) => {
     return (
-        <Grid container spacing={1} wrap="nowrap" alignItems="center">
+        <Grid container alignItems="center">
             <Grid item>
-                <Typography noWrap variant="overline" color="textSecondary">
-                    {label}
-                </Typography>
+                <Box paddingRight={1}>
+                    <Typography noWrap variant="overline" color="textSecondary">
+                        {label}
+                    </Typography>
+                </Box>
             </Grid>
             <Grid item>
-                <Typography noWrap variant="subtitle2">
-                    {value}
-                </Typography>
+                <Typography variant="subtitle2">{value}</Typography>
             </Grid>
         </Grid>
     );
@@ -225,39 +225,28 @@ const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
             <Typography variant="h6">
                 <strong>{trial.trial_id}</strong>{" "}
             </Typography>
-            <Grid container direction="column">
+            <Grid container spacing={1}>
                 {[
-                    ["nct number", nct_id],
+                    ["nct number", nct_id, 12],
                     [
                         "principal investigator(s)",
-                        lead_cimac_pis ? lead_cimac_pis.join(", ") : undefined
+                        lead_cimac_pis ? lead_cimac_pis.join(", ") : undefined,
+                        12
                     ],
-                    ["biobank", biobank]
-                ]
-                    .filter(([_, value]) => value !== undefined)
-                    .map(([label, value]) => (
-                        <Grid item key={label}>
-                            <LabelAndValue label={label} value={value} />
-                        </Grid>
-                    ))}
-            </Grid>
-            <Grid container spacing={2} wrap="nowrap">
-                {[
+                    ["biobank", biobank, 12],
                     ["status", trial_status],
                     ["participants", participants.length],
                     ["samples", sampleCount],
-                    ["assays", Object.keys(assayBundle).length]
+                    ["assays", Object.keys(assayBundle).length],
+                    ["overview", trial_name, 12]
                 ]
-                    .filter(([_, value]) => value !== undefined)
-                    .map(([label, value]) => (
-                        <Grid item key={label}>
+                    .filter(config => config[1] !== undefined)
+                    .map(([label, value, width]) => (
+                        <Grid item key={label} xs={width}>
                             <LabelAndValue label={label} value={value} />
                         </Grid>
                     ))}
             </Grid>
-            {trial_name && (
-                <Typography variant="subtitle1">{trial_name}</Typography>
-            )}
         </>
     );
 
