@@ -64,8 +64,8 @@ const PipelinesPage: React.FC<RouteComponentProps> = props => {
     const classes = useRootStyles();
     return (
         <div className={classes.centeredPage}>
-            <Grid container direction="row">
-                <Grid item style={{ width: 200 }}>
+            <Grid container justify="center" direction="row" wrap="nowrap">
+                <Grid item style={{ minWidth: 200 }}>
                     <List style={{ paddingTop: 0 }}>
                         <ListSubheader disableSticky>
                             Pipeline Docs
@@ -93,10 +93,7 @@ const PipelinesPage: React.FC<RouteComponentProps> = props => {
                 </Grid>
                 <Grid item>
                     <div style={{ padding: "1em" }}>
-                        <Redirect
-                            from="/pipelines"
-                            to="/pipelines/rna"
-                        />
+                        <Redirect from="/pipelines" to="/pipelines/rna" />
                         <Route
                             path={`/pipelines/:docPath`}
                             render={({ match }) =>

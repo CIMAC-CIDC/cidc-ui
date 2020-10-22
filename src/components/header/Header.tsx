@@ -18,7 +18,7 @@ import {
 } from "react-router-dom";
 import logo from "../../logo.png";
 import { useUserContext } from "../identity/UserProvider";
-import { colors, widths } from "../../rootStyles";
+import { colors } from "../../rootStyles";
 import { theme } from "../../App";
 import MuiRouterLink from "../generic/MuiRouterLink";
 import {
@@ -141,7 +141,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
     }
 
     return (
-        <div data-testid="header" style={{ minWidth: widths.pageWidth }}>
+        <div data-testid="header" style={{ width: "100%" }}>
             <EnvBanner />
             <div className={classes.tabs}>
                 <Grid

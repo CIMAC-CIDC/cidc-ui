@@ -7,7 +7,8 @@ export const colors = {
 };
 
 export const widths = {
-    pageWidth: 1050,
+    maxPageWidth: 1500,
+    minPageWidth: 1100,
     markdownWidth: 800
 };
 
@@ -17,17 +18,17 @@ export const useRootStyles = makeStyles({
         height: "100vh"
     },
     markdown: {
-        width: widths.markdownWidth,
+        maxWidth: widths.markdownWidth,
         margin: "auto"
     },
     content: {
         padding: "1em 3em 3em",
         minHeight: 960,
-        background: "white",
-        overflowX: "scroll"
+        background: "white"
     },
     centeredPage: {
-        width: widths.pageWidth,
+        minWidth: widths.minPageWidth,
+        maxWidth: widths.maxPageWidth,
         margin: "auto"
     }
 });

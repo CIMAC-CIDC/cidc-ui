@@ -138,7 +138,7 @@ function PaginatedTable<T extends IRowWithId>(props: IPaginatedTableProps<T>) {
                             )}
                             {props.headers.map(header => (
                                 <TableCell key={header.key}>
-                                    <Box whiteSpace="nowrap">
+                                    <Box>
                                         {props.onClickHeader ? (
                                             header.disableSort ? (
                                                 header.label

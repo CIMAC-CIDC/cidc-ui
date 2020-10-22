@@ -5,8 +5,13 @@ import { theme } from "../../App";
 
 const Footer: React.FC = () => {
     return (
-        <Box bgcolor={theme.palette.grey["100"]} width="100vw">
-            <Grid container justify="center" spacing={5}>
+        <Box bgcolor={theme.palette.grey["100"]}>
+            <Grid
+                container
+                justify="center"
+                spacing={5}
+                style={{ maxWidth: "100%" }}
+            >
                 <Grid item>
                     &copy; {new Date().getFullYear()} CIDC @ Dana-Farber Cancer
                     Institute{" "}

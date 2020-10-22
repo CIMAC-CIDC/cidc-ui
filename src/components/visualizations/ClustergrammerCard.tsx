@@ -68,7 +68,7 @@ export interface IClustergrammerCardProps {
 }
 
 const ClustergrammerCard: React.FC<IClustergrammerCardProps> = ({ file }) => {
-    const width = widths.pageWidth - 25;
+    const width = widths.maxPageWidth;
     const height = 800;
 
     return (

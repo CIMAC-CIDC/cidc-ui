@@ -23,7 +23,7 @@ import {
 } from "../../../util/formatters";
 
 const fileQueryDefaults = {
-    page_size: 15
+    page_size: 50
     // // Columns to omit from `getFiles` queries.
     // // These columns may contain large JSON blobs
     // // that would slow the query down.
@@ -222,13 +222,17 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
 
     const formatObjectURL = (row: DataFile) => {
         const paths = row.object_url.split("/");
-        const fileName = paths[paths.length - 1];
-        const prefix = paths.slice(0, paths.length - 1).join("/");
         return (
             <MuiRouterLink to={`/browse-data/${row.id}`}>
                 <div style={{ textDecoration: "underline" }}>
-                    <div>{prefix}/</div>
-                    <div>{fileName}</div>
+                    <Grid container>
+                        {paths.map((p, i) => (
+                            <Grid key={p} item>
+                                {p}
+                                {i === paths.length - 1 ? "" : "/"}
+                            </Grid>
+                        ))}
+                    </Grid>
                 </div>
             </MuiRouterLink>
         );
