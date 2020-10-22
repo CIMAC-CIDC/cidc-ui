@@ -33,7 +33,7 @@ const HomePage: React.FunctionComponent = () => {
     const user = React.useContext(UserContext);
 
     return (
-        <div className={classes.centeredPage}>
+        <div className={classes.centeredPage} style={{ maxWidth: 700 }}>
             <Typography
                 variant="h4"
                 style={{ textAlign: "center" }}

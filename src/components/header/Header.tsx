@@ -120,7 +120,7 @@ const StyledTab = withStyles({
 const useHeaderStyles = makeStyles({
     tabs: {
         background: `linear-gradient(to right, white,${colors.LIGHT_BLUE} 300px, ${colors.LIGHT_BLUE})`,
-        width: "100%",
+        minWidth: "100%",
         margin: 0
     },
     logo: { height: 87, padding: 5 }
