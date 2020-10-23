@@ -110,7 +110,7 @@ const StyledTab: typeof Tab = withStyles({
     root: { minWidth: 120 }
 })(Tab);
 
-const NavTabs: React.FC<{ selectedTab?: string; tabs: TabProps[] }> = ({
+const NavTabs: React.FC<{ selectedTab: string | false; tabs: TabProps[] }> = ({
     selectedTab,
     tabs
 }) => {
@@ -119,6 +119,7 @@ const NavTabs: React.FC<{ selectedTab?: string; tabs: TabProps[] }> = ({
             {tabs.map(tab => {
                 return (
                     <StyledTab
+                        key={tab.value}
                         component={Link}
                         disableRipple
                         to={tab.value}
@@ -146,14 +147,18 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
     const classes = useHeaderStyles();
     const user = useUserContext();
 
-    let selectedTab: string | undefined = props.location.pathname;
+    let selectedTab: string | false = props.location.pathname;
 
     if (["/", "/privacy-security"].includes(selectedTab)) {
-        selectedTab = undefined;
+        selectedTab = false;
     } else if (DONT_RENDER_PATHS.includes(selectedTab)) {
         return null;
     } else {
         selectedTab = `/${selectedTab.split("/")[1]}`;
+    }
+
+    if (!user) {
+        return null;
     }
 
     return (
@@ -195,14 +200,28 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                     <Grid item style={{ padding: 0 }}>
                         <NavTabs
                             selectedTab={selectedTab}
-                            tabs={[
-                                { label: "browse data", value: "/browse-data" },
-                                { label: "assays", value: "/assays" },
-                                { label: "analyses", value: "/analyses" },
-                                { label: "manifests", value: "/manifests" },
-                                { label: "pipelines", value: "/pipelines" },
-                                { label: "schema", value: "/schema" }
-                            ]}
+                            tabs={
+                                [
+                                    {
+                                        label: "browse data",
+                                        value: "/browse-data"
+                                    },
+                                    user.showAssays && {
+                                        label: "assays",
+                                        value: "/assays"
+                                    },
+                                    user.showAnalyses && {
+                                        label: "analyses",
+                                        value: "/analyses"
+                                    },
+                                    user.showManifests && {
+                                        label: "manifests",
+                                        value: "/manifests"
+                                    },
+                                    { label: "pipelines", value: "/pipelines" },
+                                    { label: "schema", value: "/schema" }
+                                ].filter(t => !!t) as TabProps[]
+                            }
                         />
                     </Grid>
                 </Grid>
