@@ -27,7 +27,6 @@ import {
 import { useRootStyles } from "../../rootStyles";
 import { Person } from "@material-ui/icons";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
-import MuiRouterLink from "../generic/MuiRouterLink";
 
 const ENV = process.env.REACT_APP_ENV;
 
@@ -137,7 +136,7 @@ const useHeaderStyles = makeStyles({
         paddingTop: 10,
         margin: 0
     },
-    logo: { height: 66, padding: 5, marginBottom: -19 }
+    logo: { height: 80, padding: 5, marginBottom: -40 }
 });
 
 export const DONT_RENDER_PATHS = ["/register", "/unactivated", "/callback"];

@@ -17,10 +17,6 @@ import { intersection, union, difference, range } from "lodash";
 import { Skeleton } from "@material-ui/lab";
 
 const useStyles = makeStyles({
-    message: {
-        margin: "1rem",
-        minWidth: 300
-    },
     row: {
         cursor: "auto !important"
     },
@@ -217,7 +213,12 @@ function PaginatedTable<T extends IRowWithId>(props: IPaginatedTableProps<T>) {
                         <TableRow>
                             <TableCell>
                                 <Typography
-                                    className={classes.message}
+                                    noWrap
+                                    style={{
+                                        overflow: "visible",
+                                        width: 0
+                                    }}
+                                    variant="subtitle2"
                                     color="textSecondary"
                                 >
                                     No data found for these filters.

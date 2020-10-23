@@ -7,14 +7,12 @@ import { useRootStyles } from "../../rootStyles";
 const ManifestsPage: React.FC = () => {
     const classes = useRootStyles();
 
-    const manifestCardStyle = { width: "80%", margin: "auto" };
-
     return (
         <Grid container className={classes.centeredPage} spacing={3}>
-            <Grid item style={manifestCardStyle}>
+            <Grid item>
                 <ManifestTemplateDownload />
             </Grid>
-            <Grid item style={manifestCardStyle}>
+            <Grid item>
                 <ManifestUpload />
             </Grid>
         </Grid>
