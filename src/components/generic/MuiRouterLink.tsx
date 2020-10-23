@@ -16,7 +16,11 @@ const MuiRouterLink: React.FC<RouteComponentProps & {
         <Link
             {...(props.LinkProps || {})}
             className={classes.link}
-            onClick={() => props.history.push(props.to)}
+            href={props.to}
+            onClick={(e: any) => {
+                e.preventDefault();
+                props.history.push(props.to);
+            }}
         >
             {props.children}
         </Link>
