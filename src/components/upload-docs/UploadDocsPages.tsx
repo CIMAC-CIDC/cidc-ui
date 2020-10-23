@@ -73,7 +73,8 @@ const pathConfigs: Dictionary<IDocPathConfig> = {
         path: "tcr",
         label: "TCR",
         title: "TCR upload",
-        assays: true
+        assays: true,
+        analyses: true
     }
 };
 
