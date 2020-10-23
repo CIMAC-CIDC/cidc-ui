@@ -1,27 +1,25 @@
 import React from "react";
-import { Tooltip } from "@material-ui/core";
+import { Grid, Tooltip, Typography } from "@material-ui/core";
 import { InfoOutlined } from "@material-ui/icons";
-import { withStyles } from "@material-ui/styles";
 
 export interface IInfoTooltipProps {
     text: string;
 }
 
-const LargeFontTooltip = withStyles({
-    tooltip: {
-        fontSize: 12
-    }
-})(Tooltip);
-
 const InfoTooltip: React.FC<IInfoTooltipProps> = ({ text, children }) => (
-    <span style={{ display: "flex", alignItems: "center" }}>
-        <span style={{ marginRight: 0.5 }}>{children}</span>
-        <LargeFontTooltip title={text} placement="bottom-start">
-            <span role="tooltip">
-                <InfoOutlined color="primary" fontSize="inherit" />
-            </span>
-        </LargeFontTooltip>
-    </span>
+    <Grid container spacing={1}>
+        <Grid item>{children}</Grid>
+        <Grid item>
+            <Tooltip
+                title={<Typography variant="caption">{text}</Typography>}
+                placement="right-end"
+            >
+                <span role="tooltip">
+                    <InfoOutlined color="primary" fontSize="inherit" />
+                </span>
+            </Tooltip>
+        </Grid>
+    </Grid>
 );
 
 export default InfoTooltip;
