@@ -26,7 +26,7 @@ const BrowseDataPage: React.FC<RouteComponentProps> = props => {
     );
 
     const viewToggleButton = (
-        <ButtonGroup size="small" color="primary">
+        <ButtonGroup size="small" color="primary" disableElevation>
             <Button
                 variant={showFileView ? "outlined" : "contained"}
                 onClick={() => setShowFileView(false)}
