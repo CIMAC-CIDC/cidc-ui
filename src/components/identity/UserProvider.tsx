@@ -34,13 +34,12 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         Permission[] | undefined
     >(undefined);
 
-    const idToken = authData && authData.idToken;
     React.useEffect(() => {
-        if (idToken) {
+        if (authData?.idToken) {
             if (!user) {
-                getAccountInfo(idToken)
+                getAccountInfo(authData.idToken)
                     .then(userAccount => {
-                        setUser(userAccount);
+                        setUser({ ...authData.user, ...userAccount });
                         if (!userAccount.approval_date) {
                             history.replace("/unactivated");
                         }
@@ -59,7 +58,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                         }
                     });
             } else if (!permissions && user.role) {
-                getPermissionsForUser(idToken, user.id).then(perms =>
+                getPermissionsForUser(authData.idToken, user.id).then(perms =>
                     setPermissions(perms)
                 );
             }
@@ -78,7 +77,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                 )
             });
         }
-    }, [idToken, setError, user, permissions]);
+    }, [authData, setError, user, permissions]);
 
     const showAssays =
         user?.role &&

@@ -7,16 +7,27 @@ import {
     Link as MuiLink,
     Grid,
     withStyles,
-    makeStyles
+    makeStyles,
+    Divider,
+    Avatar,
+    Button,
+    TabProps
 } from "@material-ui/core";
 import {
     withRouter,
     RouteComponentProps,
-    Link as RouterLink
+    Link as RouterLink,
+    Link
 } from "react-router-dom";
 import logo from "../../logo.png";
-import { useUserContext } from "../identity/UserProvider";
+import {
+    IAccountWithExtraContext,
+    useUserContext
+} from "../identity/UserProvider";
 import { useRootStyles } from "../../rootStyles";
+import { Person } from "@material-ui/icons";
+import { ORGANIZATION_NAME_MAP } from "../../util/constants";
+import MuiRouterLink from "../generic/MuiRouterLink";
 
 const ENV = process.env.REACT_APP_ENV;
 
@@ -48,18 +59,45 @@ export const EnvBanner: React.FunctionComponent = () =>
         </Card>
     ) : null;
 
+const UserOverview: React.FC<{ user: IAccountWithExtraContext }> = ({
+    user
+}) => {
+    return (
+        <Grid container spacing={2} alignItems="center">
+            <Grid item>
+                {user.picture ? (
+                    <Avatar
+                        alt={`${user.first_n} ${user.last_n}'s avatar`}
+                        src={user.picture}
+                    />
+                ) : (
+                    <Person fontSize="large" />
+                )}
+            </Grid>
+            <Grid item style={{ maxWidth: 150 }}>
+                <Typography variant="subtitle2">
+                    {user.first_n} {user.last_n}
+                </Typography>
+                <Typography variant="caption" color="textSecondary">
+                    {ORGANIZATION_NAME_MAP[user.organization]}
+                </Typography>
+            </Grid>
+        </Grid>
+    );
+};
+
 interface IStyledTabsProps {
     value: string | false;
     onChange: (event: React.ChangeEvent<{}>, newValue: string) => void;
 }
 
-const StyledTabs = withStyles({
+// @ts-ignore
+const StyledTabs: typeof Tabs = withStyles({
     indicator: {
         display: "flex",
         justifyContent: "center",
         backgroundColor: "transparent",
         "& > div": {
-            maxWidth: 60,
             width: "100%",
             backgroundColor: "black"
         }
@@ -68,17 +106,39 @@ const StyledTabs = withStyles({
     <Tabs {...props} TabIndicatorProps={{ children: <div /> }} />
 ));
 
-const StyledTab = withStyles(theme => ({
+// @ts-ignore
+const StyledTab: typeof Tab = withStyles({
     root: { minWidth: 120 }
-}))(Tab);
+})(Tab);
 
-const useHeaderStyles = makeStyles(theme => ({
+const NavTabs: React.FC<{ selectedTab?: string; tabs: TabProps[] }> = ({
+    selectedTab,
+    tabs
+}) => {
+    return (
+        <StyledTabs role="navigation" value={selectedTab}>
+            {tabs.map(tab => {
+                return (
+                    <StyledTab
+                        component={Link}
+                        disableRipple
+                        to={tab.value}
+                        value={tab.value}
+                        label={tab.label}
+                    />
+                );
+            })}
+        </StyledTabs>
+    );
+};
+
+const useHeaderStyles = makeStyles({
     tabs: {
-        background: theme.palette.grey[100],
+        paddingTop: 10,
         margin: 0
     },
-    logo: { height: 75, padding: 5 }
-}));
+    logo: { height: 66, padding: 5, marginBottom: -19 }
+});
 
 export const DONT_RENDER_PATHS = ["/register", "/unactivated", "/callback"];
 
@@ -87,14 +147,10 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
     const classes = useHeaderStyles();
     const user = useUserContext();
 
-    function handleChange(_: React.ChangeEvent<{}>, value: any) {
-        props.history.push(value);
-    }
-
-    let selectedTab: string | false = props.location.pathname;
+    let selectedTab: string | undefined = props.location.pathname;
 
     if (["/", "/privacy-security"].includes(selectedTab)) {
-        selectedTab = false;
+        selectedTab = undefined;
     } else if (DONT_RENDER_PATHS.includes(selectedTab)) {
         return null;
     } else {
@@ -102,73 +158,57 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
     }
 
     return (
-        <div data-testid="header" style={{ minWidth: "100%" }}>
+        <div data-testid="header">
             <EnvBanner />
             <div className={classes.tabs}>
                 <Grid
                     container
                     className={rootClasses.centeredPage}
-                    justify="space-between"
-                    alignItems="center"
+                    direction="column"
                     wrap="nowrap"
-                    spacing={1}
                 >
                     <Grid item>
-                        <RouterLink to="/">
-                            <img
-                                src={logo}
-                                className={classes.logo}
-                                alt="Home"
-                            />
-                        </RouterLink>
+                        <Grid
+                            container
+                            alignItems="baseline"
+                            justify="space-between"
+                        >
+                            <Grid item>
+                                <RouterLink to="/">
+                                    <img
+                                        src={logo}
+                                        alt="Home"
+                                        className={classes.logo}
+                                    />
+                                </RouterLink>
+                            </Grid>
+                            <Grid item>
+                                <Button
+                                    component={Link}
+                                    to={"/profile"}
+                                    disableRipple
+                                >
+                                    <UserOverview user={user} />
+                                </Button>
+                            </Grid>
+                        </Grid>
                     </Grid>
-                    <Grid item>
-                        <StyledTabs value={selectedTab} onChange={handleChange}>
-                            <StyledTab
-                                disableRipple={true}
-                                value="/browse-data"
-                                label="browse data"
-                            />
-                            {user && user.showAssays && (
-                                <StyledTab
-                                    disableRipple={true}
-                                    value="/assays"
-                                    label="Assays"
-                                />
-                            )}
-                            {user && user.showAnalyses && (
-                                <StyledTab
-                                    disableRipple={true}
-                                    value="/analyses"
-                                    label="Analyses"
-                                />
-                            )}
-                            {user && user.showManifests && (
-                                <StyledTab
-                                    disableRipple={true}
-                                    value="/manifests"
-                                    label="Manifests"
-                                />
-                            )}
-                            <StyledTab
-                                disableRipple={true}
-                                value="/pipelines"
-                                label="Pipelines"
-                            />
-                            <StyledTab
-                                disableRipple={true}
-                                value="/schema"
-                                label="Schema"
-                            />
-                            <StyledTab
-                                disableRipple={true}
-                                value="/profile"
-                                label="Profile"
-                            />
-                        </StyledTabs>
+                    <Grid item style={{ padding: 0 }}>
+                        <NavTabs
+                            selectedTab={selectedTab}
+                            tabs={[
+                                { label: "browse data", value: "/browse-data" },
+                                { label: "assays", value: "/assays" },
+                                { label: "analyses", value: "/analyses" },
+                                { label: "manifests", value: "/manifests" },
+                                { label: "pipelines", value: "/pipelines" },
+                                { label: "schema", value: "/schema" }
+                            ]}
+                        />
                     </Grid>
                 </Grid>
             </div>
+            <Divider />
         </div>
     );
 };

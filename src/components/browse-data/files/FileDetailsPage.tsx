@@ -40,6 +40,7 @@ import {
 import { isEmpty, map, range, sortBy } from "lodash";
 import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 import { Skeleton } from "@material-ui/lab";
+import { useRootStyles } from "../../../rootStyles";
 
 const DownloadURL: React.FunctionComponent<{
     fileId: number;
@@ -341,6 +342,8 @@ const RelatedFiles: React.FC<{ file: DataFile; token: string }> = ({
 const FileDetailsPage: React.FC<RouteComponentProps<{
     fileId: string;
 }>> = props => {
+    const rootClasses = useRootStyles();
+
     const authData = React.useContext(AuthContext);
     const [file, setFile] = React.useState<DataFile | undefined>(undefined);
 
@@ -355,15 +358,11 @@ const FileDetailsPage: React.FC<RouteComponentProps<{
     }, [idToken, fileIdInt]);
 
     return (
-        <div>
+        <div className={rootClasses.centeredPage}>
             {!file || !idToken ? (
                 <Loader />
             ) : (
-                <Grid
-                    container
-                    spacing={2}
-                    style={{ width: 1050, margin: "auto" }}
-                >
+                <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <FileHeader file={file} token={idToken} />
                     </Grid>

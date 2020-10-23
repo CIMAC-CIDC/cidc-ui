@@ -7,12 +7,12 @@ export const colors = {
 };
 
 export const widths = {
-    maxPageWidth: 1500,
-    minPageWidth: 1100,
+    maxPageWidth: 1300,
+    minPageWidth: 1000,
     markdownWidth: 800
 };
 
-export const useRootStyles = makeStyles({
+export const useRootStyles = makeStyles(theme => ({
     root: {
         minWidth: "640px !important",
         height: "100vh"
@@ -31,4 +31,4 @@ export const useRootStyles = makeStyles({
         maxWidth: widths.maxPageWidth,
         margin: "auto"
     }
-});
+}));

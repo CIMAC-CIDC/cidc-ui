@@ -52,12 +52,21 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
                 login();
                 return;
             }
-
-            const { email, given_name, family_name } = res.idTokenPayload;
+            const {
+                email,
+                given_name,
+                family_name,
+                picture
+            } = res.idTokenPayload;
 
             setAuthData({
                 idToken: res.idToken as string,
-                user: { email, first_n: given_name, last_n: family_name }
+                user: {
+                    email,
+                    first_n: given_name,
+                    last_n: family_name,
+                    picture
+                }
             });
         });
     }, []);

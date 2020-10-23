@@ -14,6 +14,7 @@ type Organization = "CIDC" | "DFCI" | "ICAHN" | "STANFORD" | "ANDERSON";
 // tslint:disable-next-line:interface-name
 export interface UnregisteredAccount {
     email: string;
+    picture?: string;
     first_n?: string;
     last_n?: string;
 }
