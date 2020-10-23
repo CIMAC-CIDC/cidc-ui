@@ -65,7 +65,7 @@ const PipelinesPage: React.FC<RouteComponentProps> = props => {
     return (
         <div className={classes.centeredPage}>
             <Grid container justify="center" direction="row" wrap="nowrap">
-                <Grid item style={{ minWidth: 200 }}>
+                <Grid item style={{ width: 200 }}>
                     <List style={{ paddingTop: 0 }}>
                         <ListSubheader disableSticky>
                             Pipeline Docs
@@ -93,12 +93,17 @@ const PipelinesPage: React.FC<RouteComponentProps> = props => {
                 </Grid>
                 <Grid item>
                     <div style={{ padding: "1em" }}>
-                        <Redirect from="/pipelines" to="/pipelines/rna" />
                         <Route
                             path={`/pipelines/:docPath`}
                             render={({ match }) =>
-                                pipelineMarkdowns[match.params.docPath]
+                                pipelineMarkdowns[match.params.docPath] ||
+                                pipelineMarkdowns.rna
                             }
+                        />
+                        <Route
+                            path="/pipelines"
+                            exact
+                            render={() => <Redirect to="pipelines/rna" />}
                         />
                     </div>
                 </Grid>

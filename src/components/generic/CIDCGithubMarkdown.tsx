@@ -3,7 +3,6 @@ import ReactMarkdown from "react-markdown";
 import "github-markdown-css/github-markdown.css";
 import { AuthContext } from "../identity/AuthProvider";
 import { useRootStyles } from "../../rootStyles";
-import Loader from "./Loader";
 import axios from "axios";
 
 export interface ICIDCGithubMarkdownProps {
@@ -58,7 +57,7 @@ const CIDCGithubMarkdown: React.FunctionComponent<ICIDCGithubMarkdownProps> = pr
             className={`markdown-body ${markdownClass}`}
         />
     ) : (
-        <Loader />
+        <div className={markdownClass}></div>
     );
 };
 

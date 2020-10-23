@@ -18,7 +18,7 @@ export const useRootStyles = makeStyles({
         height: "100vh"
     },
     markdown: {
-        maxWidth: widths.markdownWidth,
+        width: widths.markdownWidth,
         margin: "auto"
     },
     content: {
