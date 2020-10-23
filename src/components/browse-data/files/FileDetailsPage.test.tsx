@@ -54,21 +54,14 @@ it("renders details when a file is provided", async () => {
     expect(queryByText(/additional metadata/i)).not.toBeInTheDocument();
 });
 
-it("shows file descriptions when available and a message if not", async () => {
+it("shows file descriptions when available and nothing if not", async () => {
     const description = "a test description";
-    getSingleFile.mockResolvedValueOnce(file).mockResolvedValueOnce({
-        ...file,
-        long_description: description
-    });
-
-    const noDescription = renderFileDetails();
-    expect(
-        await noDescription.findByText(/about this file/i)
-    ).toBeInTheDocument();
-    expect(
-        noDescription.queryByText(/no description available/i)
-    ).toBeInTheDocument();
-    cleanup();
+    getSingleFile
+        .mockResolvedValueOnce({
+            ...file,
+            long_description: description
+        })
+        .mockResolvedValueOnce(file);
 
     const hasDescription = renderFileDetails();
     expect(
@@ -77,8 +70,12 @@ it("shows file descriptions when available and a message if not", async () => {
     expect(
         hasDescription.queryByText(new RegExp(description, "i"))
     ).toBeInTheDocument();
+    cleanup();
+
+    const noDescription = renderFileDetails();
+    await noDescription.findByText(/some\/url/i);
     expect(
-        hasDescription.queryByText(/no description available/i)
+        noDescription.queryByText(/about this file/i)
     ).not.toBeInTheDocument();
 });
 

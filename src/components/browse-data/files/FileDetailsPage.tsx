@@ -173,23 +173,16 @@ const FileHeader: React.FC<{ file: DataFile; token: string }> = ({
 };
 
 const FileDescription: React.FC<{ file: DataFile }> = ({ file }) => {
-    return (
+    return file.long_description ? (
         <Card>
             <CardHeader
                 title={<Typography variant="h6">About This File</Typography>}
             />
             <CardContent>
-                {file.long_description ? (
-                    <Typography>{file.long_description}</Typography>
-                ) : (
-                    <Typography color="textSecondary">
-                        There's no description available for this file type -
-                        yet! We're working on it, and we should have one soon.
-                    </Typography>
-                )}
+                <Typography>{file.long_description}</Typography>
             </CardContent>
         </Card>
-    );
+    ) : null;
 };
 
 export const AdditionalMetadataTable: React.FunctionComponent<{
