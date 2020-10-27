@@ -10,8 +10,8 @@ import {
 import { map } from "lodash";
 import { RouteComponentProps, Route, withRouter, Redirect } from "react-router";
 import UploadInstructions from "./UploadInstructions";
-import { useRootStyles } from "../../rootStyles";
 import { Dictionary } from "lodash";
+import PageWithSidebar from "../generic/PageWithSidebar";
 
 interface IDocPathConfig {
     path: string;
@@ -83,8 +83,6 @@ export interface IUploadDocsPageProps extends RouteComponentProps {
 }
 
 const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
-    const classes = useRootStyles();
-
     const DocsListItem: React.FunctionComponent<{
         label: string;
         path: string;
@@ -106,7 +104,7 @@ const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
         return (
             <UploadInstructions
                 docPath={`${CLIInstructionsPath}.md`}
-                title={"The CLI Command-Line Interface"}
+                title={"The CIDC Command-Line Interface"}
                 tokenButton={true}
                 uploadType={props.uploadType}
             />
@@ -137,55 +135,54 @@ const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
     };
 
     return (
-        <div className={classes.centeredPage}>
-            <Grid container justify="center" direction="row" wrap="nowrap">
-                <Grid item style={{ width: 200 }}>
-                    <List style={{ paddingTop: 0 }}>
-                        <ListSubheader disableSticky>
-                            General Overview
-                        </ListSubheader>
-                        <DocsListItem
-                            label={"CLI Instructions"}
-                            path={CLIInstructionsSitePath}
-                        />
-                        <ListSubheader disableSticky>
-                            Assay-Specific Docs
-                        </ListSubheader>
-                        {map(pathConfigs, (config, path) => {
-                            return (
-                                config[props.uploadType] && (
-                                    <DocsListItem
-                                        key={path}
-                                        label={config.label}
-                                        path={`/${props.uploadType}/${config.path}`}
-                                    />
-                                )
-                            );
-                        })}
-                    </List>
+        <PageWithSidebar
+            sidebar={
+                <Grid container>
+                    <Grid item xs={11}>
+                        <List>
+                            <ListSubheader disableSticky>
+                                General Overview
+                            </ListSubheader>
+                            <DocsListItem
+                                label={"CLI Instructions"}
+                                path={CLIInstructionsSitePath}
+                            />
+                            <ListSubheader disableSticky>
+                                Assay-Specific Docs
+                            </ListSubheader>
+                            {map(pathConfigs, (config, path) => {
+                                return (
+                                    config[props.uploadType] && (
+                                        <DocsListItem
+                                            key={path}
+                                            label={config.label}
+                                            path={`/${props.uploadType}/${config.path}`}
+                                        />
+                                    )
+                                );
+                            })}
+                        </List>
+                    </Grid>
+                    <Grid item>
+                        <Divider orientation="vertical" />
+                    </Grid>
                 </Grid>
-                <Grid item>
-                    <Divider orientation="vertical" />
-                </Grid>
-                <Grid item>
-                    <div style={{ padding: "1em" }}>
-                        <Route
-                            path={`/${props.uploadType}`}
-                            component={CLIRedirect}
-                            exact
-                        />
-                        <Route
-                            path={CLIInstructionsSitePath}
-                            component={CLIUploadInstructions}
-                        />
-                        <Route
-                            path={`/${props.uploadType}/:docPath`}
-                            component={SelectedUploadInstructions}
-                        />
-                    </div>
-                </Grid>
-            </Grid>
-        </div>
+            }
+        >
+            <Route
+                path={`/${props.uploadType}`}
+                component={CLIRedirect}
+                exact
+            />
+            <Route
+                path={CLIInstructionsSitePath}
+                component={CLIUploadInstructions}
+            />
+            <Route
+                path={`/${props.uploadType}/:docPath`}
+                component={SelectedUploadInstructions}
+            />
+        </PageWithSidebar>
     );
 };
 

@@ -47,9 +47,7 @@ const TemplateDownloadButton: React.FunctionComponent<ITemplateDownloadButtonPro
                 <Grid item key={url}>
                     <form method="get" action={url}>
                         <Button type="submit" {...buttonProps}>
-                            {verboseLabel
-                                ? `Download an empty ${types[i]} template`
-                                : types[i]}
+                            {verboseLabel ? `${types[i]} template` : types[i]}
                         </Button>
                     </form>
                 </Grid>

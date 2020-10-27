@@ -8,18 +8,13 @@ export const colors = {
 
 export const widths = {
     maxPageWidth: 1400,
-    minPageWidth: 1100,
-    markdownWidth: 800
+    minPageWidth: 1100
 };
 
 export const useRootStyles = makeStyles(theme => ({
     root: {
         minWidth: "640px !important",
         height: "100vh"
-    },
-    markdown: {
-        width: widths.markdownWidth,
-        margin: "auto"
     },
     content: {
         paddingTop: "1rem",

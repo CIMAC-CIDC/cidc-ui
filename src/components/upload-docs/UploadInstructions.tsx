@@ -2,10 +2,9 @@ import * as React from "react";
 import CIDCGithubMarkdown from "../generic/CIDCGithubMarkdown";
 import TemplateDownloadButton from "../generic/TemplateDownloadButton";
 import { withIdToken, AuthContext } from "../identity/AuthProvider";
-import { Grid, Typography, Divider } from "@material-ui/core";
+import { Grid, Typography, Divider, Box } from "@material-ui/core";
 import { CloudDownload, Fingerprint } from "@material-ui/icons";
 import CopyToClipboardButton from "../generic/CopyToClipboardButton";
-import { widths } from "../../rootStyles";
 import { IUploadDocsPageProps } from "./UploadDocsPages";
 
 export interface IUploadInstructionsProps {
@@ -21,9 +20,10 @@ const CopyIdToken: React.FunctionComponent = () => {
 
     return (
         <CopyToClipboardButton
+            disableElevation
             title="Identity Token"
             copyValue={authData ? authData.idToken : ""}
-            variant="contained"
+            variant="outlined"
             color="primary"
             startIcon={<Fingerprint />}
             disabled={!authData}
@@ -37,47 +37,39 @@ const UploadInstructions: React.FunctionComponent<IUploadInstructionsProps> = pr
     const name = pathParts[pathParts.length - 1].slice(0, -3);
 
     return (
-        <Grid container direction="column">
-            <Grid item>
-                <Grid
-                    container
-                    direction="row"
-                    justify="space-between"
-                    alignItems="center"
-                    style={{ width: widths.markdownWidth }}
-                    wrap="nowrap"
-                >
-                    <Grid item>
-                        <Typography variant="h4">{props.title}</Typography>
-                    </Grid>
-                    <Grid item>
-                        {props.tokenButton ? (
-                            <CopyIdToken />
-                        ) : (
-                            <TemplateDownloadButton
-                                fullWidth
-                                verboseLabel
-                                color="primary"
-                                templateName={name}
-                                templateType={props.uploadType}
-                                variant="contained"
-                                startIcon={<CloudDownload />}
-                            />
-                        )}
-                    </Grid>
+        <>
+            <Grid
+                container
+                direction="row"
+                justify="space-between"
+                alignItems="center"
+                wrap="nowrap"
+            >
+                <Grid item xs={8}>
+                    <Typography variant="h4">{props.title}</Typography>
+                </Grid>
+                <Grid item>
+                    {props.tokenButton ? (
+                        <CopyIdToken />
+                    ) : (
+                        <TemplateDownloadButton
+                            verboseLabel
+                            fullWidth
+                            disableElevation
+                            color="primary"
+                            templateName={name}
+                            templateType={props.uploadType}
+                            variant="outlined"
+                            startIcon={<CloudDownload />}
+                        />
+                    )}
                 </Grid>
             </Grid>
-            <Grid item style={{ padding: "1em 0" }}>
+            <Box py={2}>
                 <Divider />
-            </Grid>
-            <Grid item>
-                <CIDCGithubMarkdown
-                    path={path}
-                    insertIdToken
-                    trimLeadingHeader
-                />
-            </Grid>
-        </Grid>
+            </Box>
+            <CIDCGithubMarkdown path={path} insertIdToken trimLeadingHeader />
+        </>
     );
 };
 

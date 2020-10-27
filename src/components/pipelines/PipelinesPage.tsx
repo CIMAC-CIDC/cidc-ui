@@ -1,5 +1,4 @@
 import React from "react";
-import { useRootStyles } from "../../rootStyles";
 import {
     Grid,
     List,
@@ -15,6 +14,7 @@ import {
     Redirect
 } from "react-router-dom";
 import CIDCGithubMarkdown from "../generic/CIDCGithubMarkdown";
+import PageWithSidebar from "../generic/PageWithSidebar";
 
 const pipelineMarkdowns = {
     wes: (
@@ -61,54 +61,54 @@ const PipelinesPage: React.FC<RouteComponentProps> = props => {
         </ListItem>
     );
 
-    const classes = useRootStyles();
     return (
-        <div className={classes.centeredPage}>
-            <Grid container justify="center" direction="row" wrap="nowrap">
-                <Grid item style={{ width: 200 }}>
-                    <List style={{ paddingTop: 0 }}>
-                        <ListSubheader disableSticky>
-                            Pipeline Docs
-                        </ListSubheader>
-                        <DocsListItem
-                            label={"RIMA (RNA-seq IMmune Analysis)"}
-                            path={`/pipelines/rna`}
-                        />
-                        <DocsListItem
-                            label={"WES (Whole Exome Sequencing"}
-                            path={`/pipelines/wes`}
-                        />
-                        <DocsListItem
-                            label={"TCR (T-cell Receptor Repertoire Analysis)"}
-                            path={`/pipelines/tcr`}
-                        />
-                        <DocsListItem
-                            label={"CHIPS ATAC-seq Analysis"}
-                            path={`/pipelines/chips`}
-                        />
-                    </List>
+        <PageWithSidebar
+            sidebar={
+                <Grid container>
+                    <Grid item xs={11}>
+                        <List style={{ paddingTop: 0 }}>
+                            <ListSubheader disableSticky>
+                                Pipeline Docs
+                            </ListSubheader>
+                            <DocsListItem
+                                label={"RIMA (RNA-seq IMmune Analysis)"}
+                                path={`/pipelines/rna`}
+                            />
+                            <DocsListItem
+                                label={"WES (Whole Exome Sequencing"}
+                                path={`/pipelines/wes`}
+                            />
+                            <DocsListItem
+                                label={
+                                    "TCR (T-cell Receptor Repertoire Analysis)"
+                                }
+                                path={`/pipelines/tcr`}
+                            />
+                            <DocsListItem
+                                label={"CHIPS ATAC-seq Analysis"}
+                                path={`/pipelines/chips`}
+                            />
+                        </List>
+                    </Grid>
+                    <Grid item>
+                        <Divider orientation="vertical" />
+                    </Grid>
                 </Grid>
-                <Grid item>
-                    <Divider orientation="vertical" />
-                </Grid>
-                <Grid item>
-                    <div style={{ padding: "1em" }}>
-                        <Route
-                            path={`/pipelines/:docPath`}
-                            render={({ match }) =>
-                                pipelineMarkdowns[match.params.docPath] ||
-                                pipelineMarkdowns.rna
-                            }
-                        />
-                        <Route
-                            path="/pipelines"
-                            exact
-                            render={() => <Redirect to="pipelines/rna" />}
-                        />
-                    </div>
-                </Grid>
-            </Grid>
-        </div>
+            }
+        >
+            <Route
+                path={`/pipelines/:docPath`}
+                render={({ match }) =>
+                    pipelineMarkdowns[match.params.docPath] ||
+                    pipelineMarkdowns.rna
+                }
+            />
+            <Route
+                path="/pipelines"
+                exact
+                render={() => <Redirect to="pipelines/rna" />}
+            />
+        </PageWithSidebar>
     );
 };
 
