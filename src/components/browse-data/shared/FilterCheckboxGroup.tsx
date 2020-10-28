@@ -19,7 +19,6 @@ import {
 } from "@material-ui/icons";
 import { Dictionary, some, partition, sortBy, range } from "lodash";
 import { useUserContext } from "../../identity/UserProvider";
-import { withStyles } from "@material-ui/styles";
 import InfoTooltip from "../../generic/InfoTooltip";
 import { IFacetInfo } from "./FilterProvider";
 import { Skeleton } from "@material-ui/lab";
@@ -151,12 +150,6 @@ interface IPermsAwareCheckboxProps extends CheckboxProps {
     onClickLabel?: () => void;
 }
 
-const PermsTooltip = withStyles(() => ({
-    tooltip: {
-        margin: -5
-    }
-}))(Tooltip);
-
 const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
     label,
     facetType,
@@ -210,7 +203,16 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
     return hasPermission ? (
         control
     ) : (
-        <PermsTooltip title="unauthorized to view">{control}</PermsTooltip>
+        <Tooltip
+            title={
+                <Typography variant="caption">
+                    You don't have permission to view data matching this filter.
+                </Typography>
+            }
+            placement="bottom"
+        >
+            {control}
+        </Tooltip>
     );
 };
 
