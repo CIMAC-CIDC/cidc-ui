@@ -115,9 +115,12 @@ function PaginatedTable<T extends IRowWithId>(props: IPaginatedTableProps<T>) {
                                 <TableCell>
                                     {props.data && (
                                         <Tooltip
-                                            title={`${
-                                                allSelected ? "Des" : "S"
-                                            }elect all rows on this page`}
+                                            title={
+                                                <Typography variant="caption">
+                                                    {allSelected ? "Des" : "S"}
+                                                    elect all rows on this page
+                                                </Typography>
+                                            }
                                         >
                                             <Checkbox
                                                 data-testid="select all"
