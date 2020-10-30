@@ -1,10 +1,8 @@
 import React from "react";
 import HomePage from "./HomePage";
-import { render } from "@testing-library/react";
+import { renderAsRouteComponent } from "../../../test/helpers";
 
 test("HomePage renders without crashing", () => {
-    const { queryByText } = render(<HomePage />);
-    expect(
-        queryByText(/Welcome to the CIMAC-CIDC Data Portal/g)
-    ).toBeInTheDocument();
+    const { queryByText } = renderAsRouteComponent(HomePage);
+    expect(queryByText(/Cancer Immunologic Data Commons/g)).toBeInTheDocument();
 });
