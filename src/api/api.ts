@@ -305,6 +305,20 @@ function getExtraDataTypes(): Promise<string[]> {
         .then(_extractItem);
 }
 
+export interface IDataOverview {
+    num_trials: number;
+    num_assays: number;
+    num_participants: number;
+    num_samples: number;
+    num_files: number;
+    num_bytes: number;
+}
+function getDataOverview(): Promise<IDataOverview> {
+    return getApiClient()
+        .get("/info/data_overview")
+        .then(_extractItem);
+}
+
 export {
     _getItem,
     _getItems,
@@ -334,5 +348,6 @@ export {
     getSupportedAssays,
     getSupportedManifests,
     getSupportedAnalyses,
-    getExtraDataTypes
+    getExtraDataTypes,
+    getDataOverview
 };
