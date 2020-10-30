@@ -1,6 +1,6 @@
 import { Fade, Grid } from "@material-ui/core";
 import React from "react";
-import logo from "../../logo.png";
+import logo from "../../logo.svg";
 import Loader from "./Loader";
 
 export const fullPageLoaderAltText = "loading the CIDC portal";

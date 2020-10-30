@@ -11,10 +11,9 @@ import { useRootStyles } from "../../rootStyles";
 import { getDataOverview, IDataOverview } from "../../api/api";
 import filesize from "filesize";
 import {
-    Assignment,
+    AssessmentOutlined,
     AssignmentOutlined,
     FileCopyOutlined,
-    LocationOnOutlined,
     OpacityOutlined,
     OpenInNewOutlined,
     PersonOutlined,
@@ -22,6 +21,9 @@ import {
 } from "@material-ui/icons";
 import { RouteComponentProps } from "react-router-dom";
 import { colors } from "../../rootStyles";
+import pactLogo from "../../pact_logo.svg";
+import fnihLogo from "../../fnih_logo.svg";
+import nciLogo from "../../nci_logo.svg";
 
 const HomePage: React.FunctionComponent<RouteComponentProps> = ({
     history
@@ -81,17 +83,17 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                             dataOverview?.num_participants,
                             PersonOutlined
                         ],
+                        ["samples", dataOverview?.num_samples, OpacityOutlined],
                         [
-                            "samples",
-                            dataOverview?.num_samples,
-                            LocationOnOutlined
+                            "assays",
+                            dataOverview?.num_assays,
+                            AssessmentOutlined
                         ],
-                        ["assays", dataOverview?.num_assays, OpacityOutlined],
                         ["files", dataOverview?.num_files, FileCopyOutlined],
                         [
                             "data",
                             dataOverview
-                                ? filesize(dataOverview.num_bytes)
+                                ? filesize(dataOverview.num_bytes, { round: 1 })
                                 : undefined,
                             StorageOutlined
                         ]
@@ -99,7 +101,7 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                         [
                             string,
                             string | undefined,
-                            typeof Assignment | undefined
+                            typeof AssignmentOutlined | undefined
                         ]
                     >).map(([label, value, Icon]) => {
                         return (
@@ -155,7 +157,7 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                 <Box paddingTop={8} paddingBottom={5}>
                     <Divider />
                 </Box>
-                <Box textAlign="center">
+                <Box textAlign="center" paddingBottom={10}>
                     <Typography
                         variant="overline"
                         style={{ fontSize: "1.2rem" }}
@@ -165,7 +167,11 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                     <Typography paragraph variant="h5" align="left">
                         The CIDC serves as the central data coordination portal
                         for the{" "}
-                        <Link href="https://cimac-network.org">
+                        <Link
+                            href="https://cimac-network.org"
+                            target="_blank"
+                            rel="noreferrer noopener"
+                        >
                             CIMAC-CIDC Network
                         </Link>
                         , an NCI Cancer Moonshot initiative that provides
@@ -174,6 +180,42 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                         clinical trials in cancer immune therapies.
                     </Typography>
                 </Box>
+            </Grid>
+            <Grid item>
+                <Grid
+                    container
+                    justify="center"
+                    alignItems="center"
+                    spacing={9}
+                >
+                    <Grid item>
+                        <Link
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            href="https://fnih.org/what-we-do/programs/partnership-for-accelerating-cancer-therapies"
+                        >
+                            <img alt="PACT logo" src={pactLogo} />
+                        </Link>
+                    </Grid>
+                    <Grid item>
+                        <Link
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            href="https://www.cancer.gov/"
+                        >
+                            <img alt="NCI logo" src={nciLogo} />
+                        </Link>
+                    </Grid>
+                    <Grid item>
+                        <Link
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            href="https://fnih.org/"
+                        >
+                            <img alt="FNIH logo" src={fnihLogo} />
+                        </Link>
+                    </Grid>
+                </Grid>
             </Grid>
         </Grid>
     );
