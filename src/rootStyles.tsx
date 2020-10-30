@@ -28,14 +28,12 @@ export const theme = createMuiTheme({
             light: colors.logoLightBlue
         }
     },
-    overrides: {
+    props: {
         MuiCard: {
-            root: {
-                boxShadow: "none",
-                border: "1px solid #cfd0d0",
-                borderRadius: 5
-            }
-        },
+            variant: "outlined"
+        }
+    },
+    overrides: {
         MuiTab: {
             root: {
                 "&$selected": {
@@ -58,8 +56,7 @@ export const useRootStyles = makeStyles({
     content: {
         paddingTop: "1rem",
         paddingBottom: "2rem",
-        minHeight: 960,
-        background: "white"
+        minHeight: 960
     },
     centeredPage: {
         paddingRight: "3rem",
