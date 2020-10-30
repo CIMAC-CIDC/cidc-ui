@@ -13,8 +13,7 @@ import Unactivated from "./components/identity/Unactivated";
 import history from "./components/identity/History";
 import ErrorGuard from "./components/errors/ErrorGuard";
 import InfoProvider from "./components/info/InfoProvider";
-import { createMuiTheme, MuiThemeProvider } from "@material-ui/core";
-import { useRootStyles } from "./rootStyles";
+import { CIDCThemeProvider, useRootStyles } from "./rootStyles";
 import { QueryParamProvider } from "use-query-params";
 import {
     AssayDocsPage,
@@ -25,25 +24,6 @@ import PipelinesPage from "./components/pipelines/PipelinesPage";
 import NotFoundRoute from "./components/generic/NotFoundRoute";
 import IdentityProvider from "./components/identity/IdentityProvider";
 
-export const theme = createMuiTheme({
-    overrides: {
-        MuiCard: {
-            root: {
-                boxShadow: "none",
-                border: "1px solid #cfd0d0",
-                borderRadius: 5
-            }
-        },
-        MuiTab: {
-            root: {
-                "&$selected": {
-                    color: "black"
-                }
-            }
-        }
-    }
-});
-
 export default function App() {
     const classes = useRootStyles();
 
@@ -51,7 +31,7 @@ export default function App() {
         <Router history={history}>
             <QueryParamProvider ReactRouterRoute={Route}>
                 <div className={classes.root}>
-                    <MuiThemeProvider theme={theme}>
+                    <CIDCThemeProvider>
                         <ErrorGuard>
                             <InfoProvider>
                                 <IdentityProvider>
@@ -127,7 +107,7 @@ export default function App() {
                                 </IdentityProvider>
                             </InfoProvider>
                         </ErrorGuard>
-                    </MuiThemeProvider>
+                    </CIDCThemeProvider>
                 </div>
             </QueryParamProvider>
         </Router>

@@ -224,16 +224,14 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         const paths = row.object_url.split("/");
         return (
             <MuiRouterLink to={`/browse-data/${row.id}`}>
-                <div style={{ textDecoration: "underline" }}>
-                    <Grid container>
-                        {paths.map((p, i) => (
-                            <Grid key={p} item>
-                                {p}
-                                {i === paths.length - 1 ? "" : "/"}
-                            </Grid>
-                        ))}
-                    </Grid>
-                </div>
+                <Grid container>
+                    {paths.map((p, i) => (
+                        <Grid key={p} item>
+                            {p}
+                            {i === paths.length - 1 ? "" : "/"}
+                        </Grid>
+                    ))}
+                </Grid>
             </MuiRouterLink>
         );
     };

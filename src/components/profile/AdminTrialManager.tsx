@@ -146,7 +146,7 @@ const TrialAccordion = withIdToken<{
                             justify="space-between"
                             alignItems="center"
                         >
-                            {trial.trial_id}
+                            <Typography>{trial.trial_id}</Typography>
                         </Grid>
                     </AccordionSummary>
                     <AccordionDetails>

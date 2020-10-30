@@ -1,8 +1,29 @@
 import * as React from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { ReactMarkdownProps } from "react-markdown";
 import "github-markdown-css/github-markdown.css";
 import { AuthContext } from "../identity/AuthProvider";
 import axios from "axios";
+import { makeStyles } from "@material-ui/core";
+
+const useStyles = makeStyles(theme => ({
+    markdown: {
+        fontFamily: theme.typography.fontFamily
+    }
+}));
+
+export const CIDCMarkdown: React.FC<Omit<
+    ReactMarkdownProps,
+    "className"
+>> = props => {
+    const classes = useStyles();
+
+    return (
+        <ReactMarkdown
+            className={`markdown-body ${classes.markdown}`}
+            {...props}
+        />
+    );
+};
 
 export interface ICIDCGithubMarkdownProps {
     path: string;
@@ -48,9 +69,7 @@ const CIDCGithubMarkdown: React.FunctionComponent<ICIDCGithubMarkdownProps> = pr
         });
     }, [fullURL, idToken, props.trimLeadingHeader]);
 
-    return markdown ? (
-        <ReactMarkdown source={markdown} className="markdown-body" />
-    ) : null;
+    return markdown ? <CIDCMarkdown source={markdown} /> : null;
 };
 
 export default CIDCGithubMarkdown;

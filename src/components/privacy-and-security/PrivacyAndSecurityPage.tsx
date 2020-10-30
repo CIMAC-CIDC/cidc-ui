@@ -1,9 +1,11 @@
 import * as React from "react";
 import { Typography } from "@material-ui/core";
+import { useRootStyles } from "../../rootStyles";
 
 const PrivacyAndSecurityPage: React.FC = () => {
+    const classes = useRootStyles();
     return (
-        <div>
+        <div className={classes.centeredPage}>
             <Typography
                 variant="h5"
                 gutterBottom={true}

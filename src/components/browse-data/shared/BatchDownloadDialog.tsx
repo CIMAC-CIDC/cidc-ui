@@ -7,8 +7,8 @@ import {
     Grid
 } from "@material-ui/core";
 import React from "react";
-import ReactMarkdown from "react-markdown";
 import { getFilelist } from "../../../api/api";
+import { CIDCMarkdown } from "../../generic/CIDCGithubMarkdown";
 
 export interface IBatchDownloadDialogProps {
     ids: number[];
@@ -32,8 +32,7 @@ const BatchDownloadDialog: React.FC<IBatchDownloadDialogProps> = ({
                 </strong>
             </DialogTitle>
             <DialogContent>
-                <ReactMarkdown
-                    className="markdown-body"
+                <CIDCMarkdown
                     source={[
                         `Download the "filelist.tsv" file for this file batch, and run this command in the desired download directory:`,
                         "```bash",

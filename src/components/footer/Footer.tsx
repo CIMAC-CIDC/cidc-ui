@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Link as MuiLink, Grid, Box } from "@material-ui/core";
+import { Link as MuiLink, Grid, Box, Typography } from "@material-ui/core";
 import MuiRouterLink from "../generic/MuiRouterLink";
-import { theme } from "../../App";
+import { theme } from "../../rootStyles";
 
 const Footer: React.FC = () => {
     return (
@@ -13,8 +13,10 @@ const Footer: React.FC = () => {
                 style={{ maxWidth: "100%" }}
             >
                 <Grid item>
-                    &copy; {new Date().getFullYear()} CIDC @ Dana-Farber Cancer
-                    Institute{" "}
+                    <Typography>
+                        &copy; {new Date().getFullYear()} CIDC @ Dana-Farber
+                        Cancer Institute
+                    </Typography>
                 </Grid>
                 <Grid item>
                     <Grid
@@ -28,7 +30,7 @@ const Footer: React.FC = () => {
                                 underline="none"
                                 href="https://cimac-network.org/cidc/"
                             >
-                                About
+                                <Typography>About</Typography>
                             </MuiLink>
                         </Grid>
                         <Grid item>
@@ -36,7 +38,7 @@ const Footer: React.FC = () => {
                                 LinkProps={{ underline: "none" }}
                                 to="/privacy-security"
                             >
-                                Privacy and Security
+                                <Typography>Privacy and Security</Typography>
                             </MuiRouterLink>
                         </Grid>
                         <Grid item>
@@ -44,7 +46,7 @@ const Footer: React.FC = () => {
                                 underline="none"
                                 href="https://github.com/cimac-cidc"
                             >
-                                GitHub
+                                <Typography>GitHub</Typography>
                             </MuiLink>
                         </Grid>
                     </Grid>
