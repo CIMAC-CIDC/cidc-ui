@@ -51,10 +51,18 @@ const PortalStat: React.FC<{
                 <Icon className={classes.icon} />
             </Grid>
             <Grid item>
-                <Typography className={classes.value} variant="h4">
+                <Typography
+                    aria-labelledby={label}
+                    className={classes.value}
+                    variant="h4"
+                >
                     {value || "-"}
                 </Typography>
-                <Typography className={classes.label} variant="overline">
+                <Typography
+                    id={label}
+                    className={classes.label}
+                    variant="overline"
+                >
                     {label}
                 </Typography>
             </Grid>
