@@ -5,7 +5,8 @@ import {
     Button,
     Box,
     Link,
-    Divider
+    Divider,
+    makeStyles
 } from "@material-ui/core";
 import { useRootStyles } from "../../rootStyles";
 import { getDataOverview, IDataOverview } from "../../api/api";
@@ -20,10 +21,46 @@ import {
     StorageOutlined
 } from "@material-ui/icons";
 import { RouteComponentProps } from "react-router-dom";
-import { colors } from "../../rootStyles";
 import pactLogo from "../../pact_logo.svg";
 import fnihLogo from "../../fnih_logo.svg";
 import nciLogo from "../../nci_logo.svg";
+
+const usePortalStatStyles = makeStyles(theme => ({
+    icon: {
+        fontSize: "4.5rem",
+        color: theme.palette.primary.main
+    },
+    value: {
+        fontSize: "1.6rem",
+        fontWeight: "bold"
+    },
+    label: {
+        fontSize: "1rem"
+    }
+}));
+
+const PortalStat: React.FC<{
+    label: string;
+    value?: string | number;
+    Icon: typeof AssignmentOutlined;
+}> = ({ label, value, Icon }) => {
+    const classes = usePortalStatStyles();
+    return (
+        <Grid container alignItems="center" spacing={1}>
+            <Grid item>
+                <Icon className={classes.icon} />
+            </Grid>
+            <Grid item>
+                <Typography className={classes.value} variant="h4">
+                    {value || "-"}
+                </Typography>
+                <Typography className={classes.label} variant="overline">
+                    {label}
+                </Typography>
+            </Grid>
+        </Grid>
+    );
+};
 
 const HomePage: React.FunctionComponent<RouteComponentProps> = ({
     history
@@ -72,74 +109,54 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                     alignItems="baseline"
                     wrap="nowrap"
                 >
-                    {([
-                        [
-                            "trials",
-                            dataOverview?.num_trials,
-                            AssignmentOutlined
-                        ],
-                        [
-                            "participants",
-                            dataOverview?.num_participants,
-                            PersonOutlined
-                        ],
-                        ["samples", dataOverview?.num_samples, OpacityOutlined],
-                        [
-                            "assays",
-                            dataOverview?.num_assays,
-                            AssessmentOutlined
-                        ],
-                        ["files", dataOverview?.num_files, FileCopyOutlined],
-                        [
-                            "data",
-                            dataOverview
-                                ? filesize(dataOverview.num_bytes, { round: 1 })
-                                : undefined,
-                            StorageOutlined
-                        ]
-                    ] as Array<
-                        [
-                            string,
-                            string | undefined,
-                            typeof AssignmentOutlined | undefined
-                        ]
-                    >).map(([label, value, Icon]) => {
-                        return (
-                            <Grid key={label} item>
-                                <Grid container alignItems="center" spacing={1}>
-                                    <Grid item>
-                                        {Icon && (
-                                            <Icon
-                                                style={{
-                                                    fontSize: "4.5rem",
-                                                    color: colors.logoDarkBlue
-                                                }}
-                                            />
-                                        )}
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography
-                                            variant="h4"
-                                            style={{
-                                                fontSize: "1.6rem",
-                                                fontWeight: "bold"
-                                            }}
-                                        >
-                                            {value || "-"}
-                                        </Typography>
-                                        <Typography
-                                            variant="overline"
-                                            style={{
-                                                fontSize: "1rem"
-                                            }}
-                                        >
-                                            {label}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-                        );
-                    })}
+                    <Grid item>
+                        <PortalStat
+                            label="trials"
+                            value={dataOverview?.num_trials}
+                            Icon={AssignmentOutlined}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <PortalStat
+                            label="participants"
+                            value={dataOverview?.num_participants}
+                            Icon={PersonOutlined}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <PortalStat
+                            label="samples"
+                            value={dataOverview?.num_samples}
+                            Icon={OpacityOutlined}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <PortalStat
+                            label="assays"
+                            value={dataOverview?.num_assays}
+                            Icon={AssessmentOutlined}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <PortalStat
+                            label="files"
+                            value={dataOverview?.num_files}
+                            Icon={FileCopyOutlined}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <PortalStat
+                            label="data"
+                            value={
+                                dataOverview
+                                    ? filesize(dataOverview.num_bytes, {
+                                          round: 1
+                                      })
+                                    : undefined
+                            }
+                            Icon={StorageOutlined}
+                        />
+                    </Grid>
                 </Grid>
                 <Button
                     disableElevation
