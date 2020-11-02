@@ -16,15 +16,21 @@ export const renderWithRouter = (
     element: React.ReactElement,
     {
         route = "/",
-        history = createMemoryHistory({ initialEntries: [route] })
-    } = {} as { route?: string; history?: History<any> }
+        history = createMemoryHistory({ initialEntries: [route] }),
+        authData = {
+            userInfo: { idToken: "", user: { email: "" } },
+            state: "logged-in"
+        }
+    } = {} as { route?: string; history?: History<any>; authData: IAuthData }
 ) => {
     return render(
-        <Router history={history}>
-            <QueryParamProvider ReactRouterRoute={Route}>
-                {element}
-            </QueryParamProvider>
-        </Router>
+        <AuthContext.Provider value={authData}>
+            <Router history={history}>
+                <QueryParamProvider ReactRouterRoute={Route}>
+                    {element}
+                </QueryParamProvider>
+            </Router>
+        </AuthContext.Provider>
     );
 };
 
@@ -36,31 +42,25 @@ export const renderAsRouteComponent = (
         history = createMemoryHistory({
             initialEntries: route ? [route] : undefined
         }),
-        authData = {}
+        authData = {
+            userInfo: { idToken: "", user: { email: "" } },
+            state: "logged-in"
+        }
     } = {} as {
         path?: string;
         route?: string;
         history?: History;
-        authData?: Partial<IAuthData>;
+        authData: IAuthData;
     }
 ) => {
-    const out = (
-        <Router history={history}>
-            <QueryParamProvider ReactRouterRoute={Route}>
-                <Route path={path} component={component} />
-            </QueryParamProvider>
-        </Router>
-    );
     return render(
-        authData ? (
-            <AuthContext.Provider
-                value={{ idToken: "", user: { email: "" }, ...authData }}
-            >
-                {out}
-            </AuthContext.Provider>
-        ) : (
-            out
-        )
+        <AuthContext.Provider value={authData}>
+            <Router history={history}>
+                <QueryParamProvider ReactRouterRoute={Route}>
+                    <Route path={path} component={component} />
+                </QueryParamProvider>
+            </Router>
+        </AuthContext.Provider>
     );
 };
 
@@ -69,8 +69,12 @@ export const renderWithUserContext = (
     user?: Partial<IAccountWithExtraContext>
 ) => {
     return render(
-        // @ts-ignore
-        <AuthContext.Provider value={{ idToken: "test-token" }}>
+        <AuthContext.Provider
+            value={
+                // @ts-ignore
+                { state: "logged-in", userInfo: { idToken: "test-token" } }
+            }
+        >
             <UserContext.Provider
                 // @ts-ignore
                 value={user}

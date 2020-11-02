@@ -26,7 +26,7 @@ import {
 } from "@material-ui/icons";
 import { XLSX_MIMETYPE } from "../../util/constants";
 import Loader from "../generic/Loader";
-import { AuthContext } from "../identity/AuthProvider";
+import { withIdToken } from "../identity/AuthProvider";
 import { InfoContext } from "../info/InfoProvider";
 
 type Status =
@@ -37,8 +37,9 @@ type Status =
     | "uploadErrors"
     | "uploadSuccess";
 
-const ManifestUpload: React.FunctionComponent = () => {
-    const authData = React.useContext(AuthContext);
+const ManifestUpload: React.FunctionComponent<{ token: string }> = ({
+    token
+}) => {
     const info = React.useContext(InfoContext);
 
     const fileInput = React.useRef<HTMLInputElement>(null);
@@ -55,9 +56,9 @@ const ManifestUpload: React.FunctionComponent = () => {
 
     // When the manifest file or manifest type changes, run validations
     React.useEffect(() => {
-        if (file && manifestType && authData) {
+        if (file && manifestType && token) {
             setStatus("loading");
-            getManifestValidationErrors(authData.idToken, {
+            getManifestValidationErrors(token, {
                 schema: manifestType,
                 template: file
             }).then(errs => {
@@ -69,7 +70,7 @@ const ManifestUpload: React.FunctionComponent = () => {
                 }
             });
         }
-    }, [file, manifestType, authData]);
+    }, [file, manifestType, token]);
 
     const onValueChange = (setState: (v: string | undefined) => void) => {
         return (e: React.ChangeEvent<HTMLSelectElement>) =>
@@ -80,7 +81,7 @@ const ManifestUpload: React.FunctionComponent = () => {
         e.preventDefault();
         if (manifestType && file) {
             setStatus("loading");
-            uploadManifest(authData!.idToken, {
+            uploadManifest(token, {
                 schema: manifestType,
                 template: file
             })
@@ -256,4 +257,4 @@ const ManifestUpload: React.FunctionComponent = () => {
     );
 };
 
-export default ManifestUpload;
+export default withIdToken(ManifestUpload);

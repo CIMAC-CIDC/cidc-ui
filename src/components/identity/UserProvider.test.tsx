@@ -20,8 +20,11 @@ function renderUserProvider(authData: boolean, children?: React.ReactElement) {
                     value={
                         authData
                             ? {
-                                  idToken: TOKEN,
-                                  user: { email: "" }
+                                  state: "logged-in",
+                                  userInfo: {
+                                      idToken: TOKEN,
+                                      user: { email: "" }
+                                  }
                               }
                             : undefined
                     }

@@ -9,6 +9,7 @@ import AuthProvider, {
 import auth0, { Auth0Callback } from "auth0-js";
 import { Router } from "react-router";
 import history from "./History";
+import { renderWithRouter } from "../../../test/helpers";
 jest.mock("auth0-js");
 
 auth0.WebAuth.mockImplementation(() => ({
@@ -48,13 +49,20 @@ afterEach(() => {
     jest.resetAllMocks();
 });
 
-it("triggers login when login is required", () => {
+it("triggers login when login is required and path isn't the homepage", () => {
     auth0Client.checkSession.mockImplementation(
         (_: any, cb: Auth0Callback<any>) => {
             cb({ code: "login_required" }, {});
         }
     );
-    const { queryByTestId } = renderWithChild();
+    renderWithRouter(<AuthProvider />, { route: "/" });
+    expect(auth0Client.checkSession).toHaveBeenCalled();
+    expect(auth0Client.authorize).not.toHaveBeenCalled();
+
+    auth0Client.checkSession.mockClear();
+
+    // auto-login is triggered for a non-homepage path
+    renderWithRouter(<AuthProvider />, { route: "/browse-data" });
     expect(auth0Client.checkSession).toHaveBeenCalled();
     expect(auth0Client.authorize).toHaveBeenCalled();
 });
@@ -62,10 +70,10 @@ it("triggers login when login is required", () => {
 it("silently authenticates and provides userInfo and token to children", async done => {
     mockSignedIn();
 
-    const TestChild = (props: { expects: (authData?: IAuthData) => void }) => {
+    const TestChild = (props: { expects: (authData: IAuthData) => void }) => {
         const authData = React.useContext(AuthContext);
         React.useEffect(() => {
-            if (authData) {
+            if (authData.state === "logged-in") {
                 props.expects(authData);
                 done();
             }
@@ -75,15 +83,16 @@ it("silently authenticates and provides userInfo and token to children", async d
 
     renderWithChild(
         <TestChild
-            expects={authData => {
-                expect(authData?.idToken).toBe(authResponse.idToken);
-                expect(authData?.user.email).toBe(
+            expects={({ state, userInfo }) => {
+                expect(state).toBe("logged-in");
+                expect(userInfo.idToken).toBe(authResponse.idToken);
+                expect(userInfo.user.email).toBe(
                     authResponse.idTokenPayload.email
                 );
-                expect(authData?.user.first_n).toBe(
+                expect(userInfo.user.first_n).toBe(
                     authResponse.idTokenPayload.given_name
                 );
-                expect(authData?.user.last_n).toBe(
+                expect(userInfo.user.last_n).toBe(
                     authResponse.idTokenPayload.family_name
                 );
             }}

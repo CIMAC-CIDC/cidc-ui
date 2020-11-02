@@ -4,7 +4,7 @@ import AuthProvider, { AuthContext } from "./AuthProvider";
 import FullPageLoader from "../generic/FullPageLoader";
 import UserProvider, { UserContext } from "./UserProvider";
 
-export const PUBLIC_PATHS = ["/callback", "/register", "/unactivated"];
+export const PUBLIC_PATHS = ["/", "/callback", "/register", "/unactivated"];
 
 export const IdentityProviderChildren = withRouter(({ history, children }) => {
     const authData = React.useContext(AuthContext);

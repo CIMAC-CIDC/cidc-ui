@@ -47,7 +47,9 @@ const getFilesResult = {
 const toggleButtonText = "toggle file view";
 const renderFileTable = () => {
     return renderWithRouter(
-        <AuthContext.Provider value={{ idToken: "test-token" }}>
+        <AuthContext.Provider
+            value={{ state: "logged-in", userInfo: { idToken: "test-token" } }}
+        >
             <FileTable
                 history={history}
                 viewToggleButton={<button>{toggleButtonText}</button>}

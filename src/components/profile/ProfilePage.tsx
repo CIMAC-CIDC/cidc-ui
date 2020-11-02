@@ -11,7 +11,7 @@ import {
 import AdminUserManager from "./AdminUserManager";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
-import { AuthContext } from "../identity/AuthProvider";
+import { withIdToken } from "../identity/AuthProvider";
 import { useUserContext } from "../identity/UserProvider";
 import { AccountCircle, FolderShared } from "@material-ui/icons";
 import Loader from "../generic/Loader";
@@ -19,10 +19,9 @@ import { useRootStyles } from "../../rootStyles";
 import AdminTrialManager from "./AdminTrialManager";
 import { formatDate } from "../../util/formatters";
 
-export default function ProfilePage() {
+const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
     const classes = useRootStyles();
 
-    const authData = React.useContext(AuthContext);
     const userAccount = useUserContext();
 
     const isAdmin = userAccount && userAccount.role === "cidc-admin";
@@ -161,11 +160,11 @@ export default function ProfilePage() {
                     </Grid>
                 </Grid>
             </Grid>
-            {authData && userAccount?.role === "cidc-admin" && (
+            {token && userAccount?.role === "cidc-admin" && (
                 <>
                     <Grid item>
                         <AdminUserManager
-                            token={authData.idToken}
+                            token={token}
                             userId={userAccount.id}
                         />
                     </Grid>
@@ -176,4 +175,6 @@ export default function ProfilePage() {
             )}
         </Grid>
     );
-}
+};
+
+export default withIdToken(ProfilePage);

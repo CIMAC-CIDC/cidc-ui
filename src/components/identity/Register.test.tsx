@@ -4,18 +4,15 @@ import { IAuthData, AuthContext } from "./AuthProvider";
 import Register from "./Register";
 import history from "./History";
 import { render, fireEvent } from "@testing-library/react";
+import { renderWithRouter } from "../../../test/helpers";
 jest.mock("../../api/api");
 
 const renderRegister = (authData?: IAuthData) => {
-    return render(
-        <AuthContext.Provider value={authData}>
-            <Register />
-        </AuthContext.Provider>
-    );
+    return renderWithRouter(<Register />, authData && { authData });
 };
 
 it("renders progress indicator when no auth data has loaded", () => {
-    const { queryByTestId } = renderRegister();
+    const { queryByTestId } = renderRegister({ state: "loading" });
     expect(queryByTestId("loader")).toBeInTheDocument();
 });
 
@@ -33,8 +30,11 @@ it("works as expected when auth data is provided", async () => {
     });
 
     const { findByDisplayValue, getByText } = renderRegister({
-        user,
-        idToken
+        state: "logged-in",
+        userInfo: {
+            user,
+            idToken
+        }
     });
     expect(await findByDisplayValue(/john/i)).toBeInTheDocument();
     expect(await findByDisplayValue(/doe/i)).toBeInTheDocument();

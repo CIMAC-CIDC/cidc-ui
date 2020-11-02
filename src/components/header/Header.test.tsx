@@ -9,6 +9,8 @@ import history from "../identity/History";
 import { Account } from "../../model/account";
 import { act } from "react-dom/test-utils";
 import { renderWithRouter } from "../../../test/helpers";
+import { login } from "../identity/AuthProvider";
+jest.mock("../identity/AuthProvider");
 
 const user: Account = {
     id: 1,
@@ -43,9 +45,13 @@ describe("Header", () => {
         });
     };
 
-    it("renders null if no user is provided", () => {
-        const { queryByAltText } = renderWithRouter(<Header />);
-        expect(queryByAltText(/home/i)).not.toBeInTheDocument();
+    it("renders a sign up / log in button if no user is provided", () => {
+        const { getByText } = renderWithRouter(<Header />, {
+            authData: { state: "logged-out" }
+        });
+        const button = getByText(/sign up \/ log in/i).closest("button");
+        fireEvent.click(button!);
+        expect(login).toHaveBeenCalled();
     });
 
     it("renders correct tabs based on the user context configuration", () => {

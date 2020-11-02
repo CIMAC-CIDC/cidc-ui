@@ -15,21 +15,21 @@ export interface IUploadInstructionsProps {
     tokenButton?: boolean;
 }
 
-const CopyIdToken: React.FunctionComponent = () => {
+const CopyIdToken: React.FunctionComponent = withIdToken(({ token }) => {
     const authData = React.useContext(AuthContext);
 
     return (
         <CopyToClipboardButton
             disableElevation
             title="Identity Token"
-            copyValue={authData ? authData.idToken : ""}
+            copyValue={token || ""}
             variant="outlined"
             color="primary"
             startIcon={<Fingerprint />}
             disabled={!authData}
         />
     );
-};
+});
 
 const UploadInstructions: React.FunctionComponent<IUploadInstructionsProps> = props => {
     const path = `cidc-documentation/master/${props.docPath}`;

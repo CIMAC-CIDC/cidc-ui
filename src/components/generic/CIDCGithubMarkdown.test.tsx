@@ -52,7 +52,12 @@ it("replaces [token] with a user's actual id token", async () => {
     const idToken = "fake-test-token";
 
     const { findByText } = render(
-        <AuthContext.Provider value={{ idToken, user: { email: "" } }}>
+        <AuthContext.Provider
+            value={{
+                state: "logged-in",
+                userInfo: { idToken, user: { email: "" } }
+            }}
+        >
             <CIDCGithubMarkdown insertIdToken path="foo" />
         </AuthContext.Provider>
     );

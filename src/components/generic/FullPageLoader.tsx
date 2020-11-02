@@ -1,18 +1,14 @@
-import { Fade, Grid } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import React from "react";
 import logo from "../../logo.svg";
+import FadeInOnMount from "./FadeInOnMount";
 import Loader from "./Loader";
 
 export const fullPageLoaderAltText = "loading the CIDC portal";
 
 const FullPageLoader: React.FC = () => {
-    const [fadeIn, setFadeIn] = React.useState<boolean>(false);
-    React.useEffect(() => {
-        setFadeIn(true);
-    }, []);
-
     return (
-        <Fade in={fadeIn} timeout={1000}>
+        <FadeInOnMount timeout={1000}>
             <Grid
                 container
                 direction="column"
@@ -31,7 +27,7 @@ const FullPageLoader: React.FC = () => {
                     <Loader />
                 </Grid>
             </Grid>
-        </Fade>
+        </FadeInOnMount>
     );
 };
 

@@ -33,7 +33,7 @@ export const useRegisterStyles = makeStyles({
 
 export default function Register() {
     const classes = useRegisterStyles();
-    const authData = React.useContext(AuthContext);
+    const auth = React.useContext(AuthContext);
 
     const [hasPrepopulated, setHasPrepopulated] = React.useState<boolean>(
         false
@@ -60,15 +60,16 @@ export default function Register() {
     );
 
     React.useEffect(() => {
-        if (authData) {
+        if (auth.state === "logged-in") {
+            const { userInfo } = auth;
             if (!hasPrepopulated) {
-                setState({ ...authData.user, token: authData.idToken });
+                setState({ ...userInfo.user, token: userInfo.idToken });
                 setHasPrepopulated(true);
             } else {
-                setState({ token: authData.idToken });
+                setState({ token: userInfo.idToken });
             }
         }
-    }, [authData, setState, hasPrepopulated]);
+    }, [auth, setState, hasPrepopulated]);
 
     const handleChange = (
         field: string,
@@ -103,7 +104,7 @@ export default function Register() {
         }
     }
 
-    if (!authData) {
+    if (auth.state === "loading") {
         return (
             <>
                 <div className={classes.header}>CIDC Registration Request</div>

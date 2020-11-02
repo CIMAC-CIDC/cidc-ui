@@ -6,10 +6,15 @@ import { IdentityProviderChildren, PUBLIC_PATHS } from "./IdentityProvider";
 import { UserContext } from "./UserProvider";
 jest.mock("auth0-js");
 
+const privateRoute = "/browse-data"; // an example of a private route
+
 describe("IdentityProviderChildren", () => {
-    it("shows loader when no auth context is provided", () => {
+    it("shows loader when no auth context is provided on private routes", () => {
         const { queryByAltText } = renderWithRouter(
-            <IdentityProviderChildren />
+            <IdentityProviderChildren />,
+            {
+                route: privateRoute
+            }
         );
         expect(queryByAltText(fullPageLoaderAltText)).toBeInTheDocument();
     });
@@ -20,7 +25,8 @@ describe("IdentityProviderChildren", () => {
                 <UserContext.Provider value={undefined}>
                     <IdentityProviderChildren />
                 </UserContext.Provider>
-            </AuthContext.Provider>
+            </AuthContext.Provider>,
+            { route: privateRoute }
         );
         expect(queryByAltText(fullPageLoaderAltText)).toBeInTheDocument();
     });
@@ -35,7 +41,8 @@ describe("IdentityProviderChildren", () => {
                         children={<div>{childText}</div>}
                     />
                 </UserContext.Provider>
-            </AuthContext.Provider>
+            </AuthContext.Provider>,
+            { route: privateRoute }
         );
         expect(queryByAltText(fullPageLoaderAltText)).not.toBeInTheDocument();
         expect(queryByText(childText)).toBeInTheDocument();

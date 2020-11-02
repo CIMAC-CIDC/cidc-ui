@@ -35,11 +35,12 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
     >(undefined);
 
     React.useEffect(() => {
-        if (authData?.idToken) {
+        if (authData.state === "logged-in") {
+            const { user: authUser, idToken } = authData.userInfo;
             if (!user) {
-                getAccountInfo(authData.idToken)
+                getAccountInfo(idToken)
                     .then(userAccount => {
-                        setUser({ ...authData.user, ...userAccount });
+                        setUser({ ...authUser, ...userAccount });
                         if (!userAccount.approval_date) {
                             history.replace("/unactivated");
                         }
@@ -58,7 +59,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                         }
                     });
             } else if (!permissions && user.role) {
-                getPermissionsForUser(authData.idToken, user.id).then(perms =>
+                getPermissionsForUser(idToken, user.id).then(perms =>
                     setPermissions(perms)
                 );
             }
@@ -96,6 +97,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         showManifests,
         showAnalyses
     };
+
     return (
         <UserContext.Provider value={value}>
             {props.children}

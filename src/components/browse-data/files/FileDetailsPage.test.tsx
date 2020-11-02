@@ -33,7 +33,7 @@ const renderFileDetails = () =>
     renderAsRouteComponent(FileDetailsPage, {
         path: "/browse-data/:fileId",
         route: `/browse-data/${file.id}`,
-        authData: { idToken }
+        authData: { state: "logged-in", userInfo: { idToken } }
     });
 
 it("renders details when a file is provided", async () => {

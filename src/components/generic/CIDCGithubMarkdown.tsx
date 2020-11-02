@@ -34,7 +34,7 @@ export interface ICIDCGithubMarkdownProps {
 const MARKDOWN_BASE_URL = "https://raw.githubusercontent.com/CIMAC-CIDC/";
 
 const CIDCGithubMarkdown: React.FunctionComponent<ICIDCGithubMarkdownProps> = props => {
-    const authData = React.useContext(AuthContext);
+    const auth = React.useContext(AuthContext);
 
     const [markdown, setMarkdown] = React.useState<string | undefined>(
         undefined
@@ -42,7 +42,10 @@ const CIDCGithubMarkdown: React.FunctionComponent<ICIDCGithubMarkdownProps> = pr
 
     const fullURL = MARKDOWN_BASE_URL + props.path;
 
-    const idToken = props.insertIdToken && authData && authData.idToken;
+    const idToken =
+        props.insertIdToken &&
+        auth.state === "logged-in" &&
+        auth.userInfo.idToken;
 
     React.useEffect(() => {
         setMarkdown(undefined);

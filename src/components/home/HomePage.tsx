@@ -23,8 +23,12 @@ import pactLogo from "../../pact_logo.svg";
 import fnihLogo from "../../fnih_logo.svg";
 import nciLogo from "../../nci_logo.svg";
 import { formatFileSize } from "../../util/formatters";
+import FadeInOnMount from "../generic/FadeInOnMount";
 
 const usePortalStatStyles = makeStyles(theme => ({
+    container: {
+        minHeight: "4.8rem"
+    },
     icon: {
         fontSize: "4.5rem",
         color: theme.palette.primary.light
@@ -44,27 +48,39 @@ const PortalStat: React.FC<{
 }> = ({ label, value, Icon }) => {
     const classes = usePortalStatStyles();
     return (
-        <Grid container alignItems="center" spacing={1}>
-            <Grid item>
-                <Icon className={classes.icon} />
-            </Grid>
-            <Grid item>
-                <Typography
-                    aria-labelledby={label}
-                    className={classes.value}
-                    variant="h4"
-                >
-                    {value || "-"}
-                </Typography>
-                <Typography
-                    id={label}
-                    className={classes.label}
-                    variant="overline"
-                >
-                    {label}
-                </Typography>
-            </Grid>
-        </Grid>
+        <div className={classes.container}>
+            {value ? (
+                <FadeInOnMount>
+                    <Grid
+                        container
+                        alignItems="center"
+                        wrap="nowrap"
+                        spacing={1}
+                    >
+                        <Grid item>
+                            <Icon className={classes.icon} />
+                        </Grid>
+                        <Grid item>
+                            <Typography
+                                noWrap
+                                aria-labelledby={label}
+                                className={classes.value}
+                                variant="h4"
+                            >
+                                {value}
+                            </Typography>
+                            <Typography
+                                id={label}
+                                className={classes.label}
+                                variant="overline"
+                            >
+                                {label}
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                </FadeInOnMount>
+            ) : null}
+        </div>
     );
 };
 

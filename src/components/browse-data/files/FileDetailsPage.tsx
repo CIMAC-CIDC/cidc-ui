@@ -17,7 +17,7 @@ import {
     TableRow,
     TableCell
 } from "@material-ui/core";
-import { AuthContext } from "../../identity/AuthProvider";
+import { withIdToken } from "../../identity/AuthProvider";
 import { DataFile } from "../../../model/file";
 import { RouteComponentProps } from "react-router";
 import {
@@ -336,23 +336,21 @@ const RelatedFiles: React.FC<{ file: DataFile; token: string }> = ({
 
 const FileDetailsPage: React.FC<RouteComponentProps<{
     fileId: string;
-}>> = props => {
+}> & { token: string }> = ({ token, ...props }) => {
     const rootClasses = useRootStyles();
 
-    const authData = React.useContext(AuthContext);
     const [file, setFile] = React.useState<DataFile | undefined>(undefined);
 
-    const idToken = authData && authData.idToken;
     const fileId = props.match.params.fileId;
     const fileIdInt = parseInt(fileId, 10);
 
     React.useEffect(() => {
-        if (idToken) {
-            getSingleFile(idToken, fileIdInt).then(fileRes => setFile(fileRes));
+        if (token) {
+            getSingleFile(token, fileIdInt).then(fileRes => setFile(fileRes));
         }
-    }, [idToken, fileIdInt]);
+    }, [token, fileIdInt]);
 
-    return !file || !idToken ? (
+    return !file || !token ? (
         <Loader />
     ) : (
         <Grid container spacing={2} className={rootClasses.centeredPage}>
@@ -368,7 +366,7 @@ const FileDetailsPage: React.FC<RouteComponentProps<{
                 </Button>
             </Grid>
             <Grid item xs={12}>
-                <FileHeader file={file} token={idToken} />
+                <FileHeader file={file} token={token} />
             </Grid>
             <Grid item xs={12}>
                 <FileDescription file={file} />
@@ -389,10 +387,10 @@ const FileDetailsPage: React.FC<RouteComponentProps<{
                 </Grid>
             )}
             <Grid item xs={12}>
-                <RelatedFiles file={file} token={idToken} />
+                <RelatedFiles file={file} token={token} />
             </Grid>
         </Grid>
     );
 };
 
-export default FileDetailsPage;
+export default withIdToken(FileDetailsPage);

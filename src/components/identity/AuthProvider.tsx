@@ -34,42 +34,58 @@ export const logout = () => {
     auth0Client.logout({ returnTo: window.location.origin });
 };
 
-export interface IAuthData {
+interface IUserInfo {
     idToken: string;
     user: UnregisteredAccount;
 }
 
-export const AuthContext = React.createContext<IAuthData | undefined>(
-    undefined
-);
+export type IAuthData =
+    | { state: "loading" }
+    | { state: "logged-out" }
+    | {
+          state: "logged-in";
+          userInfo: IUserInfo;
+      };
+
+export const AuthContext = React.createContext<IAuthData>({ state: "loading" });
 
 const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
-    const [authData, setAuthData] = React.useState<IAuthData | undefined>();
+    const [authData, setAuthData] = React.useState<IAuthData>({
+        state: "loading"
+    });
 
     const checkSession = React.useCallback(() => {
         auth0Client.checkSession({}, (err, res) => {
             if (err?.code === "login_required") {
-                login();
-                return;
-            }
-            const {
-                email,
-                given_name,
-                family_name,
-                picture
-            } = res.idTokenPayload;
-
-            setAuthData({
-                idToken: res.idToken as string,
-                user: {
-                    email,
-                    first_n: given_name,
-                    last_n: family_name,
-                    picture
+                // Don't automatically log in if the user is visiting the home page
+                if (props.history.location.pathname === "/") {
+                    setAuthData({ state: "logged-out" });
+                } else {
+                    login();
                 }
-            });
+            } else {
+                const {
+                    email,
+                    given_name,
+                    family_name,
+                    picture
+                } = res.idTokenPayload;
+
+                setAuthData({
+                    state: "logged-in",
+                    userInfo: {
+                        idToken: res.idToken as string,
+                        user: {
+                            email,
+                            first_n: given_name,
+                            last_n: family_name,
+                            picture
+                        }
+                    }
+                });
+            }
         });
-    }, []);
+    }, [props.history.location.pathname]);
 
     const targetPath = useQueryParam(TARGET_PARAM, StringParam)[0];
     const onRedirectCallback = React.useCallback(() => {
@@ -82,7 +98,6 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
         }
     }, [props.history, targetPath]);
 
-    const isAuthenticated = authData !== undefined;
     React.useEffect(() => {
         if (props.location.pathname === "/logout") {
             logout();
@@ -92,12 +107,12 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
             onRedirectCallback();
             return;
         }
-        if (!isAuthenticated) {
+        if (authData.state !== "logged-in") {
             checkSession();
         }
     }, [
         props.location,
-        isAuthenticated,
+        authData.state,
         props.location.pathname,
         checkSession,
         onRedirectCallback
@@ -117,12 +132,27 @@ const AuthProvider: React.FunctionComponent<RouteComponentProps> = props => {
 
 export default withRouter(AuthProvider);
 
+/**
+ * Inject the current user's identity token into the wrapped component as a prop
+ * called token. If auth data is loading, the component won't be rendered. If
+ * the current user is not logged in, the component will be rendered with an undefined
+ * `token` prop.
+ */
 export function withIdToken<P>(
     Component: React.ComponentType<any>
 ): React.FunctionComponent<P> {
     return (props: any) => {
-        const authData = React.useContext(AuthContext);
+        const auth = React.useContext(AuthContext);
 
-        return <Component {...props} token={authData && authData.idToken} />;
+        if (auth.state === "loading") {
+            return null;
+        }
+
+        return (
+            <Component
+                {...props}
+                token={auth.state === "logged-in" && auth.userInfo.idToken}
+            />
+        );
     };
 }

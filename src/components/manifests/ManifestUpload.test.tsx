@@ -16,7 +16,10 @@ function renderWithMockedAuthContext() {
     return render(
         <InfoContext.Provider value={fakeInfo}>
             <AuthContext.Provider
-                value={{ idToken: TOKEN, user: { email: "" } }}
+                value={{
+                    state: "logged-in",
+                    userInfo: { idToken: TOKEN }
+                }}
             >
                 <ManifestUpload cardClass="foo" />
             </AuthContext.Provider>
