@@ -28,7 +28,7 @@ import nciLogo from "../../nci_logo.svg";
 const usePortalStatStyles = makeStyles(theme => ({
     icon: {
         fontSize: "4.5rem",
-        color: theme.palette.primary.main
+        color: theme.palette.primary.light
     },
     value: {
         fontSize: "1.6rem"
