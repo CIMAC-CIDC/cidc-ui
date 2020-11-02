@@ -157,7 +157,7 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                             value={
                                 dataOverview
                                     ? filesize(dataOverview.num_bytes, {
-                                          round: 0
+                                          round: dataOverview.num_bytes < 10e12 ? 0 : 1
                                       })
                                     : undefined
                             }
