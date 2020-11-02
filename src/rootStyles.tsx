@@ -10,7 +10,7 @@ export const colors = {
     LIGHT_GREY: "#cfd0d0",
     DARK_BLUE_GREY: "#3b4856",
     logoLightBlue: "#0B9FEC",
-    logoDarkBlue: "#1C65BE"
+    logoDarkBlue: "#1E66BE"
 };
 
 export const widths = {
