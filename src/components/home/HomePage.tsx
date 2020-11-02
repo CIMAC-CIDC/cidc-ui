@@ -31,8 +31,7 @@ const usePortalStatStyles = makeStyles(theme => ({
         color: theme.palette.primary.main
     },
     value: {
-        fontSize: "1.6rem",
-        fontWeight: "bold"
+        fontSize: "1.6rem"
     },
     label: {
         fontSize: "1rem"
