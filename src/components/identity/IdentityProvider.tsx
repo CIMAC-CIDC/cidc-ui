@@ -11,7 +11,7 @@ export const IdentityProviderChildren = withRouter(({ history, children }) => {
     const userData = React.useContext(UserContext);
 
     const pageIsPublic = PUBLIC_PATHS.includes(history.location.pathname);
-    const userIsAuthenticated = !!authData && !!userData;
+    const userIsAuthenticated = authData.state !== "loading" && !!userData;
 
     return pageIsPublic || userIsAuthenticated ? (
         <>{children}</>

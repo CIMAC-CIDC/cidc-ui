@@ -9,30 +9,17 @@ import {
     OutlinedInput,
     MenuItem,
     Typography,
-    makeStyles
+    Box,
+    Card,
+    CardContent,
+    CardHeader
 } from "@material-ui/core";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
 import { createUser } from "../../api/api";
-import { AuthContext } from "./AuthProvider";
-import history from "./History";
-import { colors } from "../../rootStyles";
-import Loader from "../generic/Loader";
+import { AuthContext, logout } from "./AuthProvider";
+import { RouteComponentProps } from "react-router-dom";
 
-export const useRegisterStyles = makeStyles({
-    header: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: colors.LIGHT_BLUE,
-        height: 48,
-        fontSize: 24
-    },
-    body: { width: 700, margin: "auto", paddingTop: 25 },
-    text: { fontSize: 18 }
-});
-
-export default function Register() {
-    const classes = useRegisterStyles();
+const Register: React.FC<RouteComponentProps> = ({ history }) => {
     const auth = React.useContext(AuthContext);
 
     const [hasPrepopulated, setHasPrepopulated] = React.useState<boolean>(
@@ -105,114 +92,120 @@ export default function Register() {
     }
 
     if (auth.state === "loading") {
-        return (
-            <>
-                <div className={classes.header}>CIDC Registration Request</div>
-                <Loader />
-            </>
-        );
+        return null;
     }
 
     return (
-        <div>
-            <div className={classes.header}>CIDC Registration Request</div>
-            <div className={classes.body}>
-                <Typography className={classes.text}>
-                    If you are interested in accessing the CIMAC-CIDC Data
-                    Portal, please complete your registration request below.
-                </Typography>
-                <Grid container={true} spacing={3} direction="column">
-                    <Grid item={true}>
-                        <TextField
-                            label="Contact Email"
-                            value={state.email}
-                            disabled={true}
-                            fullWidth={true}
-                            margin="normal"
-                            variant="outlined"
-                        />
-                    </Grid>
-                    <Grid item={true}>
-                        <TextField
-                            label="First Name"
-                            fullWidth={true}
-                            value={state.first_n}
-                            onChange={e => handleChange("first_n", e)}
-                            margin="normal"
-                            variant="outlined"
-                            required={true}
-                            error={state.firstNameError}
-                        />
-                    </Grid>
-                    <Grid item={true}>
-                        <TextField
-                            label="Last Name"
-                            fullWidth={true}
-                            value={state.last_n}
-                            onChange={e => handleChange("last_n", e)}
-                            margin="normal"
-                            variant="outlined"
-                            required={true}
-                            error={state.lastNameError}
-                        />
-                    </Grid>
-                    <Grid item={true}>
-                        <FormControl
-                            variant="outlined"
-                            fullWidth
-                            required={true}
-                            margin="normal"
-                            error={state.organizationError}
-                            style={{ minWidth: 420 }}
-                        >
-                            <InputLabel>Organization</InputLabel>
-                            <Select
-                                value={state.organization}
-                                onChange={e => handleChange("organization", e)}
-                                input={<OutlinedInput labelWidth={100} />}
+        <Box margin="auto" width={600}>
+            <Card>
+                <CardHeader title="Sign up for the CIMAC-CIDC Portal" />
+                <CardContent>
+                    <Grid container spacing={2} direction="column">
+                        <Grid item>
+                            <Typography>
+                                If you are interested in accessing the
+                                CIMAC-CIDC Portal, please complete your account
+                                request below.
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            <TextField
+                                label="Contact Email"
+                                value={state.email}
+                                disabled
+                                fullWidth
+                                margin="normal"
+                                variant="outlined"
+                            />
+                        </Grid>
+                        <Grid item>
+                            <TextField
+                                label="First Name"
+                                fullWidth
+                                value={state.first_n}
+                                onChange={e => handleChange("first_n", e)}
+                                margin="normal"
+                                variant="outlined"
+                                required
+                                error={state.firstNameError}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <TextField
+                                label="Last Name"
+                                fullWidth
+                                value={state.last_n}
+                                onChange={e => handleChange("last_n", e)}
+                                margin="normal"
+                                variant="outlined"
+                                required
+                                error={state.lastNameError}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <FormControl
+                                variant="outlined"
+                                fullWidth
+                                required
+                                margin="normal"
+                                error={state.organizationError}
+                                style={{ minWidth: 420 }}
                             >
-                                <MenuItem value="EMPTY">Please select</MenuItem>
-                                <MenuItem value="DFCI">
-                                    {ORGANIZATION_NAME_MAP.DFCI}
-                                </MenuItem>
-                                <MenuItem value="CIDC">
-                                    {ORGANIZATION_NAME_MAP.CIDC}
-                                </MenuItem>
-                                <MenuItem value="ICAHN">
-                                    {ORGANIZATION_NAME_MAP.ICAHN}
-                                </MenuItem>
-                                <MenuItem value="STANFORD">
-                                    {ORGANIZATION_NAME_MAP.STANFORD}
-                                </MenuItem>
-                                <MenuItem value="ANDERSON">
-                                    {ORGANIZATION_NAME_MAP.ANDERSON}
-                                </MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item={true}>
-                        <Grid container justify="space-between">
-                            <Grid item>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => history.push("/logout")}
+                                <InputLabel>Organization</InputLabel>
+                                <Select
+                                    value={state.organization}
+                                    onChange={e =>
+                                        handleChange("organization", e)
+                                    }
+                                    input={<OutlinedInput labelWidth={100} />}
                                 >
-                                    Cancel
-                                </Button>
-                            </Grid>
-                            <Grid item>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => handleClick()}
-                                >
-                                    Register
-                                </Button>
+                                    <MenuItem value="EMPTY">
+                                        Please select
+                                    </MenuItem>
+                                    <MenuItem value="DFCI">
+                                        {ORGANIZATION_NAME_MAP.DFCI}
+                                    </MenuItem>
+                                    <MenuItem value="CIDC">
+                                        {ORGANIZATION_NAME_MAP.CIDC}
+                                    </MenuItem>
+                                    <MenuItem value="ICAHN">
+                                        {ORGANIZATION_NAME_MAP.ICAHN}
+                                    </MenuItem>
+                                    <MenuItem value="STANFORD">
+                                        {ORGANIZATION_NAME_MAP.STANFORD}
+                                    </MenuItem>
+                                    <MenuItem value="ANDERSON">
+                                        {ORGANIZATION_NAME_MAP.ANDERSON}
+                                    </MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item>
+                            <Grid container justify="space-between">
+                                <Grid item>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => logout()}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </Grid>
+                                <Grid item>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={() => handleClick()}
+                                    >
+                                        Register
+                                    </Button>
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
-                </Grid>
-            </div>
-        </div>
+                </CardContent>
+            </Card>
+        </Box>
     );
-}
+};
+
+export default Register;

@@ -155,7 +155,7 @@ const useHeaderStyles = makeStyles({
     logo: { height: 80, padding: 5, marginBottom: -40 }
 });
 
-export const DONT_RENDER_PATHS = ["/register", "/unactivated", "/callback"];
+export const DONT_RENDER_PATHS = ["/unactivated", "/callback"];
 
 const Header: React.FunctionComponent<RouteComponentProps> = props => {
     const rootClasses = useRootStyles();
@@ -165,7 +165,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
 
     let selectedTab: string | false = props.location.pathname;
 
-    if (["/", "/privacy-security"].includes(selectedTab)) {
+    if (["/", "/register", "/privacy-security"].includes(selectedTab)) {
         selectedTab = false;
     } else if (DONT_RENDER_PATHS.includes(selectedTab)) {
         return null;
