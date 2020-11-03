@@ -5,7 +5,6 @@ import {
     Button,
     Box,
     Link,
-    Divider,
     makeStyles
 } from "@material-ui/core";
 import { useRootStyles } from "../../rootStyles";
@@ -180,22 +179,8 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                 </Button>
             </Grid>
             <Grid item>
-                <Box paddingTop={8} paddingBottom={5}>
-                    <Divider />
-                </Box>
-                <Box textAlign="center" paddingBottom={10}>
-                    <Typography
-                        variant="overline"
-                        style={{ fontSize: "1.2rem" }}
-                    >
-                        What is the CIDC?
-                    </Typography>
-                    <Typography
-                        paragraph
-                        variant="body1"
-                        align="left"
-                        style={{ fontSize: "1.2rem" }}
-                    >
+                <Box textAlign="center" py={8}>
+                    <Typography paragraph variant="h6" align="left">
                         The CIDC serves as the central data coordination portal
                         for the{" "}
                         <Link
