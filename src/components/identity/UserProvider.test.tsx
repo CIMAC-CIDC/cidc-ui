@@ -60,9 +60,10 @@ it("handles an approved user", async () => {
 it("handles unapproved users", async () => {
     getAccountInfo.mockResolvedValue({ id: 1 });
 
+    history.push("/browse-data");
     const { findByTestId } = renderUserProvider(true);
     await findByTestId("children");
-    expect(history.location.pathname).toBe("/unactivated");
+    expect(history.location.pathname).toBe("/");
 });
 
 it("handles unregistered users", async () => {

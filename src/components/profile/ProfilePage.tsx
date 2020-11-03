@@ -24,12 +24,11 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
 
     const userAccount = useUserContext();
 
-    const isAdmin = userAccount && userAccount.role === "cidc-admin";
-    const isNCI = userAccount && userAccount.role === "nci-biobank-user";
-    const permissions = userAccount && userAccount.permissions;
-    const hasPerms = permissions && permissions.length > 0;
+    const isAdmin = userAccount?.role === "cidc-admin";
+    const isNCI = userAccount?.role === "nci-biobank-user";
+    const permissions = userAccount?.permissions || [];
 
-    return !userAccount || !permissions ? (
+    return !userAccount?.approval_date ? (
         <Loader />
     ) : (
         <Grid
@@ -39,8 +38,8 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
             className={classes.centeredPage}
         >
             <Grid item>
-                <Grid container spacing={3}>
-                    <Grid item>
+                <Grid container spacing={3} alignItems="stretch" wrap="nowrap">
+                    <Grid item xs={5}>
                         <Card style={{ height: "100%" }}>
                             <CardHeader
                                 avatar={<AccountCircle />}
@@ -61,23 +60,20 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
                                 }
                             />
                             <CardContent>
-                                <Grid
-                                    container
-                                    justify="flex-start"
-                                    direction="column"
-                                >
+                                <Grid container direction="column" spacing={1}>
                                     <Grid item>
-                                        <Typography paragraph>
-                                            {`${userAccount.first_n} ${userAccount.last_n}`}
+                                        <Typography>
+                                            {userAccount.first_n}{" "}
+                                            {userAccount.last_n}
                                         </Typography>
                                     </Grid>
                                     <Grid item>
-                                        <Typography paragraph>
+                                        <Typography>
                                             {userAccount.email}
                                         </Typography>
                                     </Grid>
                                     <Grid item>
-                                        <Typography paragraph>
+                                        <Typography>
                                             {
                                                 ORGANIZATION_NAME_MAP[
                                                     userAccount.organization
@@ -86,16 +82,18 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
                                         </Typography>
                                     </Grid>
                                     <Grid item>
-                                        <Typography paragraph>
+                                        <Typography>
                                             Joined on{" "}
-                                            {formatDate(userAccount._created)}
+                                            {formatDate(
+                                                userAccount.approval_date
+                                            )}
                                         </Typography>
                                     </Grid>
                                 </Grid>
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item>
+                    <Grid item xs={7}>
                         <Card style={{ height: "100%" }}>
                             <CardHeader
                                 avatar={<FolderShared />}
@@ -109,52 +107,37 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
                                 }
                             />
                             <CardContent>
-                                <div>
+                                {isAdmin || isNCI ? (
+                                    <Typography>
+                                        Your have access to all datasets.
+                                    </Typography>
+                                ) : permissions.length ? (
                                     <Grid container spacing={2}>
-                                        {isAdmin || isNCI ? (
-                                            <Grid item>
-                                                <Typography paragraph>
-                                                    Your role (
-                                                    <code>
-                                                        {userAccount.role}
-                                                    </code>
-                                                    ) gives you access to all
-                                                    datasets.
-                                                </Typography>
-                                            </Grid>
-                                        ) : hasPerms ? (
-                                            permissions.map(perm => {
-                                                return (
-                                                    <Grid
-                                                        item
-                                                        key={
-                                                            perm.trial_id +
-                                                            perm.upload_type
-                                                        }
-                                                    >
-                                                        <Chip
-                                                            label={`${perm.trial_id}: ${perm.upload_type}`}
-                                                        />
-                                                    </Grid>
-                                                );
-                                            })
-                                        ) : (
-                                            <Grid item>
-                                                <Typography
-                                                    variant="h5"
-                                                    color="textSecondary"
-                                                    paragraph
+                                        {permissions.map(perm => {
+                                            return (
+                                                <Grid
+                                                    item
+                                                    key={
+                                                        perm.trial_id +
+                                                        perm.upload_type
+                                                    }
                                                 >
-                                                    You do not have access to
-                                                    any datasets.
-                                                    <br />
-                                                    <ContactAnAdmin /> if you
-                                                    believe this is a mistake.
-                                                </Typography>
-                                            </Grid>
-                                        )}
+                                                    <Chip
+                                                        label={`${perm.trial_id}: ${perm.upload_type}`}
+                                                    />
+                                                </Grid>
+                                            );
+                                        })}
                                     </Grid>
-                                </div>
+                                ) : (
+                                    <Typography>
+                                        You haven't been granted access to any
+                                        datasets yet. Please <ContactAnAdmin />{" "}
+                                        with what trials and assay types you
+                                        need to access, and we'll configure your
+                                        permissions accordingly.
+                                    </Typography>
+                                )}
                             </CardContent>
                         </Card>
                     </Grid>

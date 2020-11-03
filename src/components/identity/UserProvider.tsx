@@ -42,7 +42,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                     .then(userAccount => {
                         setUser({ ...authUser, ...userAccount });
                         if (!userAccount.approval_date) {
-                            history.replace("/unactivated");
+                            history.replace("/");
                         }
                     })
                     .catch(error => {

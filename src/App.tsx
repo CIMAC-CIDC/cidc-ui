@@ -9,7 +9,6 @@ import ManifestsPage from "./components/manifests/ManifestsPage";
 import PrivacyAndSecurityPage from "./components/privacy-and-security/PrivacyAndSecurityPage";
 import ProfilePage from "./components/profile/ProfilePage";
 import Register from "./components/identity/Register";
-import Unactivated from "./components/identity/Unactivated";
 import history from "./components/identity/History";
 import ErrorGuard from "./components/errors/ErrorGuard";
 import InfoProvider from "./components/info/InfoProvider";
@@ -91,11 +90,6 @@ export default function App() {
                                                 exact
                                                 path="/register"
                                                 component={Register}
-                                            />
-                                            <Route
-                                                exact
-                                                path="/unactivated"
-                                                component={Unactivated}
                                             />
                                             <Route
                                                 path="*"

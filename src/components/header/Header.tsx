@@ -155,7 +155,7 @@ const useHeaderStyles = makeStyles({
     logo: { height: 80, padding: 5, marginBottom: -40 }
 });
 
-export const DONT_RENDER_PATHS = ["/unactivated", "/callback"];
+export const DONT_RENDER_PATHS = ["/callback"];
 
 const Header: React.FunctionComponent<RouteComponentProps> = props => {
     const rootClasses = useRootStyles();
@@ -216,7 +216,8 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                         </Grid>
                     </Grid>
                     <Grid item style={{ padding: 0 }}>
-                        {user ? (
+                        {// only show tabs to approved users
+                        user?.approval_date ? (
                             <NavTabs
                                 selectedTab={selectedTab}
                                 tabs={
