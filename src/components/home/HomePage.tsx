@@ -10,7 +10,6 @@ import {
 } from "@material-ui/core";
 import { useRootStyles } from "../../rootStyles";
 import { getDataOverview, IDataOverview } from "../../api/api";
-import filesize from "filesize";
 import {
     AssessmentOutlined,
     AssignmentOutlined,
@@ -24,6 +23,7 @@ import { RouteComponentProps } from "react-router-dom";
 import pactLogo from "../../pact_logo.svg";
 import fnihLogo from "../../fnih_logo.svg";
 import nciLogo from "../../nci_logo.svg";
+import { formatFileSize } from "../../util/formatters";
 
 const usePortalStatStyles = makeStyles(theme => ({
     icon: {
@@ -156,8 +156,11 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                             label="data"
                             value={
                                 dataOverview
-                                    ? filesize(dataOverview.num_bytes, {
-                                          round: dataOverview.num_bytes < 10e12 ? 0 : 1
+                                    ? formatFileSize(dataOverview.num_bytes, {
+                                          round:
+                                              dataOverview.num_bytes < 1e12
+                                                  ? 0
+                                                  : 1
                                       })
                                     : undefined
                             }
@@ -168,8 +171,7 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                 <Button
                     disableElevation
                     fullWidth
-                    color="primary"
-                    variant="contained"
+                    variant="outlined"
                     onClick={() => history.push("/browse-data")}
                     endIcon={<OpenInNewOutlined />}
                     style={{ marginTop: "1rem", fontSize: "1.2rem" }}
@@ -188,7 +190,12 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                     >
                         What is the CIDC?
                     </Typography>
-                    <Typography paragraph variant="h5" align="left">
+                    <Typography
+                        paragraph
+                        variant="body1"
+                        align="left"
+                        style={{ fontSize: "1.2rem" }}
+                    >
                         The CIDC serves as the central data coordination portal
                         for the{" "}
                         <Link
