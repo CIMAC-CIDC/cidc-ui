@@ -91,7 +91,7 @@ const PendingRegistrationAlert: React.FC = () => {
     return (
         <Alert severity="success">
             <Typography paragraph>
-                Thank for you for submitting a registration request for the
+                Thank you for submitting a registration request for the
                 CIMAC-CIDC Data Portal.
             </Typography>
             <Typography paragraph>

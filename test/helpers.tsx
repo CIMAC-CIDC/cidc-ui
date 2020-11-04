@@ -53,15 +53,11 @@ export const renderAsRouteComponent = (
         authData: IAuthData;
     }
 ) => {
-    return render(
-        <AuthContext.Provider value={authData}>
-            <Router history={history}>
-                <QueryParamProvider ReactRouterRoute={Route}>
-                    <Route path={path} component={component} />
-                </QueryParamProvider>
-            </Router>
-        </AuthContext.Provider>
-    );
+    return renderWithRouter(<Route path={path} component={component} />, {
+        route,
+        history,
+        authData
+    });
 };
 
 export const renderWithUserContext = (

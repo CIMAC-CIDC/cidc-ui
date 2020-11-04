@@ -9,7 +9,7 @@ import history from "../identity/History";
 import { Account } from "../../model/account";
 import { act } from "react-dom/test-utils";
 import { renderWithRouter } from "../../../test/helpers";
-import { login } from "../identity/AuthProvider";
+import { login, logout } from "../identity/AuthProvider";
 jest.mock("../identity/AuthProvider");
 
 const user: Account = {
@@ -17,11 +17,16 @@ const user: Account = {
     _etag: "",
     _created: "",
     _updated: "",
+    first_n: "foo",
+    last_n: "bar",
     email: "",
     disabled: false,
     organization: "DFCI",
-    picture: "some-url"
+    picture: "some-url",
+    approval_date: "01/01/01",
+    role: "cimac-user"
 };
+const avatarAltText = /foo bar's avatar/i;
 const renderWithUserContext = (u: IAccountWithExtraContext) => {
     return renderWithRouter(
         <UserContext.Provider value={u}>
@@ -45,16 +50,57 @@ describe("Header", () => {
         });
     };
 
+    const checkNoTabs = (queryByText: (q: RegExp) => void) => {
+        checkVisibility(
+            queryByText,
+            [],
+            [
+                "browse data",
+                "pipelines",
+                "schema",
+                "manifests",
+                "assays",
+                "analyses"
+            ]
+        );
+    };
+
     it("renders a sign up / log in button if no user is provided", () => {
-        const { getByText } = renderWithRouter(<Header />, {
-            authData: { state: "logged-out" }
-        });
+        const { getByText, queryByText, queryByAltText } = renderWithRouter(
+            <Header />,
+            {
+                authData: { state: "logged-out" }
+            }
+        );
         const button = getByText(/sign up \/ log in/i).closest("button");
         fireEvent.click(button!);
         expect(login).toHaveBeenCalled();
+
+        // ensure the UserProfileMenu isn't rendered
+        expect(queryByAltText(avatarAltText)).not.toBeInTheDocument();
+
+        // ensure no tabs are rendered for unauthenticated users
+        checkNoTabs(queryByText);
+    });
+
+    it("renders the UserProfileMenu if a user is provided", () => {
+        const { queryByAltText } = renderWithRouter(
+            <UserContext.Provider value={user}>
+                <Header />
+            </UserContext.Provider>
+        );
+        expect(queryByAltText(avatarAltText)).toBeInTheDocument();
     });
 
     it("renders correct tabs based on the user context configuration", () => {
+        // unactivated user (can't see any tabs)
+        const { queryByText: q0 } = renderWithUserContext({
+            ...user,
+            approval_date: undefined
+        });
+        checkNoTabs(q0);
+        cleanup();
+
         // cidc user
         const { queryByText: q1 } = renderWithUserContext(user);
         checkVisibility(
@@ -186,5 +232,59 @@ describe("EnvBanner", () => {
 
         // reset the ENV
         process.env.REACT_APP_ENV = oldENV;
+    });
+});
+
+describe("UserProfileMenu", () => {
+    it("opens on click and shows expected options to approved users", () => {
+        const { queryByText, getByAltText } = renderWithRouter(
+            <UserContext.Provider value={user}>
+                <Header />
+            </UserContext.Provider>
+        );
+        expect(queryByText(/profile/i)).not.toBeInTheDocument();
+
+        // opens on click
+        fireEvent.click(getByAltText(avatarAltText));
+        expect(queryByText(/profile/i)).toBeInTheDocument();
+        expect(queryByText(/log out/i)).toBeInTheDocument();
+    });
+
+    it("opens on click and shows expected options to unapproved users", () => {
+        const { queryByText, getByAltText } = renderWithRouter(
+            <UserContext.Provider value={{ ...user, approval_date: undefined }}>
+                <Header />
+            </UserContext.Provider>
+        );
+        expect(queryByText(/log out/i)).not.toBeInTheDocument();
+
+        // opens on click
+        fireEvent.click(getByAltText(avatarAltText));
+        expect(queryByText(/profile/i)).not.toBeInTheDocument();
+        expect(queryByText(/log out/i)).toBeInTheDocument();
+    });
+
+    it("navigates to /profile when the 'profile' option is clicked", () => {
+        history.push("/");
+        const { getByText, getByAltText } = renderWithRouter(
+            <UserContext.Provider value={user}>
+                <Header />
+            </UserContext.Provider>,
+            { history }
+        );
+        fireEvent.click(getByAltText(avatarAltText));
+        fireEvent.click(getByText(/profile/i));
+        expect(history.location.pathname).toContain("/profile");
+    });
+
+    it("calls the logout function when the 'logout' option is clicked", () => {
+        const { getByText, getByAltText } = renderWithRouter(
+            <UserContext.Provider value={user}>
+                <Header />
+            </UserContext.Provider>
+        );
+        fireEvent.click(getByAltText(avatarAltText));
+        fireEvent.click(getByText(/log out/i));
+        expect(logout).toHaveBeenCalled();
     });
 });

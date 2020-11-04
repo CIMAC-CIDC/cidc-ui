@@ -1,9 +1,11 @@
+import React from "react";
 import HomePage from "./HomePage";
 import { renderAsRouteComponent } from "../../../test/helpers";
 import { getDataOverview, IDataOverview } from "../../api/api";
 import history from "../identity/History";
 import { fireEvent } from "@testing-library/react";
 import { cleanup } from "@testing-library/react-hooks";
+import { UserContext } from "../identity/UserProvider";
 jest.mock("../../api/api");
 
 const dataOverview: IDataOverview = {
@@ -73,4 +75,47 @@ test("data sizes are rounded correctly", async () => {
     });
     const decimalTb = renderAsRouteComponent(HomePage);
     expect(await decimalTb.findByText(/1.2 tb/i)).toBeInTheDocument();
+});
+
+describe("'pending approval'", () => {
+    const approvalMessage = /thank you for submitting a registration request/i;
+
+    test("unauthenticated users don't see it", () => {
+        const { queryByText } = renderAsRouteComponent(HomePage, {
+            authData: { state: "logged-out" }
+        });
+        expect(queryByText(approvalMessage)).not.toBeInTheDocument();
+    });
+
+    const user = { first_n: "foo", last_n: "bar", approval_date: "01/01/01" };
+
+    test("authenticated, approved users don't see it", () => {
+        const Wrapped = (props: any) => {
+            return (
+                <UserContext.Provider value={user}>
+                    <HomePage {...props} />
+                </UserContext.Provider>
+            );
+        };
+        const { queryByText } = renderAsRouteComponent(Wrapped, {
+            authData: { state: "logged-out" }
+        });
+        expect(queryByText(approvalMessage)).not.toBeInTheDocument();
+    });
+
+    test("authenticated, unapproved users see it", () => {
+        const Wrapped = (props: any) => {
+            return (
+                <UserContext.Provider
+                    value={{ ...user, approval_date: undefined }}
+                >
+                    <HomePage {...props} />
+                </UserContext.Provider>
+            );
+        };
+        const { queryByText } = renderAsRouteComponent(Wrapped, {
+            authData: { state: "logged-out" }
+        });
+        expect(queryByText(approvalMessage)).toBeInTheDocument();
+    });
 });

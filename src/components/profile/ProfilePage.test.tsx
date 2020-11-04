@@ -9,6 +9,7 @@ const user: IAccountWithExtraContext = {
     first_n: "john",
     last_n: "doe",
     email: "test@email.com",
+    approval_date: "01/01/01",
     permissions: [
         { trial_id: "test-trial-1", upload_type: "wes" },
         { trial_id: "test-trial-2", upload_type: "cytof" }

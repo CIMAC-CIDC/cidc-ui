@@ -200,7 +200,11 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
 
     let selectedTab: string | false = props.location.pathname;
 
-    if (["/", "/register", "/privacy-security"].includes(selectedTab)) {
+    if (
+        ["/", "/register", "/privacy-security", "/profile"].includes(
+            selectedTab
+        )
+    ) {
         selectedTab = false;
     } else if (DONT_RENDER_PATHS.includes(selectedTab)) {
         return null;
