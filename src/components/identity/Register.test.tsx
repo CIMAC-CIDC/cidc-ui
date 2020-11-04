@@ -3,11 +3,11 @@ import { createUser } from "../../api/api";
 import { IAuthData } from "./AuthProvider";
 import Register from "./Register";
 import { fireEvent } from "@testing-library/react";
-import { renderWithRouter } from "../../../test/helpers";
+import { renderAsRouteComponent } from "../../../test/helpers";
 jest.mock("../../api/api");
 
 const renderRegister = (authData?: IAuthData) => {
-    return renderWithRouter(<Register />, authData && { authData });
+    return renderAsRouteComponent(Register, authData && { authData });
 };
 
 it("renders nothing when no auth data has loaded", () => {
