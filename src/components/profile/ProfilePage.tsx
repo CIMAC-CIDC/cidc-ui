@@ -109,7 +109,9 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
                             <CardContent>
                                 {isAdmin || isNCI ? (
                                     <Typography>
-                                        Your have access to all datasets.
+                                        Your role (
+                                        <code>{userAccount.role}</code>) gives
+                                        you access to all datasets.
                                     </Typography>
                                 ) : permissions.length ? (
                                     <Grid container spacing={2}>

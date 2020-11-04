@@ -78,7 +78,13 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                 )
             });
         }
-    }, [authData, setError, user, permissions]);
+    }, [
+        authData,
+        setError,
+        user,
+        permissions,
+        props.history.location.pathname
+    ]);
 
     const showAssays =
         user?.role &&

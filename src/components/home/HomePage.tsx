@@ -128,7 +128,7 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
             direction="column"
             alignItems="stretch"
         >
-            {!user?.approval_date && (
+            {user && !user.approval_date && (
                 <Grid item>{<PendingRegistrationAlert />}</Grid>
             )}
             <Grid item>

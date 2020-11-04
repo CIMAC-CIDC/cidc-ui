@@ -85,7 +85,9 @@ const Register: React.FC<RouteComponentProps> = ({ history }) => {
                 organization: state.organization
             };
 
-            createUser(state.token!, newUser).then(() => history.replace("/"));
+            createUser(state.token!, newUser).then(() => {
+                history.replace("/");
+            });
         }
     }
 

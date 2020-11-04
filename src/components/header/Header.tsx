@@ -12,7 +12,9 @@ import {
     Avatar,
     Button,
     TabProps,
-    Box
+    Box,
+    Menu,
+    MenuItem
 } from "@material-ui/core";
 import {
     withRouter,
@@ -28,7 +30,7 @@ import {
 import { useRootStyles } from "../../rootStyles";
 import { Person } from "@material-ui/icons";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
-import { AuthContext, login } from "../identity/AuthProvider";
+import { AuthContext, login, logout } from "../identity/AuthProvider";
 import FadeInOnMount from "../generic/FadeInOnMount";
 
 const ENV = process.env.REACT_APP_ENV;
@@ -61,40 +63,73 @@ export const EnvBanner: React.FunctionComponent = () =>
         </Card>
     ) : null;
 
-const UserProfileButton: React.FC<{ user: IAccountWithExtraContext }> = ({
+const UserProfileMenu: React.FC<{ user: IAccountWithExtraContext }> = ({
     user
 }) => {
-    const userButton = (
-        <Button disabled={!user} component={Link} to={"/profile"} disableRipple>
-            <Grid
-                container
-                spacing={2}
-                justify="space-between"
-                alignItems="center"
+    const [
+        menuAnchor,
+        setMenuAnchor
+    ] = React.useState<HTMLButtonElement | null>();
+
+    const userProfileButton = (
+        <>
+            <Button
+                disableRipple
+                style={{ textTransform: "none", textAlign: "left", width: 225 }}
+                aria-controls="profile-menu"
+                aria-haspopup="true"
+                onClick={e => setMenuAnchor(e.currentTarget)}
             >
-                <Grid item>
-                    {user.picture ? (
-                        <Avatar
-                            alt={`${user.first_n} ${user.last_n}'s avatar`}
-                            src={user.picture}
-                        />
-                    ) : (
-                        <Person fontSize="large" />
-                    )}
+                <Grid
+                    container
+                    spacing={2}
+                    justify="space-between"
+                    alignItems="center"
+                    wrap="nowrap"
+                >
+                    <Grid item>
+                        {user.picture ? (
+                            <Avatar
+                                alt={`${user.first_n} ${user.last_n}'s avatar`}
+                                src={user.picture}
+                            />
+                        ) : (
+                            <Person fontSize="large" />
+                        )}
+                    </Grid>
+                    <Grid item style={{ maxWidth: 150 }}>
+                        <Typography variant="subtitle2">
+                            {user.first_n} {user.last_n}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                            {ORGANIZATION_NAME_MAP[user.organization]}
+                        </Typography>
+                    </Grid>
                 </Grid>
-                <Grid item style={{ maxWidth: 150 }}>
-                    <Typography variant="subtitle2">
-                        {user.first_n} {user.last_n}
-                    </Typography>
-                    <Typography variant="caption" color="textSecondary">
-                        {ORGANIZATION_NAME_MAP[user.organization]}
-                    </Typography>
-                </Grid>
-            </Grid>
-        </Button>
+            </Button>
+            <Menu
+                id="profile-menu"
+                anchorEl={menuAnchor}
+                getContentAnchorEl={null}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                transformOrigin={{ vertical: "top", horizontal: "center" }}
+                open={!!menuAnchor}
+                onClick={() => setMenuAnchor(null)}
+                onClose={() => setMenuAnchor(null)}
+            >
+                {user.approval_date && (
+                    <MenuItem component={Link} to="profile">
+                        Profile
+                    </MenuItem>
+                )}
+                <MenuItem style={{ width: 225 }} onClick={() => logout()}>
+                    Log Out
+                </MenuItem>
+            </Menu>
+        </>
     );
 
-    return <FadeInOnMount>{userButton}</FadeInOnMount>;
+    return <FadeInOnMount>{userProfileButton}</FadeInOnMount>;
 };
 
 interface IStyledTabsProps {
@@ -200,7 +235,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                             </Grid>
                             <Grid item>
                                 {authState === "logged-in" && user && (
-                                    <UserProfileButton user={user} />
+                                    <UserProfileMenu user={user} />
                                 )}
                                 {authState === "logged-out" && (
                                     <Button
@@ -217,7 +252,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                     </Grid>
                     <Grid item style={{ padding: 0 }}>
                         {// only show tabs to approved users
-                        user?.approval_date ? (
+                        user && user.approval_date ? (
                             <NavTabs
                                 selectedTab={selectedTab}
                                 tabs={
