@@ -1,5 +1,11 @@
 import * as React from "react";
-import { Grid, Card, CardHeader, CardContent } from "@material-ui/core";
+import {
+    Grid,
+    Card,
+    CardHeader,
+    CardContent,
+    Typography
+} from "@material-ui/core";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
 import { ErrorOutline } from "@material-ui/icons";
 
@@ -54,15 +60,18 @@ const ErrorGuard: React.FunctionComponent = ({ children }) => {
                                 title={title}
                             />
                             <CardContent>
-                                {error.description ? (
-                                    error.description
-                                ) : (
-                                    <>
-                                        The CIDC Portal encountered a problem.
-                                        Please <ContactAnAdmin lower /> if this
-                                        issue persists.
-                                    </>
-                                )}
+                                <Typography>
+                                    {error.description ? (
+                                        error.description
+                                    ) : (
+                                        <>
+                                            The CIDC Portal encountered a
+                                            problem. Please{" "}
+                                            <ContactAnAdmin lower /> if this
+                                            issue persists.
+                                        </>
+                                    )}
+                                </Typography>
                             </CardContent>
                         </Card>
                     </Grid>

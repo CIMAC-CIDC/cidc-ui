@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link } from "react-router-dom";
+import { Link as RRLink } from "react-router-dom";
 import {
     getSingleFile,
     getDownloadURL,
@@ -15,7 +15,8 @@ import {
     Table,
     TableBody,
     TableRow,
-    TableCell
+    TableCell,
+    Link as MuiLink
 } from "@material-ui/core";
 import { withIdToken } from "../../identity/AuthProvider";
 import { DataFile } from "../../../model/file";
@@ -278,13 +279,13 @@ const RelatedFiles: React.FC<{ file: DataFile; token: string }> = ({
         <Grid item>
             <Typography color="textSecondary">
                 This file has no directly related files, but you can still{" "}
-                <a
+                <MuiLink
                     href={`/browse-data?file_view=1&trial_ids=${file.trial_id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
                     browse all files in this trial{" "}
-                </a>
+                </MuiLink>
                 .
             </Typography>
         </Grid>
@@ -294,14 +295,16 @@ const RelatedFiles: React.FC<{ file: DataFile; token: string }> = ({
         <>
             {sortBy(relatedFiles, "object_url").map(({ id, object_url }) => {
                 return (
-                    <Grid item key={object_url}>
-                        <a
-                            href={`/browse-data/${id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            {object_url}
-                        </a>
+                    <Grid item key={object_url} xs={6}>
+                        <Typography>
+                            <MuiLink
+                                href={`/browse-data/${id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {object_url}
+                            </MuiLink>
+                        </Typography>
                     </Grid>
                 );
             })}
@@ -318,13 +321,13 @@ const RelatedFiles: React.FC<{ file: DataFile; token: string }> = ({
                     open={batchDownloadOpen}
                     onClose={() => setBatchDownloadOpen(false)}
                 />
-                <Grid container direction="column" spacing={1}>
+                <Grid container direction="row" spacing={1}>
                     {relatedFiles
                         ? relatedFiles.length > 0
                             ? relatedFilesList
                             : noRelatedFilesMessage
                         : range(5).map(i => (
-                              <Grid item key={i}>
+                              <Grid item xs={6} key={i}>
                                   <Skeleton width="100%" height={25} />
                               </Grid>
                           ))}
@@ -359,7 +362,7 @@ const FileDetailsPage: React.FC<RouteComponentProps<{
                     size="small"
                     variant="outlined"
                     startIcon={<ArrowLeft />}
-                    component={Link}
+                    component={RRLink}
                     to="/browse-data?file_view=1"
                 >
                     back to file browser
