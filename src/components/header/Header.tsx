@@ -118,7 +118,7 @@ const UserProfileMenu: React.FC<{ user: IAccountWithExtraContext }> = ({
                 onClose={() => setMenuAnchor(null)}
             >
                 {user.approval_date && (
-                    <MenuItem component={Link} to="profile">
+                    <MenuItem component={Link} to="/profile">
                         Profile
                     </MenuItem>
                 )}
