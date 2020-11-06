@@ -39,7 +39,7 @@ export const Clustergrammer: React.FC<IClustergrammerProps> = props => {
             if (iframe.document.DrawClustergram) {
                 iframe.document.DrawClustergram({
                     network_data: props.networkData,
-                    sidebar_width: 150
+                    sidebar_width: 125
                 });
             }
         }, 1000);
@@ -68,7 +68,7 @@ export interface IClustergrammerCardProps {
 }
 
 const ClustergrammerCard: React.FC<IClustergrammerCardProps> = ({ file }) => {
-    const width = widths.minPageWidth - 20;
+    const width = widths.minPageWidth;
     const height = 800;
 
     return (
@@ -90,7 +90,7 @@ const ClustergrammerCard: React.FC<IClustergrammerCardProps> = ({ file }) => {
                     </Grid>
                 }
             />
-            <CardContent>
+            <CardContent style={{ overflowX: "scroll" }}>
                 <Grid
                     container
                     spacing={3}
