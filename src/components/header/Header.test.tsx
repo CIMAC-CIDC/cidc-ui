@@ -265,7 +265,8 @@ describe("UserProfileMenu", () => {
     });
 
     it("navigates to /profile when the 'profile' option is clicked", () => {
-        history.push("/");
+        const testPath = "/pipelines/";
+        history.push(testPath);
         const { getByText, getByAltText } = renderWithRouter(
             <UserContext.Provider value={user}>
                 <Header />
@@ -275,6 +276,7 @@ describe("UserProfileMenu", () => {
         fireEvent.click(getByAltText(avatarAltText));
         fireEvent.click(getByText(/profile/i));
         expect(history.location.pathname).toContain("/profile");
+        expect(history.location.pathname).not.toContain(testPath);
     });
 
     it("calls the logout function when the 'logout' option is clicked", () => {
