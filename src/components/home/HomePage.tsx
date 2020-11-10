@@ -121,6 +121,8 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
         getDataOverview().then(d => setDataOverview(d));
     }, []);
 
+    const isUnapprovedUser = user && !user.approval_date;
+
     return (
         <Grid
             className={classes.centeredPage}
@@ -128,7 +130,7 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
             direction="column"
             alignItems="stretch"
         >
-            {user && !user.approval_date && (
+            {isUnapprovedUser && (
                 <Grid item>{<PendingRegistrationAlert />}</Grid>
             )}
             <Grid item>
@@ -215,6 +217,7 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
                     disableElevation
                     fullWidth
                     variant="outlined"
+                    disabled={isUnapprovedUser}
                     onClick={() => history.push("/browse-data")}
                     endIcon={<OpenInNewOutlined />}
                     style={{ marginTop: "1rem", fontSize: "1.2rem" }}

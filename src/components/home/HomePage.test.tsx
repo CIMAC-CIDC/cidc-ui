@@ -53,11 +53,49 @@ it("renders logos for supporting organizations", () => {
     expect(queryByAltText("PACT logo")).toBeInTheDocument();
 });
 
-test("'explore the data' button", () => {
-    const { getByText } = renderAsRouteComponent(HomePage, { history });
+const user = { first_n: "foo", last_n: "bar", approval_date: "01/01/01" };
 
-    fireEvent.click(getByText(/explore the data/i));
-    expect(history.location.pathname).toBe("/browse-data");
+describe("'explore the data' button", () => {
+    it("it's enabled for unauthenticated users", () => {
+        const { getByText } = renderAsRouteComponent(HomePage, { history });
+
+        fireEvent.click(getByText(/explore the data/i));
+        expect(history.location.pathname).toBe("/browse-data");
+    });
+
+    it("it's enabled for approved users", () => {
+        const Wrapped = (props: any) => {
+            return (
+                <UserContext.Provider value={user}>
+                    <HomePage {...props} />
+                </UserContext.Provider>
+            );
+        };
+        const { getByText } = renderAsRouteComponent(Wrapped, {
+            authData: { state: "logged-out" }
+        });
+
+        fireEvent.click(getByText(/explore the data/i));
+        expect(history.location.pathname).toBe("/browse-data");
+    });
+
+    it("it's disabled for authenticated, unapproved users", () => {
+        const Wrapped = (props: any) => {
+            return (
+                <UserContext.Provider
+                    value={{ ...user, approval_date: undefined }}
+                >
+                    <HomePage {...props} />
+                </UserContext.Provider>
+            );
+        };
+        const { getByText } = renderAsRouteComponent(Wrapped, {
+            authData: { state: "logged-out" }
+        });
+
+        const button = getByText(/explore the data/i).closest("button");
+        expect(button!.disabled).toBe(true);
+    });
 });
 
 test("data sizes are rounded correctly", async () => {
@@ -86,8 +124,6 @@ describe("'pending approval'", () => {
         });
         expect(queryByText(approvalMessage)).not.toBeInTheDocument();
     });
-
-    const user = { first_n: "foo", last_n: "bar", approval_date: "01/01/01" };
 
     test("authenticated, approved users don't see it", () => {
         const Wrapped = (props: any) => {
