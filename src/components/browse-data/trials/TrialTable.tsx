@@ -13,7 +13,8 @@ import {
     TableCell,
     TableHead,
     Divider,
-    withStyles
+    withStyles,
+    Link
 } from "@material-ui/core";
 import { getTrials } from "../../../api/api";
 import { IFileBundle, Trial } from "../../../model/trial";
@@ -170,10 +171,10 @@ const AssayButtonTable: React.FC<{
     );
 };
 
-const LabelAndValue: React.FC<{ label: string; value: string }> = ({
-    label,
-    value
-}) => {
+const LabelAndValue: React.FC<{
+    label: string;
+    value: string | React.ReactElement;
+}> = ({ label, value }) => {
     return (
         <Grid container alignItems="center">
             <Grid item>
@@ -190,7 +191,7 @@ const LabelAndValue: React.FC<{ label: string; value: string }> = ({
     );
 };
 
-const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
+export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
     const {
         participants,
         trial_name,
@@ -227,9 +228,18 @@ const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
             </Typography>
             <Grid container spacing={1}>
                 {[
-                    ["nct number", nct_id, 12],
                     [
-                        "principal investigator(s)",
+                        "nct number",
+                        <Link
+                            href={`https://clinicaltrials.gov/ct2/show/${nct_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {nct_id}
+                        </Link>
+                    ],
+                    [
+                        "cimac investigator(s)",
                         lead_cimac_pis ? lead_cimac_pis.join(", ") : undefined,
                         12
                     ],
@@ -253,10 +263,10 @@ const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
     const datasets = (
         <>
             <Typography variant="overline" color="textSecondary">
-                Clinical Data
+                Clinical/Sample Data
             </Typography>
             <BatchDownloadButton token={token} ids={clinicalIds}>
-                {clinicalIds.length} clinical overview files
+                {clinicalIds.length} participant/sample files
             </BatchDownloadButton>
             {!isEmpty(assayBundle) && (
                 <Box paddingTop={1}>

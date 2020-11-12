@@ -1,11 +1,11 @@
 import React from "react";
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { range } from "lodash";
 import { renderWithRouter } from "../../../../test/helpers";
 import { getTrials } from "../../../api/api";
 import { AuthContext } from "../../identity/AuthProvider";
 import { FilterContext } from "../shared/FilterProvider";
-import TrialTable from "./TrialTable";
+import TrialTable, { TrialCard } from "./TrialTable";
 jest.mock("../../../api/api");
 
 const fileBundle = {
@@ -94,7 +94,7 @@ it("renders trials with no filters applied", async () => {
     expect(queryAllByText(new RegExp("nice biobank", "i")).length).toBe(10);
 
     // renders batch download interface
-    expect(queryAllByText(/2 clinical overview files/i).length).toBe(10);
+    expect(queryAllByText(/2 participant\/sample files/i).length).toBe(10);
     expect(queryAllByText(/cytof/i).length).toBe(10);
     expect(queryAllByText(/4 files/i).length).toBe(10);
     expect(queryAllByText(/3 files/i).length).toBe(10);
@@ -156,4 +156,15 @@ it("filters by trial id", async () => {
     );
     await findByText(/test-trial-0/i);
     expect(getTrials).toHaveBeenCalled();
+});
+
+test("TrialCard links out to clinicaltrials.gov", () => {
+    const { getByText } = render(
+        // @ts-ignore
+        <TrialCard token="foo" trial={trialsPageOne[0]} />
+    );
+    const nctLink = getByText(new RegExp(metadata.nct_id, "i")).closest("a");
+    expect(nctLink.href).toBe(
+        "https://clinicaltrials.gov/ct2/show/NCT11111111"
+    );
 });
