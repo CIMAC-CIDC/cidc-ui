@@ -140,15 +140,13 @@ const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
                 <Grid container>
                     <Grid item xs={11}>
                         <List>
-                            <ListSubheader disableSticky>
-                                General Overview
-                            </ListSubheader>
                             <DocsListItem
-                                label={"CLI Instructions"}
+                                label={"The CIDC CLI"}
                                 path={CLIInstructionsSitePath}
                             />
                             <ListSubheader disableSticky>
-                                Assay-Specific Docs
+                                {props.uploadType[0].toUpperCase() +
+                                    props.uploadType.slice(1)}
                             </ListSubheader>
                             {map(pathConfigs, (config, path) => {
                                 return (

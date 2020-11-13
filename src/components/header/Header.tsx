@@ -266,15 +266,15 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                             value: "/browse-data"
                                         },
                                         user.showAssays && {
-                                            label: "assays",
+                                            label: "transfer assays",
                                             value: "/assays"
                                         },
                                         user.showAnalyses && {
-                                            label: "analyses",
+                                            label: "transfer analyses",
                                             value: "/analyses"
                                         },
                                         user.showManifests && {
-                                            label: "manifests",
+                                            label: "transfer manifests",
                                             value: "/manifests"
                                         },
                                         {

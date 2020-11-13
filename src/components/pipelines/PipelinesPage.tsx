@@ -68,7 +68,7 @@ const PipelinesPage: React.FC<RouteComponentProps> = props => {
                     <Grid item xs={11}>
                         <List style={{ paddingTop: 0 }}>
                             <ListSubheader disableSticky>
-                                Pipeline Docs
+                                Pipelines
                             </ListSubheader>
                             <DocsListItem
                                 label={"RIMA (RNA-seq IMmune Analysis)"}
