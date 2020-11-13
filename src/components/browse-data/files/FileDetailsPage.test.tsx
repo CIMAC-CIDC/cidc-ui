@@ -7,6 +7,7 @@ import {
 import FileDetailsPage, { AdditionalMetadataTable } from "./FileDetailsPage";
 import { renderAsRouteComponent } from "../../../../test/helpers";
 import { fireEvent, act, render, cleanup } from "@testing-library/react";
+import history from "../../identity/History";
 jest.mock("../../../api/api");
 jest.mock("../../../util/useRawFile");
 
@@ -230,4 +231,28 @@ describe("related files", () => {
         const downloadButton = getByText(downloadButtonText).closest("button");
         expect(downloadButton?.disabled).toBe(false);
     });
+});
+
+test("'back to file browser' button has expected href", async () => {
+    getSingleFile.mockResolvedValue(file);
+    const buttonText = /back to file browser/i;
+
+    // If there's no filter state, the button links to the file browser by default
+    const noState = renderFileDetails();
+    const noStateButton = await noState.findByText(buttonText);
+    expect(noStateButton.closest("a").href).toBe(
+        "http://localhost/browse-data?file_view=1"
+    );
+    cleanup();
+
+    // If there's filter state, the button includes that state in its href
+    const route = "/browse-data?some=1&filter=2&params=3";
+    history.push(`/browse-data/${file.id}`, { prevPath: route });
+    const withState = renderAsRouteComponent(FileDetailsPage, {
+        path: "/browse-data/:fileId",
+        authData: { state: "logged-in", userInfo: { idToken } },
+        history
+    });
+    const withStateButton = await withState.findByText(buttonText);
+    expect(withStateButton.closest("a").href).toBe(`http://localhost${route}`);
 });

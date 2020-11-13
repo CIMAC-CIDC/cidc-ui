@@ -20,7 +20,7 @@ import {
 } from "@material-ui/core";
 import { withIdToken } from "../../identity/AuthProvider";
 import { DataFile } from "../../../model/file";
-import { RouteComponentProps } from "react-router";
+import { RouteComponentProps, StaticContext } from "react-router";
 import {
     ArrowLeft,
     Category,
@@ -337,9 +337,13 @@ const RelatedFiles: React.FC<{ file: DataFile; token: string }> = ({
     );
 };
 
-const FileDetailsPage: React.FC<RouteComponentProps<{
-    fileId: string;
-}> & { token: string }> = ({ token, ...props }) => {
+const FileDetailsPage: React.FC<RouteComponentProps<
+    {
+        fileId: string;
+    },
+    StaticContext,
+    { prevPath?: string }
+> & { token: string }> = ({ token, ...props }) => {
     const rootClasses = useRootStyles();
 
     const [file, setFile] = React.useState<DataFile | undefined>(undefined);
@@ -363,7 +367,10 @@ const FileDetailsPage: React.FC<RouteComponentProps<{
                     variant="outlined"
                     startIcon={<ArrowLeft />}
                     component={RRLink}
-                    to="/browse-data?file_view=1"
+                    to={
+                        props.history.location.state?.prevPath ||
+                        "/browse-data?file_view=1"
+                    }
                 >
                     back to file browser
                 </Button>

@@ -10,6 +10,7 @@ const useStyles = makeStyles({
 const MuiRouterLink: React.FC<RouteComponentProps & {
     LinkProps?: LinkProps;
     to: string;
+    state?: any;
 }> = props => {
     const classes = useStyles();
     return (
@@ -19,7 +20,7 @@ const MuiRouterLink: React.FC<RouteComponentProps & {
             href={props.to}
             onClick={(e: any) => {
                 e.preventDefault();
-                props.history.push(props.to);
+                props.history.push(props.to, props.state);
             }}
         >
             {props.children}

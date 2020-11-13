@@ -5,7 +5,8 @@ import { renderWithRouter } from "../../../../test/helpers";
 import { getFiles, getFilelist } from "../../../api/api";
 import { DataFile } from "../../../model/file";
 import { AuthContext } from "../../identity/AuthProvider";
-import FileTable, { filterParams, sortParams } from "./FileTable";
+import FileTable, { filterParams, ObjectURL, sortParams } from "./FileTable";
+import history from "../../identity/History";
 jest.mock("../../../api/api");
 
 test("filterParams", () => {
@@ -31,7 +32,7 @@ test("sortParams", () => {
     });
 });
 
-const files: Array<Partial<DataFile>> = range(0, 5).map(id => ({
+const files: DataFile[] = range(0, 5).map(id => ({
     id,
     object_url: `file/url/${id}`,
     trial_id: "test-trial",
@@ -97,4 +98,14 @@ it("handles batch download requests", async () => {
     // download the filelist
     fireEvent.click(getByText(/download filelist.tsv/i));
     expect(getFilelist).toHaveBeenCalledWith("test-token", [0, 2, 4]);
+});
+
+test("ObjectURL provides filter state to file details page links", async () => {
+    const route = "/browse-files?some=1&filter=2&params=3";
+    history.push(route);
+    const { getByText } = renderWithRouter(<ObjectURL file={files[0]} />, {
+        history
+    });
+    fireEvent.click(getByText(/url/i));
+    expect(history.location.state.prevPath).toBe(route);
 });

@@ -21,6 +21,7 @@ import {
     formatDate,
     formatFileSize
 } from "../../../util/formatters";
+import { useHistory } from "react-router-dom";
 
 const fileQueryDefaults = {
     page_size: 50
@@ -113,6 +114,28 @@ const BatchDownloadButton: React.FC<{
                 onClose={() => setOpenDialog(false)}
             />
         </Grid>
+    );
+};
+
+export const ObjectURL: React.FC<{ file: DataFile }> = ({ file }) => {
+    const history = useHistory();
+    const paths = file.object_url.split("/");
+    return (
+        <MuiRouterLink
+            to={`/browse-data/${file.id}`}
+            state={{
+                prevPath: history.location.pathname + history.location.search
+            }}
+        >
+            <Grid container>
+                {paths.map((p, i) => (
+                    <Grid key={p} item>
+                        {p}
+                        {i === paths.length - 1 ? "" : "/"}
+                    </Grid>
+                ))}
+            </Grid>
+        </MuiRouterLink>
     );
 };
 
@@ -220,22 +243,6 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         // eslint-disable-next-line
     }, [props.token, filters, sortHeader, queryPage, setQueryPage]);
 
-    const formatObjectURL = (row: DataFile) => {
-        const paths = row.object_url.split("/");
-        return (
-            <MuiRouterLink to={`/browse-data/${row.id}`}>
-                <Grid container>
-                    {paths.map((p, i) => (
-                        <Grid key={p} item>
-                            {p}
-                            {i === paths.length - 1 ? "" : "/"}
-                        </Grid>
-                    ))}
-                </Grid>
-            </MuiRouterLink>
-        );
-    };
-
     return (
         <Grid container direction="column" spacing={1}>
             <Grid item>
@@ -281,7 +288,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                             return (
                                 <>
                                     <TableCell>
-                                        {formatObjectURL(row)}
+                                        <ObjectURL file={row} />
                                     </TableCell>
                                     <TableCell>{row.trial_id}</TableCell>
                                     <TableCell>{row.file_ext}</TableCell>
