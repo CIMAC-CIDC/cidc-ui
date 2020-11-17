@@ -32,7 +32,7 @@ import {
 import CopyToClipboardButton from "../../generic/CopyToClipboardButton";
 import { ButtonProps } from "@material-ui/core/Button";
 import Loader from "../../generic/Loader";
-import IHCBarplot from "../../visualizations/IHCBarplot";
+import IHCBarplotCard from "../../visualizations/IHCBarplotCard";
 import ClustergrammerCard from "../../visualizations/ClustergrammerCard";
 import TextWithIcon from "../../generic/TextWithIcon";
 import {
@@ -383,7 +383,7 @@ const FileDetailsPage: React.FC<RouteComponentProps<
             </Grid>
             {file.ihc_combined_plot && (
                 <Grid item xs={12}>
-                    <IHCBarplot data={file.ihc_combined_plot} />
+                    <IHCBarplotCard data={file.ihc_combined_plot} />
                 </Grid>
             )}
             {file.clustergrammer && (

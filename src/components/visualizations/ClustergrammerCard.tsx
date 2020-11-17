@@ -54,7 +54,7 @@ export const Clustergrammer = withResize<IClustergrammerProps>(
             window.addEventListener("onresize", renderClustergrammer);
         };
 
-        return cgHTML && height && width ? (
+        return cgHTML && height !== undefined && width !== undefined ? (
             <Frame
                 title="clustergrammer-iframe"
                 initialContent={cgHTML}

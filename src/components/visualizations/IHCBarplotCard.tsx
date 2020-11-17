@@ -16,13 +16,11 @@ import {
     CardHeader,
     Select,
     MenuItem,
-    Typography
+    Typography,
+    Box
 } from "@material-ui/core";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
-
-export interface IHCBarplotProps {
-    data: IHCPlotData;
-}
+import withResize from "../generic/withResize";
 
 const IHC_CONFIG = {
     facets: [
@@ -96,7 +94,49 @@ const IHCPlotControls: React.FC<{
     );
 };
 
-const IHCBarplot: React.FC<IHCBarplotProps> = props => {
+interface IHCBarplotProps extends IHCBarplotCardProps {
+    data: any;
+    dataColumn: string;
+    width?: number;
+    height?: number;
+}
+
+const IHCBarplot = withResize<IHCBarplotProps>(
+    ({ data, dataColumn, width, height }) => {
+        return (
+            <Plot
+                data={data}
+                layout={{
+                    width,
+                    height,
+                    autosize: false,
+                    showlegend: true,
+                    yaxis: {
+                        anchor: "x",
+                        title: { text: dataColumn }
+                    },
+                    xaxis: {
+                        anchor: "y",
+                        title: {
+                            text: "Sample<br>(hover to view CIMAC ID)"
+                        },
+                        categorymode: "array",
+                        categoryarray: map(data, "cimac_id"),
+                        showticklabels: false
+                    },
+                    margin: { t: 10 }
+                }}
+                config={{ displaylogo: false }}
+            />
+        );
+    }
+);
+
+export interface IHCBarplotCardProps {
+    data: IHCPlotData;
+}
+
+const IHCBarplotCard: React.FC<IHCBarplotCardProps> = props => {
     const [facet, setFacet] = React.useState<string>(
         IHC_CONFIG.facets[0].value
     );
@@ -120,8 +160,14 @@ const IHCBarplot: React.FC<IHCBarplotProps> = props => {
     }));
 
     const plot = (
-        <Grid container direction="row" wrap="nowrap" spacing={1}>
-            <Grid item>
+        <Grid
+            container
+            direction="row"
+            justify="space-between"
+            wrap="nowrap"
+            spacing={1}
+        >
+            <Grid item xs={3}>
                 <IHCPlotControls
                     dataColumn={dataColumn}
                     dataColumns={dataColumns}
@@ -130,28 +176,10 @@ const IHCBarplot: React.FC<IHCBarplotProps> = props => {
                     setFacet={setFacet}
                 />
             </Grid>
-            <Grid item>
-                <Plot
-                    data={data}
-                    layout={{
-                        showlegend: true,
-                        yaxis: {
-                            anchor: "x",
-                            title: { text: dataColumn }
-                        },
-                        xaxis: {
-                            anchor: "y",
-                            title: {
-                                text: "Sample<br>(hover to view CIMAC ID)"
-                            },
-                            categorymode: "array",
-                            categoryarray: map(props.data, "cimac_id"),
-                            showticklabels: false
-                        },
-                        margin: { t: 10 }
-                    }}
-                    config={{ displaylogo: false }}
-                />
+            <Grid item xs={9}>
+                <Box height={600}>
+                    <IHCBarplot data={data} dataColumn={dataColumn} />
+                </Box>
             </Grid>
         </Grid>
     );
@@ -174,4 +202,4 @@ const IHCBarplot: React.FC<IHCBarplotProps> = props => {
     );
 };
 
-export default IHCBarplot;
+export default IHCBarplotCard;

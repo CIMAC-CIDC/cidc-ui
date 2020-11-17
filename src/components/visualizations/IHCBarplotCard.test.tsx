@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
-import IHCBarplot from "./IHCBarplot";
+import IHCBarplotCard from "./IHCBarplotCard";
 
 it("renders a plot when some data columns are available", () => {
     const ihcData = [
@@ -16,7 +16,7 @@ it("renders a plot when some data columns are available", () => {
         }
     ];
     const { queryByText, queryAllByText, getByText } = render(
-        <IHCBarplot data={ihcData} />
+        <IHCBarplotCard data={ihcData} />
     );
     // control panel rendered
     expect(queryByText(/color by/i)).toBeInTheDocument();
@@ -32,7 +32,9 @@ it("renders a plot when some data columns are available", () => {
 
 it("renders an error message when no data columns are available", () => {
     const ihcDataNoDataColumns = [{ foo: "bar" }];
-    const { queryByText } = render(<IHCBarplot data={ihcDataNoDataColumns} />);
+    const { queryByText } = render(
+        <IHCBarplotCard data={ihcDataNoDataColumns} />
+    );
     expect(
         queryByText(
             /failed to build an IHC expression distribution visualization/i

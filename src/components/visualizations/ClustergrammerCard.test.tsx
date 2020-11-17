@@ -1,8 +1,9 @@
 import React from "react";
 import networkData from "../__data__/clustergrammerNetwork.json";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import ClustergrammerCard, { Clustergrammer } from "./ClustergrammerCard";
 import useRawFile from "../../util/useRawFile";
+import { Box } from "@material-ui/core";
 jest.mock("../../util/useRawFile");
 
 useRawFile.mockImplementation(() => {
@@ -11,13 +12,13 @@ useRawFile.mockImplementation(() => {
 
 describe("Clustergrammer", () => {
     it("loads an iframe", async () => {
-        const { baseElement } = render(
+        const { container } = render(
             <Clustergrammer networkData={networkData} />,
             { container: document.createElement("div") }
         );
 
-        const cgIframe = baseElement.childNodes[0];
-        expect(cgIframe.nodeName).toBe("IFRAME");
+        const iframe = await waitFor(() => container.querySelector("iframe"));
+        expect(iframe).not.toBe(null);
     });
 });
 
