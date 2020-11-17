@@ -1,9 +1,11 @@
 import {
+    Box,
     Button,
     Card,
     CardContent,
     CardHeader,
     Grid,
+    Link,
     Typography
 } from "@material-ui/core";
 import { OpenInNew } from "@material-ui/icons";
@@ -91,28 +93,40 @@ const ClustergrammerCard: React.FC<IClustergrammerCardProps> = ({ file }) => {
                 }
             />
             <CardContent style={{ overflowX: "scroll" }}>
-                <Grid
-                    container
-                    spacing={3}
-                    style={{ width, margin: "auto" }}
-                    direction="column"
-                >
+                <Box m="auto" width={width}>
                     {file.clustergrammer ? (
-                        <Clustergrammer
-                            networkData={file.clustergrammer}
-                            width={width}
-                            height={height}
-                        />
-                    ) : (
-                        <Grid item>
-                            <Typography color="textSecondary">
-                                Oops! This file cannot be visualized with
-                                Clustergrammer. Please <ContactAnAdmin lower />{" "}
-                                so we can investigate this issue.
+                        <>
+                            <Typography
+                                variant="subtitle1"
+                                paragraph
+                                gutterBottom
+                            >
+                                <strong>Note:</strong> the rows in this
+                                visualization have been z-score normalized using
+                                Clustergrammer's built-in{" "}
+                                <Link
+                                    href="https://clustergrammer.readthedocs.io/clustergrammer_py.html#clustergrammer_py.Network.normalize"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <code>normalize</code>
+                                </Link>{" "}
+                                function.
                             </Typography>
-                        </Grid>
+                            <Clustergrammer
+                                networkData={file.clustergrammer}
+                                width={width}
+                                height={height}
+                            />
+                        </>
+                    ) : (
+                        <Typography color="textSecondary">
+                            Oops! This file cannot be visualized with
+                            Clustergrammer. Please <ContactAnAdmin lower /> so
+                            we can investigate this issue.
+                        </Typography>
                     )}
-                </Grid>
+                </Box>
             </CardContent>
         </Card>
     );
