@@ -27,11 +27,7 @@
         </style>
     </head>
     <body>
-        <div id="cg-root">
-            <div id="cg-loader">
-                Loading Clustergrammer...
-            </div>
-        </div>
+        <div id="cg-root"></div>
 
         <!-- Required JS Libraries -->
         <script src="/static/cg/lib/js/d3.min.js"></script>
@@ -50,17 +46,22 @@
             document.DrawClustergram = function(args) {
                 args.root = "#cg-root";
 
+                // Size the plot container
                 d3.select(args.root)
                     .style("width", window.innerWidth + "px")
                     .style("height", window.innerHeight - 20 + "px");
 
-                d3.select(window).on("resize", function() {
-                    resize_container(args);
-                    cgm.resize_viz();
+                // Clear previously rendered clustergrammer viz from plot container
+                const root = document.getElementById(args.root.slice(1));
+                ["viz_wrapper", "sidebar_wrapper"].forEach(cls => {
+                    const elements = document.getElementsByClassName(cls);
+                    if (elements.length == 1) {
+                        root.removeChild(elements[0]);
+                    }
                 });
 
-                cgm = Clustergrammer(args);
-                document.getElementById("cg-loader").remove();
+                // Render the plot
+                const cgm = Clustergrammer(args);
             };
         </script>
     </body>
