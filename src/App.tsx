@@ -13,8 +13,8 @@ import {
     AssayDocsPage,
     AnalysesDocsPage
 } from "./components/upload-docs/UploadDocsPages";
-import Loader from "./components/generic/Loader";
 
+// Code-split across different routes on the site
 const HomePage = React.lazy(() => import("./components/home/HomePage"));
 const ManifestsPage = React.lazy(() =>
     import("./components/manifests/ManifestsPage")
@@ -51,7 +51,7 @@ export default function App() {
                                 <IdentityProvider>
                                     <Header />
                                     <div className={classes.content}>
-                                        <React.Suspense fallback={<Loader />}>
+                                        <React.Suspense fallback={null}>
                                             <Switch>
                                                 <Route
                                                     exact
