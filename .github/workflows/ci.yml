@@ -31,8 +31,7 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
-          coverage xml
-          ./cc-test-reporter after-build -t coverage.py --exit-code 0
+          ./cc-test-reporter after-build --exit-code 0
 
   build:
     runs-on: ubuntu-latest
