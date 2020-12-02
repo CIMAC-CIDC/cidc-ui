@@ -1,0 +1,88 @@
+on:
+  push:
+    branches: [master, production]
+  pull_request:
+    branches: [master, production]
+
+env:
+  IS_STAGING: ${{ github.ref == 'refs/heads/master' }}
+  IS_PROD: ${{ github.ref == 'refs/heads/production' }}
+  NODE_VERSION: 14
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install dependencies
+        run: |
+          npm install
+      - name: Setup codeclimate test coverage reporter
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+      - name: Run linter
+        run: |
+          npm run lint
+      - name: Run tests
+        run: |
+          npm run test -- --coverage
+      - name: Report test coverage
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          coverage xml
+          ./cc-test-reporter after-build -t coverage.py --exit-code 0
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install dependencies
+        run: |
+          npm install
+      - name: Create an optimized build
+        run: |
+          if $IS_PROD; then cat .env.prod > .env; else cat .env.staging > .env; fi
+          npm run build
+      - name: Archive the build artifacts
+        uses: actions/upload-artifact@v2
+        if: ${{ env.IS_PROD || env.IS_STAGING }}
+        with:
+          name: build-artifacts
+          path: build
+
+  gcs-deploy:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: ${{ env.IS_PROD || env.IS_STAGING }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+          path: build
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ env.IS_PROD && "cidc-dfci" || "cidc-dfci-staging" }}
+          service_account_key: ${{ env.IS_PROD && secrets.GCP_SA_KEY_PROD || secrets.GCP_SA_KEY_STAGING }}
+          export_default_credentials: true
+      - name: Deploy build artifacts to Cloud Storage
+        env:
+          BUCKET: ${{ env.IS_PROD && "gs://cidc-ui-prod" || "gs://cidc-ui-staging"}}
+        run: |
+          # Copy the contents of the build directory to the GCS UI bucket
+          gsutil -m -h "Cache-Control:no-cache,max-age=0" cp -r build/* $BUCKET
+          # Make all objects in the GCS UI bucket public
+          gsutil iam ch allUsers:objectViewer $BUCKET

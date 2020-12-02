@@ -3,11 +3,18 @@
 | production  | [production](https://github.com/CIMAC-CIDC/cidc-ui/tree/production) | [![Build Status](https://travis-ci.org/CIMAC-CIDC/cidc-ui.svg?branch=production)](https://travis-ci.org/CIMAC-CIDC/cidc-ui)                                                                                                                                                                   ||                                                                                                                                                               |
 | staging     | [master](https://github.com/CIMAC-CIDC/cidc-ui)                     | [![Build Status](https://travis-ci.org/CIMAC-CIDC/cidc-ui.svg?branch=master)](https://travis-ci.org/CIMAC-CIDC/cidc-ui)     | [![Maintainability](https://api.codeclimate.com/v1/badges/5b511fb97b4e48906501/maintainability)](https://codeclimate.com/github/CIMAC-CIDC/cidc-ui/maintainability) | [![Test Coverage](https://api.codeclimate.com/v1/badges/5b511fb97b4e48906501/test_coverage)](https://codeclimate.com/github/CIMAC-CIDC/cidc-ui/test_coverage) |
 
-## CIDC UI Readme
+## CIDC UI
 
 ### Installation:
 
-Clone the project, and run `npm install`
+This repo uses [nvm]() for node version management. Configure your node version:
+```
+nvm use
+```
+Next, install the dependencies: 
+```
+npm install
+```
 
 ### Build:
 
