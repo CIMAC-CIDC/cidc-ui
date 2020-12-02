@@ -7,7 +7,7 @@
 
 ### Installation:
 
-This repo uses [nvm]() for node version management. Configure your node version:
+This repo uses [nvm](https://github.com/nvm-sh/nvm#install--update-script) for node version management. Configure your node version:
 ```
 nvm use
 ```
