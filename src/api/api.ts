@@ -122,10 +122,19 @@ function getAccountInfo(token: string): Promise<Account> {
         .then(_extractItem);
 }
 
-function getTrials(token: string, params: any = {}): Promise<Trial[]> {
+function getTrials(
+    token: string,
+    params: any = {},
+    cancelToken?: CancelToken
+): Promise<Trial[]> {
     return getApiClient(token)
         .get("trial_metadata", {
-            params: { sort_field: "trial_id", sort_direction: "asc", ...params }
+            params: {
+                sort_field: "trial_id",
+                sort_direction: "asc",
+                ...params
+            },
+            cancelToken
         })
         .then(_extractItems);
 }

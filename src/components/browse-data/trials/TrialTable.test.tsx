@@ -4,8 +4,10 @@ import { range } from "lodash";
 import { renderWithRouter } from "../../../../test/helpers";
 import { getTrials } from "../../../api/api";
 import { AuthContext } from "../../identity/AuthProvider";
-import { FilterContext } from "../shared/FilterProvider";
-import TrialTable, { TrialCard } from "./TrialTable";
+import { FilterContext, IFilterContext } from "../shared/FilterProvider";
+import TrialTable, { TrialCard, usePaginatedTrials } from "./TrialTable";
+import { act, renderHook } from "@testing-library/react-hooks";
+import { CancelToken } from "axios";
 jest.mock("../../../api/api");
 
 const fileBundle = {
@@ -139,9 +141,9 @@ it("handles pagination as expected", async () => {
 it("filters by trial id", async () => {
     getTrials.mockImplementation((token: string, params: any) => {
         expect(params.trial_ids).toBe("test-trial-0,test-trial-1");
-        return Promise.resolve(trialsPageOne);
+        return Promise.resolve(trialsPageOne.slice(0, 2));
     });
-    const { findByText } = renderWithRouter(
+    const { findByText, queryByText } = renderWithRouter(
         <AuthContext.Provider value={{ idToken: "test-token" }}>
             <FilterContext.Provider
                 value={{
@@ -154,7 +156,9 @@ it("filters by trial id", async () => {
             </FilterContext.Provider>
         </AuthContext.Provider>
     );
-    await findByText(/test-trial-0/i);
+    expect(await findByText(/test-trial-0/i)).toBeInTheDocument();
+    expect(queryByText(/test-trial-1/i)).toBeInTheDocument();
+    expect(queryByText(/test-trial-2/i)).not.toBeInTheDocument();
     expect(getTrials).toHaveBeenCalled();
 });
 
@@ -167,4 +171,54 @@ test("TrialCard links out to clinicaltrials.gov", () => {
     expect(nctLink.href).toBe(
         "https://clinicaltrials.gov/ct2/show/NCT11111111"
     );
+});
+
+test("usePaginatedTrials appears not to have a race condition", async () => {
+    let allCallsMade = false;
+    getTrials
+        .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
+            await new Promise(r => setTimeout(r, 400));
+            cancelToken.throwIfRequested();
+            return trialsPageOne;
+        })
+        .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
+            cancelToken.throwIfRequested();
+            return trialsPageOne.slice(0, 2);
+        })
+        .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
+            await new Promise(r => setTimeout(r, 100));
+            cancelToken.throwIfRequested();
+            return trialsPageOne.slice(3, 6);
+        })
+        .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
+            await new Promise(r => setTimeout(r, 500));
+            cancelToken.throwIfRequested();
+            allCallsMade = true;
+            return trialsPageOne.slice(7, 9);
+        });
+
+    const wrapper: React.FC<any> = ({ children, filters }) => (
+        <FilterContext.Provider value={{ filters }}>
+            {children}
+        </FilterContext.Provider>
+    );
+    const { rerender, result, waitFor } = renderHook(
+        () => usePaginatedTrials("token"),
+        {
+            wrapper,
+            initialProps: { filters: { trial_ids: [] } }
+        }
+    );
+    // The actual filter values don't matter here, because the API responses
+    // are mocked to return values independent of these filters. What matters
+    // is that the filters change between each render.
+    rerender({ filters: { trial_ids: ["test-trial-0"] } });
+    rerender({ filters: { trial_ids: ["test-trial-1"] } });
+    rerender({ filters: { trial_ids: ["test-trial-2"] } });
+
+    await waitFor(() => expect(allCallsMade).toBe(true));
+
+    expect(result.current.allLoaded).toBe(true);
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.trials).toEqual(trialsPageOne.slice(7, 9));
 });

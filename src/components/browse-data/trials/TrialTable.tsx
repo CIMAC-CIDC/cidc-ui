@@ -24,6 +24,7 @@ import { CloudDownload } from "@material-ui/icons";
 import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 import { Skeleton } from "@material-ui/lab";
 import { useFilterFacets } from "../shared/FilterProvider";
+import axios, { CancelTokenSource } from "axios";
 
 const BatchDownloadButton: React.FC<{
     ids: number[];
@@ -300,8 +301,12 @@ export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
     );
 };
 
+const CANCEL_MESSAGE = "cancelling stale filter request";
+
 const TRIALS_PER_PAGE = 10;
-const usePaginatedTrials = (token: string) => {
+export const usePaginatedTrials = (token: string) => {
+    const axiosCanceller = React.useRef<CancelTokenSource | undefined>();
+
     const { filters } = useFilterFacets();
 
     const [trials, setTrials] = React.useState<Trial[] | undefined>();
@@ -312,29 +317,48 @@ const usePaginatedTrials = (token: string) => {
 
     const loadMore = React.useCallback(() => {
         if (!allLoaded) {
+            // Cancel the previous request, if one is ongoing
+            if (axiosCanceller.current) {
+                axiosCanceller.current.cancel(CANCEL_MESSAGE);
+            }
+
+            axiosCanceller.current = axios.CancelToken.source();
+
             setIsLoading(true);
-            getTrials(token, {
-                include_file_bundles: true,
-                page_size: TRIALS_PER_PAGE,
-                page_num: page,
-                trial_ids: filters.trial_ids?.join(",")
-            }).then(results => {
-                setTrials(ts => [...(ts || []), ...results]);
-                if (results.length === TRIALS_PER_PAGE) {
-                    setPage(p => p + 1);
-                } else {
-                    setAllLoaded(true);
-                }
-                setIsLoading(false);
-            });
+            getTrials(
+                token,
+                {
+                    include_file_bundles: true,
+                    page_size: TRIALS_PER_PAGE,
+                    page_num: page,
+                    trial_ids: filters.trial_ids?.join(",")
+                },
+                axiosCanceller.current.token
+            )
+                .then(results => {
+                    setTrials(ts =>
+                        page > 0 ? [...(ts || []), ...results] : results
+                    );
+                    if (results.length === TRIALS_PER_PAGE) {
+                        setPage(p => p + 1);
+                    } else {
+                        setAllLoaded(true);
+                    }
+                    setIsLoading(false);
+                })
+                .catch(err => {
+                    if (err.message !== CANCEL_MESSAGE) {
+                        console.error(err.message);
+                    }
+                });
         }
     }, [allLoaded, page, token, filters.trial_ids]);
 
     // Clear all results when filters change
     React.useEffect(() => {
         setPage(0);
-        setAllLoaded(false);
         setTrials(undefined);
+        setAllLoaded(false);
     }, [filters.trial_ids]);
 
     // Load first page of trials on initial render
