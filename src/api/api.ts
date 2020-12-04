@@ -96,9 +96,7 @@ function getRelatedFiles(token: string, fileId: number): Promise<DataFile[]> {
 
 function getFilelist(token: string, fileIds: number[]): Promise<Blob> {
     return getApiClient(token)
-        .get("downloadable_files/filelist", {
-            params: { file_ids: fileIds.join(",") }
-        })
+        .post("downloadable_files/filelist", { file_ids: fileIds })
         .then(
             ({ data }) =>
                 new Blob([data], {

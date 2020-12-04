@@ -161,8 +161,8 @@ test("getFiles", async () => {
 test("getFileList", async () => {
     const filelist = "a\tb\nc\td\n";
     const fileIds = [1, 2, 3, 4, 5, 6];
-    axiosMock.onGet("downloadable_files/filelist").reply(config => {
-        expect(config.params?.file_ids).toBe("1,2,3,4,5,6");
+    axiosMock.onPost("downloadable_files/filelist").reply(config => {
+        expect(config.data).toBe('{"file_ids":[1,2,3,4,5,6]}');
         return [200, "a\tb\nc\td\n"];
     });
 
