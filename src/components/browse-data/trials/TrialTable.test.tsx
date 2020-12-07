@@ -184,7 +184,7 @@ test("TrialCard links out to clinicaltrials.gov", () => {
 test("usePaginatedTrials appears not to have a race condition", async () => {
     getTrials
         .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
-            await new Promise(r => setTimeout(r, 400));
+            await new Promise(r => setTimeout(r, 1000));
             cancelToken.throwIfRequested();
             return trialsPageOne;
         })
@@ -199,7 +199,7 @@ test("usePaginatedTrials appears not to have a race condition", async () => {
             return trialsPageOne.slice(3, 6);
         })
         .mockImplementation(async (t, p, cancelToken: CancelToken) => {
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 300));
             cancelToken.throwIfRequested();
             return trialsPageOne.slice(7, 9);
         });
