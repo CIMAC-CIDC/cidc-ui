@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Account } from "../model/account";
 import { Trial, NewTrial } from "../model/trial";
 import { DataFile } from "../model/file";
@@ -5,7 +6,8 @@ import axios, {
     AxiosInstance,
     AxiosResponse,
     AxiosError,
-    CancelToken
+    CancelToken,
+    CancelTokenSource
 } from "axios";
 import Permission from "../model/permission";
 import { IFacets } from "../components/browse-data/shared/FilterProvider";
@@ -325,6 +327,25 @@ function getDataOverview(): Promise<IDataOverview> {
         .get("/info/data_overview")
         .then(_extractItem);
 }
+
+export const useCancelToken = (message = "cancelling stale request") => {
+    const cancellerRef = React.useRef<CancelTokenSource | undefined>();
+
+    return {
+        get: () => {
+            if (cancellerRef.current) {
+                cancellerRef.current.cancel(message);
+            }
+            cancellerRef.current = axios.CancelToken.source();
+            return cancellerRef.current.token;
+        },
+        catchCancellation: (err: any) => {
+            if (err.message !== message) {
+                throw err;
+            }
+        }
+    };
+};
 
 export {
     _getItem,

@@ -10,10 +10,9 @@ import {
     Typography
 } from "@material-ui/core";
 import { useQueryParam, NumberParam } from "use-query-params";
-import { getFiles, IDataWithMeta } from "../../../api/api";
+import { getFiles, IDataWithMeta, useCancelToken } from "../../../api/api";
 import { withIdToken } from "../../identity/AuthProvider";
 import MuiRouterLink from "../../generic/MuiRouterLink";
-import axios, { CancelTokenSource } from "axios";
 import { IFilters, useFilterFacets } from "../shared/FilterProvider";
 import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 import {
@@ -139,11 +138,9 @@ export const ObjectURL: React.FC<{ file: DataFile }> = ({ file }) => {
     );
 };
 
-const CANCEL_MESSAGE = "cancelling stale filter request";
-
 const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
-    const axiosCanceller = React.useRef<CancelTokenSource | undefined>();
+    const cancelToken = useCancelToken();
 
     const { filters } = useFilterFacets();
 
@@ -194,13 +191,6 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
             // Clear existing data, so the table shows a loading indicator
             setData(undefined);
 
-            // Cancel the previous request, if one is ongoing
-            if (axiosCanceller.current) {
-                axiosCanceller.current.cancel(CANCEL_MESSAGE);
-            }
-
-            axiosCanceller.current = axios.CancelToken.source();
-
             getFiles(
                 props.token,
                 {
@@ -209,7 +199,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                     ...sortParams(sortHeader),
                     ...fileQueryDefaults
                 },
-                axiosCanceller.current.token
+                cancelToken.get()
             )
                 .then(files => {
                     // Check if queryPage is too high for the current filters.
@@ -227,11 +217,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                         setData(files);
                     }
                 })
-                .catch(err => {
-                    if (err.message !== CANCEL_MESSAGE) {
-                        console.error(err.message);
-                    }
-                });
+                .catch(cancelToken.catchCancellation);
         }
         // Track which page we're switching from.
         setPrevPage(queryPage);

@@ -8,7 +8,15 @@ import { FilterContext, IFilterContext } from "../shared/FilterProvider";
 import TrialTable, { TrialCard, usePaginatedTrials } from "./TrialTable";
 import { act, renderHook } from "@testing-library/react-hooks";
 import { CancelToken } from "axios";
-jest.mock("../../../api/api");
+
+jest.mock("../../../api/api", () => {
+    const actualApi = jest.requireActual("../../../api/api");
+    return {
+        __esModule: true,
+        ...actualApi,
+        getTrials: jest.fn()
+    };
+});
 
 const fileBundle = {
     IHC: {
@@ -190,7 +198,7 @@ test("usePaginatedTrials appears not to have a race condition", async () => {
             cancelToken.throwIfRequested();
             return trialsPageOne.slice(3, 6);
         })
-        .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
+        .mockImplementation(async (t, p, cancelToken: CancelToken) => {
             await new Promise(r => setTimeout(r, 500));
             cancelToken.throwIfRequested();
             allCallsMade = true;

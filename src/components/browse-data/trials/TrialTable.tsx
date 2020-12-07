@@ -16,7 +16,7 @@ import {
     withStyles,
     Link
 } from "@material-ui/core";
-import { getTrials } from "../../../api/api";
+import { getTrials, useCancelToken } from "../../../api/api";
 import { IFileBundle, Trial } from "../../../model/trial";
 import { withIdToken } from "../../identity/AuthProvider";
 import { flatMap, flatten, isEmpty, map, omitBy, pickBy, range } from "lodash";
@@ -24,7 +24,6 @@ import { CloudDownload } from "@material-ui/icons";
 import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 import { Skeleton } from "@material-ui/lab";
 import { useFilterFacets } from "../shared/FilterProvider";
-import axios, { CancelTokenSource } from "axios";
 
 const BatchDownloadButton: React.FC<{
     ids: number[];
@@ -301,11 +300,9 @@ export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
     );
 };
 
-const CANCEL_MESSAGE = "cancelling stale filter request";
-
 const TRIALS_PER_PAGE = 10;
 export const usePaginatedTrials = (token: string) => {
-    const axiosCanceller = React.useRef<CancelTokenSource | undefined>();
+    const cancelToken = useCancelToken();
 
     const { filters } = useFilterFacets();
 
@@ -317,13 +314,6 @@ export const usePaginatedTrials = (token: string) => {
 
     const loadMore = React.useCallback(() => {
         if (!allLoaded) {
-            // Cancel the previous request, if one is ongoing
-            if (axiosCanceller.current) {
-                axiosCanceller.current.cancel(CANCEL_MESSAGE);
-            }
-
-            axiosCanceller.current = axios.CancelToken.source();
-
             setIsLoading(true);
             getTrials(
                 token,
@@ -333,26 +323,21 @@ export const usePaginatedTrials = (token: string) => {
                     page_num: page,
                     trial_ids: filters.trial_ids?.join(",")
                 },
-                axiosCanceller.current.token
+                cancelToken.get()
             )
                 .then(results => {
                     setTrials(ts =>
                         page > 0 ? [...(ts || []), ...results] : results
                     );
-                    if (results.length === TRIALS_PER_PAGE) {
-                        setPage(p => p + 1);
-                    } else {
+                    if (results.length < TRIALS_PER_PAGE) {
                         setAllLoaded(true);
                     }
+                    setPage(p => p + 1);
                     setIsLoading(false);
                 })
-                .catch(err => {
-                    if (err.message !== CANCEL_MESSAGE) {
-                        console.error(err.message);
-                    }
-                });
+                .catch(cancelToken.catchCancellation);
         }
-    }, [allLoaded, page, token, filters.trial_ids]);
+    }, [allLoaded, page, token, filters.trial_ids, cancelToken]);
 
     // Clear all results when filters change
     React.useEffect(() => {
@@ -361,12 +346,11 @@ export const usePaginatedTrials = (token: string) => {
         setAllLoaded(false);
     }, [filters.trial_ids]);
 
-    // Load first page of trials on initial render
     React.useEffect(() => {
-        if (page === 0) {
+        if (page === 0 && isLoading !== true) {
             loadMore();
         }
-    }, [page, loadMore]);
+    }, [page, isLoading, loadMore]);
 
     return {
         trials,

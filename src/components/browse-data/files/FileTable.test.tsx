@@ -7,7 +7,16 @@ import { DataFile } from "../../../model/file";
 import { AuthContext } from "../../identity/AuthProvider";
 import FileTable, { filterParams, ObjectURL, sortParams } from "./FileTable";
 import history from "../../identity/History";
-jest.mock("../../../api/api");
+
+jest.mock("../../../api/api", () => {
+    const actualApi = jest.requireActual("../../../api/api");
+    return {
+        __esModule: true,
+        ...actualApi,
+        getFiles: jest.fn(),
+        getFilelist: jest.fn()
+    };
+});
 
 test("filterParams", () => {
     expect(filterParams({})).toEqual({});
