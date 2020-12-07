@@ -4,14 +4,22 @@ import {
     Button,
     FormControl,
     Select,
-    MenuItem
+    MenuItem,
+    Switch,
+    Tooltip,
+    makeStyles
 } from "@material-ui/core";
-import EditIcon from "@material-ui/icons/Edit";
 import UserPermissionsDialog from "./AdminUserPermissionsDialog";
 import { ORGANIZATION_NAME_MAP, ROLES } from "../../util/constants";
-import { updateRole, getUserEtag } from "../../api/api";
+import { updateUser, getUserEtag } from "../../api/api";
 import { withIdToken } from "../identity/AuthProvider";
 import { Account } from "../../model/account";
+
+const useStyles = makeStyles(theme => ({
+    disabled: {
+        color: theme.palette.text.secondary
+    }
+}));
 
 export interface IAdminUserTableRowProps {
     user: Account;
@@ -26,9 +34,12 @@ const IAdminUserTableRow: React.FC<IAdminUserTableRowProps & {
         false
     );
 
-    const setRole = (role: string) => {
+    const classes = useStyles();
+    const cellClass = user.disabled ? classes.disabled : undefined;
+
+    const doUserUpdate = (updates: Parameters<typeof updateUser>[3]) => {
         getUserEtag(token, user.id).then(etag => {
-            updateRole(token, user.id, etag, role).then(updatedUser => {
+            updateUser(token, user.id, etag, updates).then(updatedUser => {
                 setUser(updatedUser);
                 reloadUsers();
             });
@@ -37,20 +48,42 @@ const IAdminUserTableRow: React.FC<IAdminUserTableRowProps & {
 
     return (
         <>
-            <TableCell>{user.email}</TableCell>
             <TableCell>
+                <Tooltip
+                    title={
+                        user.disabled
+                            ? "enable this account"
+                            : "disable this account"
+                    }
+                >
+                    <Switch
+                        size="small"
+                        color="primary"
+                        checked={!user.disabled}
+                        onChange={() =>
+                            doUserUpdate({ disabled: !user.disabled })
+                        }
+                    />
+                </Tooltip>
+            </TableCell>
+            <TableCell className={cellClass}>{user.email}</TableCell>
+            <TableCell className={cellClass}>
                 {user.first_n} {user.last_n}
             </TableCell>
-            <TableCell>{ORGANIZATION_NAME_MAP[user.organization]}</TableCell>
+            <TableCell className={cellClass}>
+                {ORGANIZATION_NAME_MAP[user.organization]}
+            </TableCell>
             <TableCell>
                 <FormControl
                     style={{ minWidth: 120, marginRight: 20 }}
                     disabled={user.disabled}
                 >
                     <Select
-                        value={user.role}
+                        value={user.role || ""}
                         onChange={e => {
-                            setRole(e.target.value as string);
+                            doUserUpdate({
+                                role: e.target.value as Account["role"]
+                            });
                         }}
                     >
                         {ROLES.map(role => (
@@ -70,7 +103,6 @@ const IAdminUserTableRow: React.FC<IAdminUserTableRowProps & {
                     onClick={() => setOpenPermsDialog(true)}
                 >
                     Edit Data Access
-                    <EditIcon style={{ marginLeft: 10 }} />
                 </Button>
                 <UserPermissionsDialog
                     open={openPermsDialog}

@@ -5,7 +5,7 @@ import { renderWithRouter } from "../../../../test/helpers";
 import { getFiles, getFilelist } from "../../../api/api";
 import { DataFile } from "../../../model/file";
 import { AuthContext } from "../../identity/AuthProvider";
-import FileTable, { filterParams, ObjectURL, sortParams } from "./FileTable";
+import FileTable, { filterParams, ObjectURL } from "./FileTable";
 import history from "../../identity/History";
 
 jest.mock("../../../api/api", () => {
@@ -27,17 +27,6 @@ test("filterParams", () => {
     expect(filterParams(exampleFilters)).toEqual({
         trial_ids: "a,b",
         facets: "foo|a|1,foo|a|2,bar|1,bar|2"
-    });
-});
-
-test("sortParams", () => {
-    expect(sortParams({ key: "foo", direction: "asc" })).toEqual({
-        sort_field: "foo",
-        sort_direction: "asc"
-    });
-    expect(sortParams({ key: "foo", direction: "desc" })).toEqual({
-        sort_field: "foo",
-        sort_direction: "desc"
     });
 });
 

@@ -2,12 +2,11 @@ import axios, { AxiosPromise } from "axios";
 import MockAdapter from "axios-mock-adapter";
 import {
     _getItem,
-    _getItems,
     _extractErrorMessage,
     getApiClient,
     getAccountInfo,
     getManifestValidationErrors,
-    updateRole,
+    updateUser,
     getFiles,
     getSingleFile,
     getFilelist,
@@ -57,22 +56,6 @@ describe("_getItem", () => {
     });
 });
 
-describe("_getItems", () => {
-    it("handles existing items", done => {
-        const payload = { _items: [OBJECT, OBJECT] };
-
-        axiosMock.onGet(ENDPOINT).reply(200, payload);
-
-        _getItems(TOKEN, ENDPOINT)
-            .then(items => expect(items).toEqual(payload._items))
-            .then(done);
-    });
-
-    it("bubbles up a 404 on non-existent items", done => {
-        respondsWith404(_getItems(TOKEN, ENDPOINT)).then(done);
-    });
-});
-
 describe("_extractErrorMessage", () => {
     const endpoint = "foo";
     const client = getApiClient(TOKEN);
@@ -108,21 +91,6 @@ describe("_extractErrorMessage", () => {
             .catch(err => expect(err.includes("401")).toBeTruthy())
             .then(done);
     });
-});
-
-test("updateRole", done => {
-    const itemID = "1";
-    const etag = "asdf";
-    const role = "cidc-admin";
-
-    axiosMock.onPatch(`users/${itemID}`).reply(config => {
-        const json = JSON.parse(config.data);
-        expect(json.role).toBe(role);
-        expect(config.headers["if-match"]).toBe(etag);
-        return [200];
-    });
-
-    updateRole(TOKEN, itemID, etag, role).then(done);
 });
 
 test("getManifestValidationErrors", done => {
@@ -211,15 +179,16 @@ test("updateTrialMetadata", async () => {
     expect(await updateTrialMetadata(TOKEN, etag, trial)).toEqual(response);
 });
 
-test("updateRole", async () => {
+test("updateUser", async () => {
     const etag = "test-etag";
-    const user = { id: 1, role: "cidc-biofx-user" };
+    const user = { id: 1 };
+    const updates = { role: "cidc-biofx-user" };
     axiosMock.onPatch(`users/${user.id}`).reply(config => {
         expect(JSON.parse(config.data)).toEqual({ role: user.role });
         expect(config.headers["if-match"]).toBe(etag);
         return [200, user];
     });
-    expect(await updateRole(TOKEN, user.id, etag, user.role)).toEqual(user);
+    expect(await updateUser(TOKEN, user.id, etag, {})).toEqual(user);
 });
 
 test("_makeManifestRequest", async () => {

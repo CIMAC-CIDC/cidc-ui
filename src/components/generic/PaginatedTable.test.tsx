@@ -85,11 +85,15 @@ const headers: IHeader[] = [
 ];
 
 it("renders headers based on header configs", () => {
-    const onClickHeader = jest.fn();
+    const onSortChange = jest.fn();
     const { queryByText, getByText } = renderPaginatedTable({
         headers,
         data,
-        onClickHeader
+        sortConfig: {
+            key: "b",
+            direction: "desc",
+            onSortChange
+        }
     });
 
     // header labels rendered
@@ -101,9 +105,9 @@ it("renders headers based on header configs", () => {
 
     // sorting interactions
     fireEvent.click(getByText(/cool column/i));
-    expect(onClickHeader).not.toHaveBeenCalled();
+    expect(onSortChange).not.toHaveBeenCalled();
     fireEvent.click(getByText(/square column/i));
-    expect(onClickHeader).toHaveBeenCalledWith(headers[1]);
+    expect(onSortChange).toHaveBeenCalledWith(headers[1].key, "asc");
 });
 
 test("selection checkboxes behave as expected", () => {

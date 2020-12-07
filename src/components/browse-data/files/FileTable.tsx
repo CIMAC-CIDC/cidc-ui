@@ -1,7 +1,7 @@
 import React from "react";
 import { DataFile } from "../../../model/file";
 import { colors } from "../../../rootStyles";
-import PaginatedTable, { IHeader } from "../../generic/PaginatedTable";
+import PaginatedTable, { ISortConfig } from "../../generic/PaginatedTable";
 import {
     makeStyles,
     TableCell,
@@ -62,15 +62,6 @@ export const filterParams = (filters: IFilters) => {
         trial_ids: filters.trial_ids?.join(","),
         facets: filters.facets?.join(",")
     };
-};
-
-export const sortParams = (header?: IHeader) => {
-    return (
-        header && {
-            sort_field: header?.key,
-            sort_direction: header?.direction
-        }
-    );
 };
 
 const BatchDownloadButton: React.FC<{
@@ -154,29 +145,9 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     >(undefined);
     const [selectedFileIds, setSelectedFileIds] = React.useState<number[]>([]);
 
-    const [headers, setHeaders] = React.useState<IHeader[]>([
-        {
-            key: "object_url",
-            label: "File Name"
-        },
-        {
-            key: "trial_id",
-            label: "Protocol ID"
-        },
-        { key: "file_ext", label: "Format" },
-        { key: "data_category", label: "Category" },
-        {
-            key: "file_size_bytes",
-            label: "Size"
-        },
-        {
-            key: "uploaded_timestamp",
-            label: "Date/Time Uploaded",
-            active: true,
-            direction: "desc"
-        } as IHeader
-    ]);
-    const sortHeader = headers.find(h => h.active);
+    const [sortConfig, setSortConfig] = React.useState<
+        Omit<ISortConfig, "onSortChange">
+    >({ key: "_created", direction: "desc" });
 
     React.useEffect(() => {
         if (queryPage === prevPage && prevPage !== 0) {
@@ -195,8 +166,9 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                 props.token,
                 {
                     page_num: queryPage,
+                    sort_field: sortConfig.key,
+                    sort_direction: sortConfig.direction,
                     ...filterParams(filters),
-                    ...sortParams(sortHeader),
                     ...fileQueryDefaults
                 },
                 cancelToken.get()
@@ -227,7 +199,7 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
         // the component from remaining in a state where queryPage != 0.
         // TODO: maybe there's a refactor that prevents this issue.
         // eslint-disable-next-line
-    }, [props.token, filters, sortHeader, queryPage, setQueryPage]);
+    }, [props.token, filters, sortConfig, queryPage, setQueryPage]);
 
     return (
         <Grid container direction="column" spacing={1}>
@@ -267,7 +239,31 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                         page={tablePage}
                         onChangePage={p => setQueryPage(p)}
                         rowsPerPage={fileQueryDefaults.page_size}
-                        headers={headers}
+                        sortConfig={{
+                            ...sortConfig,
+                            onSortChange: (key, direction) =>
+                                setSortConfig({ key, direction })
+                        }}
+                        headers={[
+                            {
+                                key: "object_url",
+                                label: "File Name"
+                            },
+                            {
+                                key: "trial_id",
+                                label: "Protocol ID"
+                            },
+                            { key: "file_ext", label: "Format" },
+                            { key: "data_category", label: "Category" },
+                            {
+                                key: "file_size_bytes",
+                                label: "Size"
+                            },
+                            {
+                                key: "uploaded_timestamp",
+                                label: "Date/Time Uploaded"
+                            }
+                        ]}
                         data={data && data.data}
                         getRowKey={row => row.id}
                         renderRowContents={row => {
@@ -301,26 +297,6 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                                 ? selectedFileIds.filter(id => id !== file.id)
                                 : [...selectedFileIds, file.id];
                             setSelectedFileIds(newSelectedFileIds);
-                        }}
-                        onClickHeader={header => {
-                            const newHeaders = headers.map(h => {
-                                const newHeader = { ...h };
-                                if (h.key === header.key) {
-                                    if (h.active) {
-                                        newHeader.direction =
-                                            h.direction === "desc"
-                                                ? "asc"
-                                                : "desc";
-                                    } else {
-                                        newHeader.active = true;
-                                        newHeader.direction = "desc";
-                                    }
-                                } else {
-                                    newHeader.active = false;
-                                }
-                                return newHeader;
-                            });
-                            setHeaders(newHeaders);
                         }}
                     />
                 </div>

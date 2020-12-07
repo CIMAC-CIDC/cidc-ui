@@ -57,12 +57,6 @@ function _getItem<T>(
         .then(_extractItem);
 }
 
-function _getItems<T>(token: string, endpoint: string): Promise<T[]> {
-    return getApiClient(token)
-        .get(endpoint)
-        .then(_extractItems);
-}
-
 export interface IDataWithMeta<D> {
     data: D;
     meta: {
@@ -171,22 +165,30 @@ function createUser(token: string, newUser: any): Promise<Account | undefined> {
     return getApiClient(token).post("users/self", newUser);
 }
 
-function getAllAccounts(token: string): Promise<Account[]> {
-    return _getItems(token, "users");
+function getUsers(
+    token: string,
+    params: any = {}
+): Promise<IDataWithMeta<Account[]>> {
+    return getApiClient(token)
+        .get("users", { params })
+        .then(res => {
+            const { _items, _meta: meta } = _extractItem(res);
+            return { data: _items, meta };
+        });
 }
 
-function updateRole(
+function updateUser(
     token: string,
-    itemID: number,
+    userId: number,
     etag: string,
-    role: string
+    updates: Partial<
+        Omit<Account, "id" | "_created" | "_updated" | "last_access">
+    >
 ): Promise<Account> {
     return getApiClient(token)
-        .patch(
-            _itemURL("users", itemID),
-            { role },
-            { headers: { "if-match": etag } }
-        )
+        .patch(_itemURL("users", userId), updates, {
+            headers: { "if-match": etag }
+        })
         .then(_extractItem);
 }
 
@@ -349,7 +351,6 @@ export const useCancelToken = (message = "cancelling stale request") => {
 
 export {
     _getItem,
-    _getItems,
     _extractErrorMessage,
     _makeManifestRequest,
     getApiClient,
@@ -364,8 +365,8 @@ export {
     createTrial,
     updateTrialMetadata,
     createUser,
-    getAllAccounts,
-    updateRole,
+    getUsers,
+    updateUser,
     getUserEtag,
     uploadManifest,
     getManifestValidationErrors,

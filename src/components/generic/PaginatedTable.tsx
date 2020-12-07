@@ -59,19 +59,26 @@ export interface IPaginatedTableProps<T extends IRowWithId> {
     rowsPerPage: number;
     getRowKey: (row: T) => string | number;
     onChangePage: (page: number) => void;
-    onClickHeader?: (header: IHeader) => void;
     onClickRow?: (row: T) => void;
     renderRowContents?: (row: T) => React.ReactElement;
     selectedRowIds?: number[];
     setSelectedRowIds?: (rows: number[]) => void;
+    sortConfig?: ISortConfig;
 }
+
+export interface ISortConfig {
+    key: string;
+    direction: "asc" | "desc";
+    onSortChange: (key: string, direction: ISortConfig["direction"]) => void;
+}
+
+const flipSortDir = (dir: ISortConfig["direction"]) =>
+    dir === "asc" ? "desc" : "asc";
 
 export interface IHeader {
     key: string;
     label: string | React.ReactElement;
     format?: (v: any) => string | React.ReactElement;
-    active?: boolean;
-    direction?: "asc" | "desc";
     disableSort?: boolean;
 }
 
@@ -138,24 +145,37 @@ function PaginatedTable<T extends IRowWithId>(props: IPaginatedTableProps<T>) {
                             {props.headers.map(header => (
                                 <TableCell key={header.key}>
                                     <Box>
-                                        {props.onClickHeader ? (
+                                        {props.sortConfig ? (
                                             header.disableSort ? (
                                                 header.label
                                             ) : (
                                                 <TableSortLabel
-                                                    active={header.active}
-                                                    direction={header.direction}
+                                                    active={
+                                                        header.key ===
+                                                        props.sortConfig.key
+                                                    }
+                                                    direction={
+                                                        props.sortConfig
+                                                            .direction
+                                                    }
                                                     onClick={() => {
-                                                        if (
-                                                            props.onClickHeader
-                                                        ) {
-                                                            setDataWillChange(
-                                                                true
-                                                            );
-                                                            props.onClickHeader(
-                                                                header
-                                                            );
-                                                        }
+                                                        setDataWillChange(true);
+                                                        props.sortConfig?.onSortChange(
+                                                            header.key,
+                                                            // Flip sort direction if this column
+                                                            // is already being sorted, otherwise don't.
+                                                            header.key ===
+                                                                props.sortConfig
+                                                                    .key
+                                                                ? flipSortDir(
+                                                                      props
+                                                                          .sortConfig
+                                                                          .direction
+                                                                  )
+                                                                : props
+                                                                      .sortConfig
+                                                                      .direction
+                                                        );
                                                     }}
                                                 >
                                                     {header.label}
