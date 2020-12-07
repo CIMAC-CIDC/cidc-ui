@@ -347,10 +347,10 @@ export const usePaginatedTrials = (token: string) => {
     }, [filters.trial_ids]);
 
     React.useEffect(() => {
-        if (page === 0 && isLoading !== true) {
+        if (page === 0 && trials === undefined) {
             loadMore();
         }
-    }, [page, isLoading, loadMore]);
+    }, [page, trials, loadMore]);
 
     return {
         trials,

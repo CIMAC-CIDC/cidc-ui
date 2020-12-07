@@ -182,7 +182,6 @@ test("TrialCard links out to clinicaltrials.gov", () => {
 });
 
 test("usePaginatedTrials appears not to have a race condition", async () => {
-    let allCallsMade = false;
     getTrials
         .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
             await new Promise(r => setTimeout(r, 400));
@@ -190,6 +189,7 @@ test("usePaginatedTrials appears not to have a race condition", async () => {
             return trialsPageOne;
         })
         .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
+            await new Promise(r => setTimeout(r, 50));
             cancelToken.throwIfRequested();
             return trialsPageOne.slice(0, 2);
         })
@@ -201,7 +201,6 @@ test("usePaginatedTrials appears not to have a race condition", async () => {
         .mockImplementation(async (t, p, cancelToken: CancelToken) => {
             await new Promise(r => setTimeout(r, 500));
             cancelToken.throwIfRequested();
-            allCallsMade = true;
             return trialsPageOne.slice(7, 9);
         });
 
@@ -224,9 +223,11 @@ test("usePaginatedTrials appears not to have a race condition", async () => {
     rerender({ filters: { trial_ids: ["test-trial-1"] } });
     rerender({ filters: { trial_ids: ["test-trial-2"] } });
 
-    await waitFor(() => expect(allCallsMade).toBe(true));
+    await waitFor(() => {
+        expect(getTrials.mock.calls.length).toBeGreaterThan(3);
+        expect(result.current.allLoaded).toBe(true);
+        expect(result.current.isLoading).toBe(false);
+    });
 
-    expect(result.current.allLoaded).toBe(true);
-    expect(result.current.isLoading).toBe(false);
     expect(result.current.trials).toEqual(trialsPageOne.slice(7, 9));
 });
