@@ -6,92 +6,81 @@ import {
     Select,
     MenuItem
 } from "@material-ui/core";
-import autobind from "autobind-decorator";
 import EditIcon from "@material-ui/icons/Edit";
 import UserPermissionsDialog from "./AdminUserPermissionsDialog";
 import { ORGANIZATION_NAME_MAP, ROLES } from "../../util/constants";
 import { updateRole, getUserEtag } from "../../api/api";
+import { withIdToken } from "../identity/AuthProvider";
+import { Account } from "../../model/account";
 
-export default class UserTableRow extends React.Component<any, {}> {
-    state = {
-        role: this.props.account.role,
-        roleDisabled: false,
-        trialsDialogOpen: false,
-        deleteDialogOpen: false
-    };
+export interface IAdminUserTableRowProps {
+    user: Account;
+    reloadUsers: () => void;
+}
 
-    private openTrials() {
-        this.setState({ trialsDialogOpen: true });
-    }
+const IAdminUserTableRow: React.FC<IAdminUserTableRowProps & {
+    token: string;
+}> = ({ token, user: userProp, reloadUsers }) => {
+    const [user, setUser] = React.useState<Account>(userProp);
+    const [openPermsDialog, setOpenPermsDialog] = React.useState<boolean>(
+        false
+    );
 
-    @autobind
-    private handleRoleChange(event: React.ChangeEvent<HTMLSelectElement>) {
-        this.setState({ role: event.target.value, roleDisabled: true });
-        getUserEtag(this.props.token, this.props.account.id).then(results => {
-            updateRole(
-                this.props.token,
-                this.props.account.id,
-                results!,
-                event.target.value
-            ).then((result: any) => {
-                this.setState({ roleDisabled: false });
-                this.props.reloadUsers();
+    const setRole = (role: string) => {
+        getUserEtag(token, user.id).then(etag => {
+            updateRole(token, user.id, etag, role).then(updatedUser => {
+                setUser(updatedUser);
+                reloadUsers();
             });
         });
-    }
+    };
 
-    @autobind
-    private handleTrialCancel() {
-        this.setState({ trialsDialogOpen: false });
-    }
+    return (
+        <>
+            <TableCell>{user.email}</TableCell>
+            <TableCell>
+                {user.first_n} {user.last_n}
+            </TableCell>
+            <TableCell>{ORGANIZATION_NAME_MAP[user.organization]}</TableCell>
+            <TableCell>
+                <FormControl
+                    style={{ minWidth: 120, marginRight: 20 }}
+                    disabled={user.disabled}
+                >
+                    <Select
+                        value={user.role}
+                        onChange={e => {
+                            setRole(e.target.value as string);
+                        }}
+                    >
+                        {ROLES.map(role => (
+                            <MenuItem value={role} key={role}>
+                                {role}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </TableCell>
+            <TableCell>
+                <Button
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    disabled={!user.approval_date}
+                    onClick={() => setOpenPermsDialog(true)}
+                >
+                    Edit Data Access
+                    <EditIcon style={{ marginLeft: 10 }} />
+                </Button>
+                <UserPermissionsDialog
+                    open={openPermsDialog}
+                    grantee={user}
+                    token={token}
+                    onCancel={() => setOpenPermsDialog(false)}
+                />
+            </TableCell>
+        </>
+    );
+};
 
-    public render() {
-        return (
-            <>
-                <TableCell>{this.props.account.email}</TableCell>
-                <TableCell>
-                    {this.props.account.first_n} {this.props.account.last_n}
-                </TableCell>
-                <TableCell>
-                    {ORGANIZATION_NAME_MAP[this.props.account.organization]}
-                </TableCell>
-                <TableCell>
-                    <FormControl
-                        style={{ minWidth: 120, marginRight: 20 }}
-                        disabled={this.state.roleDisabled}
-                    >
-                        <Select
-                            value={this.state.role}
-                            onChange={(e: any) => this.handleRoleChange(e)}
-                        >
-                            {ROLES.map(role => (
-                                <MenuItem value={role} key={role}>
-                                    {role}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </TableCell>
-                <TableCell>
-                    <Button
-                        size="small"
-                        variant="outlined"
-                        color="primary"
-                        disabled={!this.props.account.approval_date}
-                        // tslint:disable-next-line:jsx-no-lambda
-                        onClick={() => this.openTrials()}
-                    >
-                        Edit Data Access
-                        <EditIcon style={{ marginLeft: 10 }} />
-                    </Button>
-                    <UserPermissionsDialog
-                        open={this.state.trialsDialogOpen}
-                        grantee={this.props.account}
-                        token={this.props.token}
-                        onCancel={this.handleTrialCancel}
-                    />
-                </TableCell>
-            </>
-        );
-    }
-}
+export default withIdToken<IAdminUserTableRowProps>(IAdminUserTableRow);

@@ -149,10 +149,7 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
             {token && userAccount?.role === "cidc-admin" && (
                 <>
                     <Grid item>
-                        <AdminUserManager
-                            token={token}
-                            userId={userAccount.id}
-                        />
+                        <AdminUserManager />
                     </Grid>
                     <Grid item>
                         <AdminTrialManager />
