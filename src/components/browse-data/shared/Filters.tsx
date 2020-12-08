@@ -21,12 +21,7 @@ const Filters: React.FunctionComponent = () => {
                     noTopDivider
                     title="Protocol Identifiers"
                     config={{
-                        options: facets.trial_ids.map(t => {
-                            if (typeof t === "string") {
-                                return { label: t };
-                            }
-                            return t;
-                        }),
+                        options: facets.trial_ids,
                         checked: filters.trial_ids
                     }}
                     onChange={updateFilters("trial_ids")}

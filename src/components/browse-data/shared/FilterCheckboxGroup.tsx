@@ -17,11 +17,12 @@ import {
     KeyboardArrowDown,
     KeyboardArrowUp
 } from "@material-ui/icons";
-import { Dictionary, some, partition, sortBy, range } from "lodash";
+import { Dictionary, some, partition, sortBy, range, sumBy } from "lodash";
 import { useUserContext } from "../../identity/UserProvider";
 import InfoTooltip from "../../generic/InfoTooltip";
 import { IFacetInfo } from "./FilterProvider";
 import { Skeleton } from "@material-ui/lab";
+import { theme } from "../../../rootStyles";
 
 const searchBoxMargin = 15;
 
@@ -145,7 +146,6 @@ export const FilterCheckboxGroupPlaceholder: React.FC = () => {
 
 interface IPermsAwareCheckboxProps extends CheckboxProps {
     facetType: string;
-    facetSubtype?: string;
     label?: React.ReactNode;
     onClickLabel?: () => void;
 }
@@ -153,7 +153,6 @@ interface IPermsAwareCheckboxProps extends CheckboxProps {
 const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
     label,
     facetType,
-    facetSubtype,
     onClickLabel,
     ...checkboxProps
 }) => {
@@ -170,25 +169,13 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
                 p.upload_type.startsWith(facetType.toLowerCase())
         );
 
-    const { checked, onClick, ...otherCheckboxProps } = checkboxProps;
+    const { checked, onClick, disabled, ...otherCheckboxProps } = checkboxProps;
 
     const control = (
         <FormControlLabel
             className={classes.checkboxLabel}
-            label={
-                <Typography
-                    variant="body2"
-                    onClick={e => {
-                        if (onClickLabel) {
-                            e.preventDefault();
-                            onClickLabel();
-                        }
-                    }}
-                >
-                    {label || facetSubtype || facetType}
-                </Typography>
-            }
-            disabled={!hasPermission}
+            label={label}
+            disabled={disabled || !hasPermission}
             control={
                 <Checkbox
                     className={classes.checkbox}
@@ -216,6 +203,33 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
     );
 };
 
+const CheckboxLabel: React.FC<IFacetInfo> = ({ label, count, description }) => {
+    const labelComponent = (
+        <Grid container spacing={1} wrap="nowrap">
+            <Grid item>
+                <Box whiteSpace="nowrap">{label}</Box>
+            </Grid>
+            {count !== undefined && (
+                <Grid item>
+                    <Box
+                        color={
+                            count > 0 ? theme.palette.text.secondary : "inherit"
+                        }
+                    >
+                        ({count})
+                    </Box>
+                </Grid>
+            )}
+        </Grid>
+    );
+
+    return description ? (
+        <InfoTooltip text={description}>{labelComponent}</InfoTooltip>
+    ) : (
+        labelComponent
+    );
+};
+
 interface IHelperProps<T extends IFilterConfig["options"]> {
     options: T;
     checked: string[];
@@ -236,27 +250,35 @@ const Checkboxes = ({
 
     return (
         <FormGroup className={classes.checkboxGroup} row={false}>
-            {sortedOptions.map(({ label, description }) => (
-                <PermsAwareCheckbox
-                    key={label}
-                    data-testid={label}
-                    label={
-                        description ? (
-                            <InfoTooltip text={description}>
-                                {label}
-                            </InfoTooltip>
-                        ) : (
-                            label
-                        )
-                    }
-                    facetType={parentType || label}
-                    facetSubtype={parentType ? label : undefined}
-                    checked={checked.includes(
-                        parentType ? `${parentType}|${label}` : label
-                    )}
-                    onClick={() => onChange(label)}
-                />
-            ))}
+            {sortedOptions.map(({ label, description, count }) => {
+                return (
+                    <FormControlLabel
+                        className={classes.checkboxLabel}
+                        label={
+                            <CheckboxLabel
+                                label={label}
+                                description={description}
+                                count={count}
+                            />
+                        }
+                        disabled={count === 0}
+                        control={
+                            <Checkbox
+                                className={classes.checkbox}
+                                checked={
+                                    count !== 0 &&
+                                    checked.includes(
+                                        parentType
+                                            ? `${parentType}|${label}`
+                                            : label
+                                    )
+                                }
+                                onClick={() => onChange(label)}
+                            />
+                        }
+                    />
+                );
+            })}
         </FormGroup>
     );
 };
@@ -332,25 +354,24 @@ const NestedBoxes = ({
     return (
         <>
             {topLevelOptions.map(opt => {
+                const suboptions = options[opt];
+                const totalFileCount = sumBy(
+                    suboptions,
+                    subopt => subopt.count || 0
+                );
+
                 const subchecked = checked.filter(check =>
                     check.startsWith(opt)
                 );
                 const hasCheckedSuboptions = subchecked.length > 0;
                 const isOpen =
-                    hasCheckedSuboptions ||
-                    openOptions.filter(o => o.startsWith(opt)).length > 0;
-                const suboptions = options[opt];
-                const isChecked = suboptions.length === subchecked.length;
+                    totalFileCount > 0 &&
+                    (hasCheckedSuboptions ||
+                        openOptions.filter(o => o.startsWith(opt)).length > 0);
 
-                const TopCheckboxLabel = (
-                    <>
-                        <span style={{ marginRight: 5 }}>{opt}</span>
-                        <Typography color="textSecondary" variant="caption">
-                            ({suboptions.length} file categor
-                            {suboptions.length === 1 ? "y" : "ies"})
-                        </Typography>
-                    </>
-                );
+                const isChecked =
+                    suboptions.filter(o => o.count > 0).length ===
+                    subchecked.length;
 
                 return (
                     <FormGroup
@@ -367,9 +388,15 @@ const NestedBoxes = ({
                                 <PermsAwareCheckbox
                                     data-testid={opt}
                                     facetType={opt}
-                                    label={TopCheckboxLabel}
+                                    label={
+                                        <CheckboxLabel
+                                            label={opt}
+                                            count={totalFileCount}
+                                        />
+                                    }
+                                    disabled={totalFileCount === 0}
                                     onClickLabel={() => toggleOpenOption(opt)}
-                                    checked={isChecked}
+                                    checked={totalFileCount !== 0 && isChecked}
                                     onClick={() => onChange(opt)}
                                 />
                             </Grid>
@@ -377,7 +404,10 @@ const NestedBoxes = ({
                                 <IconButton
                                     data-testid={`toggle open ${opt}`}
                                     size="small"
-                                    disabled={hasCheckedSuboptions}
+                                    disabled={
+                                        hasCheckedSuboptions ||
+                                        totalFileCount === 0
+                                    }
                                     onClick={() =>
                                         isOpen
                                             ? removeOpenOption(opt)

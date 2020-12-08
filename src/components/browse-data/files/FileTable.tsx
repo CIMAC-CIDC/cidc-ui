@@ -58,9 +58,11 @@ export interface IFileTableProps {
 }
 
 export const filterParams = (filters: IFilters) => {
+    const joinParam = (ps?: string[]) =>
+        ps ? (ps.length > 0 ? ps.join(",") : undefined) : undefined;
     return {
-        trial_ids: filters.trial_ids?.join(","),
-        facets: filters.facets?.join(",")
+        trial_ids: joinParam(filters.trial_ids),
+        facets: joinParam(filters.facets)
     };
 };
 

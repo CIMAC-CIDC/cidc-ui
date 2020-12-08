@@ -7,7 +7,8 @@ import axios, {
     AxiosResponse,
     AxiosError,
     CancelToken,
-    CancelTokenSource
+    CancelTokenSource,
+    AxiosRequestConfig
 } from "axios";
 import Permission from "../model/permission";
 import { IFacets } from "../components/browse-data/shared/FilterProvider";
@@ -66,7 +67,7 @@ export interface IDataWithMeta<D> {
 
 function getFiles(
     token: string,
-    params?: any,
+    params?: AxiosRequestConfig["params"],
     cancelToken?: CancelToken
 ): Promise<IDataWithMeta<DataFile[]>> {
     return getApiClient(token)
@@ -286,9 +287,12 @@ function revokePermission(token: string, permissionID: number): Promise<any> {
     );
 }
 
-function getFilterFacets(token: string): Promise<IFacets> {
+function getFilterFacets(
+    token: string,
+    params?: AxiosRequestConfig["params"]
+): Promise<IFacets> {
     return getApiClient(token)
-        .get("downloadable_files/filter_facets")
+        .get("downloadable_files/filter_facets", { params })
         .then(_extractItem);
 }
 

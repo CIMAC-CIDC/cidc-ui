@@ -1,16 +1,17 @@
-import { Dictionary, uniq } from "lodash";
 import React from "react";
+import { Dictionary, uniq } from "lodash";
 import { ArrayParam, useQueryParams } from "use-query-params";
 import { getFilterFacets } from "../../../api/api";
 import { withIdToken } from "../../identity/AuthProvider";
+import { filterParams } from "../files/FileTable";
 
 export interface IFacetInfo {
     label: string;
+    count: number;
     description?: string;
-    count?: number;
 }
 export interface IFacets {
-    trial_ids: Array<string | IFacetInfo>;
+    trial_ids: IFacetInfo[];
     facets: Dictionary<Dictionary<IFacetInfo[]> | IFacetInfo[]>;
 }
 
@@ -52,22 +53,60 @@ const FilterProvider: React.FC<IFilterProviderProps & { token: string }> = ({
     children
 }) => {
     const [facets, setFacets] = React.useState<IFacets | undefined>();
-    React.useEffect(() => {
-        getFilterFacets(token).then(setFacets);
-    }, [token]);
+
     // For now, only show protocol identifier filters in the trial view
     const maybeFilteredFacets =
         trialView && facets
             ? ({ trial_ids: facets.trial_ids, facets: {} } as IFacets)
             : facets;
 
-    const [filters, setFilters] = useQueryParams(filterConfig);
+    const [filters, setFiltersInternal] = useQueryParams(filterConfig);
+    const setFilters: typeof setFiltersInternal = updates => {
+        const newFilters = { ...filters, ...updates };
+        getFilterFacets(token, filterParams(newFilters)).then(newFacets => {
+            setFacets(newFacets);
+            setFiltersInternal({
+                trial_ids: newFilters.trial_ids,
+                facets: newFilters.facets?.filter(facetString => {
+                    const [cat, facet, subfacet] = facetString.split("|");
+                    if (
+                        newFacets.facets &&
+                        newFacets.facets[cat] &&
+                        newFacets.facets[cat][facet]
+                    ) {
+                        return (
+                            newFacets.facets[cat][facet].count > 0 ||
+                            newFacets.facets[cat][facet].filter(
+                                (sf: IFacetInfo) =>
+                                    sf.label === subfacet && sf.count > 0
+                            ).length > 0
+                        );
+                    }
+                    return true;
+                })
+            });
+        });
+    };
+
+    // Auto-load facets on first render
+    const firstRender = React.useRef<boolean>(true);
+    React.useEffect(() => {
+        if (firstRender.current) {
+            getFilterFacets(token, filterParams(filters)).then(setFacets);
+        }
+        firstRender.current = false;
+    }, [token, filters]);
+
     const hasFilters =
         Object.values(filters).filter(fs => {
             return fs && fs.length > 0;
         }).length > 0;
     const clearFilters = () => {
-        Object.keys(filters).forEach(k => setFilters({ [k]: undefined }));
+        const clearedFilters = Object.keys(filters).reduce(
+            (f, k) => ({ ...f, [k]: undefined }),
+            {}
+        );
+        setFilters(clearedFilters);
     };
     const toggleFilter = (k: keyof IFacets, v: string) => {
         const currentValues = filters[k] || [];

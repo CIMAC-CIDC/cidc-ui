@@ -7,7 +7,7 @@ export interface IInfoTooltipProps {
 }
 
 const InfoTooltip: React.FC<IInfoTooltipProps> = ({ text, children }) => (
-    <Grid container spacing={1}>
+    <Grid container spacing={1} wrap="nowrap">
         <Grid item>{children}</Grid>
         <Grid item>
             <Tooltip
