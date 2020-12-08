@@ -180,7 +180,11 @@ const FileDescription: React.FC<{ file: DataFile }> = ({ file }) => {
                 title={<Typography variant="h6">About This File</Typography>}
             />
             <CardContent>
-                <Typography>{file.long_description}</Typography>
+                {file.long_description.split("\n").map(line => (
+                    <Typography paragraph key={line}>
+                        {line}
+                    </Typography>
+                ))}
             </CardContent>
         </Card>
     ) : null;
