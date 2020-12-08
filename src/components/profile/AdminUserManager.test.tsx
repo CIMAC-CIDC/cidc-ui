@@ -16,10 +16,15 @@ const users: Array<Partial<Account>> = range(0, 15).map(id => ({
     disabled: !!(id % 2),
     role: "cimac-user"
 }));
+const user = users[0];
 const currentUser = users[users.length - 1];
 
 beforeEach(() => {
     getUsers.mockResolvedValue({ data: users, meta: { total: users.length } });
+    getUserEtag.mockResolvedValue("test-etag");
+    updateUser.mockImplementation(async (t, i, e, updates) => {
+        return { ...user, updates };
+    });
 });
 
 it("renders all users", async () => {
@@ -29,23 +34,18 @@ it("renders all users", async () => {
     );
     expect(await findByText(users[0].email!)).toBeInTheDocument();
 
-    users.forEach(user => {
-        if (user === currentUser) {
-            expect(queryByText(user.email!)).not.toBeInTheDocument();
+    users.forEach(u => {
+        if (u === currentUser) {
+            expect(queryByText(u.email!)).not.toBeInTheDocument();
         } else {
-            expect(queryByText(user.email!)).toBeInTheDocument();
+            expect(queryByText(u.email!)).toBeInTheDocument();
         }
     });
 });
 
 test("role update selection", async () => {
-    const user = users[0];
     const newRole = "cidc-admin";
-    getUserEtag.mockResolvedValue("test-etag");
-    updateUser.mockImplementation(async (t, i, e, updates) => {
-        expect(updates.role).toBe(newRole);
-        return { ...user, updates };
-    });
+
     const { findAllByText, getByText } = renderWithUserContext(
         <AdminUserManager />,
         currentUser
@@ -55,7 +55,26 @@ test("role update selection", async () => {
     // Change the user's role to cidc-admin
     fireEvent.mouseDown(roleSelect);
     fireEvent.click(getByText(newRole));
+    waitFor(() =>
+        expect(updateUser).toHaveReturnedWith({ ...user, role: newRole })
+    );
+});
 
-    // Update request gets sent
-    waitFor(() => expect(updateUser).toHaveBeenCalled());
+test("disabling a user", async () => {
+    const { findAllByTitle, getByText } = renderWithUserContext(
+        <AdminUserManager />,
+        currentUser
+    );
+
+    const disableToggle = (await findAllByTitle(/disable this account/i))[0];
+
+    // Disable the user
+    fireEvent.click(disableToggle);
+    waitFor(() =>
+        expect(updateUser).toHaveReturnedWith({ ...user, disabled: true })
+    );
+
+    // Re-enable the user
+    fireEvent.click(disableToggle);
+    waitFor(() => expect(updateUser).toHaveLastReturnedWith(user));
 });
