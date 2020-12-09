@@ -16,7 +16,7 @@ import {
     withStyles,
     Link
 } from "@material-ui/core";
-import { getTrials, useCancelToken } from "../../../api/api";
+import { IApiPage } from "../../../api/api";
 import { IFileBundle, Trial } from "../../../model/trial";
 import { withIdToken } from "../../identity/AuthProvider";
 import { flatMap, flatten, isEmpty, map, omitBy, pickBy, range } from "lodash";
@@ -24,6 +24,8 @@ import { CloudDownload } from "@material-ui/icons";
 import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 import { Skeleton } from "@material-ui/lab";
 import { useFilterFacets } from "../shared/FilterProvider";
+import { useSWRInfinite } from "swr";
+import { formatQueryString } from "../../../util/formatters";
 
 const BatchDownloadButton: React.FC<{
     ids: number[];
@@ -302,60 +304,44 @@ export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
 
 const TRIALS_PER_PAGE = 10;
 export const usePaginatedTrials = (token: string) => {
-    const cancelToken = useCancelToken();
-
     const { filters } = useFilterFacets();
+    const getTrialURL = (
+        pageIndex: number,
+        previousPageData: IApiPage<Trial> | null
+    ) => {
+        if (previousPageData && !previousPageData._items.length) {
+            return null;
+        }
+        return [
+            `/trial_metadata?${formatQueryString({
+                include_file_bundles: true,
+                page_size: TRIALS_PER_PAGE,
+                page_num: pageIndex,
+                trial_ids: filters.trial_ids?.join(",")
+            })}`,
+            token
+        ];
+    };
 
-    const [trials, setTrials] = React.useState<Trial[] | undefined>();
-    const [allLoaded, setAllLoaded] = React.useState<boolean>(false);
-
-    const [isLoading, setIsLoading] = React.useState<boolean>(false);
-    const [page, setPage] = React.useState<number>(0);
+    const { data, isValidating, setSize } = useSWRInfinite<IApiPage<Trial>>(
+        getTrialURL
+    );
+    const trials = data?.flatMap(page => page._items);
+    const allLoaded = trials && trials.length % TRIALS_PER_PAGE !== 0;
 
     const loadMore = React.useCallback(() => {
-        if (!allLoaded) {
-            setIsLoading(true);
-            getTrials(
-                token,
-                {
-                    include_file_bundles: true,
-                    page_size: TRIALS_PER_PAGE,
-                    page_num: page,
-                    trial_ids: filters.trial_ids?.join(",")
-                },
-                cancelToken.get()
-            )
-                .then(results => {
-                    setTrials(ts =>
-                        page > 0 ? [...(ts || []), ...results] : results
-                    );
-                    if (results.length < TRIALS_PER_PAGE) {
-                        setAllLoaded(true);
-                    }
-                    setPage(p => p + 1);
-                    setIsLoading(false);
-                })
-                .catch(cancelToken.catchCancellation);
-        }
-    }, [allLoaded, page, token, filters.trial_ids, cancelToken]);
+        setSize(size => size + 1);
+    }, [setSize]);
 
     // Clear all results when filters change
     React.useEffect(() => {
-        setPage(0);
-        setTrials(undefined);
-        setAllLoaded(false);
-    }, [filters.trial_ids]);
-
-    React.useEffect(() => {
-        if (page === 0 && trials === undefined) {
-            loadMore();
-        }
-    }, [page, trials, loadMore]);
+        setSize(1);
+    }, [filters.trial_ids, setSize]);
 
     return {
         trials,
         allLoaded,
-        isLoading,
+        isLoading: isValidating,
         loadMore
     };
 };

@@ -7,7 +7,7 @@ import {
     Grid
 } from "@material-ui/core";
 import React from "react";
-import { getFilelist } from "../../../api/api";
+import { apiCreate } from "../../../api/api";
 import { CIDCMarkdown } from "../../generic/CIDCGithubMarkdown";
 
 export interface IBatchDownloadDialogProps {
@@ -23,6 +23,23 @@ const BatchDownloadDialog: React.FC<IBatchDownloadDialogProps> = ({
     open,
     onClose
 }) => {
+    const downloadFilelist = () => {
+        apiCreate<string>("/downloadable_files/filelist", token, {
+            data: { file_ids: ids }
+        }).then(tsv => {
+            const blob = new Blob([tsv], {
+                type: "text/tab-separated-values"
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "filelist.tsv";
+            document.body.appendChild(a);
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    };
+
     return (
         <Dialog open={!!open} onClose={onClose}>
             <DialogTitle>
@@ -59,17 +76,7 @@ const BatchDownloadDialog: React.FC<IBatchDownloadDialogProps> = ({
                         <Button
                             color="primary"
                             variant="contained"
-                            onClick={() => {
-                                getFilelist(token, ids).then(blob => {
-                                    const url = URL.createObjectURL(blob);
-                                    const a = document.createElement("a");
-                                    a.href = url;
-                                    a.download = "filelist.tsv";
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    URL.revokeObjectURL(url);
-                                });
-                            }}
+                            onClick={() => downloadFilelist()}
                         >
                             Download Filelist.tsv
                         </Button>

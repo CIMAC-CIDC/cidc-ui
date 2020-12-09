@@ -4,6 +4,7 @@ import "github-markdown-css/github-markdown.css";
 import { AuthContext } from "../identity/AuthProvider";
 import axios from "axios";
 import { makeStyles } from "@material-ui/core";
+import useSWR from "swr";
 
 const useStyles = makeStyles(theme => ({
     markdown: {
@@ -36,41 +37,29 @@ const MARKDOWN_BASE_URL = "https://raw.githubusercontent.com/CIMAC-CIDC/";
 const CIDCGithubMarkdown: React.FunctionComponent<ICIDCGithubMarkdownProps> = props => {
     const auth = React.useContext(AuthContext);
 
-    const [markdown, setMarkdown] = React.useState<string | undefined>(
-        undefined
-    );
-
     const fullURL = MARKDOWN_BASE_URL + props.path;
+    const { data: text } = useSWR<string>(fullURL, url =>
+        axios.get(url).then(({ data }) => data)
+    );
 
     const idToken =
         props.insertIdToken &&
         auth.state === "logged-in" &&
         auth.userInfo.idToken;
 
-    React.useEffect(() => {
-        setMarkdown(undefined);
-        axios.get(fullURL).then(({ data: text }) => {
-            // Header trimming
-            let trimmedText = text;
-            if (props.trimLeadingHeader) {
-                const lines = text.split("\n");
-                const hasLeadingHeader = lines && lines[0].startsWith("#");
-                if (hasLeadingHeader) {
-                    trimmedText = lines.slice(1).join("\n");
-                }
-            }
+    let trimmedText = text;
+    if (props.trimLeadingHeader && text) {
+        const lines = text.split("\n");
+        const hasLeadingHeader = lines && lines[0].startsWith("#");
+        if (hasLeadingHeader) {
+            trimmedText = lines.slice(1).join("\n");
+        }
+    }
 
-            // ID token substitution
-            const finalText = idToken
-                ? trimmedText.replace(
-                      /cidc login \[token\]/g,
-                      "cidc login " + idToken
-                  )
-                : trimmedText;
-
-            setMarkdown(finalText);
-        });
-    }, [fullURL, idToken, props.trimLeadingHeader]);
+    // ID token substitution
+    const markdown = idToken
+        ? trimmedText?.replace(/cidc login \[token\]/g, "cidc login " + idToken)
+        : trimmedText;
 
     return markdown ? <CIDCMarkdown source={markdown} /> : null;
 };

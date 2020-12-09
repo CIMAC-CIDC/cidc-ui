@@ -15,9 +15,10 @@ import {
     CardHeader
 } from "@material-ui/core";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
-import { createUser } from "../../api/api";
 import { AuthContext, logout } from "./AuthProvider";
 import { RouteComponentProps } from "react-router-dom";
+import { apiCreate } from "../../api/api";
+import { UnregisteredAccount } from "../../model/account";
 
 const Register: React.FC<RouteComponentProps> = ({ history }) => {
     const auth = React.useContext(AuthContext);
@@ -85,9 +86,9 @@ const Register: React.FC<RouteComponentProps> = ({ history }) => {
                 organization: state.organization
             };
 
-            createUser(state.token!, newUser).then(() => {
-                history.replace("/");
-            });
+            apiCreate<UnregisteredAccount>("/users/self", state.token!, {
+                data: newUser
+            }).then(() => history.replace("/"));
         }
     }
 

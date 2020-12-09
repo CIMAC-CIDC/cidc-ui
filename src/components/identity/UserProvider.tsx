@@ -2,11 +2,12 @@ import * as React from "react";
 import { AuthContext } from "./AuthProvider";
 import { Account } from "../../model/account";
 import { RouteComponentProps, withRouter } from "react-router";
-import { getAccountInfo, getPermissionsForUser } from "../../api/api";
+import { IApiPage } from "../../api/api";
 import history from "./History";
 import { ErrorContext } from "../errors/ErrorGuard";
 import Permission from "../../model/permission";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
+import useSWR from "swr";
 
 export interface IAccountWithExtraContext extends Account {
     permissions?: Permission[];
@@ -29,62 +30,49 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
     const authData = React.useContext(AuthContext);
     const setError = React.useCallback(React.useContext(ErrorContext), []);
 
-    const [user, setUser] = React.useState<Account | undefined>(undefined);
-    const [permissions, setPermissions] = React.useState<
-        Permission[] | undefined
-    >(undefined);
-
+    const { data: user, error } = useSWR<Account>(
+        authData.state === "logged-in"
+            ? ["/users/self", authData.userInfo.idToken]
+            : null
+    );
     React.useEffect(() => {
-        if (authData.state === "logged-in") {
-            const { user: authUser, idToken } = authData.userInfo;
-            if (!user) {
-                getAccountInfo(idToken)
-                    .then(userAccount => {
-                        setUser({ ...authUser, ...userAccount });
-                        if (!userAccount.approval_date) {
-                            history.replace("/");
-                        }
-                    })
-                    .catch(error => {
-                        const message = error.response?.data?._error?.message;
-                        // If the user isn't registered, send them to the registration page.
-                        // Otherwise, give up and display an error.
-                        if (message?.includes("not registered")) {
-                            history.replace("/register");
-                        } else {
-                            setError({
-                                type: "Request Error",
-                                message: "error loading account information"
-                            });
-                        }
-                    });
-            } else if (!permissions && user.role) {
-                getPermissionsForUser(idToken, user.id).then(perms =>
-                    setPermissions(perms)
-                );
+        if (user) {
+            if (user?.disabled) {
+                // user's account is registered and approved, but disabled
+                setError({
+                    type: "Login Error",
+                    message: "Account Disabled",
+                    description: (
+                        <>
+                            Your CIDC account has been disabled due to
+                            inactivity. <ContactAnAdmin /> to reactivate your
+                            account.
+                        </>
+                    )
+                });
+            } else if (!user?.approval_date) {
+                // user is registered but not yet approved
+                history.replace("/");
             }
-        }
-
-        // Show an informative message if the user is disabled
-        if (user && user.disabled) {
+        } else if (
+            // user is authenticated but not yet registered
+            error?.response?.data?._error?.message?.includes("not registered")
+        ) {
+            history.replace("/register");
+        } else if (error) {
+            console.error(error);
             setError({
-                type: "Login Error",
-                message: "Account Disabled",
-                description: (
-                    <>
-                        Your CIDC account has been disabled due to inactivity.{" "}
-                        <ContactAnAdmin /> to reactivate your account.
-                    </>
-                )
+                type: "Request Error",
+                message: "error loading account information"
             });
         }
-    }, [
-        authData,
-        setError,
-        user,
-        permissions,
-        props.history.location.pathname
-    ]);
+    }, [user, error, setError]);
+
+    const { data: permissions } = useSWR<IApiPage<Permission>>(
+        authData.state === "logged-in" && user
+            ? [`/permissions?user_id=${user.id}`, authData.userInfo.idToken]
+            : null
+    );
 
     const showAssays =
         user?.role &&
@@ -96,13 +84,17 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
     const showAnalyses =
         user?.role && ["cidc-biofx-user", "cidc-admin"].includes(user.role);
 
-    const value = user && {
-        ...user,
-        permissions,
-        showAssays,
-        showManifests,
-        showAnalyses
-    };
+    const value =
+        authData.state === "logged-in" && user
+            ? {
+                  ...authData.userInfo.user,
+                  ...user,
+                  permissions: permissions?._items,
+                  showAssays,
+                  showManifests,
+                  showAnalyses
+              }
+            : undefined;
 
     return (
         <UserContext.Provider value={value}>

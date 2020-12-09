@@ -18,7 +18,6 @@ import {
     Radio,
     FormLabel
 } from "@material-ui/core";
-import { getManifestValidationErrors, uploadManifest } from "../../api/api";
 import {
     WarningRounded,
     CheckBoxRounded,
@@ -28,6 +27,7 @@ import { XLSX_MIMETYPE } from "../../util/constants";
 import Loader from "../generic/Loader";
 import { withIdToken } from "../identity/AuthProvider";
 import { InfoContext } from "../info/InfoProvider";
+import { apiCreate } from "../../api/api";
 
 type Status =
     | "loading"
@@ -54,23 +54,30 @@ const ManifestUpload: React.FunctionComponent<{ token: string }> = ({
         undefined
     );
 
+    const formData = React.useMemo(() => {
+        if (manifestType && file) {
+            const data = new FormData();
+            data.append("schema", manifestType.toLowerCase());
+            data.append("template", file);
+            return data;
+        }
+    }, [manifestType, file]);
+
     // When the manifest file or manifest type changes, run validations
     React.useEffect(() => {
-        if (file && manifestType && token) {
+        if (formData && token) {
             setStatus("loading");
-            getManifestValidationErrors(token, {
-                schema: manifestType,
-                template: file
-            }).then(errs => {
-                setErrors(errs);
-                if (errs) {
-                    setStatus(
-                        errs.length ? "validationErrors" : "validationSuccess"
-                    );
-                }
-            });
+            apiCreate<{ errors: string[] }>("/ingestion/validate", token, {
+                data: formData
+            })
+                .catch(({ response }) => {
+                    const errs = response.data._error.message.errors;
+                    setErrors(errs);
+                    setStatus("validationErrors");
+                })
+                .then(() => setStatus("validationSuccess"));
         }
-    }, [file, manifestType, token]);
+    }, [formData, token]);
 
     const onValueChange = (setState: (v: string | undefined) => void) => {
         return (e: React.ChangeEvent<HTMLSelectElement>) =>
@@ -79,18 +86,21 @@ const ManifestUpload: React.FunctionComponent<{ token: string }> = ({
 
     const onSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault();
-        if (manifestType && file) {
-            setStatus("loading");
-            uploadManifest(token, {
-                schema: manifestType,
-                template: file
-            })
+        if (formData) {
+            apiCreate<{
+                metadata_json_patch: { protocol_identifier: string };
+            }>("ingestion/upload_manifest", token, { data: formData })
                 .then(({ metadata_json_patch }) => {
                     setStatus("uploadSuccess");
                     setTargetTrial(metadata_json_patch.protocol_identifier);
                 })
                 .catch(err => {
-                    setErrors([`Upload failed: ${err.toString()}`]);
+                    if (err.response.status < 500) {
+                        const errs = err.response.data._error.message.errors;
+                        setErrors(["Upload failed:", ...errs]);
+                    } else {
+                        setErrors([`Upload failed: ${err.toString()}`]);
+                    }
                     setStatus("uploadErrors");
                 });
         }

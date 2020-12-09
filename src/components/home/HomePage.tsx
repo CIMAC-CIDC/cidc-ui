@@ -8,7 +8,7 @@ import {
     makeStyles
 } from "@material-ui/core";
 import { useRootStyles } from "../../rootStyles";
-import { getDataOverview, IDataOverview } from "../../api/api";
+import { IDataOverview } from "../../api/api";
 import {
     AssessmentOutlined,
     AssignmentOutlined,
@@ -27,6 +27,7 @@ import FadeInOnMount from "../generic/FadeInOnMount";
 import { Alert } from "@material-ui/lab";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
 import { useUserContext } from "../identity/UserProvider";
+import useSWR from "swr";
 
 const usePortalStatStyles = makeStyles(theme => ({
     container: {
@@ -114,12 +115,9 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
     const classes = useRootStyles();
     const user = useUserContext();
 
-    const [dataOverview, setDataOverview] = React.useState<
-        IDataOverview | undefined
-    >(undefined);
-    React.useEffect(() => {
-        getDataOverview().then(d => setDataOverview(d));
-    }, []);
+    const { data: dataOverview } = useSWR<IDataOverview>([
+        "/info/data_overview"
+    ]);
 
     const isUnapprovedUser = user && !user.approval_date;
 

@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-    getSupportedAssays,
-    getSupportedManifests,
-    getExtraDataTypes,
-    getSupportedAnalyses
-} from "../../api/api";
+import useSWR from "swr";
 
 export interface IInfoContext {
     supportedTemplates: {
@@ -20,24 +15,10 @@ export const InfoContext = React.createContext<IInfoContext | undefined>(
 );
 
 const InfoProvider: React.FunctionComponent = props => {
-    const [assays, setAssays] = React.useState<string[] | undefined>(undefined);
-    const [manifests, setManifests] = React.useState<string[] | undefined>(
-        undefined
-    );
-    const [analyses, setAnalyses] = React.useState<string[] | undefined>(
-        undefined
-    );
-    const [extraDataTypes, setExtraDataTypes] = React.useState<
-        string[] | undefined
-    >(undefined);
-
-    React.useEffect(() => {
-        // TODO: what if one of these requests fail?
-        getSupportedAssays().then(setAssays);
-        getSupportedManifests().then(setManifests);
-        getSupportedAnalyses().then(setAnalyses);
-        getExtraDataTypes().then(setExtraDataTypes);
-    }, []);
+    const { data: assays } = useSWR(["/info/assays"]);
+    const { data: manifests } = useSWR(["/info/manifests"]);
+    const { data: analyses } = useSWR(["/info/analyses"]);
+    const { data: extraDataTypes } = useSWR(["/info/extra_data_types"]);
 
     const context =
         assays && manifests && analyses && extraDataTypes

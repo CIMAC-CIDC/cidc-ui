@@ -17,7 +17,7 @@ import {
     IconButton,
     Grid
 } from "@material-ui/core";
-import { getUserEtag, getUsers, updateUser } from "../../api/api";
+import { IApiPage } from "../../api/api";
 import { Account } from "../../model/account";
 import { Edit, SupervisorAccount } from "@material-ui/icons";
 import PaginatedTable, { ISortConfig } from "../generic/PaginatedTable";
@@ -26,6 +26,9 @@ import { withIdToken } from "../identity/AuthProvider";
 import { ORGANIZATION_NAME_MAP, ROLES } from "../../util/constants";
 import UserPermissionsDialogWithInfo from "./AdminUserPermissionsDialog";
 import { useForm } from "react-hook-form";
+import useSWR from "swr";
+import { formatQueryString } from "../../util/formatters";
+import { apiUpdate } from "../../api/api";
 
 const useContactEmailStyles = makeStyles(theme => ({
     input: {
@@ -125,12 +128,11 @@ const useRowStyles = makeStyles(theme => ({
 
 interface IAdminUserTableRowProps {
     user: Account;
-    reloadUsers: () => void;
+    onUpdatedUser: (user: Account) => void;
 }
 
 const AdminUserTableRow: React.FC<IAdminUserTableRowProps> = withIdToken(
-    ({ token, user: userProp, reloadUsers }) => {
-        const [user, setUser] = React.useState<Account>(userProp);
+    ({ token, user, onUpdatedUser }) => {
         const [openPermsDialog, setOpenPermsDialog] = React.useState<boolean>(
             false
         );
@@ -138,13 +140,11 @@ const AdminUserTableRow: React.FC<IAdminUserTableRowProps> = withIdToken(
         const classes = useRowStyles();
         const cellClass = user.disabled ? classes.disabled : undefined;
 
-        const doUserUpdate = (updates: Parameters<typeof updateUser>[3]) => {
-            getUserEtag(token, user.id).then(etag => {
-                updateUser(token, user.id, etag, updates).then(updatedUser => {
-                    setUser(updatedUser);
-                    reloadUsers();
-                });
-            });
+        const doUserUpdate = (updates: Partial<Account>) => {
+            apiUpdate<Account>(`/users/${user.id}`, token, {
+                etag: user._etag,
+                data: updates
+            }).then(updatedUser => onUpdatedUser(updatedUser));
         };
 
         return (
@@ -229,36 +229,24 @@ const ADMIN_TABLE_PAGE_SIZE = 15;
 
 const AdminUserManager: React.FC<{ token: string }> = ({ token }) => {
     const user = useUserContext();
-    const [users, setUsers] = React.useState<Account[] | undefined>();
-    const [total, setTotal] = React.useState<number>(0);
     const [page, setPage] = React.useState<number>(0);
     const [sortConfig, setSortConfig] = React.useState<
         Omit<ISortConfig, "onSortChange">
     >({ key: "email", direction: "desc" });
 
-    const reloadUsers = React.useCallback(() => {
-        getUsers(token, {
+    const { data, mutate } = useSWR<IApiPage<Account>>([
+        `/users?${formatQueryString({
             page_num: page,
             page_size: ADMIN_TABLE_PAGE_SIZE,
             sort_field: sortConfig.key,
             sort_direction: sortConfig.direction
-        }).then(({ data, meta }) => {
-            // Remove the current user from the user list
-            // and the total user count.
-            setUsers(
-                data.filter(
-                    fetchedUser =>
-                        fetchedUser.role !== "system" &&
-                        fetchedUser.id !== user.id
-                )
-            );
-            setTotal(meta.total - 1);
-        });
-    }, [user.id, token, page, sortConfig]);
-
-    React.useEffect(() => {
-        reloadUsers();
-    }, [reloadUsers]);
+        })}`,
+        token
+    ]);
+    const users = data?._items.filter(
+        fetchedUser =>
+            fetchedUser.role !== "system" && fetchedUser.id !== user.id
+    );
 
     return (
         <Card>
@@ -283,13 +271,28 @@ const AdminUserManager: React.FC<{ token: string }> = ({ token }) => {
                         { key: "", label: "Permissions" }
                     ]}
                     data={users}
-                    count={total}
+                    count={data?._meta.total || 0}
                     page={page}
                     rowsPerPage={ADMIN_TABLE_PAGE_SIZE}
                     onChangePage={p => setPage(p)}
                     getRowKey={u => u.id}
                     renderRowContents={u => (
-                        <AdminUserTableRow user={u} reloadUsers={reloadUsers} />
+                        <AdminUserTableRow
+                            user={u}
+                            onUpdatedUser={updatedUser => {
+                                if (data) {
+                                    mutate({
+                                        _meta: data._meta,
+                                        _items: data._items.map(otherUser => {
+                                            return otherUser.id ===
+                                                updatedUser.id
+                                                ? updatedUser
+                                                : otherUser;
+                                        })
+                                    });
+                                }
+                            }}
+                        />
                     )}
                 />
             </CardContent>

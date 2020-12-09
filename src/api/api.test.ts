@@ -7,16 +7,9 @@ import {
     getAccountInfo,
     getManifestValidationErrors,
     updateUser,
-    getFiles,
     getSingleFile,
     getFilelist,
     getDownloadURL,
-    getTrials,
-    getFilterFacets,
-    getSupportedAssays,
-    getSupportedManifests,
-    getSupportedAnalyses,
-    getExtraDataTypes,
     updateTrialMetadata,
     _makeManifestRequest
 } from "./api";
@@ -111,21 +104,6 @@ test("getManifestValidationErrors", done => {
         .then(done);
 });
 
-test("getFiles", async () => {
-    const response = {
-        _items: [
-            { id: 1, trial_id: "10021" },
-            { id: 2, trial_id: "E4412" }
-        ],
-        _meta: { total: 10 }
-    };
-    axiosMock.onGet("downloadable_files").reply(200, response);
-
-    const files = await getFiles(TOKEN);
-    expect(files.data).toEqual(response._items);
-    expect(files.meta).toEqual(response._meta);
-});
-
 test("getFileList", async () => {
     const filelist = "a\tb\nc\td\n";
     const fileIds = [1, 2, 3, 4, 5, 6];
@@ -146,23 +124,6 @@ test("getDownloadURL", async () => {
     });
 
     expect(await getDownloadURL(TOKEN, fileId)).toBe(url);
-});
-
-test("getTrials", async () => {
-    const response = {
-        _items: [
-            { id: 1, trial_id: "10021" },
-            { id: 2, trial_id: "E4412" }
-        ],
-        _meta: { total: 10 }
-    };
-    axiosMock.onGet("trial_metadata").reply(config => {
-        expect(config.params.sort_field).toBe("trial_id");
-        expect(config.params.sort_direction).toBe("asc");
-        return [200, response];
-    });
-
-    expect(await getTrials(TOKEN)).toEqual(response._items);
 });
 
 test("updateTrialMetadata", async () => {
@@ -229,15 +190,7 @@ test("getManifestValidationErrors", async () => {
 test("simple GET endpoints", async () => {
     const testConfigs = [
         { route: "users/self", endpoint: getAccountInfo },
-        { route: "downloadable_files", endpoint: getSingleFile, withId: true },
-        {
-            route: "downloadable_files/filter_facets",
-            endpoint: getFilterFacets
-        },
-        { route: "/info/assays", endpoint: getSupportedAssays },
-        { route: "/info/manifests", endpoint: getSupportedManifests },
-        { route: "/info/analyses", endpoint: getSupportedAnalyses },
-        { route: "/info/extra_data_types", endpoint: getExtraDataTypes }
+        { route: "downloadable_files", endpoint: getSingleFile, withId: true }
     ];
 
     await Promise.all(

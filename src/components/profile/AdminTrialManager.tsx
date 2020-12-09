@@ -1,10 +1,5 @@
 import React from "react";
-import {
-    getTrials,
-    createTrial,
-    updateTrialMetadata,
-    getTrial
-} from "../../api/api";
+import { IApiPage } from "../../api/api";
 import { Trial } from "../../model/trial";
 import {
     Card,
@@ -36,6 +31,8 @@ import {
 } from "react-hook-form";
 import { mapValues, omit, omitBy, range } from "lodash";
 import { Skeleton } from "@material-ui/lab";
+import useSWR from "swr";
+import { apiCreate, apiUpdate } from "../../api/api";
 
 const TrialTextField: React.FC<{
     name: string;
@@ -115,16 +112,20 @@ const TrialAccordion = withIdToken<{
                 ? v.split(",").map((p: string) => p.trim())
                 : v;
         });
-        const updatedMetadata = {
-            ...trial.metadata_json,
-            ...parsedValues
-        };
         try {
-            const { _etag } = await getTrial(token, trial.trial_id);
-            const updatedTrial = await updateTrialMetadata(token, _etag, {
-                trial_id: trial.trial_id,
-                metadata_json: updatedMetadata
-            });
+            const updatedTrial = await apiUpdate<Trial>(
+                `/trial_metadata/${trial.trial_id}`,
+                token,
+                {
+                    etag: trial._etag,
+                    data: {
+                        metadata_json: {
+                            ...trial.metadata_json,
+                            ...parsedValues
+                        }
+                    }
+                }
+            );
             onUpdatedTrial(updatedTrial);
             const newFormValues = omit(
                 updatedTrial.metadata_json,
@@ -299,13 +300,15 @@ const CreateNewTrial = withIdToken<ICreateNewTrialProps>(
         };
         const submissionHandler = handleSubmit(() => {
             const trialId = getValues(inputName);
-            return createTrial(token, {
-                trial_id: trialId,
-                metadata_json: {
-                    protocol_identifier: trialId,
-                    participants: [],
-                    allowed_collection_event_names: [],
-                    allowed_cohort_names: []
+            return apiCreate<Trial>("/trial_metadata", token, {
+                data: {
+                    trial_id: trialId,
+                    metadata_json: {
+                        protocol_identifier: trialId,
+                        participants: [],
+                        allowed_collection_event_names: [],
+                        allowed_cohort_names: []
+                    }
                 }
             })
                 .then(handleSuccess)
@@ -375,11 +378,9 @@ const CreateNewTrial = withIdToken<ICreateNewTrialProps>(
 );
 
 const TrialManager: React.FC<{ token: string }> = ({ token }) => {
-    const [trials, setTrials] = React.useState<Trial[] | undefined>();
-    React.useEffect(() => {
-        // TODO: get smarter about pagination
-        getTrials(token, { page_size: 200 }).then(ts => setTrials(ts));
-    }, [token]);
+    const url =
+        "/trial_metadata?page_size=200&sort_field=_created&sort_direction=desc";
+    const { data: trials, mutate } = useSWR<IApiPage<Trial>>([url, token]);
 
     return (
         <Card>
@@ -394,23 +395,19 @@ const TrialManager: React.FC<{ token: string }> = ({ token }) => {
                             <Grid item>
                                 <CreateNewTrial
                                     onNewTrial={trial =>
-                                        setTrials([trial, ...trials])
+                                        mutate({
+                                            ...trials,
+                                            _items: [trial, ...trials._items]
+                                        })
                                     }
                                 />
                             </Grid>
-                            {trials.map((trial, i) => {
+                            {trials._items.map((trial, i) => {
                                 return (
                                     <Grid item key={trial.trial_id}>
                                         <TrialAccordion
                                             trial={trial}
-                                            onUpdatedTrial={updatedTrial => {
-                                                const ts = trials.slice(
-                                                    0,
-                                                    trials.length
-                                                );
-                                                ts.splice(i, 1, updatedTrial);
-                                                setTrials(ts);
-                                            }}
+                                            onUpdatedTrial={() => mutate()}
                                         />
                                     </Grid>
                                 );

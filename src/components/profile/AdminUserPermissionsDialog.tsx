@@ -11,23 +11,21 @@ import {
     TableHead,
     FormControl,
     Checkbox,
-    Grid
+    Grid,
+    makeStyles
 } from "@material-ui/core";
 import groupBy from "lodash/groupBy";
 import mapValues from "lodash/mapValues";
-import autobind from "autobind-decorator";
-import {
-    getTrials,
-    getPermissionsForUser,
-    grantPermission,
-    revokePermission
-} from "../../api/api";
+import { IApiPage } from "../../api/api";
 import { Trial } from "../../model/trial";
 import { Account } from "../../model/account";
 import Permission from "../../model/permission";
 import { InfoContext } from "../info/InfoProvider";
 import Loader from "../generic/Loader";
 import { UserContext } from "../identity/UserProvider";
+import useSWR from "swr";
+import { widths } from "../../rootStyles";
+import { apiCreate, apiDelete } from "../../api/api";
 
 export interface IUserPermissionsDialogProps {
     open: boolean;
@@ -36,15 +34,8 @@ export interface IUserPermissionsDialogProps {
     onCancel: () => void;
 }
 
-export interface IUserPermissionsDialogState {
-    trials?: Trial[];
-    permissions?: Permission[];
-    page: number;
-    rowsPerPage: number;
-    isRefreshing: boolean;
-}
-
-const UserPermissionsDialogWithInfo: React.FunctionComponent<IUserPermissionsDialogProps> = props => {
+const ROWS_PER_PAGE = 50;
+const UserPermissionsDialogWithInfo: React.FC<IUserPermissionsDialogProps> = props => {
     const info = React.useContext(InfoContext);
     const granter = React.useContext(UserContext);
 
@@ -70,238 +61,164 @@ const UserPermissionsDialogWithInfo: React.FunctionComponent<IUserPermissionsDia
     );
 };
 
-class UserPermissionsDialog extends React.Component<
-    IUserPermissionsDialogProps & {
-        supportedTypes: string[];
-        granter: Account;
+const useStyles = makeStyles(theme => ({
+    dialogContent: { width: widths.minPageWidth, height: 600 },
+    trialCell: {
+        position: "sticky",
+        background: theme.palette.background.default,
+        left: -24,
+        zIndex: 100
     },
-    IUserPermissionsDialogState
-> {
-    state: IUserPermissionsDialogState = {
-        trials: undefined,
-        permissions: undefined,
-        page: 0,
-        rowsPerPage: 10,
-        isRefreshing: false
-    };
+    tablePagination: { position: "sticky", left: 0 }
+}));
 
-    @autobind
-    componentDidMount() {
-        if (this.props.open) {
-            getTrials(this.props.token).then(trials =>
-                this.setState({ trials })
-            );
-            this.refreshPermissions();
-        }
-    }
+const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
+    supportedTypes: string[];
+    granter: Account;
+}> = props => {
+    const classes = useStyles();
+    const [page, setPage] = React.useState<number>(0);
 
-    componentDidUpdate(prevProps: any) {
-        if (!prevProps.open) {
-            this.componentDidMount();
-        }
-    }
+    const { data: trialBundle } = useSWR<IApiPage<Trial>>([
+        props.open && "/trial_metadata?page_size=200",
+        props.token
+    ]);
+    const trials = trialBundle?._items;
+    const { data: permissionBundle, mutate, isValidating } = useSWR<
+        IApiPage<Permission>
+    >([props.open && `/permissions?user_id=${props.grantee.id}`, props.token]);
+    const permissions = permissionBundle?._items;
 
-    @autobind
-    refreshPermissions() {
-        this.setState({ isRefreshing: true });
-        getPermissionsForUser(this.props.token, this.props.grantee.id).then(
-            permissions => {
-                this.setState({ permissions, isRefreshing: false });
-            }
-        );
-    }
-
-    @autobind
-    private makeHandleChange(trial: string, assay: string) {
-        return (e: React.ChangeEvent<HTMLInputElement>, deleteId?: number) => {
+    const makeHandleChange = (trial: string, assay: string) => {
+        return async (
+            e: React.ChangeEvent<HTMLInputElement>,
+            perm?: Permission
+        ) => {
             const checked = e.currentTarget.checked;
             if (checked) {
-                // Add to local state
-                const tempNewPerm = {
+                const newPerm = {
+                    granted_to_user: props.grantee.id,
+                    granted_by_user: props.granter.id,
                     trial_id: trial,
                     upload_type: assay
-                } as Permission;
-                this.setState(({ permissions }) => ({
-                    permissions: permissions
-                        ? [...permissions, tempNewPerm]
-                        : [tempNewPerm]
-                }));
-
-                // Add to API
-                grantPermission(
-                    this.props.token,
-                    this.props.granter.id,
-                    this.props.grantee.id,
-                    trial,
-                    assay
-                ).then(() => this.refreshPermissions());
-            } else if (!checked && deleteId) {
-                // Delete from local state
-                this.setState(({ permissions }) => ({
-                    permissions:
-                        permissions &&
-                        permissions.filter(
-                            p =>
-                                !(
-                                    p.trial_id === trial &&
-                                    p.upload_type === assay
-                                )
-                        )
-                }));
-
-                // Delete from API
-                revokePermission(this.props.token, deleteId).then(() =>
-                    this.refreshPermissions()
+                };
+                mutate({
+                    _meta: { total: (permissionBundle?._meta.total || 0) + 1 },
+                    // @ts-ignore because newPerm is missing `id` and `_etag` fields
+                    _items: [...(permissionBundle?._items || []), newPerm]
+                });
+                await apiCreate<Permission>("/permissions", props.token, {
+                    data: newPerm
+                });
+            } else if (!checked && perm) {
+                mutate({
+                    _items:
+                        permissionBundle?._items.filter(
+                            p => p.id !== perm.id
+                        ) || [],
+                    _meta: { total: permissionBundle?._meta.total || 0 }
+                });
+                await apiDelete<Permission>(
+                    `/permissions/${perm.id}`,
+                    props.token,
+                    { etag: perm._etag }
                 );
             }
         };
+    };
+
+    const userName = `${props.grantee.first_n} ${props.grantee.last_n}`;
+    if (!permissions) {
+        return null;
     }
+    // Create a mapping from trial ID -> assay type -> permission
+    const permissionsMap = mapValues(
+        groupBy(permissions, p => p.trial_id),
+        trialGroup =>
+            trialGroup.reduce((acc, p) => ({ ...acc, [p.upload_type]: p }), {})
+    );
 
-    @autobind
-    private handleCancel() {
-        this.props.onCancel();
-    }
-
-    @autobind
-    private handleChangePage(
-        event: React.MouseEvent<HTMLButtonElement> | null,
-        page: number
-    ) {
-        this.setState({ page });
-    }
-
-    @autobind
-    private handleChangeRowsPerPage(
-        event: React.ChangeEvent<HTMLInputElement>
-    ) {
-        this.setState({ rowsPerPage: Number(event.target.value) });
-    }
-
-    public render() {
-        const userName = `${this.props.grantee.first_n} ${this.props.grantee.last_n}`;
-        if (!this.state.permissions) {
-            return null;
-        }
-        // Create a mapping from trial ID -> assay type -> permission
-        const permissionsMap = mapValues(
-            groupBy(this.state.permissions, p => p.trial_id),
-            trialGroup =>
-                trialGroup.reduce(
-                    (acc, p) => ({ ...acc, [p.upload_type]: p }),
-                    {}
-                )
-        );
-
-        return (
-            <>
-                <Dialog open={this.props.open} onClose={this.handleCancel}>
-                    <DialogTitle>
-                        <Grid container direction="row" justify="space-between">
-                            <Grid item>
-                                Editing data access for{" "}
-                                <strong>{userName}</strong>
-                            </Grid>
-                            <Grid item>
-                                {this.state.isRefreshing && (
-                                    <Loader size={25} />
-                                )}
-                            </Grid>
-                        </Grid>
-                    </DialogTitle>
-                    {!this.state.trials && <Loader />}
-                    <DialogContent>
-                        {this.state.trials && (
-                            <div>
-                                <Table padding="checkbox">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Trial</TableCell>
-                                            {this.props.supportedTypes.map(
-                                                typ => (
-                                                    <TableCell
-                                                        key={typ}
-                                                        size="small"
-                                                    >
-                                                        {typ}
-                                                    </TableCell>
-                                                )
-                                            )}
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {this.state.trials
-                                            .slice(
-                                                this.state.page *
-                                                    this.state.rowsPerPage,
-                                                this.state.page *
-                                                    this.state.rowsPerPage +
-                                                    this.state.rowsPerPage
-                                            )
-                                            .map((trial: Trial) => (
-                                                <TableRow key={trial.trial_id}>
-                                                    <TableCell>
-                                                        {trial.trial_id}
-                                                    </TableCell>
-                                                    {this.props.supportedTypes.map(
-                                                        typ => {
-                                                            return (
-                                                                <AssayCheckbox
-                                                                    key={
-                                                                        typ +
-                                                                        trial.trial_id
-                                                                    }
-                                                                    trialID={
-                                                                        trial.trial_id
-                                                                    }
-                                                                    assayType={
-                                                                        typ
-                                                                    }
-                                                                    permissionsMap={
-                                                                        permissionsMap
-                                                                    }
-                                                                    onChange={this.makeHandleChange(
-                                                                        trial.trial_id,
-                                                                        typ
-                                                                    )}
-                                                                    shouldRefresh={() =>
-                                                                        this.setState(
-                                                                            {
-                                                                                isRefreshing: true
-                                                                            }
-                                                                        )
-                                                                    }
-                                                                    isRefreshing={
-                                                                        this
-                                                                            .state
-                                                                            .isRefreshing
-                                                                    }
-                                                                />
-                                                            );
+    return (
+        <Dialog open={props.open} onClose={() => props.onCancel()}>
+            <DialogTitle>
+                <Grid container direction="row" justify="space-between">
+                    <Grid item>
+                        Editing data access for <strong>{userName}</strong>
+                    </Grid>
+                    <Grid item>{isValidating && <Loader size={25} />}</Grid>
+                </Grid>
+            </DialogTitle>
+            {!trials && <Loader />}
+            <DialogContent className={classes.dialogContent}>
+                {trials && (
+                    <div>
+                        <Table padding="checkbox" stickyHeader>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell className={classes.trialCell}>
+                                        Trial
+                                    </TableCell>
+                                    {props.supportedTypes.map(typ => (
+                                        <TableCell key={typ} size="small">
+                                            {typ}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {trials
+                                    .slice(
+                                        page * ROWS_PER_PAGE,
+                                        page * ROWS_PER_PAGE + ROWS_PER_PAGE
+                                    )
+                                    .map((trial: Trial) => (
+                                        <TableRow key={trial.trial_id}>
+                                            <TableCell
+                                                className={classes.trialCell}
+                                            >
+                                                {trial.trial_id}
+                                            </TableCell>
+                                            {props.supportedTypes.map(typ => {
+                                                return (
+                                                    <AssayCheckbox
+                                                        key={
+                                                            typ + trial.trial_id
                                                         }
-                                                    )}
-                                                </TableRow>
-                                            ))}
-                                    </TableBody>
-                                </Table>
-                                <TablePagination
-                                    component="div"
-                                    rowsPerPageOptions={[5, 10, 25]}
-                                    count={this.state.trials.length}
-                                    rowsPerPage={this.state.rowsPerPage}
-                                    page={this.state.page}
-                                    onChangePage={this.handleChangePage}
-                                    onChangeRowsPerPage={
-                                        this.handleChangeRowsPerPage
-                                    }
-                                />
-                            </div>
-                        )}
-                    </DialogContent>
-                </Dialog>
-            </>
-        );
-    }
-}
+                                                        trialID={trial.trial_id}
+                                                        assayType={typ}
+                                                        permissionsMap={
+                                                            permissionsMap
+                                                        }
+                                                        onChange={makeHandleChange(
+                                                            trial.trial_id,
+                                                            typ
+                                                        )}
+                                                        isRefreshing={
+                                                            isValidating
+                                                        }
+                                                    />
+                                                );
+                                            })}
+                                        </TableRow>
+                                    ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                )}
+                {trials && (
+                    <TablePagination
+                        className={classes.tablePagination}
+                        component="div"
+                        count={trialBundle?._meta.total || 0}
+                        rowsPerPage={ROWS_PER_PAGE}
+                        page={page}
+                        onChangePage={(e, p) => setPage(p)}
+                    />
+                )}
+            </DialogContent>
+        </Dialog>
+    );
+};
 
 const AssayCheckbox: React.FunctionComponent<{
     trialID: string;
@@ -311,23 +228,15 @@ const AssayCheckbox: React.FunctionComponent<{
     };
     onChange: (
         e: React.ChangeEvent<HTMLInputElement>,
-        deleteId?: number
+        permission?: Permission
     ) => void;
-    shouldRefresh: () => void;
     isRefreshing: boolean;
-}> = ({
-    trialID,
-    assayType,
-    permissionsMap,
-    onChange,
-    isRefreshing,
-    shouldRefresh
-}) => {
+}> = ({ trialID, assayType, permissionsMap, onChange, isRefreshing }) => {
     const isChecked =
         trialID in permissionsMap && assayType in permissionsMap[trialID];
 
-    const deleteId = isChecked
-        ? permissionsMap[trialID][assayType].id
+    const permission = permissionsMap[trialID]
+        ? permissionsMap[trialID][assayType]
         : undefined;
 
     return (
@@ -337,8 +246,7 @@ const AssayCheckbox: React.FunctionComponent<{
                     data-testid={`checkbox-${trialID}-${assayType}`}
                     checked={isChecked}
                     onChange={e => {
-                        shouldRefresh();
-                        onChange(e, deleteId);
+                        onChange(e, permission);
                     }}
                     disabled={isRefreshing}
                 />
