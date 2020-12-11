@@ -61,7 +61,7 @@ test("role update selection", async () => {
 });
 
 test("disabling a user", async () => {
-    const { findAllByTitle, getByText } = renderWithUserContext(
+    const { findAllByTitle } = renderWithUserContext(
         <AdminUserManager />,
         currentUser
     );
@@ -77,4 +77,41 @@ test("disabling a user", async () => {
     // Re-enable the user
     fireEvent.click(disableToggle);
     waitFor(() => expect(updateUser).toHaveLastReturnedWith(user));
+});
+
+test("adding and editing a contact email", async () => {
+    const {
+        findAllByText,
+        findByTitle,
+        getByPlaceholderText,
+        findByText
+    } = renderWithUserContext(<AdminUserManager />, currentUser);
+
+    const enterEmail = (email: string) => {
+        const emailInput = getByPlaceholderText(/add a contact email/i);
+        fireEvent.input(emailInput, {
+            target: { value: email }
+        });
+        fireEvent.submit(emailInput);
+        waitFor(() =>
+            expect(updateUser).toHaveLastReturnedWith({
+                ...user,
+                contact_email: email
+            })
+        );
+    };
+
+    // Add a new contact email
+    const contactEmail = "some@contact.email.com";
+    const addButton = (await findAllByText(/add a contact email/i))[0];
+    fireEvent.click(addButton);
+    enterEmail(contactEmail);
+    expect(await findByText(contactEmail)).toBeInTheDocument();
+
+    // Updating an existing contact email
+    const newContactEmail = "new@contact.email.com";
+    const editButton = await findByTitle(/edit contact email/i);
+    fireEvent.click(editButton);
+    enterEmail(newContactEmail);
+    expect(await findByText(newContactEmail)).toBeInTheDocument();
 });

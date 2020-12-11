@@ -38,7 +38,6 @@ const ContactEmail: React.FC<{
     user: Account;
     onSave: (newContactEmail: string) => void;
 }> = ({ user, onSave }) => {
-    console.log(user.contact_email);
     const classes = useContactEmailStyles();
     const [isEditing, setIsEditing] = React.useState<boolean>(false);
     const { register, handleSubmit } = useForm<{ contactEmail: string }>();
@@ -61,6 +60,7 @@ const ContactEmail: React.FC<{
                             defaultValue: user.contact_email
                         }}
                         InputProps={{ className: classes.input }}
+                        placeholder="Add a contact email"
                         variant="outlined"
                         size="small"
                     />
@@ -91,12 +91,14 @@ const ContactEmail: React.FC<{
                         >
                             <Grid item>{user.contact_email}</Grid>
                             <Grid item>
-                                <IconButton
-                                    size="small"
-                                    onClick={() => setIsEditing(true)}
-                                >
-                                    <Edit fontSize="small" />
-                                </IconButton>
+                                <Tooltip title="edit contact email">
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        <Edit fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
                             </Grid>
                         </Grid>
                     ) : (
