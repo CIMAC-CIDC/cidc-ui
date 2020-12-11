@@ -20,6 +20,7 @@ const user = users[0];
 const currentUser = users[users.length - 1];
 
 beforeEach(() => {
+    jest.clearAllMocks();
     getUsers.mockResolvedValue({ data: users, meta: { total: users.length } });
     getUserEtag.mockResolvedValue("test-etag");
     updateUser.mockImplementation(async (t, i, e, updates) => {
@@ -43,6 +44,10 @@ it("renders all users", async () => {
     });
 });
 
+const getUserUpdates = () => {
+    return updateUser.mock.calls[0][3];
+};
+
 test("role update selection", async () => {
     const newRole = "cidc-admin";
 
@@ -55,63 +60,69 @@ test("role update selection", async () => {
     // Change the user's role to cidc-admin
     fireEvent.mouseDown(roleSelect);
     fireEvent.click(getByText(newRole));
-    waitFor(() =>
-        expect(updateUser).toHaveReturnedWith({ ...user, role: newRole })
-    );
+    await waitFor(() => expect(updateUser).toHaveBeenCalled());
+    expect(getUserUpdates()).toEqual({ role: newRole });
 });
 
 test("disabling a user", async () => {
-    const { findAllByTitle } = renderWithUserContext(
+    const { findAllByRole } = renderWithUserContext(
         <AdminUserManager />,
         currentUser
     );
 
-    const disableToggle = (await findAllByTitle(/disable this account/i))[0];
+    const disableToggle = (await findAllByRole("checkbox"))[0];
 
     // Disable the user
     fireEvent.click(disableToggle);
-    waitFor(() =>
-        expect(updateUser).toHaveReturnedWith({ ...user, disabled: true })
-    );
-
-    // Re-enable the user
-    fireEvent.click(disableToggle);
-    waitFor(() => expect(updateUser).toHaveLastReturnedWith(user));
+    await waitFor(() => expect(updateUser).toHaveBeenCalled());
+    expect(getUserUpdates()).toEqual({ disabled: true });
 });
 
-test("adding and editing a contact email", async () => {
-    const {
-        findAllByText,
-        findByTitle,
-        getByPlaceholderText,
-        findByText
-    } = renderWithUserContext(<AdminUserManager />, currentUser);
-
-    const enterEmail = (email: string) => {
-        const emailInput = getByPlaceholderText(/add a contact email/i);
-        fireEvent.input(emailInput, {
-            target: { value: email }
-        });
-        fireEvent.submit(emailInput);
-        waitFor(() =>
-            expect(updateUser).toHaveLastReturnedWith({
-                ...user,
-                contact_email: email
-            })
-        );
-    };
+test("adding a contact email", async () => {
+    const { findAllByText, getByPlaceholderText } = renderWithUserContext(
+        <AdminUserManager />,
+        currentUser
+    );
 
     // Add a new contact email
     const contactEmail = "some@contact.email.com";
     const addButton = (await findAllByText(/add a contact email/i))[0];
     fireEvent.click(addButton);
-    enterEmail(contactEmail);
-    expect(await findByText(contactEmail)).toBeInTheDocument();
+    const emailInput = getByPlaceholderText(/add a contact email/i);
+    fireEvent.input(emailInput, { target: { value: contactEmail } });
+    fireEvent.submit(emailInput);
+
+    // Check that updates were made
+    await waitFor(() => expect(updateUser).toHaveBeenCalled());
+    expect(getUserUpdates()).toEqual({ contact_email: contactEmail });
+});
+
+test("editing a contact email", async () => {
+    const oldContactEmail = "old@contact.email.com";
+    const userWithContactEmail = {
+        ...users[0],
+        contact_email: oldContactEmail
+    };
+    getUsers.mockResolvedValue({
+        data: [userWithContactEmail, ...users.slice(1)],
+        meta: { total: users.length }
+    });
+
+    const {
+        findByText,
+        findByTitle,
+        getByPlaceholderText
+    } = renderWithUserContext(<AdminUserManager />, currentUser);
+
+    expect(await findByText(oldContactEmail)).toBeInTheDocument();
 
     // Updating an existing contact email
     const newContactEmail = "new@contact.email.com";
     const editButton = await findByTitle(/edit contact email/i);
     fireEvent.click(editButton);
-    enterEmail(newContactEmail);
-    expect(await findByText(newContactEmail)).toBeInTheDocument();
+    const emailInput = getByPlaceholderText(/add a contact email/i);
+    fireEvent.input(emailInput, { target: { value: newContactEmail } });
+    fireEvent.submit(emailInput);
+    await waitFor(() => expect(updateUser).toHaveBeenCalled());
+    expect(getUserUpdates()).toEqual({ contact_email: newContactEmail });
 });
