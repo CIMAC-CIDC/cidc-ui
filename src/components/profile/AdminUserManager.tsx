@@ -29,7 +29,8 @@ import { useForm } from "react-hook-form";
 
 const useContactEmailStyles = makeStyles(theme => ({
     input: {
-        fontSize: theme.typography.subtitle2.fontSize
+        fontSize: theme.typography.subtitle2.fontSize,
+        width: 200
     }
 }));
 
@@ -54,7 +55,6 @@ const ContactEmail: React.FC<{
                 >
                     <TextField
                         autoFocus
-                        fullWidth
                         inputRef={register}
                         inputProps={{
                             name: "contactEmail",
@@ -147,6 +147,13 @@ const AdminUserTableRow: React.FC<IAdminUserTableRowProps> = withIdToken(
 
         return (
             <>
+                <TableCell className={cellClass}>{user.email}</TableCell>
+                <TableCell className={cellClass}>
+                    {user.first_n} {user.last_n}
+                </TableCell>
+                <TableCell className={cellClass}>
+                    {ORGANIZATION_NAME_MAP[user.organization]}
+                </TableCell>
                 <TableCell>
                     <Tooltip
                         title={
@@ -165,7 +172,6 @@ const AdminUserTableRow: React.FC<IAdminUserTableRowProps> = withIdToken(
                         />
                     </Tooltip>
                 </TableCell>
-                <TableCell className={cellClass}>{user.email}</TableCell>
                 <TableCell>
                     <ContactEmail
                         user={user}
@@ -173,12 +179,6 @@ const AdminUserTableRow: React.FC<IAdminUserTableRowProps> = withIdToken(
                             doUserUpdate({ contact_email: contactEmail })
                         }
                     />
-                </TableCell>
-                <TableCell className={cellClass}>
-                    {user.first_n} {user.last_n}
-                </TableCell>
-                <TableCell className={cellClass}>
-                    {ORGANIZATION_NAME_MAP[user.organization]}
                 </TableCell>
                 <TableCell>
                     <FormControl
@@ -272,11 +272,11 @@ const AdminUserManager: React.FC<{ token: string }> = ({ token }) => {
                             setSortConfig({ key, direction })
                     }}
                     headers={[
-                        { key: "disabled", label: "Enabled?" },
                         { key: "email", label: "Email" },
-                        { key: "contact_email", label: "Contact Email" },
                         { key: "first_n", label: "Name" },
                         { key: "organization", label: "Organization" },
+                        { key: "disabled", label: "Enabled?" },
+                        { key: "contact_email", label: "Contact Email" },
                         { key: "role", label: "Role" },
                         { key: "", label: "Permissions" }
                     ]}
