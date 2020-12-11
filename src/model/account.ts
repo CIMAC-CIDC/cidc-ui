@@ -25,9 +25,10 @@ export interface Account extends UnregisteredAccount {
     _created: string;
     _updated: string;
     id: number;
-    approval_date?: string;
+    organization: Organization;
     disabled: boolean;
+    contact_email?: string;
+    approval_date?: string;
     role?: Role;
     last_access?: string;
-    organization: Organization;
 }
