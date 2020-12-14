@@ -65,6 +65,9 @@ const FilterProvider: React.FC<IFilterProviderProps & { token: string }> = ({
         const newFilters = { ...filters, ...updates };
         getFilterFacets(token, filterParams(newFilters)).then(newFacets => {
             setFacets(newFacets);
+            // If any previously applied filters now have zero results under the
+            // new filter set, remove those filters. This is to ensure a user can't
+            // end up with a set of selected filters that yields empty search results.
             setFiltersInternal({
                 trial_ids: newFilters.trial_ids,
                 facets: newFilters.facets?.filter(facetString => {
@@ -127,11 +130,11 @@ const FilterProvider: React.FC<IFilterProviderProps & { token: string }> = ({
             } else {
                 const keyFilters = filters[k] || [];
                 const facetFamily = [category, facet].join(ARRAY_PARAM_DELIM);
-                const facetsInFamily: string[] = facets[k][category][
-                    facet
-                ].map((f: IFacetInfo) =>
-                    [facetFamily, f.label].join(ARRAY_PARAM_DELIM)
-                );
+                const facetsInFamily: string[] = facets[k][category][facet]
+                    .filter(({ count }: IFacetInfo) => count > 0)
+                    .map((f: IFacetInfo) =>
+                        [facetFamily, f.label].join(ARRAY_PARAM_DELIM)
+                    );
                 const hasAllFilters =
                     keyFilters.filter(f => f.startsWith(facetFamily)).length ===
                     facetsInFamily.length;
