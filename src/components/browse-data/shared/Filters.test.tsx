@@ -13,7 +13,11 @@ import FilterProvider, { IFacets } from "./FilterProvider";
 jest.mock("../../../api/api");
 
 const facets: IFacets = {
-    trial_ids: ["test-trial-1", "test-trial-2"],
+    trial_ids: [
+        "test-trial-1",
+        "test-trial-2",
+        { label: "test-trial-3", count: 1 }
+    ],
     facets: {
         flatFacet: [
             {

@@ -7,9 +7,10 @@ import { withIdToken } from "../../identity/AuthProvider";
 export interface IFacetInfo {
     label: string;
     description?: string;
+    count?: number;
 }
 export interface IFacets {
-    trial_ids: string[];
+    trial_ids: Array<string | IFacetInfo>;
     facets: Dictionary<Dictionary<IFacetInfo[]> | IFacetInfo[]>;
 }
 
