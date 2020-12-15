@@ -1,4 +1,4 @@
-import { fireEvent, act } from "@testing-library/react";
+import { fireEvent, act, waitFor } from "@testing-library/react";
 import React from "react";
 import {
     getNativeCheckbox,
@@ -14,30 +14,38 @@ jest.mock("../../../api/api");
 
 const facets: IFacets = {
     trial_ids: [
-        "test-trial-1",
-        "test-trial-2",
-        { label: "test-trial-3", count: 1 }
+        { label: "test-trial-1", count: 0 },
+        { label: "test-trial-2", count: 1 }
     ],
     facets: {
         flatFacet: [
             {
                 label: "subfacet 1",
-                description: "description 1"
+                description: "description 1",
+                count: 0
             },
             {
                 label: "subfacet 2",
-                description: "description 2"
+                description: "description 2",
+                count: 1
             }
         ],
         nestedFacet: {
             nestedSubfacet: [
                 {
                     label: "subsubfacet 1",
-                    description: "subdescription 1"
+                    description: "subdescription 1",
+                    count: 0
                 },
                 {
                     label: "subsubfacet 2",
-                    description: "subdescription 2"
+                    description: "subdescription 2",
+                    count: 1
+                },
+                {
+                    label: "subsubfacet 3",
+                    description: "description 3",
+                    count: 2
                 }
             ]
         }
@@ -80,55 +88,81 @@ it("handles checkbox selection as expected", async () => {
             role: "cidc-admin"
         }
     );
-    let trialCheckbox = getNativeCheckbox(await findByTestId(/test-trial-1/i));
 
-    // select flat facet
+    // flat facet with 0 count is disabled
+    const disabledTrialCheckbox = getNativeCheckbox(
+        await findByTestId(/test-trial-1/i)
+    );
+    expect(disabledTrialCheckbox.disabled).toBe(true);
+
+    // selecting a flat facet with >0 count works as expected
+    let trialCheckbox = getNativeCheckbox(getByTestId(/test-trial-2/i));
     fireEvent.click(trialCheckbox);
-    expect(history.location.search).toContain("test-trial-1");
-    trialCheckbox = getNativeCheckbox(getByTestId(/test-trial-1/i));
+    await waitFor(() =>
+        expect(history.location.search).toContain("test-trial-2")
+    );
+    trialCheckbox = getNativeCheckbox(getByTestId(/test-trial-2/i));
     expect(trialCheckbox.checked).toBe(true);
 
     // de-select flat facet
     fireEvent.click(trialCheckbox);
-    expect(history.location.search).not.toContain("test-trial-1");
-    trialCheckbox = getNativeCheckbox(getByTestId(/test-trial-1/i));
+    await waitFor(() =>
+        expect(history.location.search).not.toContain("test-trial-2")
+    );
+    trialCheckbox = getNativeCheckbox(getByTestId(/test-trial-2/i));
     expect(trialCheckbox.checked).toBe(false);
 
     // open nested facet
     const openNestedFacets = getByTestId(/toggle open nestedSubfacet/i);
     fireEvent.click(openNestedFacets);
 
-    // select subfacet
+    // nested facet with 0 count is disabled
     const subfacetCheckbox1 = getNativeCheckbox(getByTestId(/subsubfacet 1/i));
-    fireEvent.click(subfacetCheckbox1);
-    expect(history.location.search).toContain(
-        encodeURIComponent("nestedSubfacet|subsubfacet 1")
+    expect(subfacetCheckbox1.disabled).toBe(true);
+
+    // select subfacet
+    const subfacetCheckbox2 = getNativeCheckbox(getByTestId(/subsubfacet 2/i));
+    fireEvent.click(subfacetCheckbox2);
+    await waitFor(() =>
+        expect(history.location.search).toContain(
+            encodeURIComponent("nestedSubfacet|subsubfacet 2")
+        )
     );
-    expect(subfacetCheckbox1.checked).toBe(true);
+    expect(subfacetCheckbox2.checked).toBe(true);
 
     // select nested facet parent
     const facetParent = getNativeCheckbox(getByTestId(/^nestedSubfacet/i));
-    const subfacetCheckbox2 = getNativeCheckbox(getByTestId(/subsubfacet 2/i));
-    expect(subfacetCheckbox2.checked).toBe(false);
+    const subfacetCheckbox3 = getNativeCheckbox(getByTestId(/subsubfacet 3/i));
+    expect(subfacetCheckbox3.checked).toBe(false);
     fireEvent.click(facetParent);
-    expect(facetParent.checked).toBe(true);
-    expect(subfacetCheckbox2.checked).toBe(true);
+    await waitFor(() => expect(facetParent.checked).toBe(true));
+    expect(subfacetCheckbox3.checked).toBe(true);
 
     // deselect subfacet
-    fireEvent.click(subfacetCheckbox1);
-    expect(history.location.search).not.toContain(
-        encodeURIComponent("nestedSubfacet|subsubfacet 1")
+    fireEvent.click(subfacetCheckbox2);
+    await waitFor(() =>
+        expect(history.location.search).not.toContain(
+            encodeURIComponent("nestedSubfacet|subsubfacet 2")
+        )
     );
-    expect(subfacetCheckbox1.checked).toBe(false);
+    expect(subfacetCheckbox2.checked).toBe(false);
 
     // use the "clear filters" button
-    fireEvent.click(trialCheckbox);
-    fireEvent.click(subfacetCheckbox1);
-    expect(getNativeCheckbox(getByTestId(/test-trial-1/i)).checked).toBe(true);
-    expect(subfacetCheckbox1.checked).toBe(true);
+    fireEvent.click(getNativeCheckbox(getByTestId(/test-trial-2/i)));
+    await waitFor(() =>
+        expect(getNativeCheckbox(getByTestId(/test-trial-2/i)).checked).toBe(
+            true
+        )
+    );
+    fireEvent.click(subfacetCheckbox2);
+    await waitFor(() => expect(subfacetCheckbox2.checked).toBe(true));
     fireEvent.click(getByText(/clear filters/i));
-    expect(getNativeCheckbox(getByTestId(/test-trial-1/i)).checked).toBe(false);
-    expect(subfacetCheckbox1.checked).toBe(false);
-    expect(subfacetCheckbox2.checked).toBe(false);
-    expect(facetParent.checked).toBe(false);
+    await waitFor(() => {
+        expect(getNativeCheckbox(getByTestId(/test-trial-2/i)).checked).toBe(
+            false
+        );
+        expect(subfacetCheckbox2.checked).toBe(false);
+        expect(subfacetCheckbox3.checked).toBe(false);
+        expect(facetParent.checked).toBe(false);
+    });
 });

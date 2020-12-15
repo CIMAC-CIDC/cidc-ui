@@ -252,8 +252,9 @@ const Checkboxes = ({
         <FormGroup className={classes.checkboxGroup} row={false}>
             {sortedOptions.map(({ label, description, count }) => {
                 return (
-                    <FormControlLabel
-                        className={classes.checkboxLabel}
+                    <PermsAwareCheckbox
+                        key={label}
+                        data-testid={label}
                         label={
                             <CheckboxLabel
                                 label={label}
@@ -261,21 +262,15 @@ const Checkboxes = ({
                                 count={count}
                             />
                         }
+                        facetType={parentType || label}
                         disabled={count === 0}
-                        control={
-                            <Checkbox
-                                className={classes.checkbox}
-                                checked={
-                                    count !== 0 &&
-                                    checked.includes(
-                                        parentType
-                                            ? `${parentType}|${label}`
-                                            : label
-                                    )
-                                }
-                                onClick={() => onChange(label)}
-                            />
+                        checked={
+                            count !== 0 &&
+                            checked.includes(
+                                parentType ? `${parentType}|${label}` : label
+                            )
                         }
+                        onClick={() => onChange(label)}
                     />
                 );
             })}
