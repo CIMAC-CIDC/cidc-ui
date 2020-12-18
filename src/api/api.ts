@@ -3,7 +3,9 @@ import retry from "async-retry";
 
 const baseURL: string = process.env.REACT_APP_API_URL!;
 
-export function buildRequester(method: Method) {
+const etagMethods = new Set(["patch", "delete"]);
+
+function buildRequester(method: Method) {
     return async function requester<T>(
         url: string,
         idToken: string,
@@ -24,7 +26,11 @@ export function buildRequester(method: Method) {
                     const res = await axios.request<T>(fullConfig);
                     return res.data;
                 } catch (e) {
-                    if (e.response.status === 412) {
+                    if (
+                        // check if we should fetch a new etag and retry the request
+                        e.response.status === 412 &&
+                        etagMethods.has(method.toLowerCase())
+                    ) {
                         const res = await axios.request({
                             ...fullConfig,
                             method: "get"
