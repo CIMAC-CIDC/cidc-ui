@@ -64,7 +64,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                 message: "error loading account information"
             });
         }
-    }, [user, error, setError]);
+    }, [user, error, setError, props.history]);
 
     const { data: permissions } = useSWR<IApiPage<Permission>>(
         authData.state === "logged-in" && user
