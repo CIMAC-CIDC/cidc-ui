@@ -64,8 +64,28 @@ const FilterProvider: React.FC<IFilterProviderProps & { token: string }> = ({
     React.useEffect(() => {
         if (newFacets) {
             setFacets(newFacets);
+            setFilters({
+                trial_ids: filters.trial_ids,
+                facets: filters.facets?.filter(facetString => {
+                    const [cat, facet, subfacet] = facetString.split("|");
+                    if (
+                        newFacets.facets &&
+                        newFacets.facets[cat] &&
+                        newFacets.facets[cat][facet]
+                    ) {
+                        return (
+                            newFacets.facets[cat][facet].count > 0 ||
+                            newFacets.facets[cat][facet].filter(
+                                (sf: IFacetInfo) =>
+                                    sf.label === subfacet && sf.count > 0
+                            ).length > 0
+                        );
+                    }
+                    return true;
+                })
+            });
         }
-    }, [newFacets]);
+    }, [filters, newFacets, setFilters]);
 
     // For now, only show protocol identifier filters in the trial view
     const maybeFilteredFacets =
