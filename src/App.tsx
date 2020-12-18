@@ -13,7 +13,8 @@ import {
     AssayDocsPage,
     AnalysesDocsPage
 } from "./components/upload-docs/UploadDocsPages";
-import { SWRConfigProvider } from "./api/api";
+import { SWRConfig } from "swr";
+import { apiFetch } from "./api/api";
 
 // Code-split across different routes on the site
 const HomePage = React.lazy(() => import("./components/home/HomePage"));
@@ -44,7 +45,7 @@ export default function App() {
 
     return (
         <Router history={history}>
-            <SWRConfigProvider>
+            <SWRConfig value={{ fetcher: apiFetch, shouldRetryOnError: false }}>
                 <QueryParamProvider ReactRouterRoute={Route}>
                     <div className={classes.root}>
                         <CIDCThemeProvider>
@@ -137,7 +138,7 @@ export default function App() {
                         </CIDCThemeProvider>
                     </div>
                 </QueryParamProvider>
-            </SWRConfigProvider>
+            </SWRConfig>
         </Router>
     );
 }

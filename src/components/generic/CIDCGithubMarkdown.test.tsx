@@ -14,41 +14,42 @@ $ cidc login [token]
 \`\`\`
 `;
 
-it("renders a markdown document", async () => {
+beforeEach(() => {
     axios.get.mockResolvedValue({ data });
+});
 
+it("renders a markdown document", async () => {
     const { findByText } = render(<CIDCGithubMarkdown path="foo" />);
 
     expect(await findByText(/Some Fun Docs/i)).toBeInTheDocument();
 });
 
-it("renders a markdown document with trimmed header", async () => {
-    axios.get.mockResolvedValue({ data });
+describe("trimLeadingHeader", () => {
+    it("renders a markdown document with trimmed header", async () => {
+        const { queryByText, findByText } = render(
+            <CIDCGithubMarkdown trimLeadingHeader path="foo" />
+        );
 
-    const { queryByText, findByText: fbt1 } = render(
-        <CIDCGithubMarkdown trimLeadingHeader path="foo" />
-    );
-
-    expect(await fbt1(/do something cool/i)).toBeInTheDocument();
-    expect(queryByText(/Some Fun Docs/i)).not.toBeInTheDocument();
-
-    // nothing funky should happen if there's no leading header in the first place
-    axios.get.mockResolvedValue({
-        // remove the first line from the example md
-        data: data
-            .split("\n")
-            .slice(1)
-            .join("\n")
+        expect(await findByText(/do something cool/i)).toBeInTheDocument();
+        expect(queryByText(/Some Fun Docs/i)).not.toBeInTheDocument();
     });
-    const { findByText: fbt2 } = render(
-        <CIDCGithubMarkdown trimLeadingHeader path="foo" />
-    );
-    expect(await fbt2(/do something cool/i)).toBeInTheDocument();
+
+    it("doesn't do anything weird if there's no header", async () => {
+        axios.get.mockResolvedValue({
+            // remove the first line from the example md
+            data: data
+                .split("\n")
+                .slice(1)
+                .join("\n")
+        });
+        const { findByText } = render(
+            <CIDCGithubMarkdown trimLeadingHeader path="foo" />
+        );
+        expect(await findByText(/do something cool/i)).toBeInTheDocument();
+    });
 });
 
 it("replaces [token] with a user's actual id token", async () => {
-    axios.get.mockResolvedValue({ data });
-
     const idToken = "fake-test-token";
 
     const { findByText } = render(

@@ -1,105 +1,87 @@
 import * as React from "react";
-import { getAccountInfo, getPermissionsForUser } from "../../api/api";
-import { render, cleanup } from "@testing-library/react";
+import { apiFetch } from "../../api/api";
+import { waitFor } from "@testing-library/react";
 import history from "./History";
-import { AuthContext } from "./AuthProvider";
 import UserProvider, { useUserContext } from "./UserProvider";
-import { Router } from "react-router";
+import { renderWithRouter } from "../../../test/helpers";
 import ErrorGuard from "../errors/ErrorGuard";
 jest.mock("../../api/api");
 
-const ChildComponent = () => <div data-testid="children" />;
+const ChildComponent = () => {
+    const user = useUserContext();
+    return user ? <div data-testid="children" /> : null;
+};
 
 const TOKEN = "blah";
 
-function renderUserProvider(authData: boolean, children?: React.ReactElement) {
-    return render(
-        <Router history={history}>
-            <ErrorGuard>
-                <AuthContext.Provider
-                    value={
-                        authData
-                            ? {
-                                  state: "logged-in",
-                                  userInfo: {
-                                      idToken: TOKEN,
-                                      user: { email: "" }
-                                  }
-                              }
-                            : undefined
-                    }
-                >
-                    <UserProvider>
-                        {children || <ChildComponent />}
-                    </UserProvider>
-                </AuthContext.Provider>
-            </ErrorGuard>
-        </Router>
+function renderUserProvider(children = <ChildComponent />, idToken = TOKEN) {
+    return renderWithRouter(
+        <ErrorGuard>
+            <UserProvider>{children}</UserProvider>
+        </ErrorGuard>,
+        {
+            history,
+            route: "/browse-data",
+            authData: {
+                state: "logged-in",
+                userInfo: { idToken, user: { email: "" } }
+            }
+        }
     );
 }
 
+const waitForPath = async (path: string) => {
+    await waitFor(() => {
+        expect(history.location.pathname).toBe(path);
+    });
+};
+
 it("handles an approved user", async () => {
     const user = { id: 1, approval_date: Date.now() };
-    getAccountInfo.mockImplementation((token: string) => {
-        expect(token).toBe(TOKEN);
-
-        return Promise.resolve(user);
-    });
-    getPermissionsForUser.mockImplementation((token: string, id: number) => {
-        expect(token).toBe(TOKEN);
-        expect(id).toBe(user.id);
-
-        return Promise.resolve([]);
+    apiFetch.mockImplementation(async (url: string) => {
+        if (url === "/users/self") {
+            return user;
+        }
+        return [];
     });
 
-    const { findByTestId } = renderUserProvider(true);
-    const children = await findByTestId("children");
-    expect(children).toBeInTheDocument();
+    const { findByTestId } = renderUserProvider();
+    await findByTestId("children");
+    expect(apiFetch).toHaveBeenCalledWith("/users/self", TOKEN);
 });
 
 it("handles unapproved users", async () => {
-    getAccountInfo.mockResolvedValue({ id: 1 });
-
-    history.push("/browse-data");
-    const { findByTestId } = renderUserProvider(true);
-    await findByTestId("children");
-    expect(history.location.pathname).toBe("/");
+    history.replace("/browse-data");
+    apiFetch.mockResolvedValue({ id: 1 });
+    renderUserProvider(<ChildComponent />, "cache-busting-token");
+    await waitForPath("/");
 });
 
 it("handles unregistered users", async () => {
-    getAccountInfo.mockRejectedValue({
+    apiFetch.mockRejectedValue({
         response: { data: { _error: { message: "is not registered." } } }
     });
-
-    const { findByTestId } = renderUserProvider(true);
-    await findByTestId("children");
-    expect(history.location.pathname).toBe("/register");
+    renderUserProvider();
+    await waitForPath("/register");
 });
 
-it("handles endpoint errors", async () => {
-    getAccountInfo.mockRejectedValue({ some: "other error" });
-    const { findByTestId: fbti1, queryByText } = renderUserProvider(true);
-    await fbti1("children");
-    expect(queryByText(/error loading account info/i)).toBeInTheDocument();
-    cleanup();
-
-    getAccountInfo.mockRejectedValue({ response: { data: "Not Found" } });
-    const { findByTestId: fbti2 } = renderUserProvider(true);
-    await fbti2("children");
-    expect(history.location.pathname).toBe("/register");
+it("handles a generic endpoint error", async () => {
+    apiFetch.mockRejectedValue({ some: "other error" });
+    const { findByText } = renderUserProvider();
+    expect(await findByText(/error loading account info/i)).toBeInTheDocument();
 });
 
 it("handles a disabled user", async () => {
     const user = { id: 1, approval_date: Date.now(), disabled: true };
-    getAccountInfo.mockResolvedValue(user);
+    apiFetch.mockResolvedValue(user);
 
-    const { findByTestId } = renderUserProvider(true);
+    const { findByTestId } = renderUserProvider();
     const error = await findByTestId("error-message");
     expect(error).toBeInTheDocument();
     expect(error.textContent).toContain("Account Disabled");
 });
 
-it("enables the correct tabs for each role", async () => {
+describe("role-based tab display", () => {
     const RoleTestComponent = () => {
         const user = useUserContext();
 
@@ -108,7 +90,7 @@ it("enables the correct tabs for each role", async () => {
         }
 
         return (
-            <div>
+            <div data-testid="results">
                 <p>showAnalyses={user.showAnalyses?.toString()}</p>
                 <p>showManifests={user.showManifests?.toString()}</p>
                 <p>showAssays={user.showAssays?.toString()}</p>
@@ -116,7 +98,7 @@ it("enables the correct tabs for each role", async () => {
         );
     };
     const mockWithRole = (role: string) => {
-        getAccountInfo.mockResolvedValue({
+        apiFetch.mockResolvedValue({
             id: 1,
             role,
             approval_date: Date.now()
@@ -131,22 +113,23 @@ it("enables the correct tabs for each role", async () => {
         { role: "cidc-admin", tabs: ["assays", "analyses", "manifests"] }
     ];
 
-    await expectedTabs.reduce(async (prevTest, { role, tabs }) => {
-        await prevTest;
-        mockWithRole(role);
-        const { findByText } = renderUserProvider(true, <RoleTestComponent />);
-        const finds = [
-            await findByText(
-                new RegExp(`showManifests=${tabs.includes("manifests")}`, "i")
-            ),
-            await findByText(
-                new RegExp(`showAssays=${tabs.includes("assays")}`, "i")
-            ),
-            await findByText(
-                new RegExp(`showAnalyses=${tabs.includes("analyses")}`, "i")
-            )
-        ];
-        finds.map(find => expect(find).toBeInTheDocument());
-        cleanup();
-    }, Promise.resolve());
+    expectedTabs.forEach(({ role, tabs }) => {
+        it(`shows the correct tabs for a ${role}`, async () => {
+            mockWithRole(role);
+            const { queryByText, findByTestId } = renderUserProvider(
+                <RoleTestComponent />
+            );
+            await findByTestId("results");
+            expect(
+                queryByText(`showManifests=${tabs.includes("manifests")}`)
+            ).toBeInTheDocument();
+            expect(
+                queryByText(`showAssays=${tabs.includes("assays")}`)
+            ).toBeInTheDocument();
+
+            expect(
+                queryByText(`showAnalyses=${tabs.includes("analyses")}`)
+            ).toBeInTheDocument();
+        });
+    });
 });

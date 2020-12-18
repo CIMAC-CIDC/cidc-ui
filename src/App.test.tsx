@@ -2,15 +2,11 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { fireEvent, render } from "@testing-library/react";
 import App from "./App";
-jest.mock("axios", () => {
-    const actualAxios = jest.requireActual("axios");
+jest.mock("./api/api", () => {
+    const actualApi = jest.requireActual("./api/api");
     return {
-        ...actualAxios,
-        create: jest.fn().mockReturnValue({
-            get: jest
-                .fn()
-                .mockResolvedValue({ data: { _items: [], trial_ids: [] } })
-        })
+        ...actualApi,
+        apiFetch: jest.fn().mockReturnValue({ _items: [], trial_ids: [] })
     };
 });
 jest.mock("./components/info/InfoProvider", () => {

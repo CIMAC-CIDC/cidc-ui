@@ -11,6 +11,18 @@ import {
     UserContext
 } from "../src/components/identity/UserProvider";
 import { QueryParamProvider } from "use-query-params";
+import { SWRConfig } from "swr";
+import { apiFetch } from "../src/api/api";
+
+const testSWRConfig = {
+    fetcher: apiFetch,
+    shouldRetryOnError: false,
+    dedupingInterval: 0
+};
+
+export const renderWithSWR = (element: React.ReactElement) => {
+    return render(<SWRConfig value={testSWRConfig}>{element}</SWRConfig>);
+};
 
 export const renderWithRouter = (
     element: React.ReactElement,
@@ -23,7 +35,7 @@ export const renderWithRouter = (
         }
     } = {} as { route?: string; history?: History<any>; authData: IAuthData }
 ) => {
-    return render(
+    return renderWithSWR(
         <AuthContext.Provider value={authData}>
             <Router history={history}>
                 <QueryParamProvider ReactRouterRoute={Route}>
@@ -64,7 +76,7 @@ export const renderWithUserContext = (
     element: React.ReactElement,
     user?: Partial<IAccountWithExtraContext>
 ) => {
-    return render(
+    return renderWithSWR(
         <AuthContext.Provider
             value={
                 // @ts-ignore

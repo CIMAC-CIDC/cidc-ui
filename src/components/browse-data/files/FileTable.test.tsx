@@ -2,21 +2,13 @@ import { fireEvent } from "@testing-library/react";
 import { range } from "lodash";
 import React from "react";
 import { renderWithRouter } from "../../../../test/helpers";
-import { getFiles, getFilelist } from "../../../api/api";
+import { apiCreate, apiFetch } from "../../../api/api";
 import { DataFile } from "../../../model/file";
 import { AuthContext } from "../../identity/AuthProvider";
 import FileTable, { filterParams, ObjectURL } from "./FileTable";
 import history from "../../identity/History";
 
-jest.mock("../../../api/api", () => {
-    const actualApi = jest.requireActual("../../../api/api");
-    return {
-        __esModule: true,
-        ...actualApi,
-        getFiles: jest.fn(),
-        getFilelist: jest.fn()
-    };
-});
+jest.mock("../../../api/api");
 
 test("filterParams", () => {
     expect(filterParams({})).toEqual({});
@@ -40,8 +32,8 @@ const files: DataFile[] = range(0, 5).map(id => ({
     uploaded_timestamp: new Date(Date.now())
 }));
 const getFilesResult = {
-    data: files,
-    meta: { total: 123 }
+    _items: files,
+    _meta: { total: 123 }
 };
 const toggleButtonText = "toggle file view";
 const renderFileTable = () => {
@@ -58,7 +50,7 @@ const renderFileTable = () => {
 };
 
 it("renders with no filters applied", async () => {
-    getFiles.mockResolvedValue(getFilesResult);
+    apiFetch.mockResolvedValue(getFilesResult);
     const {
         findAllByText,
         queryByText,
@@ -77,8 +69,8 @@ it("renders with no filters applied", async () => {
 });
 
 it("handles batch download requests", async () => {
-    getFiles.mockResolvedValue(getFilesResult);
-    getFilelist.mockResolvedValue("foo");
+    apiFetch.mockResolvedValue(getFilesResult);
+    apiCreate.mockResolvedValue("foo");
     const { findAllByText, getByText, queryByText } = renderFileTable();
     const rows = await findAllByText(/url/i);
 
@@ -95,7 +87,11 @@ it("handles batch download requests", async () => {
 
     // download the filelist
     fireEvent.click(getByText(/download filelist.tsv/i));
-    expect(getFilelist).toHaveBeenCalledWith("test-token", [0, 2, 4]);
+    expect(apiCreate).toHaveBeenCalledWith(
+        "/downloadable_files/filelist",
+        "test-token",
+        { data: { file_ids: [0, 2, 4] } }
+    );
 });
 
 test("ObjectURL provides filter state to file details page links", async () => {

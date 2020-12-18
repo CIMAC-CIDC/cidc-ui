@@ -118,7 +118,6 @@ const HomePage: React.FunctionComponent<RouteComponentProps> = ({
     const { data: dataOverview } = useSWR<IDataOverview>([
         "/info/data_overview"
     ]);
-
     const isUnapprovedUser = user && !user.approval_date;
 
     return (

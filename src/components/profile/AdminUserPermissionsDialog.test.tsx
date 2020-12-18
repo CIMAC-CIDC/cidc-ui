@@ -1,17 +1,12 @@
 import * as React from "react";
-import { render, fireEvent } from "@testing-library/react";
-import {
-    grantPermission,
-    revokePermission,
-    getPermissionsForUser,
-    getTrials
-} from "../../api/api";
+import { fireEvent, waitFor } from "@testing-library/react";
+import { apiCreate, apiDelete, apiFetch } from "../../api/api";
 import { Account } from "../../model/account";
 import { Trial } from "../../model/trial";
 import { InfoContext } from "../info/InfoProvider";
 import UserPermissionsDialogWithInfo from "./AdminUserPermissionsDialog";
 import { UserContext } from "../identity/UserProvider";
-import { getNativeCheckbox } from "../../../test/helpers";
+import { getNativeCheckbox, renderWithSWR } from "../../../test/helpers";
 jest.mock("../../api/api");
 
 const TOKEN = "test-token";
@@ -23,7 +18,8 @@ const WES_PERMISSION = {
     id: 123,
     granted_to_user: GRANTEE.id,
     trial_id: "test-1",
-    upload_type: "wes"
+    upload_type: "wes",
+    _etag: "test-etag"
 };
 const PERMISSIONS = [
     WES_PERMISSION,
@@ -34,20 +30,37 @@ const PERMISSIONS = [
     }
 ];
 
-getTrials.mockResolvedValue(TRIALS);
-getPermissionsForUser.mockResolvedValue(PERMISSIONS);
+const mockFetch = (trials = TRIALS, perms = PERMISSIONS) => {
+    apiFetch.mockImplementation(async (url: string) => {
+        if (url.includes("/trial_metadata")) {
+            return { _items: trials, _meta: { total: trials.length } };
+        }
+        if (url.includes("/permissions")) {
+            return { _items: perms, _meta: { total: perms.length } };
+        }
+    });
+};
 
 function doRender() {
     const infoContext = {
         supportedTemplates: {
-            assays: ["cytof", "wes", "rna", "olink", "ihc", "elisa", "mif", "tcr"],
+            assays: [
+                "cytof",
+                "wes",
+                "rna",
+                "olink",
+                "ihc",
+                "elisa",
+                "mif",
+                "tcr"
+            ],
             manifests: [],
             analyses: []
         },
         extraDataTypes: []
     };
 
-    return render(
+    return renderWithSWR(
         <InfoContext.Provider value={infoContext}>
             <UserContext.Provider value={GRANTER}>
                 <UserPermissionsDialogWithInfo
@@ -62,6 +75,7 @@ function doRender() {
 }
 
 it("renders existing permissions", async () => {
+    mockFetch();
     const { findByTestId } = doRender();
 
     // Check that the permissions the user has been granted show up as checked
@@ -73,7 +87,8 @@ it("renders existing permissions", async () => {
     }
 });
 
-it("handles permissions granting", async done => {
+it("handles permissions granting", async () => {
+    mockFetch();
     const { findByTestId } = doRender();
     // User doesn't yet have permission to view cytof for this trial
     const checkboxId = `checkbox-${TRIAL.trial_id}-cytof`;
@@ -83,25 +98,22 @@ it("handles permissions granting", async done => {
     const nativeCheckbox = getNativeCheckbox(muiCheckbox);
     expect(nativeCheckbox.checked).toBe(false);
 
-    // Check expected call to grantPermission
-    grantPermission.mockImplementation(
-        (token, granter, grantee, trial, assay) => {
-            expect([token, granter, grantee, trial, assay]).toEqual([
-                TOKEN,
-                GRANTER.id,
-                GRANTEE.id,
-                TRIAL.trial_id,
-                "cytof"
-            ]);
-            return Promise.resolve(done());
-        }
-    );
-
     // Grant permission to the user
     fireEvent.click(nativeCheckbox);
+    await waitFor(() => {
+        expect(apiCreate).toHaveBeenCalledWith("/permissions", TOKEN, {
+            data: {
+                granted_to_user: GRANTEE.id,
+                granted_by_user: GRANTER.id,
+                trial_id: TRIAL.trial_id,
+                upload_type: "cytof"
+            }
+        });
+    });
 });
 
-it("handles permission revocation", async done => {
+it("handles permission revocation", async () => {
+    mockFetch();
     const { findByTestId } = doRender();
     // User has permission to view wes for this trial
     const checkboxId = `checkbox-${TRIAL.trial_id}-wes`;
@@ -111,12 +123,15 @@ it("handles permission revocation", async done => {
     const nativeCheckbox = getNativeCheckbox(muiCheckbox);
     expect(nativeCheckbox.checked).toBe(true);
 
-    // Check expected call to revokePermission
-    revokePermission.mockImplementation((token, id) => {
-        expect([token, id]).toEqual([TOKEN, WES_PERMISSION.id]);
-        return Promise.resolve(done());
-    });
-
     // Delete permission for the user
     fireEvent.click(nativeCheckbox);
+    await waitFor(() => {
+        expect(apiDelete).toHaveBeenCalledWith(
+            `/permissions/${WES_PERMISSION.id}`,
+            TOKEN,
+            {
+                etag: WES_PERMISSION._etag
+            }
+        );
+    });
 });

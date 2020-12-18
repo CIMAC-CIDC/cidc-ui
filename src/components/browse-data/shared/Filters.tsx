@@ -32,7 +32,7 @@ const Filters: React.FunctionComponent = () => {
         </Grid>
     );
 
-    const otherFacetCheckboxes = facets ? (
+    const otherFacetCheckboxes = facets?.facets ? (
         Object.entries(facets.facets).map(([facetHeader, options]) => {
             const checked = filters.facets
                 ?.filter(facet => facet.startsWith(facetHeader))

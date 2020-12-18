@@ -1,22 +1,27 @@
 import React from "react";
-import { render } from "@testing-library/react";
 import InfoProvider, { InfoContext } from "./InfoProvider";
-import {
-    getSupportedAssays,
-    getSupportedAnalyses,
-    getSupportedManifests,
-    getExtraDataTypes
-} from "../../api/api";
+import { apiFetch } from "../../api/api";
+import { renderWithSWR } from "../../../test/helpers";
 jest.mock("../../api/api");
 
 const assays = ["wes", "rna", "olink"];
-getSupportedAssays.mockResolvedValue(assays);
 const analyses = ["wes_analysis", "rna_analysis"];
-getSupportedAnalyses.mockResolvedValue(analyses);
 const manifests = ["pbmc", "plasma"];
-getSupportedManifests.mockResolvedValue(manifests);
 const extraDataTypes = ["tumor_normal_pairing"];
-getExtraDataTypes.mockResolvedValue(extraDataTypes);
+apiFetch.mockImplementation(async (url: string) => {
+    switch (url) {
+        case "/info/assays":
+            return assays;
+        case "/info/analyses":
+            return analyses;
+        case "/info/manifests":
+            return manifests;
+        case "/info/extra_data_types":
+            return extraDataTypes;
+        default:
+            throw new Error("shouldn't reach this code");
+    }
+});
 
 const dataQuery = (
     findByText: (q: RegExp) => Promise<HTMLElement>,
@@ -32,7 +37,7 @@ const TestInfoConsumer: React.FC = () => {
 };
 
 it("provides info if all api info requests succeed", async () => {
-    const { findByText } = render(
+    const { findByText } = renderWithSWR(
         <InfoProvider>
             <TestInfoConsumer />
         </InfoProvider>

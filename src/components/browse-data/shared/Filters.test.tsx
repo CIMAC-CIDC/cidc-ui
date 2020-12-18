@@ -4,7 +4,7 @@ import {
     getNativeCheckbox,
     renderWithUserContext
 } from "../../../../test/helpers";
-import { getFilterFacets } from "../../../api/api";
+import { apiFetch } from "../../../api/api";
 import Filters from "./Filters";
 import { QueryParamProvider } from "use-query-params";
 import history from "../../identity/History";
@@ -52,8 +52,11 @@ const facets: IFacets = {
     }
 };
 
+beforeEach(() => {
+    apiFetch.mockResolvedValue(facets);
+});
+
 it("renders expected facets based on getFilterFacets", async () => {
-    getFilterFacets.mockResolvedValue(facets);
     const { findByText, queryByText } = renderWithUserContext(
         <FilterProvider>
             <Filters />
@@ -74,7 +77,6 @@ it("renders expected facets based on getFilterFacets", async () => {
 });
 
 it("handles checkbox selection as expected", async () => {
-    getFilterFacets.mockResolvedValue(facets);
     const { findByTestId, getByTestId, getByText } = renderWithUserContext(
         <Router history={history}>
             <QueryParamProvider ReactRouterRoute={Route}>

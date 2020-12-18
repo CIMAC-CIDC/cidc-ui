@@ -16,7 +16,7 @@ import {
     withStyles,
     Link
 } from "@material-ui/core";
-import { IApiPage } from "../../../api/api";
+import { apiFetch, IApiPage } from "../../../api/api";
 import { IFileBundle, Trial } from "../../../model/trial";
 import { withIdToken } from "../../identity/AuthProvider";
 import { flatMap, flatten, isEmpty, map, omitBy, pickBy, range } from "lodash";
@@ -324,10 +324,13 @@ export const usePaginatedTrials = (token: string) => {
     };
 
     const { data, isValidating, setSize } = useSWRInfinite<IApiPage<Trial>>(
-        getTrialURL
+        getTrialURL,
+        apiFetch // provide this explicitly because that make mocking in tests easier
     );
     const trials = data?.flatMap(page => page._items);
-    const allLoaded = trials && trials.length % TRIALS_PER_PAGE !== 0;
+    const allLoaded =
+        trials &&
+        (trials.length === 0 || trials.length % TRIALS_PER_PAGE !== 0);
 
     const loadMore = React.useCallback(() => {
         setSize(size => size + 1);

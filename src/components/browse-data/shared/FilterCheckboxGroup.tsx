@@ -332,7 +332,7 @@ const NestedBoxes = ({
     onChange
 }: IHelperProps<Dictionary<IFacetInfo[]>>) => {
     const classes = useFilterStyles();
-    const topLevelOptions = Object.keys(options);
+    const topLevelOptions = Object.keys(options || {});
     const [openOptions, setOpenOptions] = React.useState<string[]>(checked);
     const addOpenOption = (opt: string) => {
         setOpenOptions([...openOptions, opt]);

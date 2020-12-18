@@ -70,12 +70,12 @@ const ManifestUpload: React.FunctionComponent<{ token: string }> = ({
             apiCreate<{ errors: string[] }>("/ingestion/validate", token, {
                 data: formData
             })
+                .then(() => setStatus("validationSuccess"))
                 .catch(({ response }) => {
                     const errs = response.data._error.message.errors;
                     setErrors(errs);
                     setStatus("validationErrors");
-                })
-                .then(() => setStatus("validationSuccess"));
+                });
         }
     }, [formData, token]);
 

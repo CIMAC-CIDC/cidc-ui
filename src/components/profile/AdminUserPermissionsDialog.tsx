@@ -79,14 +79,17 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
     const classes = useStyles();
     const [page, setPage] = React.useState<number>(0);
 
-    const { data: trialBundle } = useSWR<IApiPage<Trial>>([
-        props.open && "/trial_metadata?page_size=200",
-        props.token
-    ]);
+    const { data: trialBundle } = useSWR<IApiPage<Trial>>(
+        props.open ? ["/trial_metadata?page_size=200", props.token] : null
+    );
     const trials = trialBundle?._items;
     const { data: permissionBundle, mutate, isValidating } = useSWR<
         IApiPage<Permission>
-    >([props.open && `/permissions?user_id=${props.grantee.id}`, props.token]);
+    >(
+        props.open
+            ? [`/permissions?user_id=${props.grantee.id}`, props.token]
+            : null
+    );
     const permissions = permissionBundle?._items;
 
     const makeHandleChange = (trial: string, assay: string) => {
@@ -102,15 +105,18 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                     trial_id: trial,
                     upload_type: assay
                 };
+                apiCreate<Permission>("/permissions", props.token, {
+                    data: newPerm
+                });
                 mutate({
                     _meta: { total: (permissionBundle?._meta.total || 0) + 1 },
                     // @ts-ignore because newPerm is missing `id` and `_etag` fields
                     _items: [...(permissionBundle?._items || []), newPerm]
                 });
-                await apiCreate<Permission>("/permissions", props.token, {
-                    data: newPerm
-                });
             } else if (!checked && perm) {
+                apiDelete<Permission>(`/permissions/${perm.id}`, props.token, {
+                    etag: perm._etag
+                });
                 mutate({
                     _items:
                         permissionBundle?._items.filter(
@@ -118,11 +124,6 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                         ) || [],
                     _meta: { total: permissionBundle?._meta.total || 0 }
                 });
-                await apiDelete<Permission>(
-                    `/permissions/${perm.id}`,
-                    props.token,
-                    { etag: perm._etag }
-                );
             }
         };
     };

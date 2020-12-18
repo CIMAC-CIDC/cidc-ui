@@ -1,6 +1,4 @@
-import * as React from "react";
 import axios, { AxiosRequestConfig, Method } from "axios";
-import { SWRConfig } from "swr";
 import retry from "async-retry";
 
 const baseURL: string = process.env.REACT_APP_API_URL!;
@@ -9,7 +7,7 @@ export function buildRequester(method: Method) {
     return async function requester<T>(
         url: string,
         idToken: string,
-        config: { etag?: string; data?: AxiosRequestConfig["data"] }
+        config?: { etag?: string; data?: AxiosRequestConfig["data"] }
     ) {
         const data = config?.data;
         let etag = config?.etag;
@@ -48,12 +46,6 @@ export const apiFetch = buildRequester("get");
 export const apiCreate = buildRequester("post");
 export const apiUpdate = buildRequester("patch");
 export const apiDelete = buildRequester("delete");
-
-export const SWRConfigProvider: React.FC = ({ children }) => (
-    <SWRConfig value={{ fetcher: apiFetch, shouldRetryOnError: false }}>
-        {children}
-    </SWRConfig>
-);
 
 export interface IApiPage<T> {
     _items: T[];

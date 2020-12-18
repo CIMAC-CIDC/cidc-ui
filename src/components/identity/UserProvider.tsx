@@ -3,7 +3,6 @@ import { AuthContext } from "./AuthProvider";
 import { Account } from "../../model/account";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IApiPage } from "../../api/api";
-import history from "./History";
 import { ErrorContext } from "../errors/ErrorGuard";
 import Permission from "../../model/permission";
 import ContactAnAdmin from "../generic/ContactAnAdmin";
@@ -52,15 +51,14 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                 });
             } else if (!user?.approval_date) {
                 // user is registered but not yet approved
-                history.replace("/");
+                props.history.replace("/");
             }
         } else if (
             // user is authenticated but not yet registered
             error?.response?.data?._error?.message?.includes("not registered")
         ) {
-            history.replace("/register");
+            props.history.replace("/register");
         } else if (error) {
-            console.error(error);
             setError({
                 type: "Request Error",
                 message: "error loading account information"
@@ -85,11 +83,11 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         user?.role && ["cidc-biofx-user", "cidc-admin"].includes(user.role);
 
     const value =
-        authData.state === "logged-in" && user
+        authData.state === "logged-in" && user && permissions
             ? {
                   ...authData.userInfo.user,
                   ...user,
-                  permissions: permissions?._items,
+                  permissions: permissions._items,
                   showAssays,
                   showManifests,
                   showAnalyses

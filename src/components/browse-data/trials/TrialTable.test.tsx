@@ -2,21 +2,13 @@ import React from "react";
 import { fireEvent, render } from "@testing-library/react";
 import { range } from "lodash";
 import { renderWithRouter } from "../../../../test/helpers";
-import { getTrials } from "../../../api/api";
+import { apiFetch } from "../../../api/api";
 import { AuthContext } from "../../identity/AuthProvider";
-import { FilterContext, IFilterContext } from "../shared/FilterProvider";
+import { FilterContext } from "../shared/FilterProvider";
 import TrialTable, { TrialCard, usePaginatedTrials } from "./TrialTable";
-import { act, renderHook } from "@testing-library/react-hooks";
-import { CancelToken } from "axios";
+import { renderHook } from "@testing-library/react-hooks";
 
-jest.mock("../../../api/api", () => {
-    const actualApi = jest.requireActual("../../../api/api");
-    return {
-        __esModule: true,
-        ...actualApi,
-        getTrials: jest.fn()
-    };
-});
+jest.mock("../../../api/api");
 
 const fileBundle = {
     IHC: {
@@ -49,18 +41,25 @@ const metadata = {
     ]
 };
 
-const trialsPageOne = range(10).map(id => ({
-    id,
-    trial_id: `test-trial-${id}`,
-    metadata_json: metadata,
-    file_bundle: fileBundle
-}));
-const trialsPageTwo = range(10, 15).map(id => ({
-    id,
-    trial_id: `test-trial-${id}`,
-    metadata_json: metadata,
-    file_bundle: fileBundle
-}));
+const total = 15;
+const trialsPageOne = {
+    _items: range(10).map(id => ({
+        id,
+        trial_id: `test-trial-${id}`,
+        metadata_json: metadata,
+        file_bundle: fileBundle
+    })),
+    _meta: { total }
+};
+const trialsPageTwo = {
+    _items: range(10, total).map(id => ({
+        id,
+        trial_id: `test-trial-${id}`,
+        metadata_json: metadata,
+        file_bundle: fileBundle
+    })),
+    _meta: { total }
+};
 
 const toggleButtonText = "toggle file view";
 const renderTrialTable = () => {
@@ -74,7 +73,7 @@ const renderTrialTable = () => {
 };
 
 it("renders trials with no filters applied", async () => {
-    getTrials.mockResolvedValue(trialsPageOne);
+    apiFetch.mockResolvedValue(trialsPageOne);
     const {
         findByText,
         queryAllByTestId,
@@ -114,7 +113,7 @@ it("renders trials with no filters applied", async () => {
 });
 
 it("handles pagination as expected", async () => {
-    getTrials.mockResolvedValue(trialsPageOne);
+    apiFetch.mockResolvedValue(trialsPageOne);
     const {
         findByText,
         queryByText,
@@ -132,7 +131,7 @@ it("handles pagination as expected", async () => {
     expect(queryAllByText(/test-trial/i).length).toBe(10);
 
     // second page
-    getTrials.mockResolvedValue(trialsPageTwo);
+    apiFetch.mockResolvedValue(trialsPageTwo);
     const loadMoreButton = getByText(/load more trials/i);
     fireEvent.click(loadMoreButton);
     await findByText(/test-trial-10/i);
@@ -147,9 +146,9 @@ it("handles pagination as expected", async () => {
 });
 
 it("filters by trial id", async () => {
-    getTrials.mockImplementation((token: string, params: any) => {
-        expect(params.trial_ids).toBe("test-trial-0,test-trial-1");
-        return Promise.resolve(trialsPageOne.slice(0, 2));
+    apiFetch.mockImplementation(async url => {
+        expect(url).toContain("trial_ids=test-trial-0,test-trial-1");
+        return { ...trialsPageOne, _items: trialsPageOne._items.slice(0, 2) };
     });
     const { findByText, queryByText } = renderWithRouter(
         <AuthContext.Provider value={{ idToken: "test-token" }}>
@@ -167,13 +166,13 @@ it("filters by trial id", async () => {
     expect(await findByText(/test-trial-0/i)).toBeInTheDocument();
     expect(queryByText(/test-trial-1/i)).toBeInTheDocument();
     expect(queryByText(/test-trial-2/i)).not.toBeInTheDocument();
-    expect(getTrials).toHaveBeenCalled();
+    expect(apiFetch).toHaveBeenCalled();
 });
 
 test("TrialCard links out to clinicaltrials.gov", () => {
     const { getByText } = render(
         // @ts-ignore
-        <TrialCard token="foo" trial={trialsPageOne[0]} />
+        <TrialCard token="foo" trial={trialsPageOne._items[0]} />
     );
     const nctLink = getByText(new RegExp(metadata.nct_id, "i")).closest("a");
     expect(nctLink.href).toBe(
@@ -182,26 +181,31 @@ test("TrialCard links out to clinicaltrials.gov", () => {
 });
 
 test("usePaginatedTrials appears not to have a race condition", async () => {
-    getTrials
-        .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
+    apiFetch
+        .mockImplementationOnce(async () => {
             await new Promise(r => setTimeout(r, 1000));
-            cancelToken.throwIfRequested();
             return trialsPageOne;
         })
-        .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
+        .mockImplementationOnce(async () => {
             await new Promise(r => setTimeout(r, 50));
-            cancelToken.throwIfRequested();
-            return trialsPageOne.slice(0, 2);
+            return {
+                ...trialsPageOne,
+                _items: trialsPageOne._items.slice(0, 2)
+            };
         })
-        .mockImplementationOnce(async (t, p, cancelToken: CancelToken) => {
+        .mockImplementationOnce(async () => {
             await new Promise(r => setTimeout(r, 100));
-            cancelToken.throwIfRequested();
-            return trialsPageOne.slice(3, 6);
+            return {
+                ...trialsPageOne,
+                _items: trialsPageOne._items.slice(3, 6)
+            };
         })
-        .mockImplementation(async (t, p, cancelToken: CancelToken) => {
+        .mockImplementation(async () => {
             await new Promise(r => setTimeout(r, 300));
-            cancelToken.throwIfRequested();
-            return trialsPageOne.slice(7, 9);
+            return {
+                ...trialsPageOne,
+                _items: trialsPageOne._items.slice(7, 9)
+            };
         });
 
     const wrapper: React.FC<any> = ({ children, filters }) => (
@@ -224,10 +228,8 @@ test("usePaginatedTrials appears not to have a race condition", async () => {
     rerender({ filters: { trial_ids: ["test-trial-2"] } });
 
     await waitFor(() => {
-        expect(getTrials.mock.calls.length).toBeGreaterThan(3);
-        expect(result.current.allLoaded).toBe(true);
-        expect(result.current.isLoading).toBe(false);
+        const lastURL = apiFetch.mock.calls[apiFetch.mock.calls.length - 1][0];
+        expect(lastURL).toContain("test-trial-2");
+        expect(result.current.trials).toEqual(trialsPageOne._items.slice(7, 9));
     });
-
-    expect(result.current.trials).toEqual(trialsPageOne.slice(7, 9));
 });

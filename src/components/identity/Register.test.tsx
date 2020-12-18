@@ -1,5 +1,5 @@
 import React from "react";
-import { createUser } from "../../api/api";
+import { apiCreate } from "../../api/api";
 import { IAuthData } from "./AuthProvider";
 import Register from "./Register";
 import { fireEvent } from "@testing-library/react";
@@ -22,11 +22,7 @@ it("works as expected when auth data is provided", async () => {
         last_n: "Doe",
         email: "test@example.com"
     };
-
-    createUser.mockImplementation(async (t: string, u: any) => {
-        expect(t).toBe(idToken);
-        expect(u).toEqual({ ...user, organization: "STANFORD" });
-    });
+    apiCreate.mockResolvedValue(user);
 
     const { findByDisplayValue, getByText } = renderRegister({
         state: "logged-in",
@@ -41,7 +37,7 @@ it("works as expected when auth data is provided", async () => {
 
     // submission without a selected organization blocks form submission
     fireEvent.click(getByText(/register/i));
-    expect(createUser).not.toHaveBeenCalled();
+    expect(apiCreate).not.toHaveBeenCalled();
 
     // select an organization
     fireEvent.mouseDown(getByText(/please select/i));
@@ -49,5 +45,7 @@ it("works as expected when auth data is provided", async () => {
 
     // submission works once all fields have values
     fireEvent.click(getByText(/register/i));
-    expect(createUser).toHaveBeenCalled();
+    expect(apiCreate).toHaveBeenCalledWith("/users/self", idToken, {
+        data: { ...user, organization: "STANFORD" }
+    });
 });

@@ -43,7 +43,6 @@ const ErrorGuard: React.FunctionComponent = ({ children }) => {
     }
 
     const title = `${error.type}${error.message ? " - " + error.message : ""}`;
-
     return (
         <div data-testid="error-message">
             <ErrorContext.Provider value={errorSetter}>

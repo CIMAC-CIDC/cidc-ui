@@ -1,13 +1,10 @@
 import React from "react";
-import {
-    getSingleFile,
-    getDownloadURL,
-    getRelatedFiles
-} from "../../../api/api";
+import { apiFetch } from "../../../api/api";
 import FileDetailsPage, { AdditionalMetadataTable } from "./FileDetailsPage";
 import { renderAsRouteComponent } from "../../../../test/helpers";
 import { fireEvent, act, render, cleanup } from "@testing-library/react";
 import history from "../../identity/History";
+
 jest.mock("../../../api/api");
 jest.mock("../../../util/useRawFile");
 
@@ -23,7 +20,6 @@ const file = {
     uploaded_timestamp: Date.now(),
     data_category_prefix: "WES"
 };
-getRelatedFiles.mockResolvedValue([]);
 
 it("renders a loader at first", () => {
     const { queryByTestId } = renderAsRouteComponent(FileDetailsPage);
@@ -37,12 +33,24 @@ const renderFileDetails = () =>
         authData: { state: "logged-in", userInfo: { idToken } }
     });
 
-it("renders details when a file is provided", async () => {
-    getSingleFile.mockImplementation(async (token: string, fileId: number) => {
-        expect(token).toBe(idToken);
-        expect(fileId).toBe(file.id);
-        return file;
+const mockFetch = (
+    f: any = file,
+    rf: any[] = [],
+    dlUrl: string = downloadURL
+) => {
+    apiFetch.mockImplementation(async (url: string) => {
+        if (url.includes("related_files")) {
+            return rf;
+        }
+        if (url.includes("download_url")) {
+            return dlUrl;
+        }
+        return f;
     });
+};
+
+it("renders details when a file is provided", async () => {
+    mockFetch();
 
     const { findByText, queryByText } = renderFileDetails();
     expect(
@@ -53,42 +61,32 @@ it("renders details when a file is provided", async () => {
     expect(queryByText(/clustergrammer/i)).not.toBeInTheDocument();
     expect(queryByText(/ihc expression plot/i)).not.toBeInTheDocument();
     expect(queryByText(/additional metadata/i)).not.toBeInTheDocument();
+
+    expect(apiFetch).toHaveBeenCalledWith(
+        `/downloadable_files/${file.id}`,
+        idToken
+    );
 });
 
-it("shows file descriptions when available and nothing if not", async () => {
+it("renders no file description if none is available", async () => {
+    mockFetch();
+    const { findByText, queryByText } = renderFileDetails();
+    await findByText(file.object_url);
+    expect(queryByText(/about this file/i)).not.toBeInTheDocument();
+});
+
+it("shows file descriptions when available", async () => {
     const description = "a test description";
-    getSingleFile
-        .mockResolvedValueOnce({
-            ...file,
-            long_description: description
-        })
-        .mockResolvedValueOnce(file);
-
-    const hasDescription = renderFileDetails();
-    expect(
-        await hasDescription.findByText(/about this file/i)
-    ).toBeInTheDocument();
-    expect(
-        hasDescription.queryByText(new RegExp(description, "i"))
-    ).toBeInTheDocument();
-    cleanup();
-
-    const noDescription = renderFileDetails();
-    await noDescription.findByText(/some\/url/i);
-    expect(
-        noDescription.queryByText(/about this file/i)
-    ).not.toBeInTheDocument();
+    mockFetch({ ...file, long_description: description });
+    const { findByText, queryByText } = renderFileDetails();
+    expect(await findByText(/about this file/i)).toBeInTheDocument();
+    expect(queryByText(new RegExp(description, "i"))).toBeInTheDocument();
 });
 
 it("generates download URLs and performs direct downloads", async done => {
-    getSingleFile.mockResolvedValue(file);
-    getDownloadURL.mockImplementation(async (token: string, fileId: number) => {
-        expect(token).toBe(idToken);
-        expect(fileId).toBe(file.id);
-        return downloadURL;
-    });
+    mockFetch();
 
-    const { findByText, getByText, queryByText } = renderFileDetails();
+    const { findByText, getByText } = renderFileDetails();
 
     // Wait for page to load
     await findByText(file.object_url);
@@ -117,14 +115,14 @@ it("generates download URLs and performs direct downloads", async done => {
     act(() => {
         fireEvent.click(getByText(/direct download/i));
     });
-    expect(getDownloadURL.mock.calls.length).toBe(2);
+    expect(apiFetch).toHaveBeenCalledWith(
+        `/downloadable_files/download_url?id=${file.id}`,
+        idToken
+    );
 });
 
 it("shows a clustergrammer card when file has appropriate data", async () => {
-    getSingleFile.mockResolvedValue({
-        ...file,
-        clustergrammer: {}
-    });
+    mockFetch({ ...file, clustergrammer: {} });
 
     const { findByText } = renderFileDetails();
     expect(
@@ -133,10 +131,7 @@ it("shows a clustergrammer card when file has appropriate data", async () => {
 });
 
 it("shows an IHC plot when file has appropriate data", async () => {
-    getSingleFile.mockResolvedValue({
-        ...file,
-        ihc_combined_plot: [{ foo: "bar" }]
-    });
+    mockFetch({ ...file, ihc_combined_plot: [{ foo: "bar" }] });
     const { findByText, queryAllByText } = renderFileDetails();
     await findByText(new RegExp(file.object_url, "i"));
     expect(
@@ -148,10 +143,7 @@ it("shows additional metadata when a file has some", async () => {
     const additionalMetadata = {
         someProperty: "some value"
     };
-    getSingleFile.mockResolvedValue({
-        ...file,
-        additional_metadata: additionalMetadata
-    });
+    mockFetch({ ...file, additional_metadata: additionalMetadata });
     const { findByText, queryByText } = renderFileDetails();
     await findByText(new RegExp(file.object_url));
     expect(queryByText(/someProperty/i)).toBeInTheDocument();
@@ -188,7 +180,7 @@ describe("related files", () => {
     const noRelatedFilesText = /no directly related files/i;
     const downloadButtonText = /download all related files/i;
     it("handles no related files", async () => {
-        getRelatedFiles.mockResolvedValue([]);
+        mockFetch();
         const { findByText, queryByText, getByText } = renderFileDetails();
         expect(await findByText(sectionHeader)).toBeInTheDocument();
 
@@ -213,7 +205,7 @@ describe("related files", () => {
     ];
 
     it("displays related files and makes them downloadable", async () => {
-        getRelatedFiles.mockResolvedValue(files);
+        mockFetch(file, files);
 
         const { findByText, queryByText, getByText } = renderFileDetails();
         expect(await findByText(sectionHeader)).toBeInTheDocument();
@@ -234,7 +226,7 @@ describe("related files", () => {
 });
 
 test("'back to file browser' button has expected href", async () => {
-    getSingleFile.mockResolvedValue(file);
+    mockFetch();
     const buttonText = /back to file browser/i;
 
     // If there's no filter state, the button links to the file browser by default

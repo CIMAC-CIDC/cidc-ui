@@ -40,24 +40,29 @@ import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 import { Skeleton } from "@material-ui/lab";
 import { useRootStyles } from "../../../rootStyles";
 import useSWR from "swr";
+import { apiFetch } from "../../../api/api";
+
+const getDownloadUrl = (token: string, fileId: number) =>
+    apiFetch<string>(`/downloadable_files/download_url?id=${fileId}`, token);
 
 const DownloadURL: React.FunctionComponent<{
-    url?: string;
-}> = ({ url }) => {
-    const [showUrl, setShowUrl] = React.useState<boolean>(false);
+    fileId: number;
+    token: string;
+}> = ({ fileId, token }) => {
+    const [url, setUrl] = React.useState<string | undefined>();
 
     const buttonProps: ButtonProps = {
         variant: "outlined",
         color: "primary"
     };
 
-    if (!url || !showUrl) {
+    if (!url) {
         return (
             <Button
                 fullWidth
                 startIcon={<LinkIcon />}
                 onClick={() => {
-                    setShowUrl(true);
+                    getDownloadUrl(token, fileId).then(u => setUrl(u));
                 }}
                 {...buttonProps}
             >
@@ -97,11 +102,13 @@ const DownloadURL: React.FunctionComponent<{
 
 const FileHeader: React.FC<{
     file: DataFile;
-    downloadUrl?: string;
-}> = ({ file, downloadUrl }) => {
+    token: string;
+}> = ({ file, token }) => {
     const doDownload = () => {
-        if (downloadUrl) {
-            window.location.assign(downloadUrl);
+        if (token) {
+            getDownloadUrl(token, file.id).then(url => {
+                window.location.assign(url);
+            });
         }
     };
 
@@ -146,13 +153,12 @@ const FileHeader: React.FC<{
                             color="primary"
                             startIcon={<CloudDownload />}
                             onClick={() => doDownload()}
-                            disabled={!downloadUrl}
                         >
                             Direct Download
                         </Button>
                     </Grid>
                     <Grid item>
-                        <DownloadURL url={downloadUrl} />
+                        <DownloadURL fileId={file.id} token={token} />
                     </Grid>
                 </Grid>
             </Grid>
@@ -340,10 +346,6 @@ const FileDetailsPage: React.FC<RouteComponentProps<
         `/downloadable_files/${fileId}`,
         token
     ]);
-    const { data: downloadUrl } = useSWR<string>([
-        `/downloadable_files/download_url?id=${fileId}`,
-        token
-    ]);
 
     return !file || !token ? (
         <Loader />
@@ -364,7 +366,7 @@ const FileDetailsPage: React.FC<RouteComponentProps<
                 </Button>
             </Grid>
             <Grid item xs={12}>
-                <FileHeader file={file} downloadUrl={downloadUrl} />
+                <FileHeader file={file} token={token} />
             </Grid>
             <Grid item xs={12}>
                 <FileDescription file={file} />

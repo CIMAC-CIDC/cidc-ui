@@ -1,16 +1,12 @@
 import { fireEvent } from "@testing-library/react";
 import React from "react";
 import { renderWithUserContext } from "../../../test/helpers";
-import {
-    getTrials,
-    createTrial,
-    updateTrialMetadata,
-    getTrial
-} from "../../api/api";
+import { apiFetch, apiCreate, apiupdate, apiUpdate } from "../../api/api";
 import AdminTrialManager from "./AdminTrialManager";
 jest.mock("../../api/api");
 
 const trial1 = {
+    _etag: "some-etag",
     trial_id: "test-trial-0",
     metadata_json: {
         participants: [{}, {}, {}],
@@ -33,7 +29,14 @@ const trial2 = {
     }
 };
 const trials = [trial1, trial2];
-getTrials.mockResolvedValue(trials);
+
+const mockFetch = (ts = trials) => {
+    apiFetch.mockResolvedValue({ _items: ts, _meta: { total: ts.length } });
+};
+
+beforeEach(() => {
+    mockFetch();
+});
 
 const renderTrialManager = () =>
     renderWithUserContext(<AdminTrialManager />, {});
@@ -47,7 +50,7 @@ it("renders available trials and trial creation button", async () => {
 
 it("handles trial creation", async () => {
     const newTrialId = "new-trial-name";
-    createTrial
+    apiCreate
         .mockRejectedValueOnce({
             response: {
                 data: { _error: { message: "violates unique constraint" } }
@@ -83,7 +86,7 @@ it("handles trial creation", async () => {
     const submitButton = getByText(/submit/i);
     fireEvent.submit(submitButton);
     expect(await findByText(/this is a required field/i)).toBeInTheDocument();
-    expect(createTrial).not.toHaveBeenCalled();
+    expect(apiCreate).not.toHaveBeenCalled();
 
     // input a value
     const input = getByLabelText(/protocol identifier/i);
@@ -96,24 +99,22 @@ it("handles trial creation", async () => {
     expect(
         await findByText(/protocol identifier already exists/i)
     ).toBeInTheDocument();
-    expect(createTrial).toHaveBeenCalledTimes(1);
+    expect(apiCreate).toHaveBeenCalledTimes(1);
     // * unexpected error
     fireEvent.submit(submitButton);
     expect(await findByText(/unexpected error/i)).toBeInTheDocument();
-    expect(createTrial).toHaveBeenCalledTimes(2);
+    expect(apiCreate).toHaveBeenCalledTimes(2);
 
-    // successful submission closes the creation form and adds the new trial
-    // to the trial manager list
+    // successful submission closes the creation form and refreshes trial list
+    expect(apiFetch).toHaveBeenCalledTimes(1);
     fireEvent.submit(submitButton);
     expect(await findByText(openFormButtonText)).toBeInTheDocument();
     expect(queryByText(infoText)).not.toBeInTheDocument();
-    expect(queryByText(newTrialId)).toBeInTheDocument();
-    expect(createTrial).toHaveBeenCalledTimes(3);
+    expect(apiFetch).toHaveBeenCalledTimes(2);
 });
 
 it("handles trial editing and updates", async () => {
-    getTrials.mockResolvedValue([trial1]);
-    getTrial.mockResolvedValue({ ...trial1, _etag: "some-etag" });
+    mockFetch([trial1]);
     const updatedTrial = {
         ...trial1,
         metadata_json: {
@@ -123,7 +124,7 @@ it("handles trial editing and updates", async () => {
             allowed_collection_event_names: ["1", "2", "3"]
         }
     };
-    updateTrialMetadata.mockResolvedValue(updatedTrial);
+    apiUpdate.mockResolvedValue(updatedTrial);
 
     const { findByText, getByLabelText, getByText } = renderTrialManager();
     const trialAccordion = await findByText(new RegExp(trial1.trial_id, "i"));
@@ -167,9 +168,14 @@ it("handles trial editing and updates", async () => {
     expect(submitButton.innerHTML).toContain("changes saved!");
 
     // edited values were passed to the API correctly
-    expect(updateTrialMetadata).toHaveBeenCalled();
-    const { metadata_json } = updateTrialMetadata.mock.calls[0][2];
-    expect(metadata_json).toEqual(updatedTrial.metadata_json);
+    expect(apiUpdate).toHaveBeenCalledWith(
+        `/trial_metadata/${trial1.trial_id}`,
+        "test-token",
+        {
+            etag: trial1._etag,
+            data: { metadata_json: updatedTrial.metadata_json }
+        }
+    );
 
     // edited values still appear in the trial editing form
     expect(nctIdInput.value).toBe(updatedTrial.metadata_json.nct_id);
@@ -177,7 +183,7 @@ it("handles trial editing and updates", async () => {
 });
 
 it("handles discarding trial edits", async () => {
-    getTrials.mockResolvedValue([trial1]);
+    mockFetch([trial1]);
 
     const {
         findByText,
@@ -222,10 +228,9 @@ it("handles discarding trial edits", async () => {
 });
 
 it("displays API errors produced while editing trials", async () => {
-    getTrials.mockResolvedValue([trial1]);
-    getTrial.mockResolvedValue({ ...trial1, _etag: "some-etag" });
+    mockFetch([trial1]);
     const errorMessage = "uh oh";
-    updateTrialMetadata.mockRejectedValue({ response: { data: errorMessage } });
+    apiUpdate.mockRejectedValue({ response: { data: errorMessage } });
 
     const { findByText, getByText, getByLabelText } = renderTrialManager();
     // expand the trial accordion

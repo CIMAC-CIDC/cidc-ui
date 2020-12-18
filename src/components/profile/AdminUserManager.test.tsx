@@ -1,6 +1,6 @@
 import * as React from "react";
 import { range } from "lodash";
-import { getUserEtag, getUsers, updateUser } from "../../api/api";
+import { apiFetch, apiUpdate } from "../../api/api";
 import { Account } from "../../model/account";
 import { renderWithUserContext } from "../../../test/helpers";
 import AdminUserManager from "./AdminUserManager";
@@ -14,19 +14,34 @@ const users: Array<Partial<Account>> = range(0, 15).map(id => ({
     last_n: `last_${id}`,
     organization: "DFCI",
     disabled: !!(id % 2),
-    role: "cimac-user"
+    role: "cimac-user",
+    etag: String(id)
 }));
 const user = users[0];
 const currentUser = users[users.length - 1];
 
 beforeEach(() => {
     jest.clearAllMocks();
-    getUsers.mockResolvedValue({ data: users, meta: { total: users.length } });
-    getUserEtag.mockResolvedValue("test-etag");
-    updateUser.mockImplementation(async (t, i, e, updates) => {
-        return { ...user, updates };
+    apiFetch.mockResolvedValue({
+        _items: users,
+        _meta: { total: users.length }
     });
+    apiUpdate.mockImplementation(
+        async (url: string, token: string, config: any) => {
+            return { ...user, ...config.data };
+        }
+    );
 });
+
+const waitForUserUpdates = async (data: Partial<Account>) => {
+    await waitFor(() =>
+        expect(apiUpdate).toHaveBeenCalledWith(
+            `/users/${user.id}`,
+            "test-token",
+            { etag: user._etag, data }
+        )
+    );
+};
 
 it("renders all users", async () => {
     const { queryByText, findByText } = renderWithUserContext(
@@ -44,10 +59,6 @@ it("renders all users", async () => {
     });
 });
 
-const getUserUpdates = () => {
-    return updateUser.mock.calls[0][3];
-};
-
 test("role update selection", async () => {
     const newRole = "cidc-admin";
 
@@ -60,8 +71,7 @@ test("role update selection", async () => {
     // Change the user's role to cidc-admin
     fireEvent.mouseDown(roleSelect);
     fireEvent.click(getByText(newRole));
-    await waitFor(() => expect(updateUser).toHaveBeenCalled());
-    expect(getUserUpdates()).toEqual({ role: newRole });
+    await waitForUserUpdates({ role: newRole });
 });
 
 test("disabling a user", async () => {
@@ -74,8 +84,7 @@ test("disabling a user", async () => {
 
     // Disable the user
     fireEvent.click(disableToggle);
-    await waitFor(() => expect(updateUser).toHaveBeenCalled());
-    expect(getUserUpdates()).toEqual({ disabled: true });
+    await waitForUserUpdates({ disabled: true });
 });
 
 test("adding a contact email", async () => {
@@ -93,8 +102,7 @@ test("adding a contact email", async () => {
     fireEvent.submit(emailInput);
 
     // Check that updates were made
-    await waitFor(() => expect(updateUser).toHaveBeenCalled());
-    expect(getUserUpdates()).toEqual({ contact_email: contactEmail });
+    await waitForUserUpdates({ contact_email: contactEmail });
 });
 
 test("editing a contact email", async () => {
@@ -103,9 +111,9 @@ test("editing a contact email", async () => {
         ...users[0],
         contact_email: oldContactEmail
     };
-    getUsers.mockResolvedValue({
-        data: [userWithContactEmail, ...users.slice(1)],
-        meta: { total: users.length }
+    apiFetch.mockResolvedValue({
+        _items: [userWithContactEmail, ...users.slice(1)],
+        _meta: { total: users.length }
     });
 
     const {
@@ -123,6 +131,5 @@ test("editing a contact email", async () => {
     const emailInput = getByPlaceholderText(/add a contact email/i);
     fireEvent.input(emailInput, { target: { value: newContactEmail } });
     fireEvent.submit(emailInput);
-    await waitFor(() => expect(updateUser).toHaveBeenCalled());
-    expect(getUserUpdates()).toEqual({ contact_email: newContactEmail });
+    await waitForUserUpdates({ contact_email: newContactEmail });
 });

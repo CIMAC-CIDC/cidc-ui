@@ -3,30 +3,28 @@ import { fireEvent } from "@testing-library/react";
 import history from "../identity/History";
 import BrowseDataPage from "./BrowseDataPage";
 import { renderAsRouteComponent } from "../../../test/helpers";
-import { getFiles, getFilterFacets, getTrials } from "../../api/api";
+import { apiFetch } from "../../api/api";
 
-jest.mock("../../api/api", () => {
-    const actualApi = jest.requireActual("../../api/api");
-    return {
-        __esModule: true,
-        ...actualApi,
-        getTrials: jest.fn(),
-        getFiles: jest.fn(),
-        getFilterFacets: jest.fn()
-    };
-});
+jest.mock("../../api/api");
 
 test("trial view / file view toggle", async () => {
-    getTrials.mockResolvedValue([]);
-    getFiles.mockResolvedValue({ data: [], meta: { total: 0 } });
-    getFilterFacets.mockResolvedValue({ trial_ids: [], facets: {} });
-
-    const { findByText, queryByText, getByText } = renderAsRouteComponent(
-        BrowseDataPage,
-        {
-            history
+    apiFetch.mockImplementation(async (url: string) => {
+        if (url.includes("trial_metadata")) {
+            return { _items: [], _meta: { total: 0 } };
         }
-    );
+        if (url.includes("downloadable_files")) {
+            return { _items: [], _meta: { total: 0 } };
+        }
+        if (url.includes("facets")) {
+            return { trial_ids: [], facets: {} };
+        }
+    });
+
+    const {
+        findByText,
+        queryByText,
+        getByText
+    } = renderAsRouteComponent(BrowseDataPage, { history });
     const trialViewText = /loaded all results/i;
     const fileViewText = /no data found for these filters/i;
 
