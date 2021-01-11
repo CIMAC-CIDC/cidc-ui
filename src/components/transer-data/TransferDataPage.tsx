@@ -55,7 +55,7 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
     return (
         <Card style={{ maxWidth: 800 }}>
             <CardHeader title="Transfer data" />
-            <CardContent>
+            <CardContent className="markdown-body">
                 <Typography gutterBottom>
                     Select the trial and assay type you wish to transfer data
                     for to generate a Google Cloud Storage transfer destination.
@@ -82,7 +82,7 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                         }).then(gcsURI => setURL(gcsURI));
                     })}
                 >
-                    <Grid container spacing={3} style={{ maxWidth: 800 }}>
+                    <Grid container spacing={3}>
                         <Grid item xs={6}>
                             <FormControl fullWidth>
                                 <InputLabel id="protocol-identifier-label">
@@ -179,12 +179,7 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                             steps:
                         </Typography>
                         <Box px={2}>
-                            <Grid
-                                container
-                                className="markdown-body"
-                                direction="column"
-                                spacing={1}
-                            >
+                            <Grid container direction="column" spacing={1}>
                                 <Grid item>
                                     <Typography variant="h4">
                                         1. Upload your data with{" "}
@@ -202,12 +197,10 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                                         containing the data you wish to upload,
                                         run a command like:
                                     </Typography>
-                                    <pre>
-                                        <code className="language-bash">
-                                            gsutil -m cp -r{" "}
-                                            {"<local data directory>"} {url}
-                                        </code>
-                                    </pre>
+                                    <code className="language-bash">
+                                        gsutil -m cp -r{" "}
+                                        {"<local data directory>"} {url}
+                                    </code>
                                 </Grid>
                                 <Grid item>
                                     <Typography variant="h4">
