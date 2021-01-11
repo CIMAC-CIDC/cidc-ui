@@ -15,6 +15,7 @@ import {
 } from "./components/upload-docs/UploadDocsPages";
 import { SWRConfig } from "swr";
 import { apiFetch } from "./api/api";
+import TransferDataPage from "./components/transer-data/TransferDataPage";
 
 // Code-split across different routes on the site
 const HomePage = React.lazy(() => import("./components/home/HomePage"));
@@ -85,6 +86,13 @@ export default function App() {
                                                         path="/browse-data"
                                                         component={
                                                             BrowseDataPage
+                                                        }
+                                                    />
+                                                    <Route
+                                                        exact
+                                                        path="/transfer-data"
+                                                        component={
+                                                            TransferDataPage
                                                         }
                                                     />
                                                     <Route

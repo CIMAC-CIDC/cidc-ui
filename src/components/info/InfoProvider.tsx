@@ -35,4 +35,8 @@ const InfoProvider: React.FunctionComponent = props => {
     );
 };
 
+export const useInfoContext = () => {
+    return React.useContext(InfoContext)!;
+};
+
 export default InfoProvider;
