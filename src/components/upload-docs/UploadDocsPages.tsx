@@ -152,7 +152,7 @@ const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
                         page.
                     </Typography>
                     <Typography>
-                        If you prefer to use the CIDC CLI for uploads, it is
+                        If you prefer to use the CIDC's CLI for uploads, it is
                         still supported, but we recommend using the new upload
                         process instead.
                     </Typography>
