@@ -289,6 +289,9 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                                                         id="metadata-file"
                                                         name="xlsx"
                                                         type="file"
+                                                        inputProps={{
+                                                            accept: ".xlsx"
+                                                        }}
                                                     />
                                                 </FormControl>
                                             </Grid>

@@ -5,13 +5,18 @@ import {
     ListItem,
     ListItemText,
     Divider,
-    ListSubheader
+    ListSubheader,
+    Box,
+    Typography
 } from "@material-ui/core";
 import { map } from "lodash";
 import { RouteComponentProps, Route, withRouter, Redirect } from "react-router";
 import UploadInstructions from "./UploadInstructions";
 import { Dictionary } from "lodash";
 import PageWithSidebar from "../generic/PageWithSidebar";
+import { Alert } from "@material-ui/lab";
+import MuiRouterLink from "../generic/MuiRouterLink";
+import { widths } from "../../rootStyles";
 
 interface IDocPathConfig {
     path: string;
@@ -135,52 +140,71 @@ const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
     };
 
     return (
-        <PageWithSidebar
-            sidebar={
-                <Grid container>
-                    <Grid item xs={11}>
-                        <List>
-                            <DocsListItem
-                                label={"The CIDC CLI"}
-                                path={CLIInstructionsSitePath}
-                            />
-                            <ListSubheader disableSticky>
-                                {props.uploadType[0].toUpperCase() +
-                                    props.uploadType.slice(1)}
-                            </ListSubheader>
-                            {map(pathConfigs, (config, path) => {
-                                return (
-                                    config[props.uploadType] && (
-                                        <DocsListItem
-                                            key={path}
-                                            label={config.label}
-                                            path={`/${props.uploadType}/${config.path}`}
-                                        />
-                                    )
-                                );
-                            })}
-                        </List>
+        <>
+            <Box width={widths.minPageWidth} m="auto" pb={3}>
+                <Alert severity="info">
+                    <Typography>
+                        The CIDC is rolling out a new, simpler upload process,
+                        with no custom CLI required. Check out the{" "}
+                        <MuiRouterLink to="/transfer-data">
+                            Transfer Data
+                        </MuiRouterLink>{" "}
+                        page.
+                    </Typography>
+                    <Typography>
+                        If you prefer to use the CIDC CLI for uploads, it is
+                        still supported, but we recommend using the new upload
+                        process instead.
+                    </Typography>
+                </Alert>
+            </Box>
+            <PageWithSidebar
+                sidebar={
+                    <Grid container>
+                        <Grid item xs={11}>
+                            <List>
+                                <DocsListItem
+                                    label={"The CIDC CLI"}
+                                    path={CLIInstructionsSitePath}
+                                />
+                                <ListSubheader disableSticky>
+                                    {props.uploadType[0].toUpperCase() +
+                                        props.uploadType.slice(1)}
+                                </ListSubheader>
+                                {map(pathConfigs, (config, path) => {
+                                    return (
+                                        config[props.uploadType] && (
+                                            <DocsListItem
+                                                key={path}
+                                                label={config.label}
+                                                path={`/${props.uploadType}/${config.path}`}
+                                            />
+                                        )
+                                    );
+                                })}
+                            </List>
+                        </Grid>
+                        <Grid item>
+                            <Divider orientation="vertical" />
+                        </Grid>
                     </Grid>
-                    <Grid item>
-                        <Divider orientation="vertical" />
-                    </Grid>
-                </Grid>
-            }
-        >
-            <Route
-                path={`/${props.uploadType}`}
-                component={CLIRedirect}
-                exact
-            />
-            <Route
-                path={CLIInstructionsSitePath}
-                component={CLIUploadInstructions}
-            />
-            <Route
-                path={`/${props.uploadType}/:docPath`}
-                component={SelectedUploadInstructions}
-            />
-        </PageWithSidebar>
+                }
+            >
+                <Route
+                    path={`/${props.uploadType}`}
+                    component={CLIRedirect}
+                    exact
+                />
+                <Route
+                    path={CLIInstructionsSitePath}
+                    component={CLIUploadInstructions}
+                />
+                <Route
+                    path={`/${props.uploadType}/:docPath`}
+                    component={SelectedUploadInstructions}
+                />
+            </PageWithSidebar>
+        </>
     );
 };
 

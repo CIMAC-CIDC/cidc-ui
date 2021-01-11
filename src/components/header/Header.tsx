@@ -265,9 +265,19 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                             label: "browse data",
                                             value: "/browse-data"
                                         },
-                                        user.showAssays && {
+
+                                        (user.showAssays ||
+                                            user.showAnalyses) && {
                                             label: "transfer data",
                                             value: "/transfer-data"
+                                        },
+                                        user.showAssays && {
+                                            label: "transfer assays",
+                                            value: "/assays"
+                                        },
+                                        user.showAnalyses && {
+                                            label: "transfer analyses",
+                                            value: "/analyses"
                                         },
                                         user.showManifests && {
                                             label: "transfer manifests",

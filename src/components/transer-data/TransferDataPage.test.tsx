@@ -4,12 +4,14 @@ import TransferDataPage from "./TransferDataPage";
 import { apiCreate, apiFetch } from "../../api/api";
 import { InfoContext } from "../info/InfoProvider";
 import { renderWithUserContext } from "../../../test/helpers";
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, waitFor } from "@testing-library/react";
 jest.mock("../../api/api");
 
 const trials = [{ trial_id: "test-trial-0" }];
 const assays = ["wes"];
 const analyses = ["wes_analysis"];
+const metadataFile = new File(["fake metadata xlsx"], "metadata.xlsx");
+const description = "a test description of this upload";
 const gcsURI = "gs://cidc-intake-test/test-trial-0/wes/testuser-123";
 
 const renderWithInfoContext = () =>
@@ -69,4 +71,13 @@ it("works as expected", async () => {
     expect(templateButton?.closest("button")).not.toBeNull();
 
     // Manifest submission form should work as expected
+    fireEvent.change(getByLabelText(/metadata spreadsheet/i), {
+        target: { files: [metadataFile] }
+    });
+    fireEvent.change(getByLabelText(/description/i), {
+        target: { value: description }
+    });
+    fireEvent.click(getByText(/upload metadata/i));
+
+    await waitFor(() => expect(apiCreate).toHaveBeenCalled());
 });
