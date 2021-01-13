@@ -56,9 +56,15 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
         <Card style={{ maxWidth: 800 }}>
             <CardHeader title="Transfer data" />
             <CardContent className="markdown-body">
-                <Typography gutterBottom>
+                <Typography>
                     Select the trial and assay type you wish to transfer data
                     for to generate a Google Cloud Storage transfer destination.
+                </Typography>
+                <Typography gutterBottom>
+                    If you have already initiated a data transfer and need to
+                    upload additional data or submit a new metadata spreadsheet
+                    for it, simply re-enter the trial and upload type relevant
+                    to that data transfer.
                 </Typography>
                 {noTrialPermissions && (
                     <Alert severity="error">
@@ -164,20 +170,29 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                         </Grid>
                     </Grid>
                 </form>
+
                 {url && trialId && uploadType && (
                     <>
                         <Box my={3}>
                             <Divider />
                         </Box>
-
                         <Typography>
                             Your transfer destination is{" "}
                             <strong>
                                 <code>{url}</code>
                             </strong>
-                            . To complete your data transfer, follow these
-                            steps:
+                            .
                         </Typography>
+                        <Alert severity="warning">
+                            Before proceeding with your data transfer, please
+                            ensure your data and metadata do not contain PHI. In
+                            particular, please include only CIMAC IDs as
+                            identifiers for participants and samples, since
+                            identifiers specific to the{" "}
+                            <strong>{trialId}</strong> trial may contain PHI.
+                            Please <ContactAnAdmin lower /> if you need
+                            assistance.
+                        </Alert>
                         <Box px={2}>
                             <Grid container direction="column" spacing={1}>
                                 <Grid item>
@@ -317,12 +332,6 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                                     </form>
                                 </Grid>
                             </Grid>
-                        </Box>
-                        <Box pt={4}>
-                            <Typography>
-                                If you encounter any issues while attempting a
-                                data transfer, please <ContactAnAdmin lower />.
-                            </Typography>
                         </Box>
                     </>
                 )}
