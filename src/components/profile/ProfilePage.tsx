@@ -6,7 +6,8 @@ import {
     Card,
     CardHeader,
     CardContent,
-    Link
+    Link,
+    Box
 } from "@material-ui/core";
 import AdminUserManager from "./AdminUserManager";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
@@ -18,6 +19,7 @@ import Loader from "../generic/Loader";
 import { useRootStyles } from "../../rootStyles";
 import AdminTrialManager from "./AdminTrialManager";
 import { formatDate } from "../../util/formatters";
+import DashFrame from "../generic/DashFrame";
 
 const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
     const classes = useRootStyles();
@@ -153,6 +155,14 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
                     </Grid>
                     <Grid item>
                         <AdminTrialManager />
+                    </Grid>
+                    <Grid item>
+                        <Typography variant="h5">
+                            Successful upload jobs (rendered by Plotly Dash)
+                        </Typography>
+                        <Box height={400}>
+                            <DashFrame dashboardId="upload_jobs" />
+                        </Box>
                     </Grid>
                 </>
             )}
