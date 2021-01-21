@@ -184,9 +184,9 @@ const NavTabs: React.FC<{ selectedTab: string | false; tabs: TabProps[] }> = ({
 
 const useHeaderStyles = makeStyles({
     tabs: {
-        paddingTop: 10,
+        paddingTop: ".5rem",
         margin: 0,
-        height: 134
+        height: "8.4rem"
     },
     logo: { height: 80, padding: 5, marginBottom: -40 }
 });
