@@ -28,7 +28,7 @@ import useSWR from "swr";
 import { Trial } from "../../model/trial";
 import { Alert } from "@material-ui/lab";
 import TemplateDownloadButton from "../generic/TemplateDownloadButton";
-import { CloudDownload } from "@material-ui/icons";
+import { CloudDownload, OpenInNew } from "@material-ui/icons";
 import { RouteComponentProps } from "react-router-dom";
 
 const TransferDataForm: React.FC = withIdToken(({ token }) => {
@@ -47,10 +47,12 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
     const { register, handleSubmit } = useForm();
     const [trialId, setTrialId] = React.useState<string | undefined>();
     const [uploadType, setUploadType] = React.useState<string | undefined>();
-    const [url, setURL] = React.useState<string | undefined>();
+    const [urlInfo, setUrlInfo] = React.useState<
+        { gs_url: string; console_url: string } | undefined
+    >();
     const [uploadSuccess, setUploadSuccess] = React.useState<boolean>(false);
 
-    const isLoadingURL = trialId && uploadType && url === undefined;
+    const isLoadingURL = trialId && uploadType && urlInfo === undefined;
 
     return (
         <Card style={{ maxWidth: 800 }}>
@@ -77,15 +79,19 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                 )}
                 <form
                     onSubmit={handleSubmit(formData => {
-                        setURL(undefined);
+                        setUrlInfo(undefined);
                         setTrialId(formData.trialId);
                         setUploadType(formData.uploadType);
-                        apiCreate<string>("/ingestion/intake_gcs_uri", token, {
-                            data: {
-                                trial_id: formData.trialId,
-                                upload_type: formData.uploadType
+                        apiCreate<typeof urlInfo>(
+                            "/ingestion/intake_bucket",
+                            token,
+                            {
+                                data: {
+                                    trial_id: formData.trialId,
+                                    upload_type: formData.uploadType
+                                }
                             }
-                        }).then(gcsURI => setURL(gcsURI));
+                        ).then(urlInfoRes => setUrlInfo(urlInfoRes));
                     })}
                 >
                     <Grid container spacing={3}>
@@ -170,8 +176,7 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                         </Grid>
                     </Grid>
                 </form>
-
-                {url && trialId && uploadType && (
+                {urlInfo && trialId && uploadType && (
                     <>
                         <Box my={3}>
                             <Divider />
@@ -179,7 +184,7 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                         <Typography>
                             Your transfer destination is{" "}
                             <strong>
-                                <code>{url}</code>
+                                <code>{urlInfo.gs_url}</code>
                             </strong>
                             .
                         </Typography>
@@ -196,8 +201,37 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                         <Box px={2}>
                             <Grid container direction="column" spacing={1}>
                                 <Grid item>
-                                    <Typography variant="h4">
-                                        1. Upload your data with{" "}
+                                    <Typography variant="h3">
+                                        1. Upload your data.
+                                    </Typography>
+                                    <Typography>
+                                        Upload data to your transfer destination
+                                        directly from you browser using the{" "}
+                                        Google Cloud Storage web interface.{" "}
+                                        <strong>Note:</strong> be sure to log in
+                                        using the Google email associated with
+                                        your CIDC account.
+                                    </Typography>
+                                    <Box pb={2}>
+                                        <Button
+                                            onClick={() =>
+                                                window.open(
+                                                    urlInfo.console_url,
+                                                    "_blank",
+                                                    "noopener,noreferrer"
+                                                )
+                                            }
+                                            variant="contained"
+                                            color="primary"
+                                            endIcon={<OpenInNew />}
+                                        >
+                                            visit the data upload console
+                                        </Button>
+                                    </Box>
+                                    <Typography>
+                                        If you are comfortable using your
+                                        computer's terminal, you can also use
+                                        GCS's command-line tool{" "}
                                         <Link
                                             href="https://cloud.google.com/storage/docs/gsutil_install"
                                             target="_blank"
@@ -205,20 +239,19 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                                         >
                                             <code>gsutil</code>
                                         </Link>
-                                        .
-                                    </Typography>
-                                    <Typography>
-                                        From the root of the directory
-                                        containing the data you wish to upload,
-                                        run a command like:
+                                        to perform uploads. This method may be
+                                        faster for large uploads. From the root
+                                        of the directory containing the data you
+                                        wish to upload, run a command like:
                                     </Typography>
                                     <code className="language-bash">
                                         gsutil -m cp -r{" "}
-                                        {"<local data directory>"} {url}
+                                        {"<local data directory>"}{" "}
+                                        {urlInfo.gs_url}
                                     </code>
                                 </Grid>
                                 <Grid item>
-                                    <Typography variant="h4">
+                                    <Typography variant="h3">
                                         2. Download an empty metadata template
                                         and populate it with your upload info.
                                     </Typography>
@@ -243,7 +276,7 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                                     />
                                 </Grid>
                                 <Grid item>
-                                    <Typography variant="h4">
+                                    <Typography variant="h3">
                                         3. Upload your metadata spreadsheet,
                                         along with a brief description of the
                                         upload.

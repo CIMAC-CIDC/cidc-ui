@@ -12,7 +12,10 @@ const assays = ["wes"];
 const analyses = ["wes_analysis"];
 const metadataFile = new File(["fake metadata xlsx"], "metadata.xlsx");
 const description = "a test description of this upload";
-const gcsURI = "gs://cidc-intake-test/test-trial-0/wes/testuser-123";
+const urls = {
+    gs_url: "gs://some-gcs-url",
+    console_url: "https://some-console-url"
+};
 
 const renderWithInfoContext = () =>
     renderWithUserContext(
@@ -24,11 +27,12 @@ const renderWithInfoContext = () =>
     );
 
 it("works as expected", async () => {
+    global.open = jest.fn(); // mock window.open
     apiFetch.mockResolvedValue({ _items: trials });
     apiCreate.mockImplementation(
         async (url: string, token: string, config: any) => {
-            if (url === "/ingestion/intake_gcs_uri") {
-                return gcsURI;
+            if (url === "/ingestion/intake_bucket") {
+                return urls;
             }
         }
     );
@@ -51,16 +55,27 @@ it("works as expected", async () => {
     // Initiate data transfer
     fireEvent.click(getByText(/initiate data transfer/i));
 
+    // There should be a button linking to the console
+    fireEvent.click(await findByText(/visit the data upload console/i));
+    expect(global.open).toHaveBeenCalledWith(
+        urls.console_url,
+        "_blank",
+        "noopener,noreferrer"
+    );
+
     // gsutil command with generated URI should appear
     expect(
-        await findByText(
-            new RegExp(`gsutil -m cp -r <local data directory> ${gcsURI}`, "i")
+        getByText(
+            new RegExp(
+                `gsutil -m cp -r <local data directory> ${urls.gs_url}`,
+                "i"
+            )
         )
     ).toBeInTheDocument();
 
     // API should've been called correctly
     expect(apiCreate).toHaveBeenCalledWith(
-        "/ingestion/intake_gcs_uri",
+        "/ingestion/intake_bucket",
         "test-token",
         { data: { trial_id: "test-trial-0", upload_type: "wes_analysis" } }
     );
