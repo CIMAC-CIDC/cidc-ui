@@ -13,7 +13,8 @@ export const ROLES = [
     "cimac-user",
     "developer",
     "devops",
-    "nci-biobank-user"
+    "nci-biobank-user",
+    "network-viewer"
 ];
 
 export const DATE_OPTIONS = {

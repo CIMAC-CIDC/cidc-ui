@@ -7,8 +7,14 @@ import { DataFile } from "../../../model/file";
 import { AuthContext } from "../../identity/AuthProvider";
 import FileTable, { filterParams, ObjectURL } from "./FileTable";
 import history from "../../identity/History";
+import { useUserContext } from "../../identity/UserProvider";
 
 jest.mock("../../../api/api");
+jest.mock("../../identity/UserProvider");
+
+beforeEach(() => {
+    useUserContext.mockImplementation(() => ({ canDownload: true }));
+});
 
 test("filterParams", () => {
     expect(filterParams({})).toEqual({});
@@ -92,6 +98,17 @@ it("handles batch download requests", async () => {
         "test-token",
         { data: { file_ids: [0, 2, 4] } }
     );
+});
+
+it("doesn't display batch download buttons for users without download perms", async () => {
+    apiFetch.mockResolvedValue(getFilesResult);
+    useUserContext.mockImplementation(() => ({ canDownload: false }));
+    const { getByText, queryByText, findAllByText } = renderFileTable();
+
+    await findAllByText(/url/i);
+
+    expect(getByText(/browse available files/i)).toBeInTheDocument();
+    expect(queryByText(/no files selected/i)).not.toBeInTheDocument();
 });
 
 test("ObjectURL provides filter state to file details page links", async () => {

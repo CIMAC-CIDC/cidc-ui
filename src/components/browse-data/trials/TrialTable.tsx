@@ -26,11 +26,12 @@ import { Skeleton } from "@material-ui/lab";
 import { useFilterFacets } from "../shared/FilterProvider";
 import { useSWRInfinite } from "swr";
 import { formatQueryString } from "../../../util/formatters";
+import { useUserContext } from "../../identity/UserProvider";
 
 const BatchDownloadButton: React.FC<{
     ids: number[];
     token: string;
-} & ButtonProps> = ({ ids, token, children }) => {
+} & ButtonProps> = ({ ids, token, children, disabled }) => {
     const [open, setOpen] = React.useState<boolean>(false);
     return (
         <>
@@ -39,7 +40,7 @@ const BatchDownloadButton: React.FC<{
                 size="small"
                 variant="outlined"
                 startIcon={<CloudDownload />}
-                disabled={!ids.length}
+                disabled={!ids.length || disabled}
                 onClick={() => {
                     setOpen(true);
                 }}
@@ -101,10 +102,15 @@ const AssayButton: React.FC<{
     bundle: IFileBundle[keyof IFileBundle];
     token: string;
 }> = ({ purpose, bundle, token }) => {
+    const user = useUserContext();
     const ids = bundle[purpose] || [];
     return (
         <Box m={1}>
-            <BatchDownloadButton token={token} ids={ids}>
+            <BatchDownloadButton
+                token={token}
+                ids={ids}
+                disabled={!user.canDownload}
+            >
                 {ids.length} files
             </BatchDownloadButton>
         </Box>
@@ -194,6 +200,7 @@ const LabelAndValue: React.FC<{
 };
 
 export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
+    const user = useUserContext();
     const {
         participants,
         trial_name,
@@ -267,7 +274,11 @@ export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
             <Typography variant="overline" color="textSecondary">
                 Clinical/Sample Data
             </Typography>
-            <BatchDownloadButton token={token} ids={clinicalIds}>
+            <BatchDownloadButton
+                token={token}
+                ids={clinicalIds}
+                disabled={!user.canDownload}
+            >
                 {clinicalIds.length} participant/sample files
             </BatchDownloadButton>
             {!isEmpty(assayBundle) && (

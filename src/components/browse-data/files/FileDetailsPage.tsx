@@ -41,11 +41,12 @@ import { Skeleton } from "@material-ui/lab";
 import { useRootStyles } from "../../../rootStyles";
 import useSWR from "swr";
 import { apiFetch } from "../../../api/api";
+import { useUserContext } from "../../identity/UserProvider";
 
 const getDownloadUrl = (token: string, fileId: number) =>
     apiFetch<string>(`/downloadable_files/download_url?id=${fileId}`, token);
 
-const DownloadURL: React.FunctionComponent<{
+const DownloadURLButton: React.FunctionComponent<{
     fileId: number;
     token: string;
 }> = ({ fileId, token }) => {
@@ -104,6 +105,8 @@ const FileHeader: React.FC<{
     file: DataFile;
     token: string;
 }> = ({ file, token }) => {
+    const user = useUserContext();
+
     const doDownload = () => {
         if (token) {
             getDownloadUrl(token, file.id).then(url => {
@@ -145,22 +148,29 @@ const FileHeader: React.FC<{
                 </Grid>
             </Grid>
             <Grid item xs={3}>
-                <Grid container direction="column" spacing={1} wrap="nowrap">
-                    <Grid item>
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            color="primary"
-                            startIcon={<CloudDownload />}
-                            onClick={() => doDownload()}
-                        >
-                            Direct Download
-                        </Button>
+                {user.canDownload && (
+                    <Grid
+                        container
+                        direction="column"
+                        spacing={1}
+                        wrap="nowrap"
+                    >
+                        <Grid item>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="primary"
+                                startIcon={<CloudDownload />}
+                                onClick={() => doDownload()}
+                            >
+                                Direct Download
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <DownloadURLButton fileId={file.id} token={token} />
+                        </Grid>
                     </Grid>
-                    <Grid item>
-                        <DownloadURL fileId={file.id} token={token} />
-                    </Grid>
-                </Grid>
+                )}
             </Grid>
         </Grid>
     );
@@ -235,6 +245,7 @@ const RelatedFiles: React.FC<{ file: DataFile; token: string }> = ({
     token,
     file
 }) => {
+    const user = useUserContext();
     const [batchDownloadOpen, setBatchDownloadOpen] = React.useState<boolean>(
         false
     );
@@ -257,15 +268,17 @@ const RelatedFiles: React.FC<{ file: DataFile; token: string }> = ({
                 </Typography>
             </Grid>
             <Grid item>
-                <Button
-                    variant="outlined"
-                    color="primary"
-                    disabled={!relatedFiles || relatedFiles.length === 0}
-                    startIcon={<CloudDownload />}
-                    onClick={() => setBatchDownloadOpen(true)}
-                >
-                    download all related files
-                </Button>
+                {user.canDownload && (
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        disabled={!relatedFiles || relatedFiles.length === 0}
+                        startIcon={<CloudDownload />}
+                        onClick={() => setBatchDownloadOpen(true)}
+                    >
+                        download all related files
+                    </Button>
+                )}
             </Grid>
         </Grid>
     );

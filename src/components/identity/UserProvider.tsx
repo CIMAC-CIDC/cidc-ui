@@ -13,6 +13,7 @@ export interface IAccountWithExtraContext extends Account {
     showAssays?: boolean;
     showAnalyses?: boolean;
     showManifests?: boolean;
+    canDownload?: boolean;
 }
 
 export const UserContext = React.createContext<
@@ -81,6 +82,7 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         user?.role && ["nci-biobank-user", "cidc-admin"].includes(user.role);
     const showAnalyses =
         user?.role && ["cidc-biofx-user", "cidc-admin"].includes(user.role);
+    const canDownload = user?.role !== "network-viewer";
 
     const value =
         authData.state === "logged-in" && user && permissions
@@ -90,7 +92,8 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                   permissions: permissions._items,
                   showAssays,
                   showManifests,
-                  showAnalyses
+                  showAnalyses,
+                  canDownload
               }
             : undefined;
 

@@ -7,8 +7,14 @@ import { AuthContext } from "../../identity/AuthProvider";
 import { FilterContext } from "../shared/FilterProvider";
 import TrialTable, { TrialCard, usePaginatedTrials } from "./TrialTable";
 import { renderHook } from "@testing-library/react-hooks";
+import { useUserContext } from "../../identity/UserProvider";
 
 jest.mock("../../../api/api");
+jest.mock("../../identity/UserProvider");
+
+beforeEach(() => {
+    useUserContext.mockImplementation(() => ({ canDownload: true }));
+});
 
 const fileBundle = {
     IHC: {
@@ -103,13 +109,37 @@ it("renders trials with no filters applied", async () => {
     expect(queryAllByText(new RegExp("nice biobank", "i")).length).toBe(10);
 
     // renders batch download interface
-    expect(queryAllByText(/2 participant\/sample files/i).length).toBe(10);
+    const clinicalButtons = queryAllByText(/2 participant\/sample files/i);
+    const fourFileButtons = queryAllByText(/4 files/i);
+    const zeroFileButtons = queryAllByText(/0 files/i);
+    expect(clinicalButtons.length).toBe(10);
     expect(queryAllByText(/cytof/i).length).toBe(10);
-    expect(queryAllByText(/4 files/i).length).toBe(10);
+    expect(fourFileButtons.length).toBe(10);
     expect(queryAllByText(/3 files/i).length).toBe(10);
     expect(queryAllByText(/ihc/i).length).toBe(10);
     expect(queryAllByText(/2 files/i).length).toBe(10);
-    expect(queryAllByText(/0 files/i).length).toBe(10);
+    expect(zeroFileButtons.length).toBe(10);
+
+    // buttons with files available are enabled
+    expect(clinicalButtons[0].closest("button").disabled).toBe(false);
+    expect(fourFileButtons[0].closest("button").disabled).toBe(false);
+    expect(zeroFileButtons[0].closest("button").disabled).toBe(true);
+});
+
+it("doesn't enable download buttons if users don't have download permission", async () => {
+    apiFetch.mockResolvedValue(trialsPageOne);
+    useUserContext.mockImplementation(() => ({ canDownload: false }));
+    const { findByText, queryAllByText } = renderTrialTable();
+
+    expect(await findByText(/test-trial-0/i)).toBeInTheDocument();
+    const clinicalButtons = queryAllByText(/2 participant\/sample files/i);
+    const fourFileButtons = queryAllByText(/4 files/i);
+    const zeroFileButtons = queryAllByText(/0 files/i);
+
+    // All download buttons are disabled
+    expect(clinicalButtons[0].closest("button").disabled).toBe(true);
+    expect(fourFileButtons[0].closest("button").disabled).toBe(true);
+    expect(zeroFileButtons[0].closest("button").disabled).toBe(true);
 });
 
 it("handles pagination as expected", async () => {

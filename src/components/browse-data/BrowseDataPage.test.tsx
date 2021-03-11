@@ -4,8 +4,14 @@ import history from "../identity/History";
 import BrowseDataPage from "./BrowseDataPage";
 import { renderAsRouteComponent } from "../../../test/helpers";
 import { apiFetch } from "../../api/api";
+import { useUserContext } from "../identity/UserProvider";
 
 jest.mock("../../api/api");
+jest.mock("../identity/UserProvider");
+
+beforeEach(() => {
+    useUserContext.mockImplementation(() => ({ canDownload: true }));
+});
 
 test("trial view / file view toggle", async () => {
     apiFetch.mockImplementation(async (url: string) => {

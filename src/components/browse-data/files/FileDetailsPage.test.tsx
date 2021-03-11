@@ -4,9 +4,15 @@ import FileDetailsPage, { AdditionalMetadataTable } from "./FileDetailsPage";
 import { renderAsRouteComponent } from "../../../../test/helpers";
 import { fireEvent, act, render, cleanup } from "@testing-library/react";
 import history from "../../identity/History";
+import { useUserContext } from "../../identity/UserProvider";
 
 jest.mock("../../../api/api");
 jest.mock("../../../util/useRawFile");
+jest.mock("../../identity/UserProvider");
+
+beforeEach(() => {
+    useUserContext.mockImplementation(() => ({ canDownload: true }));
+});
 
 const idToken = "test-token";
 const downloadURL = "do-a-download";
@@ -121,6 +127,17 @@ it("generates download URLs and performs direct downloads", async done => {
     );
 });
 
+it("hides file download buttons if the user doesn't have download permissions", async () => {
+    mockFetch();
+    useUserContext.mockImplementation(() => ({ canDownload: false }));
+    const { findByText, queryByText } = renderFileDetails();
+
+    await findByText(file.object_url);
+
+    expect(queryByText(/direct download/i)).not.toBeInTheDocument();
+    expect(queryByText(/temporary download link/i)).not.toBeInTheDocument();
+});
+
 it("shows a clustergrammer card when file has appropriate data", async () => {
     mockFetch({ ...file, clustergrammer: {} });
 
@@ -222,6 +239,15 @@ describe("related files", () => {
         // makes all files batch downloadable
         const downloadButton = getByText(downloadButtonText).closest("button");
         expect(downloadButton?.disabled).toBe(false);
+    });
+
+    it("doesn't show a download button for network-viewer users", async () => {
+        mockFetch();
+        useUserContext.mockImplementation(() => ({ canDownload: false }));
+
+        const { findByText, queryByText } = renderFileDetails();
+        expect(await findByText(noRelatedFilesText)).toBeInTheDocument();
+        expect(queryByText(downloadButtonText)).not.toBeInTheDocument();
     });
 });
 

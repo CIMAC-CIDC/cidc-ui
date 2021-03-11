@@ -7,7 +7,8 @@ import {
     TableCell,
     Button,
     Grid,
-    Typography
+    Typography,
+    Box
 } from "@material-ui/core";
 import { useQueryParam, NumberParam } from "use-query-params";
 import { IApiPage } from "../../../api/api";
@@ -23,6 +24,7 @@ import {
 } from "../../../util/formatters";
 import { useHistory } from "react-router-dom";
 import useSWR from "swr";
+import { useUserContext } from "../../identity/UserProvider";
 
 const fileQueryDefaults = {
     page_size: 50
@@ -135,6 +137,7 @@ export const ObjectURL: React.FC<{ file: DataFile }> = ({ file }) => {
 
 const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
     const classes = useStyles();
+    const user = useUserContext();
     const { filters } = useFilterFacets();
 
     const [queryPage, setQueryPage] = useQueryParam("page", NumberParam);
@@ -172,20 +175,26 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                     <Grid item>
                         <Grid container alignItems="center" spacing={1}>
                             <Grid item>
-                                <Typography
-                                    color="textSecondary"
-                                    variant="caption"
-                                >
-                                    Select files for batch download
-                                </Typography>
+                                <Box padding={1}>
+                                    <Typography
+                                        color="textSecondary"
+                                        variant="caption"
+                                    >
+                                        {user.canDownload
+                                            ? "Select files for batch download"
+                                            : "Browse available files"}
+                                    </Typography>
+                                </Box>
                             </Grid>
-                            <Grid item>
-                                <BatchDownloadButton
-                                    ids={selectedFileIds}
-                                    token={props.token}
-                                    clearIds={() => setSelectedFileIds([])}
-                                />
-                            </Grid>
+                            {user.canDownload && (
+                                <Grid item>
+                                    <BatchDownloadButton
+                                        ids={selectedFileIds}
+                                        token={props.token}
+                                        clearIds={() => setSelectedFileIds([])}
+                                    />
+                                </Grid>
+                            )}
                         </Grid>
                     </Grid>
                     <Grid item>{props.viewToggleButton}</Grid>
@@ -247,16 +256,23 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                                 </>
                             );
                         }}
-                        selectedRowIds={selectedFileIds}
-                        setSelectedRowIds={setSelectedFileIds}
-                        onClickRow={file => {
-                            const newSelectedFileIds = selectedFileIds.includes(
-                                file.id
-                            )
-                                ? selectedFileIds.filter(id => id !== file.id)
-                                : [...selectedFileIds, file.id];
-                            setSelectedFileIds(newSelectedFileIds);
-                        }}
+                        {
+                            // Rows should only be selectable if the user has download perms
+                            ...(user.canDownload && {
+                                selectedRowIds: selectedFileIds,
+                                setSelectedRowIds: setSelectedFileIds,
+                                onClickRow: file => {
+                                    const newSelectedFileIds = selectedFileIds.includes(
+                                        file.id
+                                    )
+                                        ? selectedFileIds.filter(
+                                              id => id !== file.id
+                                          )
+                                        : [...selectedFileIds, file.id];
+                                    setSelectedFileIds(newSelectedFileIds);
+                                }
+                            })
+                        }
                     />
                 </div>
             </Grid>
