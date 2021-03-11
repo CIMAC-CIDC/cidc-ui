@@ -5,6 +5,7 @@ import history from "./History";
 import UserProvider, { useUserContext } from "./UserProvider";
 import { renderWithRouter } from "../../../test/helpers";
 import ErrorGuard from "../errors/ErrorGuard";
+import { ROLES } from "../../util/constants";
 jest.mock("../../api/api");
 
 const ChildComponent = () => {
@@ -81,6 +82,45 @@ it("handles a disabled user", async () => {
     expect(error.textContent).toContain("Account Disabled");
 });
 
+const mockWithRole = (role: string) => {
+    apiFetch.mockResolvedValue({
+        id: 1,
+        role,
+        approval_date: Date.now()
+    });
+};
+
+describe("download access", () => {
+    const DownloadTestComponent = () => {
+        const user = useUserContext();
+
+        if (!user) {
+            return null;
+        }
+
+        return (
+            <div>{user.canDownload ? "can download" : "cannot download"}</div>
+        );
+    };
+
+    ROLES.forEach(role => {
+        it(`knows whether ${role} should be allowed to download data`, async () => {
+            mockWithRole(role);
+            const { findByText } = renderUserProvider(
+                <DownloadTestComponent />
+            );
+
+            expect(
+                await findByText(
+                    role === "network-viewer"
+                        ? /cannot download/i
+                        : /can download/i
+                )
+            ).toBeInTheDocument();
+        });
+    });
+});
+
 describe("role-based tab display", () => {
     const RoleTestComponent = () => {
         const user = useUserContext();
@@ -97,16 +137,10 @@ describe("role-based tab display", () => {
             </div>
         );
     };
-    const mockWithRole = (role: string) => {
-        apiFetch.mockResolvedValue({
-            id: 1,
-            role,
-            approval_date: Date.now()
-        });
-    };
 
     const expectedTabs = [
         { role: "cimac-user", tabs: [] },
+        { role: "network-viewer", tabs: [] },
         { role: "cimac-biofx-user", tabs: ["assays"] },
         { role: "cidc-biofx-user", tabs: ["assays", "analyses"] },
         { role: "nci-biobank-user", tabs: ["manifests"] },
