@@ -17,9 +17,9 @@ import {
     IconButton,
     Grid
 } from "@material-ui/core";
-import { IApiPage } from "../../api/api";
+import { apiFetch, IApiPage } from "../../api/api";
 import { Account } from "../../model/account";
-import { Edit, SupervisorAccount } from "@material-ui/icons";
+import { CloudDownload, Edit, SupervisorAccount } from "@material-ui/icons";
 import PaginatedTable, { ISortConfig } from "../generic/PaginatedTable";
 import { useUserContext } from "../identity/UserProvider";
 import { withIdToken } from "../identity/AuthProvider";
@@ -29,6 +29,8 @@ import { useForm } from "react-hook-form";
 import useSWR from "swr";
 import { formatQueryString } from "../../util/formatters";
 import { apiUpdate } from "../../api/api";
+import moment from "moment";
+import Loader from "../generic/Loader";
 
 const useContactEmailStyles = makeStyles(theme => ({
     input: {
@@ -119,6 +121,47 @@ const ContactEmail: React.FC<{
         </Box>
     );
 };
+
+const DataAccessReportDownloadButton: React.FC = withIdToken(({ token }) => {
+    const [isDownloading, setIsDownloading] = React.useState<boolean>(false);
+
+    const downloadDataAccessReport = () => {
+        setIsDownloading(true);
+        apiFetch<ArrayBuffer>("/users/data_access_report", token, {
+            responseType: "arraybuffer"
+        }).then(data => {
+            const blob = new Blob([data], {
+                type:
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            const date = moment().format("YYYY-MM-DD");
+            a.href = url;
+            a.download = `cidc_${process.env.REACT_APP_ENV}_data_access_${date}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            URL.revokeObjectURL(url);
+            setIsDownloading(false);
+        });
+    };
+
+    return (
+        <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<CloudDownload />}
+            onClick={() => downloadDataAccessReport()}
+            disabled={isDownloading}
+        >
+            <Grid container spacing={1} alignItems="center" wrap="nowrap">
+                <Grid item>Download Data Access Report</Grid>
+
+                <Grid item>{isDownloading && <Loader size="1rem" />}</Grid>
+            </Grid>
+        </Button>
+    );
+});
 
 const useRowStyles = makeStyles(theme => ({
     disabled: {
@@ -252,7 +295,15 @@ const AdminUserManager: React.FC<{ token: string }> = ({ token }) => {
         <Card>
             <CardHeader
                 avatar={<SupervisorAccount />}
-                title={<Typography variant="h6">Manage Users</Typography>}
+                title={
+                    <Grid container justify="space-between" alignItems="center">
+                        <Typography variant="h6">Manage Users</Typography>
+                        <Grid item></Grid>
+                        <Grid item>
+                            <DataAccessReportDownloadButton />
+                        </Grid>
+                    </Grid>
+                }
             />
             <CardContent>
                 <PaginatedTable

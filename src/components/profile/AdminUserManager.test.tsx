@@ -133,3 +133,24 @@ test("editing a contact email", async () => {
     fireEvent.submit(emailInput);
     await waitForUserUpdates({ contact_email: newContactEmail });
 });
+
+test("downloading a data access report", async () => {
+    const { getByText, findByText } = renderWithUserContext(
+        <AdminUserManager />,
+        currentUser
+    );
+    await findByText(users[0].email!);
+
+    apiFetch.mockReset();
+    apiFetch.mockResolvedValue(new ArrayBuffer(8));
+
+    const downloadButton = getByText(/download data access report/i).closest(
+        "button"
+    )!;
+    fireEvent.click(downloadButton);
+
+    expect(downloadButton.disabled).toBe(true);
+    expect(apiFetch).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => expect(downloadButton.disabled).toBe(false));
+});

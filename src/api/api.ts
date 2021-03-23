@@ -10,9 +10,14 @@ function buildRequester(method: Method) {
     return async function requester<T>(
         url: string,
         idToken: string,
-        config?: { etag?: string; data?: AxiosRequestConfig["data"] }
+        config?: {
+            etag?: string;
+            data?: AxiosRequestConfig["data"];
+            responseType?: AxiosRequestConfig["responseType"];
+        }
     ) {
         const data = config?.data;
+        const responseType = config?.responseType;
         let etag = config?.etag;
         return retry<T>(
             async bail => {
@@ -22,9 +27,17 @@ function buildRequester(method: Method) {
                     "content-type":
                         data instanceof FormData ? "multipart/form" : undefined
                 };
-                const fullConfig = { url, method, baseURL, data, headers };
+                const fullConfig = {
+                    url,
+                    method,
+                    baseURL,
+                    data,
+                    headers,
+                    responseType
+                };
                 try {
                     const res = await axios.request<T>(fullConfig);
+
                     return res.data;
                 } catch (e) {
                     if (

@@ -33,7 +33,6 @@ const BatchDownloadDialog: React.FC<IBatchDownloadDialogProps> = ({
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "filelist.tsv";
             document.body.appendChild(a);
             a.click();
             URL.revokeObjectURL(url);
