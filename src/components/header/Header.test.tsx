@@ -106,7 +106,7 @@ describe("Header", () => {
         checkVisibility(
             q1,
             ["browse data", "pipelines", "schema"],
-            ["manifests", "assays", "analyses"]
+            ["manifests", "assays", "analyses", "data overview"]
         );
         cleanup();
 
@@ -118,7 +118,7 @@ describe("Header", () => {
         checkVisibility(
             q2,
             ["browse data", "pipelines", "schema", "assays"],
-            ["manifests", "analyses"]
+            ["manifests", "analyses", "data overview"]
         );
         cleanup();
 
@@ -129,7 +129,13 @@ describe("Header", () => {
         });
         checkVisibility(
             q3,
-            ["browse data", "pipelines", "schema", "manifests"],
+            [
+                "browse data",
+                "pipelines",
+                "schema",
+                "manifests",
+                "data overview"
+            ],
             ["assays", "analyses"]
         );
         cleanup();
@@ -143,7 +149,7 @@ describe("Header", () => {
         checkVisibility(
             q4,
             ["browse data", "pipelines", "schema", "assays", "analyses"],
-            ["manifests"]
+            ["manifests", "data overview"]
         );
         cleanup();
 
@@ -162,7 +168,8 @@ describe("Header", () => {
                 "schema",
                 "assays",
                 "analyses",
-                "manifests"
+                "manifests",
+                "data overview"
             ],
             []
         );
@@ -183,7 +190,8 @@ describe("Header", () => {
             "schema",
             "assays",
             "analyses",
-            "manifests"
+            "manifests",
+            "data-overview"
         ].forEach(path => {
             act(() => {
                 fireEvent.click(

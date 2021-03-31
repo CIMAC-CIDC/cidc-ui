@@ -302,7 +302,11 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                             label: "pipelines",
                                             value: "/pipelines"
                                         },
-                                        { label: "schema", value: "/schema" }
+                                        { label: "schema", value: "/schema" },
+                                        user.showManifests && {
+                                            label: "data overview",
+                                            value: "/data-overview"
+                                        }
                                     ].filter(t => !!t) as TabProps[]
                                 }
                             />

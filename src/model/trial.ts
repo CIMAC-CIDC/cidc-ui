@@ -21,3 +21,9 @@ export interface IFileBundle {
         miscellaneous?: number[];
     };
 }
+
+export interface ITrialOverview {
+    trial_id: string;
+    file_size_bytes: number;
+    [assay: string]: number | string;
+}
