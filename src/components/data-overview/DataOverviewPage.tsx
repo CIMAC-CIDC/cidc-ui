@@ -20,6 +20,10 @@ import { RouteComponentProps } from "react-router";
 import { useRootStyles } from "../../rootStyles";
 import { formatFileSize } from "../../util/formatters";
 
+const friendlyAssayNames = {
+    hande: "h&e"
+};
+
 const HeaderCell = withStyles({
     root: {
         textTransform: "uppercase",
@@ -72,7 +76,9 @@ export const DataOverviewTable: React.FC = withIdToken(({ token }) => {
                             <HeaderCell>Protocol ID</HeaderCell>
                             <HeaderCell>Total Data Ingested</HeaderCell>
                             {assays.map(assay => (
-                                <HeaderCell key={assay}>{assay}</HeaderCell>
+                                <HeaderCell key={assay}>
+                                    {friendlyAssayNames[assay] || assay}
+                                </HeaderCell>
                             ))}
                         </TableRow>
                     </TableHead>

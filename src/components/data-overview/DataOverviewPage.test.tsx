@@ -14,8 +14,8 @@ afterEach(() => {
 
 it("displays data as expected", async () => {
     apiFetch.mockResolvedValue([
-        { trial_id: "trial1", file_size_bytes: 1e3, assay_1: 11, assay_2: 12 },
-        { trial_id: "trial2", file_size_bytes: 1e6, assay_1: 21, assay_2: 0 }
+        { trial_id: "trial1", file_size_bytes: 1e3, hande: 11, wes: 12 },
+        { trial_id: "trial2", file_size_bytes: 1e6, hande: 21, wes: 0 }
     ]);
 
     const { findByText, queryByText } = renderAsRouteComponent(
@@ -25,6 +25,9 @@ it("displays data as expected", async () => {
     expect(await findByText(/protocol id/i)).toBeInTheDocument();
     expect(queryByText(/trial1/i)).toBeInTheDocument();
     expect(queryByText(/trial2/i)).toBeInTheDocument();
+    // note: hande has been translated to more readable h&e
+    expect(queryByText(/h&e/i)).toBeInTheDocument();
+    expect(queryByText(/wes/i)).toBeInTheDocument();
     expect(queryByText(/1 kb/i)).toBeInTheDocument();
     expect(queryByText(/1 mb/i)).toBeInTheDocument();
     expect(queryByText(/11/i)).toBeInTheDocument();
