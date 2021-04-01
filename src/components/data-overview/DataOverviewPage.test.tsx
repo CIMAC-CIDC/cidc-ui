@@ -2,7 +2,15 @@ import React from "react";
 import DataOverviewPage from "./DataOverviewPage";
 import { renderAsRouteComponent } from "../../../test/helpers";
 import { apiFetch } from "../../api/api";
+import { cleanup } from "@testing-library/react-hooks";
 jest.mock("../../api/api");
+
+afterEach(() => {
+    // the mocks below don't work without calling this
+    // cleanup function (don't know the root cause yet,
+    // but it's useSWR-related)
+    cleanup();
+});
 
 it("displays data as expected", async () => {
     apiFetch.mockResolvedValue([
