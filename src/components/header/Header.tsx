@@ -303,7 +303,7 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
                                             value: "/pipelines"
                                         },
                                         { label: "schema", value: "/schema" },
-                                        user.showManifests && {
+                                        {
                                             label: "data overview",
                                             value: "/data-overview"
                                         }

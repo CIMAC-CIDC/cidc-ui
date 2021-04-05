@@ -13,19 +13,38 @@ afterEach(() => {
 });
 
 it("displays data as expected", async () => {
-    apiFetch.mockResolvedValue([
-        { trial_id: "trial1", file_size_bytes: 1e3, hande: 11, wes: 12 },
-        { trial_id: "trial2", file_size_bytes: 1e6, hande: 21, wes: 0 }
-    ]);
+    apiFetch.mockImplementation(async (url: string) => {
+        switch (url) {
+            case "/info/data_overview":
+                return { num_bytes: 1e9 };
+            case "/trial_metadata/summaries":
+                return [
+                    {
+                        trial_id: "trial1",
+                        file_size_bytes: 1e3,
+                        "h&e": 11,
+                        wes: 12
+                    },
+                    {
+                        trial_id: "trial2",
+                        file_size_bytes: 1e6,
+                        "h&e": 21,
+                        wes: 0
+                    }
+                ];
+            default:
+                throw Error("got unexpected URL " + url);
+        }
+    });
 
     const { findByText, queryByText } = renderAsRouteComponent(
         DataOverviewPage
     );
 
+    // from per-trial data summaries
     expect(await findByText(/protocol id/i)).toBeInTheDocument();
     expect(queryByText(/trial1/i)).toBeInTheDocument();
     expect(queryByText(/trial2/i)).toBeInTheDocument();
-    // note: hande has been translated to more readable h&e
     expect(queryByText(/h&e/i)).toBeInTheDocument();
     expect(queryByText(/wes/i)).toBeInTheDocument();
     expect(queryByText(/1 kb/i)).toBeInTheDocument();
@@ -34,6 +53,9 @@ it("displays data as expected", async () => {
     expect(queryByText(/12/i)).toBeInTheDocument();
     expect(queryByText(/21/i)).toBeInTheDocument();
     expect(queryByText(/-/)).toBeInTheDocument();
+
+    // from CIDC-wide data overview
+    expect(queryByText(/1 gb/i)).toBeInTheDocument();
 });
 
 it("handles no data", async () => {

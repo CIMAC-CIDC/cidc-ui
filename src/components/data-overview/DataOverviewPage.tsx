@@ -10,7 +10,8 @@ import {
     Typography,
     Card,
     CardContent,
-    withStyles
+    withStyles,
+    Chip
 } from "@material-ui/core";
 import { withIdToken } from "../identity/AuthProvider";
 import { ITrialOverview } from "../../model/trial";
@@ -19,10 +20,7 @@ import Loader from "../generic/Loader";
 import { RouteComponentProps } from "react-router";
 import { useRootStyles } from "../../rootStyles";
 import { formatFileSize } from "../../util/formatters";
-
-const friendlyAssayNames = {
-    hande: "h&e"
-};
+import { IDataOverview } from "../../api/api";
 
 const HeaderCell = withStyles({
     root: {
@@ -31,13 +29,14 @@ const HeaderCell = withStyles({
     }
 })(TableCell);
 
-export const DataOverviewTable: React.FC = withIdToken(({ token }) => {
-    const { data } = useSWR<ITrialOverview[]>([
+const DataOverviewTable: React.FC = withIdToken(({ token }) => {
+    const { data: overview } = useSWR<IDataOverview>(["/info/data_overview"]);
+    const { data: summary } = useSWR<ITrialOverview[]>([
         "/trial_metadata/summaries",
         token
     ]);
 
-    if (data === undefined) {
+    if (summary === undefined || overview === undefined) {
         return (
             <Grid container justify="center">
                 <Grid item>
@@ -47,20 +46,36 @@ export const DataOverviewTable: React.FC = withIdToken(({ token }) => {
         );
     }
 
-    if (data.length === 0) {
+    if (summary.length === 0) {
         return <Typography>No data found.</Typography>;
     }
 
-    const assays = Object.keys(data[0]).filter(
+    const assays = Object.keys(summary[0]).filter(
         k => !["trial_id", "file_size_bytes"].includes(k)
     );
 
     // List the trials with the most data first
-    const sortedData = sortBy(data, "file_size_bytes").reverse();
+    const sortedData = sortBy(summary, "file_size_bytes").reverse();
 
     return (
         <Card>
             <CardContent>
+                <Chip
+                    variant="outlined"
+                    label={
+                        <>
+                            <Typography
+                                display="inline"
+                                style={{ fontWeight: "bold" }}
+                            >
+                                Total Data Ingested:{" "}
+                            </Typography>
+                            <Typography display="inline">
+                                {formatFileSize(overview.num_bytes)}
+                            </Typography>
+                        </>
+                    }
+                />
                 <Table size="small">
                     <TableHead>
                         <TableRow>
@@ -74,11 +89,9 @@ export const DataOverviewTable: React.FC = withIdToken(({ token }) => {
                         </TableRow>
                         <TableRow>
                             <HeaderCell>Protocol ID</HeaderCell>
-                            <HeaderCell>Total Data Ingested</HeaderCell>
+                            <HeaderCell>Data Size</HeaderCell>
                             {assays.map(assay => (
-                                <HeaderCell key={assay}>
-                                    {friendlyAssayNames[assay] || assay}
-                                </HeaderCell>
+                                <HeaderCell key={assay}>{assay}</HeaderCell>
                             ))}
                         </TableRow>
                     </TableHead>

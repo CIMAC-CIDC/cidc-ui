@@ -105,8 +105,8 @@ describe("Header", () => {
         const { queryByText: q1 } = renderWithUserContext(user);
         checkVisibility(
             q1,
-            ["browse data", "pipelines", "schema"],
-            ["manifests", "assays", "analyses", "data overview"]
+            ["browse data", "pipelines", "schema", "data overview"],
+            ["manifests", "assays", "analyses"]
         );
         cleanup();
 
@@ -117,8 +117,8 @@ describe("Header", () => {
         });
         checkVisibility(
             q2,
-            ["browse data", "pipelines", "schema", "assays"],
-            ["manifests", "analyses", "data overview"]
+            ["browse data", "pipelines", "schema", "assays", "data overview"],
+            ["manifests", "analyses"]
         );
         cleanup();
 
@@ -148,8 +148,15 @@ describe("Header", () => {
         });
         checkVisibility(
             q4,
-            ["browse data", "pipelines", "schema", "assays", "analyses"],
-            ["manifests", "data overview"]
+            [
+                "browse data",
+                "pipelines",
+                "schema",
+                "assays",
+                "analyses",
+                "data overview"
+            ],
+            ["manifests"]
         );
         cleanup();
 
