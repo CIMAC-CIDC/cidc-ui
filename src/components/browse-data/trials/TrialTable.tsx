@@ -19,7 +19,7 @@ import {
 import { apiFetch, IApiPage } from "../../../api/api";
 import { IFileBundle, Trial } from "../../../model/trial";
 import { withIdToken } from "../../identity/AuthProvider";
-import { flatMap, flatten, isEmpty, map, omitBy, pickBy, range } from "lodash";
+import { flatMap, isEmpty, omitBy, pickBy, range } from "lodash";
 import { CloudDownload } from "@material-ui/icons";
 import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 import { Skeleton } from "@material-ui/lab";
@@ -202,35 +202,61 @@ const LabelAndValue: React.FC<{
 export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
     const user = useUserContext();
     const {
-        participants,
         trial_name,
         nct_id,
         trial_status,
         biobank,
         lead_cimac_pis
     } = trial.metadata_json;
-    const sampleCount = flatten(map(participants, "samples")).length;
 
-    // `!` is unsafe, but `TrialTable` will only render this component
-    // with trials that have defined `file_bundle`s.
-    const fileBundle = trial.file_bundle!;
-
+    const fileBundle = trial.file_bundle || {};
     const clinicalBundle = pickBy(fileBundle, isClinical);
+    const clinicalIds = flatMap(clinicalBundle, bundle =>
+        flatMap(bundle, v => v || [])
+    );
     const assayBundle = omitBy(
         fileBundle,
         (v, k) => isClinical(v, k) || k === "other"
     );
 
-    // Render nothing if this trial has no files
-    if (isEmpty(assayBundle) && isEmpty(clinicalBundle)) {
-        return null;
-    }
+    const rightPanel =
+        isEmpty(assayBundle) && isEmpty(clinicalBundle) ? (
+            <Grid
+                container
+                justify="center"
+                alignItems="center"
+                style={{ height: "100%" }}
+            >
+                <Grid item>
+                    <Typography color="textSecondary" variant="subtitle2">
+                        No files have been uploaded yet.
+                    </Typography>
+                </Grid>
+            </Grid>
+        ) : (
+            <>
+                <Typography variant="overline" color="textSecondary">
+                    Clinical/Sample Data
+                </Typography>
+                <BatchDownloadButton
+                    token={token}
+                    ids={clinicalIds}
+                    disabled={!user.canDownload}
+                >
+                    {clinicalIds.length} participant/sample files
+                </BatchDownloadButton>
+                {!isEmpty(assayBundle) && (
+                    <Box paddingTop={1}>
+                        <AssayButtonTable
+                            token={token}
+                            assayBundle={assayBundle}
+                        />
+                    </Box>
+                )}
+            </>
+        );
 
-    const clinicalIds = flatMap(clinicalBundle, bundle =>
-        flatMap(bundle, v => v || [])
-    );
-
-    const trialInfo = (
+    const leftPanel = (
         <>
             <Typography variant="h6">
                 <strong>{trial.trial_id}</strong>{" "}
@@ -254,9 +280,22 @@ export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
                     ],
                     ["biobank", biobank, 12],
                     ["status", trial_status],
-                    ["participants", participants.length],
-                    ["samples", sampleCount],
-                    ["assays", Object.keys(assayBundle).length],
+                    [
+                        "participants",
+                        trial.num_participants === undefined
+                            ? "-"
+                            : trial.num_participants
+                    ],
+                    [
+                        "samples",
+                        trial.num_samples === undefined
+                            ? "-"
+                            : trial.num_samples
+                    ],
+                    [
+                        "assays",
+                        assayBundle ? Object.keys(assayBundle).length : 0
+                    ],
                     ["overview", trial_name, 12]
                 ]
                     .filter(config => config[1] !== undefined)
@@ -266,26 +305,6 @@ export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
                         </Grid>
                     ))}
             </Grid>
-        </>
-    );
-
-    const datasets = (
-        <>
-            <Typography variant="overline" color="textSecondary">
-                Clinical/Sample Data
-            </Typography>
-            <BatchDownloadButton
-                token={token}
-                ids={clinicalIds}
-                disabled={!user.canDownload}
-            >
-                {clinicalIds.length} participant/sample files
-            </BatchDownloadButton>
-            {!isEmpty(assayBundle) && (
-                <Box paddingTop={1}>
-                    <AssayButtonTable token={token} assayBundle={assayBundle} />
-                </Box>
-            )}
         </>
     );
 
@@ -299,13 +318,13 @@ export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
                     wrap="nowrap"
                 >
                     <Grid item xs={6}>
-                        {trialInfo}
+                        {leftPanel}
                     </Grid>
                     <Grid item>
                         <Divider orientation="vertical" />
                     </Grid>
                     <Grid item xs={5}>
-                        {datasets}
+                        {rightPanel}
                     </Grid>
                 </Grid>
             </CardContent>
@@ -326,6 +345,7 @@ export const usePaginatedTrials = (token: string) => {
         return [
             `/trial_metadata?${formatQueryString({
                 include_file_bundles: true,
+                include_counts: true,
                 page_size: TRIALS_PER_PAGE,
                 page_num: pageIndex,
                 trial_ids: filters.trial_ids?.join(",")
@@ -336,7 +356,7 @@ export const usePaginatedTrials = (token: string) => {
 
     const { data, isValidating, setSize } = useSWRInfinite<IApiPage<Trial>>(
         getTrialURL,
-        apiFetch // provide this explicitly because that make mocking in tests easier
+        apiFetch // provide this explicitly because that makes mocking in tests easier
     );
     const trials = data?.flatMap(page => page._items);
     const allLoaded =
@@ -347,10 +367,13 @@ export const usePaginatedTrials = (token: string) => {
         setSize(size => size + 1);
     }, [setSize]);
 
-    // Clear all results when filters change
+    // Clear all results when filters change if data has already loaded
+    const hasTrials = !!trials;
     React.useEffect(() => {
-        setSize(1);
-    }, [filters.trial_ids, setSize]);
+        if (hasTrials) {
+            setSize(1);
+        }
+    }, [filters.trial_ids, setSize, hasTrials]);
 
     return {
         trials,

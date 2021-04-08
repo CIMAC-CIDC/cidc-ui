@@ -7,6 +7,8 @@ export interface Trial {
     trial_id: string;
     metadata_json: any;
     file_bundle?: IFileBundle;
+    num_participants?: number;
+    num_samples?: number;
     // TODO: implement role-based access to Trial resources in the new API.
     // TODO: add missing fields (e.g., assays, participants) to this object.
 }

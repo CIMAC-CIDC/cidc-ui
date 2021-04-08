@@ -1,7 +1,10 @@
 import React from "react";
 import { fireEvent, render } from "@testing-library/react";
 import { range } from "lodash";
-import { renderWithRouter } from "../../../../test/helpers";
+import {
+    renderWithRouter,
+    renderWithUserContext
+} from "../../../../test/helpers";
 import { apiFetch } from "../../../api/api";
 import { AuthContext } from "../../identity/AuthProvider";
 import { FilterContext } from "../shared/FilterProvider";
@@ -40,11 +43,7 @@ const metadata = {
     trial_status: "Ongoing",
     lead_cimac_pis: ["a", "b", "c"],
     biobank: "nice biobank",
-    participants: [
-        { samples: range(5) },
-        { samples: range(7) },
-        { samples: range(2) }
-    ]
+    participants: []
 };
 
 const total = 15;
@@ -53,7 +52,9 @@ const trialsPageOne = {
         id,
         trial_id: `test-trial-${id}`,
         metadata_json: metadata,
-        file_bundle: fileBundle
+        file_bundle: fileBundle,
+        num_participants: 3,
+        num_samples: 14
     })),
     _meta: { total }
 };
@@ -262,4 +263,22 @@ test("usePaginatedTrials appears not to have a race condition", async () => {
         expect(lastURL).toContain("test-trial-2");
         expect(result.current.trials).toEqual(trialsPageOne._items.slice(7, 9));
     });
+});
+
+test("TrialCard handles trials that don't have file bundles or participant/sample counts", () => {
+    const trial = {
+        ...trialsPageOne._items[0],
+        trial_id: "trial",
+        num_participants: undefined,
+        num_samples: undefined,
+        file_bundle: undefined
+    };
+    const { queryAllByText, queryByText } = renderWithUserContext(
+        <TrialCard trial={trial} token={""} />
+    );
+
+    expect(queryByText(/no files have been uploaded/i)).toBeInTheDocument();
+
+    // If no participant and sample count are available, trial card should show a dash
+    expect(queryAllByText(/-/i).length).toBe(2);
 });
