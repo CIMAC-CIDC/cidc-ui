@@ -1,5 +1,4 @@
 import React from "react";
-import { IApiPage } from "../../api/api";
 import { Trial } from "../../model/trial";
 import {
     Card,
@@ -32,7 +31,7 @@ import {
 import { mapValues, omit, omitBy, range } from "lodash";
 import { Skeleton } from "@material-ui/lab";
 import useSWR from "swr";
-import { apiCreate, apiUpdate } from "../../api/api";
+import { apiCreate, apiUpdate, apiFetch, IApiPage } from "../../api/api";
 
 const TrialTextField: React.FC<{
     name: string;
@@ -113,19 +112,19 @@ const TrialAccordion = withIdToken<{
                 : v;
         });
         try {
-            const updatedTrial = await apiUpdate<Trial>(
-                `/trial_metadata/${trial.trial_id}`,
-                token,
-                {
-                    etag: trial._etag,
-                    data: {
-                        metadata_json: {
-                            ...trial.metadata_json,
-                            ...parsedValues
-                        }
+            const url = `/trial_metadata/${trial.trial_id}`;
+            // Get the full trial metadata, since the trial manager is populated
+            // with pruned trial metadata that doesn't include certain fields.
+            const fullTrial = await apiFetch<Trial>(url, token);
+            const updatedTrial = await apiUpdate<Trial>(url, token, {
+                etag: fullTrial._etag,
+                data: {
+                    metadata_json: {
+                        ...fullTrial.metadata_json,
+                        ...parsedValues
                     }
                 }
-            );
+            });
             onUpdatedTrial(updatedTrial);
             const newFormValues = omit(
                 updatedTrial.metadata_json,

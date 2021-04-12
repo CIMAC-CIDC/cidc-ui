@@ -31,7 +31,14 @@ const trial2 = {
 const trials = [trial1, trial2];
 
 const mockFetch = (ts = trials) => {
-    apiFetch.mockResolvedValue({ _items: ts, _meta: { total: ts.length } });
+    apiFetch.mockImplementation(async (url: string) => {
+        if (url.endsWith(trial1.trial_id)) {
+            return trial1;
+        } else if (url.endsWith(trial2.trial_id)) {
+            return trial2;
+        }
+        return { _items: ts, _meta: { total: ts.length } };
+    });
 };
 
 beforeEach(() => {
