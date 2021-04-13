@@ -178,7 +178,7 @@ it("handles pagination as expected", async () => {
 
 it("filters by trial id", async () => {
     apiFetch.mockImplementation(async url => {
-        expect(url).toContain("trial_ids=test-trial-0,test-trial-1");
+        expect(url).toContain("trial_ids=test-trial-0%2Ctest-trial-1");
         return { ...trialsPageOne, _items: trialsPageOne._items.slice(0, 2) };
     });
     const { findByText, queryByText } = renderWithRouter(

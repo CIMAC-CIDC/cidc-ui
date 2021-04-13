@@ -20,11 +20,11 @@ test("filterParams", () => {
     expect(filterParams({})).toEqual({});
     const exampleFilters = {
         trial_ids: ["a", "b"],
-        facets: ["foo|a|1", "foo|a|2", "bar|1", "bar|2"]
+        facets: ["foo|h&e|1", "foo|a|2", "bar|1", "bar|2"]
     };
     expect(filterParams(exampleFilters)).toEqual({
-        trial_ids: "a,b",
-        facets: "foo|a|1,foo|a|2,bar|1,bar|2"
+        trial_ids: "a%2Cb",
+        facets: "foo%7Ch%26e%7C1%2Cfoo%7Ca%7C2%2Cbar%7C1%2Cbar%7C2"
     });
 });
 

@@ -63,7 +63,11 @@ export interface IFileTableProps {
 
 export const filterParams = (filters: IFilters) => {
     const joinParam = (ps?: string[]) =>
-        ps ? (ps.length > 0 ? ps.join(",") : undefined) : undefined;
+        ps
+            ? ps.length > 0
+                ? encodeURIComponent(ps.join(","))
+                : undefined
+            : undefined;
     return {
         trial_ids: joinParam(filters.trial_ids),
         facets: joinParam(filters.facets)

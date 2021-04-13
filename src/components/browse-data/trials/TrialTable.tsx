@@ -348,7 +348,9 @@ export const usePaginatedTrials = (token: string) => {
                 include_counts: true,
                 page_size: TRIALS_PER_PAGE,
                 page_num: pageIndex,
-                trial_ids: filters.trial_ids?.join(",")
+                trial_ids: filters.trial_ids
+                    ? encodeURIComponent(filters.trial_ids.join(","))
+                    : undefined
             })}`,
             token
         ];
