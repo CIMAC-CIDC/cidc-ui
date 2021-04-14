@@ -22,7 +22,7 @@ import { RouteComponentProps } from "react-router-dom";
 import pactLogo from "../../pact_logo.svg";
 import fnihLogo from "../../fnih_logo.svg";
 import nciLogo from "../../nci_logo.svg";
-import { formatFileSize } from "../../util/formatters";
+import { formatFileSize } from "../../util/utils";
 import FadeInOnMount from "../generic/FadeInOnMount";
 import { Alert } from "@material-ui/lab";
 import ContactAnAdmin from "../generic/ContactAnAdmin";

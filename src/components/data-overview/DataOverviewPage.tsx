@@ -19,7 +19,7 @@ import useSWR from "swr";
 import Loader from "../generic/Loader";
 import { RouteComponentProps } from "react-router";
 import { useRootStyles } from "../../rootStyles";
-import { formatFileSize } from "../../util/formatters";
+import { formatFileSize } from "../../util/utils";
 import { IDataOverview } from "../../api/api";
 
 const HeaderCell = withStyles({

@@ -27,7 +27,7 @@ import { ORGANIZATION_NAME_MAP, ROLES } from "../../util/constants";
 import UserPermissionsDialogWithInfo from "./AdminUserPermissionsDialog";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
-import { formatQueryString } from "../../util/formatters";
+import { formatQueryString } from "../../util/utils";
 import { apiUpdate } from "../../api/api";
 import moment from "moment";
 import Loader from "../generic/Loader";

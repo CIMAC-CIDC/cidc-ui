@@ -1,5 +1,5 @@
 import React from "react";
-import { formatQueryString } from "../../util/formatters";
+import { formatQueryString } from "../../util/utils";
 import { withIdToken } from "../identity/AuthProvider";
 import withResize from "./withResize";
 

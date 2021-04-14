@@ -29,3 +29,7 @@ export const formatQueryString = (
         ""
     );
 };
+
+export const naivePluralize = (str: string, n: number) => {
+    return n !== 1 ? str + "s" : str;
+};

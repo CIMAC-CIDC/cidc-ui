@@ -21,7 +21,7 @@ import {
     formatDate,
     formatFileSize,
     formatQueryString
-} from "../../../util/formatters";
+} from "../../../util/utils";
 import { useHistory } from "react-router-dom";
 import useSWR from "swr";
 import { useUserContext } from "../../identity/UserProvider";

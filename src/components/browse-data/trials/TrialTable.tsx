@@ -25,7 +25,7 @@ import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 import { Skeleton } from "@material-ui/lab";
 import { useFilterFacets } from "../shared/FilterProvider";
 import { useSWRInfinite } from "swr";
-import { formatQueryString } from "../../../util/formatters";
+import { formatQueryString, naivePluralize } from "../../../util/utils";
 import { useUserContext } from "../../identity/UserProvider";
 
 const BatchDownloadButton: React.FC<{
@@ -94,9 +94,6 @@ interface ITrialCardProps {
     token: string;
 }
 
-const isClinical = (_: any, key: string) =>
-    ["Participants Info", "Samples Info"].includes(key);
-
 const AssayButton: React.FC<{
     purpose: keyof IFileBundle[keyof IFileBundle];
     bundle: IFileBundle[keyof IFileBundle];
@@ -111,7 +108,7 @@ const AssayButton: React.FC<{
                 ids={ids}
                 disabled={!user.canDownload}
             >
-                {ids.length} files
+                {ids.length} {naivePluralize("file", ids.length)}
             </BatchDownloadButton>
         </Box>
     );
@@ -199,6 +196,15 @@ const LabelAndValue: React.FC<{
     );
 };
 
+const extractFileIds = (fileBundle: IFileBundle, keys: string[]) =>
+    flatMap(
+        pickBy(fileBundle, (_, key) => keys.includes(key)),
+        bundle => flatMap(bundle, v => v || [])
+    );
+
+const partSampFields = ["Participants Info", "Samples Info"];
+const clinicalFields = ["Clinical Data"];
+
 export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
     const user = useUserContext();
     const {
@@ -210,17 +216,20 @@ export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
     } = trial.metadata_json;
 
     const fileBundle = trial.file_bundle || {};
-    const clinicalBundle = pickBy(fileBundle, isClinical);
-    const clinicalIds = flatMap(clinicalBundle, bundle =>
-        flatMap(bundle, v => v || [])
-    );
+    const partSampIds = extractFileIds(fileBundle, partSampFields);
+    const clinicalIds = extractFileIds(fileBundle, clinicalFields);
     const assayBundle = omitBy(
         fileBundle,
-        (v, k) => isClinical(v, k) || k === "other"
+        (v, k) =>
+            partSampFields.includes(k) ||
+            clinicalFields.includes(k) ||
+            k === "other"
     );
 
     const rightPanel =
-        isEmpty(assayBundle) && isEmpty(clinicalBundle) ? (
+        isEmpty(assayBundle) &&
+        partSampIds.length === 0 &&
+        clinicalIds.length === 0 ? (
             <Grid
                 container
                 justify="center"
@@ -236,14 +245,26 @@ export const TrialCard: React.FC<ITrialCardProps> = ({ trial, token }) => {
         ) : (
             <>
                 <Typography variant="overline" color="textSecondary">
-                    Clinical/Sample Data
+                    Sample-Tracking Data
+                </Typography>
+                <BatchDownloadButton
+                    token={token}
+                    ids={partSampIds}
+                    disabled={!user.canDownload}
+                >
+                    {partSampIds.length} participant/sample{" "}
+                    {naivePluralize("file", partSampIds.length)}
+                </BatchDownloadButton>
+                <Typography variant="overline" color="textSecondary">
+                    Clinical Data
                 </Typography>
                 <BatchDownloadButton
                     token={token}
                     ids={clinicalIds}
                     disabled={!user.canDownload}
                 >
-                    {clinicalIds.length} participant/sample files
+                    {clinicalIds.length} clinical data{" "}
+                    {naivePluralize("file", clinicalIds.length)}
                 </BatchDownloadButton>
                 {!isEmpty(assayBundle) && (
                     <Box paddingTop={1}>

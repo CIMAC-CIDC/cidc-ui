@@ -18,7 +18,7 @@ import { AccountCircle, FolderShared } from "@material-ui/icons";
 import Loader from "../generic/Loader";
 import { useRootStyles } from "../../rootStyles";
 import AdminTrialManager from "./AdminTrialManager";
-import { formatDate } from "../../util/formatters";
+import { formatDate } from "../../util/utils";
 import DashFrame from "../generic/DashFrame";
 
 const ProfilePage: React.FC<{ token: string }> = ({ token }) => {

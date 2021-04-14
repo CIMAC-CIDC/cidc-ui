@@ -33,6 +33,9 @@ const fileBundle = {
     "Samples Info": {
         clinical: [12]
     },
+    "Clinical Data": {
+        clinical: [13]
+    },
     other: {
         source: [1, 2, 3]
     }
@@ -110,9 +113,11 @@ it("renders trials with no filters applied", async () => {
     expect(queryAllByText(new RegExp("nice biobank", "i")).length).toBe(10);
 
     // renders batch download interface
-    const clinicalButtons = queryAllByText(/2 participant\/sample files/i);
+    const partSampButtons = queryAllByText(/2 participant\/sample files/i);
+    const clinicalButtons = queryAllByText(/1 clinical data file/i);
     const fourFileButtons = queryAllByText(/4 files/i);
     const zeroFileButtons = queryAllByText(/0 files/i);
+    expect(partSampButtons.length).toBe(10);
     expect(clinicalButtons.length).toBe(10);
     expect(queryAllByText(/cytof/i).length).toBe(10);
     expect(fourFileButtons.length).toBe(10);
@@ -122,6 +127,7 @@ it("renders trials with no filters applied", async () => {
     expect(zeroFileButtons.length).toBe(10);
 
     // buttons with files available are enabled
+    expect(partSampButtons[0].closest("button").disabled).toBe(false);
     expect(clinicalButtons[0].closest("button").disabled).toBe(false);
     expect(fourFileButtons[0].closest("button").disabled).toBe(false);
     expect(zeroFileButtons[0].closest("button").disabled).toBe(true);
@@ -133,11 +139,13 @@ it("doesn't enable download buttons if users don't have download permission", as
     const { findByText, queryAllByText } = renderTrialTable();
 
     expect(await findByText(/test-trial-0/i)).toBeInTheDocument();
-    const clinicalButtons = queryAllByText(/2 participant\/sample files/i);
+    const partSampButtons = queryAllByText(/2 participant\/sample files/i);
+    const clinicalButtons = queryAllByText(/1 clinical data file/i);
     const fourFileButtons = queryAllByText(/4 files/i);
     const zeroFileButtons = queryAllByText(/0 files/i);
 
     // All download buttons are disabled
+    expect(partSampButtons[0].closest("button").disabled).toBe(true);
     expect(clinicalButtons[0].closest("button").disabled).toBe(true);
     expect(fourFileButtons[0].closest("button").disabled).toBe(true);
     expect(zeroFileButtons[0].closest("button").disabled).toBe(true);

@@ -4,7 +4,7 @@ import { ArrayParam, useQueryParams } from "use-query-params";
 import { withIdToken } from "../../identity/AuthProvider";
 import { filterParams } from "../files/FileTable";
 import useSWR from "swr";
-import { formatQueryString } from "../../../util/formatters";
+import { formatQueryString } from "../../../util/utils";
 
 export interface IFacetInfo {
     label: string;

@@ -34,7 +34,7 @@ import {
     formatDataCategory,
     formatDate,
     formatFileSize
-} from "../../../util/formatters";
+} from "../../../util/utils";
 import { isEmpty, map, range, sortBy } from "lodash";
 import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 import { Skeleton } from "@material-ui/lab";
