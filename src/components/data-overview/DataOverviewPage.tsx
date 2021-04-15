@@ -63,10 +63,7 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
     );
 
     // List the trials with the most data first
-    const sortedData = sortBy(summary, [
-        "clinical_participants",
-        "file_size_bytes"
-    ]).reverse();
+    const sortedData = sortBy(summary, ["file_size_bytes"]).reverse();
 
     return (
         <Card>
@@ -120,8 +117,9 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
                                     <Chip
                                         style={{ width: "100%" }}
                                         color={
+                                            row.clinical_participants > 0 &&
                                             row.clinical_participants ===
-                                            row.total_participants
+                                                row.total_participants
                                                 ? "primary"
                                                 : "default"
                                         }
