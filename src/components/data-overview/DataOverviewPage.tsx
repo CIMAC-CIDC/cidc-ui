@@ -29,6 +29,14 @@ const HeaderCell = withStyles({
     }
 })(TableCell);
 
+const nonAssayFields = [
+    "trial_id",
+    "file_size_bytes",
+    "clinical_participants",
+    "total_participant",
+    "total_samples"
+];
+
 const DataOverviewTable: React.FC = withIdToken(({ token }) => {
     const { data: overview } = useSWR<IDataOverview>(["/info/data_overview"]);
     const { data: summary } = useSWR<ITrialOverview[]>([
@@ -51,11 +59,14 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
     }
 
     const assays = Object.keys(summary[0]).filter(
-        k => !["trial_id", "file_size_bytes"].includes(k)
+        k => !nonAssayFields.includes(k)
     );
 
     // List the trials with the most data first
-    const sortedData = sortBy(summary, "file_size_bytes").reverse();
+    const sortedData = sortBy(summary, [
+        "clinical_participants",
+        "file_size_bytes"
+    ]).reverse();
 
     return (
         <Card>
@@ -81,7 +92,7 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
                         <TableRow>
                             <TableCell
                                 style={{ borderBottom: 0 }}
-                                colSpan={2}
+                                colSpan={3}
                             />
                             <TableCell colSpan={assays.length} align="center">
                                 # of Samples per Assay
@@ -90,6 +101,9 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
                         <TableRow>
                             <HeaderCell>Protocol ID</HeaderCell>
                             <HeaderCell>Data Size</HeaderCell>
+                            <HeaderCell align="center">
+                                Clinical Data
+                            </HeaderCell>
                             {assays.map(assay => (
                                 <HeaderCell key={assay}>{assay}</HeaderCell>
                             ))}
@@ -101,6 +115,19 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
                                 <TableCell>{row.trial_id}</TableCell>
                                 <TableCell align="right">
                                     {formatFileSize(row.file_size_bytes)}
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Chip
+                                        style={{ width: "100%" }}
+                                        color={
+                                            row.clinical_participants ===
+                                            row.total_participants
+                                                ? "primary"
+                                                : "default"
+                                        }
+                                        variant="outlined"
+                                        label={`${row.clinical_participants} / ${row.total_participants} participants`}
+                                    />
                                 </TableCell>
                                 {assays.map(assay => (
                                     <TableCell key={assay} align="right">

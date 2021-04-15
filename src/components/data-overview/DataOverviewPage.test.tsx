@@ -3,7 +3,10 @@ import DataOverviewPage from "./DataOverviewPage";
 import { renderAsRouteComponent } from "../../../test/helpers";
 import { apiFetch } from "../../api/api";
 import { cleanup } from "@testing-library/react-hooks";
+import { createMuiTheme } from "@material-ui/core";
 jest.mock("../../api/api");
+
+const theme = createMuiTheme();
 
 afterEach(() => {
     // the mocks below don't work without calling this
@@ -22,12 +25,16 @@ it("displays data as expected", async () => {
                     {
                         trial_id: "trial1",
                         file_size_bytes: 1e3,
+                        clinical_participants: 1,
+                        total_participants: 2,
                         "h&e": 11,
                         wes: 12
                     },
                     {
                         trial_id: "trial2",
                         file_size_bytes: 1e6,
+                        clinical_participants: 3,
+                        total_participants: 3,
                         "h&e": 21,
                         wes: 0
                     }
@@ -53,6 +60,18 @@ it("displays data as expected", async () => {
     expect(queryByText(/12/i)).toBeInTheDocument();
     expect(queryByText(/21/i)).toBeInTheDocument();
     expect(queryByText(/-/)).toBeInTheDocument();
+
+    // clinical data is displayed (and colored) as expected
+    const partialClinical = queryByText(/1 \/ 2 participants/i);
+    expect(partialClinical).toBeInTheDocument();
+    expect(partialClinical?.closest("div")).toHaveStyle(
+        `color: ${theme.palette.text.primary}`
+    ); // grey
+    const fullClinical = queryByText(/3 \/ 3 participants/i);
+    expect(fullClinical).toBeInTheDocument();
+    expect(fullClinical?.closest("div")).toHaveStyle(
+        `color: ${theme.palette.primary.main}`
+    ); // blue
 
     // from CIDC-wide data overview
     expect(queryByText(/1 gb/i)).toBeInTheDocument();
