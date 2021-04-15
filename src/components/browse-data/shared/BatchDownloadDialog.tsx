@@ -6,6 +6,7 @@ import {
     DialogTitle,
     Grid
 } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 import React from "react";
 import { apiCreate } from "../../../api/api";
 import { CIDCMarkdown } from "../../generic/CIDCGithubMarkdown";
@@ -23,21 +24,31 @@ const BatchDownloadDialog: React.FC<IBatchDownloadDialogProps> = ({
     open,
     onClose
 }) => {
+    const [error, setError] = React.useState<string>("");
+
     const downloadFilelist = () => {
         apiCreate<string>("/downloadable_files/filelist", token, {
             data: { file_ids: ids }
-        }).then(tsv => {
-            const blob = new Blob([tsv], {
-                type: "text/tab-separated-values"
+        })
+            .then(tsv => {
+                const blob = new Blob([tsv], {
+                    type: "text/tab-separated-values"
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "filelist.tsv";
+                document.body.appendChild(a);
+                a.click();
+                URL.revokeObjectURL(url);
+            })
+            .catch(err => {
+                if (err.response.status) {
+                    setError(
+                        "You don't have permission to download the files in this batch. Please contact cidc@jimmy.harvard.edu if you believe this is a mistake."
+                    );
+                }
             });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "filelist.tsv";
-            document.body.appendChild(a);
-            a.click();
-            URL.revokeObjectURL(url);
-        });
     };
 
     return (
@@ -66,6 +77,7 @@ const BatchDownloadDialog: React.FC<IBatchDownloadDialogProps> = ({
                             "using control+c), you can resume that download by rerunning the download command."
                     ].join("\n")}
                 />
+                {error && <Alert severity="error">{error}</Alert>}
             </DialogContent>
             <DialogActions>
                 <Grid container justify="space-between">
