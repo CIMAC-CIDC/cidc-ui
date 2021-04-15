@@ -33,7 +33,7 @@ it("displays data as expected", async () => {
                     {
                         trial_id: "trial2",
                         file_size_bytes: 1e6,
-                        clinical_participants: 3,
+                        clinical_participants: 0,
                         total_participants: 3,
                         "h&e": 21,
                         wes: 0

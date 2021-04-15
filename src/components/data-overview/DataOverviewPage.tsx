@@ -62,8 +62,11 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
         k => !nonAssayFields.includes(k)
     );
 
-    // List the trials with the most data first
-    const sortedData = sortBy(summary, ["file_size_bytes"]).reverse();
+    // List trials with clinical data first, ordered by total file size
+    const sortedData = sortBy(summary, s => [
+        s.clinical_participants > 0,
+        s.file_size_bytes
+    ]).reverse();
 
     return (
         <Card>
@@ -117,9 +120,7 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
                                     <Chip
                                         style={{ width: "100%" }}
                                         color={
-                                            row.clinical_participants > 0 &&
-                                            row.clinical_participants ===
-                                                row.total_participants
+                                            row.clinical_participants > 0
                                                 ? "primary"
                                                 : "default"
                                         }
