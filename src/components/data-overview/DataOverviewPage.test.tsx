@@ -65,13 +65,13 @@ it("displays data as expected", async () => {
     const partialClinical = queryByText(/1 \/ 2 participants/i);
     expect(partialClinical).toBeInTheDocument();
     expect(partialClinical?.closest("div")).toHaveStyle(
-        `color: ${theme.palette.text.primary}`
-    ); // grey
-    const fullClinical = queryByText(/3 \/ 3 participants/i);
-    expect(fullClinical).toBeInTheDocument();
-    expect(fullClinical?.closest("div")).toHaveStyle(
         `color: ${theme.palette.primary.main}`
     ); // blue
+    const fullClinical = queryByText(/0 \/ 3 participants/i);
+    expect(fullClinical).toBeInTheDocument();
+    expect(fullClinical?.closest("div")).toHaveStyle(
+        `color: ${theme.palette.text.primary}`
+    ); // grey
 
     // from CIDC-wide data overview
     expect(queryByText(/1 gb/i)).toBeInTheDocument();
