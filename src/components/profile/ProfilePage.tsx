@@ -118,16 +118,17 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
                                 ) : permissions.length ? (
                                     <Grid container spacing={2}>
                                         {permissions.map(perm => {
+                                            const trialId =
+                                                perm.trial_id || "*";
+                                            const uploadType =
+                                                perm.upload_type || "*";
                                             return (
                                                 <Grid
                                                     item
-                                                    key={
-                                                        perm.trial_id +
-                                                        perm.upload_type
-                                                    }
+                                                    key={trialId + uploadType}
                                                 >
                                                     <Chip
-                                                        label={`${perm.trial_id}: ${perm.upload_type}`}
+                                                        label={`${trialId}: ${uploadType}`}
                                                     />
                                                 </Grid>
                                             );

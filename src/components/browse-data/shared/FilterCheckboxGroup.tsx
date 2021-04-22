@@ -166,7 +166,7 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
             permissions || [],
             p =>
                 p.trial_id === facetType ||
-                p.upload_type.startsWith(facetType.toLowerCase())
+                p.upload_type?.startsWith(facetType.toLowerCase())
         );
 
     const { checked, onClick, disabled, ...otherCheckboxProps } = checkboxProps;
