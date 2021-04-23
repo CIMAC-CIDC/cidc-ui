@@ -154,13 +154,29 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                                 <TableCell className={classes.trialCell}>
                                     Trial
                                 </TableCell>
-                                {props.supportedTypes.map(typ => (
+                                {props.supportedTypes.map(uploadType => (
                                     <TableCell
-                                        key={typ}
+                                        key={uploadType}
                                         size="small"
                                         align="center"
                                     >
-                                        {typ}
+                                        <Grid
+                                            direction="row"
+                                            alignItems="center"
+                                        >
+                                            <Grid item>{uploadType}</Grid>
+                                            <Grid item>
+                                                <PermCheckbox
+                                                    grantee={props.grantee}
+                                                    granter={props.granter}
+                                                    uploadType={uploadType}
+                                                    token={props.token}
+                                                    disableIfUnchecked={
+                                                        tooManyPerms
+                                                    }
+                                                />
+                                            </Grid>
+                                        </Grid>
                                     </TableCell>
                                 ))}
                             </TableRow>

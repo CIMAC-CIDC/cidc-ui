@@ -30,6 +30,25 @@ const PERMISSIONS = [
     }
 ];
 
+const INFO = {
+    supportedTemplates: {
+        assays: [
+            "cytof",
+            "wes",
+            "rna",
+            "olink",
+            "ihc",
+            "elisa",
+            "mif",
+            "tcr",
+            "hande"
+        ],
+        manifests: [],
+        analyses: []
+    },
+    extraDataTypes: []
+};
+
 const mockFetch = (trials = TRIALS, perms = PERMISSIONS) => {
     apiFetch.mockImplementation(async (url: string) => {
         if (url.includes("/trial_metadata")) {
@@ -42,27 +61,8 @@ const mockFetch = (trials = TRIALS, perms = PERMISSIONS) => {
 };
 
 function doRender() {
-    const infoContext = {
-        supportedTemplates: {
-            assays: [
-                "cytof",
-                "wes",
-                "rna",
-                "olink",
-                "ihc",
-                "elisa",
-                "mif",
-                "tcr",
-                "hande"
-            ],
-            manifests: [],
-            analyses: []
-        },
-        extraDataTypes: []
-    };
-
     return renderWithSWR(
-        <InfoContext.Provider value={infoContext}>
+        <InfoContext.Provider value={INFO}>
             <UserContext.Provider value={GRANTER}>
                 <UserPermissionsDialogWithInfo
                     token={TOKEN}
@@ -134,5 +134,31 @@ it("handles permission revocation", async () => {
                 etag: WES_PERMISSION._etag
             }
         );
+    });
+});
+
+it("handles broad trial permissions", async () => {
+    const trials = [TRIAL, { ...TRIAL, trial_id: "test-2" }];
+    const perms = [
+        { trial_id: TRIAL.trial_id, upload_type: null },
+        { trial_id: null, upload_type: "ihc" }
+    ];
+    mockFetch(trials, perms);
+
+    const { findByTestId, getByTestId } = doRender();
+
+    // All IHC checkboxes are checked across trials
+    expect(
+        getNativeCheckbox(await findByTestId("checkbox-test-1-ihc")).checked
+    ).toBe(true);
+    expect(getNativeCheckbox(getByTestId("checkbox-test-2-ihc")).checked).toBe(
+        true
+    );
+
+    // All upload types are checked for TRIAL.trial_id trial
+    INFO.supportedTemplates.assays.map(assay => {
+        expect(
+            getNativeCheckbox(getByTestId(`checkbox-test-1-${assay}`)).checked
+        ).toBe(true);
     });
 });

@@ -119,16 +119,17 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
                                     <Grid container spacing={2}>
                                         {permissions.map(perm => {
                                             const trialId =
-                                                perm.trial_id || "*";
+                                                perm.trial_id || "[ALL TRIALS]";
                                             const uploadType =
-                                                perm.upload_type || "*";
+                                                perm.upload_type ||
+                                                "[ALL DATA]";
                                             return (
                                                 <Grid
                                                     item
                                                     key={trialId + uploadType}
                                                 >
                                                     <Chip
-                                                        label={`${trialId}: ${uploadType}`}
+                                                        label={`${trialId} : ${uploadType}`}
                                                     />
                                                 </Grid>
                                             );
