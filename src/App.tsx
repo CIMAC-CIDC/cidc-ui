@@ -51,7 +51,13 @@ export default function App() {
 
     return (
         <Router history={history}>
-            <SWRConfig value={{ fetcher: apiFetch, shouldRetryOnError: false }}>
+            <SWRConfig
+                value={{
+                    fetcher: apiFetch,
+                    shouldRetryOnError: false,
+                    revalidateOnFocus: false
+                }}
+            >
                 <QueryParamProvider ReactRouterRoute={Route}>
                     <div className={classes.root}>
                         <CIDCThemeProvider>
