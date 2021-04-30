@@ -119,7 +119,10 @@ const BatchDownloadDialog: React.FC<IBatchDownloadDialogProps> = ({
                                     fullWidth
                                     color="primary"
                                     variant="contained"
-                                    disabled={loadingDownload}
+                                    disabled={
+                                        loadingDownload ||
+                                        error === errors.TOO_BIG
+                                    }
                                     onClick={() => downloadDirectly()}
                                 >
                                     download directly

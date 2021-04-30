@@ -29,20 +29,25 @@ it("shows expected errors on direct download click", async () => {
         <BatchDownloadDialog ids={ids} token={"foo"} open />
     );
 
+    const directDownloadButton = getByText(/download directly/i).closest(
+        "button"
+    )!;
+
     // Check a "no files available" error
     apiCreate.mockRejectedValue({ response: { status: 404 } });
-    fireEvent.click(getByText(/download directly/i));
+    fireEvent.click(directDownloadButton);
     expect(await findByText(/you don't have permission/i)).toBeInTheDocument();
-
-    // Check a "batch too large" error
-    apiCreate.mockRejectedValue({ response: { status: 400 } });
-    fireEvent.click(getByText(/download directly/i));
-    expect(await findByText(/more than 100MB/i)).toBeInTheDocument();
 
     // Check a miscellaneous error
     apiCreate.mockRejectedValue({ response: { status: 500 } });
-    fireEvent.click(getByText(/download directly/i));
+    fireEvent.click(directDownloadButton);
     expect(await findByText(/unexpected issue/i)).toBeInTheDocument();
+
+    // Check a "batch too large" error
+    apiCreate.mockRejectedValue({ response: { status: 400 } });
+    fireEvent.click(directDownloadButton);
+    expect(await findByText(/more than 100MB/i)).toBeInTheDocument();
+    expect(directDownloadButton.disabled).toBe(true);
 });
 
 it("shows an info message when a direct download is loading", async () => {
