@@ -18,7 +18,8 @@ import {
     Radio,
     FormControlLabel,
     GridProps,
-    AccordionActions
+    AccordionActions,
+    Checkbox
 } from "@material-ui/core";
 import { LibraryAdd, Add, ExpandMore } from "@material-ui/icons";
 import { withIdToken } from "../identity/AuthProvider";
@@ -28,10 +29,11 @@ import {
     useForm,
     useFormContext
 } from "react-hook-form";
-import { mapValues, omit, omitBy, range } from "lodash";
+import { mapValues, omit, omitBy, range, uniq } from "lodash";
 import { Skeleton } from "@material-ui/lab";
 import useSWR from "swr";
 import { apiCreate, apiUpdate, apiFetch, IApiPage } from "../../api/api";
+import { useInfoContext } from "../info/InfoProvider";
 
 const TrialTextField: React.FC<{
     name: string;
@@ -78,6 +80,53 @@ const TrialStatusField: React.FC<{ width: GridProps["xs"] }> = ({ width }) => {
                     name={name}
                     control={control}
                 />
+            </FormControl>
+        </Grid>
+    );
+};
+
+const TrialExpectAssaysField: React.FC<{ width: GridProps["xs"] }> = ({
+    width
+}) => {
+    const { register, getValues } = useFormContext();
+    const name = "expected_assays";
+    const checked: string[] = getValues()[name] || [];
+
+    const {
+        supportedTemplates: { assays }
+    } = useInfoContext();
+
+    // Hacky way to ensure wes_bam and wes_fastq show up like "wes"
+    // cytof_10021 and cytof_e4412 show up like "cytof", "hande" as
+    // "h&e", etc.
+    const simplifiedAssays = uniq(
+        assays.map(a => {
+            if (a === "hande") {
+                return "h&e";
+            }
+            return a.split("_")[0];
+        })
+    );
+
+    return (
+        <Grid item xs={width}>
+            <FormControl component="fieldset">
+                <FormLabel component="legend">Expected Assays</FormLabel>
+                <Grid container spacing={1}>
+                    {simplifiedAssays.map(v => (
+                        <Grid item key={v}>
+                            <FormControlLabel
+                                key={v}
+                                label={v}
+                                value={v}
+                                name={name}
+                                inputRef={register}
+                                defaultChecked={checked.includes(v)}
+                                control={<Checkbox size="small" />}
+                            />
+                        </Grid>
+                    ))}
+                </Grid>
             </FormControl>
         </Grid>
     );
@@ -151,6 +200,7 @@ const TrialAccordion = withIdToken<{
                     </AccordionSummary>
                     <AccordionDetails>
                         <Grid container spacing={1}>
+                            <TrialExpectAssaysField width={12} />
                             <TrialTextField
                                 name="allowed_cohort_names"
                                 label="Cohort Names (comma-separated)"

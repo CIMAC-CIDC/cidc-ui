@@ -1,7 +1,11 @@
 import { fireEvent } from "@testing-library/react";
 import React from "react";
-import { renderWithUserContext } from "../../../test/helpers";
+import {
+    getNativeCheckbox,
+    renderWithUserContext
+} from "../../../test/helpers";
 import { apiFetch, apiCreate, apiupdate, apiUpdate } from "../../api/api";
+import { InfoContext } from "../info/InfoProvider";
 import AdminTrialManager from "./AdminTrialManager";
 jest.mock("../../api/api");
 
@@ -14,6 +18,7 @@ const trial1 = {
         protocol_identifier: "test-trial-0",
         trial_name: "trial testing something interesting!",
         trial_status: "New",
+        expected_assays: ["wes", "h&e"],
         biobank: "cool new biobank",
         allowed_collection_event_names: ["a", "b", "c"],
         allowed_cohort_names: []
@@ -46,7 +51,24 @@ beforeEach(() => {
 });
 
 const renderTrialManager = () =>
-    renderWithUserContext(<AdminTrialManager />, {});
+    renderWithUserContext(
+        <InfoContext.Provider
+            value={{
+                supportedTemplates: {
+                    assays: [
+                        "wes_bam",
+                        "wes_fastq",
+                        "cytof_10021",
+                        "hande",
+                        "ihc"
+                    ]
+                }
+            }}
+        >
+            <AdminTrialManager />
+        </InfoContext.Provider>,
+        {}
+    );
 
 it("renders available trials and trial creation button", async () => {
     const { findByText, queryByText } = renderTrialManager();
@@ -126,6 +148,7 @@ it("handles trial editing and updates", async () => {
         ...trial1,
         metadata_json: {
             ...trial1.metadata_json,
+            expected_assays: ["h&e", "ihc"],
             nct_id: "new nct id",
             trial_status: "Ongoing",
             allowed_collection_event_names: ["1", "2", "3"]
@@ -147,12 +170,20 @@ it("handles trial editing and updates", async () => {
     expect(collectionEvents.value).toBe(
         trial1.metadata_json.allowed_collection_event_names.join(",")
     );
+    const hAndECheckbox = getByLabelText(/h\&e/i);
+    expect(hAndECheckbox.checked).toBe(true);
+    const wesCheckbox = getByLabelText(/wes$/i);
+    expect(wesCheckbox.checked).toBe(true);
+    // check that the ihc checkbox *isn't* checked
+    const ihcCheckbox = getByLabelText(/ihc/i);
+    expect(ihcCheckbox.checked).toBe(false);
 
     // check that submission button is disabled if there are no changes yet
     const submitButton = getByText(/save changes/i).closest("button")!;
     expect(submitButton.disabled).toBe(true);
 
-    // update the collection events, add an NCT identifier, and set the trial status
+    // update the collection events, add an NCT identifier, set the trial status,
+    // remove wes from expected assays, and add ihc
     fireEvent.input(collectionEvents, { target: { value: "1, 2 ,  3 " } });
     const nctIdInput = getByLabelText(/nct number/i);
     fireEvent.input(nctIdInput, {
@@ -160,6 +191,8 @@ it("handles trial editing and updates", async () => {
     });
     const ongoingRadio = getByLabelText(/ongoing/i);
     fireEvent.click(ongoingRadio);
+    fireEvent.click(wesCheckbox);
+    fireEvent.click(ihcCheckbox);
     expect(submitButton.disabled).toBe(false);
 
     // ensure values were updated

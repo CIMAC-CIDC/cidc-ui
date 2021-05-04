@@ -26,9 +26,10 @@ export interface IFileBundle {
 
 export interface ITrialOverview {
     trial_id: string;
+    expected_assays: string[];
     file_size_bytes: number;
     clinical_participants: number;
     total_participants: number;
     total_samples: number;
-    [assay: string]: number | string;
+    [assay: string]: number | string | string[];
 }

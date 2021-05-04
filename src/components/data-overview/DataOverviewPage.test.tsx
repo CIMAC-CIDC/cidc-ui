@@ -4,6 +4,7 @@ import { renderAsRouteComponent } from "../../../test/helpers";
 import { apiFetch } from "../../api/api";
 import { cleanup } from "@testing-library/react-hooks";
 import { createMuiTheme } from "@material-ui/core";
+import { within } from "@testing-library/dom";
 jest.mock("../../api/api");
 
 const theme = createMuiTheme();
@@ -14,6 +15,9 @@ afterEach(() => {
     // but it's useSWR-related)
     cleanup();
 });
+
+const innerText = (elem: HTMLElement, text: string) =>
+    within(elem).queryByText(text);
 
 it("displays data as expected", async () => {
     apiFetch.mockImplementation(async (url: string) => {
@@ -27,16 +31,20 @@ it("displays data as expected", async () => {
                         file_size_bytes: 1e3,
                         clinical_participants: 1,
                         total_participants: 2,
+                        expected_assays: ["wes", "h&e", "ihc"],
                         "h&e": 11,
-                        wes: 12
+                        wes: 12,
+                        ihc: 0
                     },
                     {
                         trial_id: "trial2",
                         file_size_bytes: 1e6,
                         clinical_participants: 0,
                         total_participants: 3,
+                        expected_assays: ["h&e", "ihc"],
                         "h&e": 21,
-                        wes: 0
+                        wes: 0,
+                        ihc: 22
                     }
                 ];
             default:
@@ -44,7 +52,7 @@ it("displays data as expected", async () => {
         }
     });
 
-    const { findByText, queryByText } = renderAsRouteComponent(
+    const { findByText, queryByText, getByTestId } = renderAsRouteComponent(
         DataOverviewPage
     );
 
@@ -56,10 +64,12 @@ it("displays data as expected", async () => {
     expect(queryByText(/wes/i)).toBeInTheDocument();
     expect(queryByText(/1 kb/i)).toBeInTheDocument();
     expect(queryByText(/1 mb/i)).toBeInTheDocument();
-    expect(queryByText(/11/i)).toBeInTheDocument();
-    expect(queryByText(/12/i)).toBeInTheDocument();
-    expect(queryByText(/21/i)).toBeInTheDocument();
-    expect(queryByText(/-/)).toBeInTheDocument();
+    expect(innerText(getByTestId("data-trial1-h&e"), "11")).toBeInTheDocument();
+    expect(innerText(getByTestId("data-trial1-wes"), "12")).toBeInTheDocument();
+    expect(innerText(getByTestId("data-trial1-ihc"), "0")).toBeInTheDocument();
+    expect(innerText(getByTestId("data-trial2-h&e"), "21")).toBeInTheDocument();
+    expect(innerText(getByTestId("data-trial2-ihc"), "22")).toBeInTheDocument();
+    expect(innerText(getByTestId("na-trial2-wes"), "n/a")).toBeInTheDocument();
 
     // clinical data is displayed (and colored) as expected
     const partialClinical = queryByText(/1 \/ 2 participants/i);
