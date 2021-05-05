@@ -161,6 +161,7 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                                         align="center"
                                     >
                                         <Grid
+                                            container
                                             direction="row"
                                             alignItems="center"
                                         >
