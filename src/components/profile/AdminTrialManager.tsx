@@ -121,8 +121,12 @@ const TrialExpectAssaysField: React.FC<{ width: GridProps["xs"] }> = ({
                                 value={v}
                                 name={name}
                                 inputRef={register}
-                                defaultChecked={checked.includes(v)}
-                                control={<Checkbox size="small" />}
+                                control={
+                                    <Checkbox
+                                        size="small"
+                                        defaultChecked={checked.includes(v)}
+                                    />
+                                }
                             />
                         </Grid>
                     ))}
