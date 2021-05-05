@@ -127,6 +127,9 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
     return (
         <Card>
             <CardContent>
+                <Typography variant="subtitle2" align="right">
+                    n/a = assay not expected for this trial
+                </Typography>
                 <Chip
                     variant="outlined"
                     label={
