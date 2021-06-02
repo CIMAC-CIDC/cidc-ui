@@ -42,7 +42,8 @@ const nonAssayFields = [
     "expected_assays",
     "clinical_participants",
     "total_participants",
-    "total_samples"
+    "total_samples",
+    "excluded_samples"
 ];
 
 const DataOverviewRow: React.FC<{
@@ -115,7 +116,7 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
     }
 
     const assays = Object.keys(summary[0]).filter(
-        k => !nonAssayFields.includes(k)
+        k => !nonAssayFields.includes(k) && !k.endsWith("analysis")
     );
 
     // List trials with clinical data first, ordered by total file size
