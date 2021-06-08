@@ -53,43 +53,52 @@ const GreyRow = withStyles({
 })(TableRow);
 
 const NAText: React.FC = () => (
-    <Chip
-        // Use an invisible chip for spacing
-        style={{ background: "none" }}
-        label={
-            <Typography color="textSecondary" variant="caption">
-                -
-            </Typography>
-        }
-    />
+    <Typography color="textSecondary" variant="caption">
+        -
+    </Typography>
 );
 
-type IngestionStatus = "success" | "approved-failure" | "unapproved-failure";
+type IngestionStatus =
+    | "success"
+    | "approved-failure"
+    | "unapproved-failure"
+    | "upstream-pending";
+
+const commonDataStyles = { minWidth: 40 };
 
 const useDataStyles = makeStyles({
     success: {
-        width: 50,
+        ...commonDataStyles,
         background: `${theme.palette.success.light} !important`
     },
     "approved-failure": {
-        width: 50,
+        ...commonDataStyles,
         background: `${theme.palette.primary.light} !important`
     },
     "unapproved-failure": {
-        width: 50,
+        ...commonDataStyles,
         background: `${theme.palette.warning.light} !important`
+    },
+    "upstream-pending": {
+        ...commonDataStyles,
+        background: `${theme.palette.grey.A100} !important`
     }
 });
 
 const ColoredData: React.FC<{
     status: IngestionStatus;
-    tooltip: string;
+    tooltip?: string;
 }> = ({ status, tooltip, children }) => {
     const classes = useDataStyles();
-    return (
+    const chip = (
+        <Chip className={classes[status]} size="small" label={children} />
+    );
+    return tooltip ? (
         <Tooltip title={<Typography variant="caption">{tooltip}</Typography>}>
-            <Chip className={classes[status]} label={children} />
+            {chip}
         </Tooltip>
+    ) : (
+        chip
     );
 };
 
@@ -99,7 +108,8 @@ const AssayCell: React.FC<{
     stage: "received" | "analyzed";
 }> = ({ overview, assay, stage }) => {
     const received = overview[assay] as number;
-    const excluded = overview.excluded_samples[assay] || [];
+    const excluded =
+        (overview.excluded_samples && overview.excluded_samples[assay]) || [];
 
     let status: IngestionStatus;
     let count: number;
@@ -119,7 +129,9 @@ const AssayCell: React.FC<{
                 ? overview.rna_level1_analysis
                 : overview[`${assay}_analysis`]) as number;
             status =
-                excluded.length === received - count && count > 0
+                count === undefined && received === 0
+                    ? "upstream-pending"
+                    : excluded.length === received - count && count > 0
                     ? excluded.length === 0
                         ? "success"
                         : "approved-failure"
@@ -129,7 +141,9 @@ const AssayCell: React.FC<{
                 "approved-failure":
                     "Some received samples failed during analysis.",
                 "unapproved-failure":
-                    "Some received samples have not been analyzed. Either their analysis is still in progress, or they failed analysis but their failures were not documented."
+                    "Some received samples have not been analyzed. Either their analysis is still in progress, or they failed analysis but their failures were not documented.",
+                "upstream-pending":
+                    "Analysis expected once samples are received."
             }[status];
             break;
     }
@@ -141,7 +155,7 @@ const AssayCell: React.FC<{
             data-testid={`data-${overview.trial_id}-${assay}`}
         >
             <ColoredData status={status} tooltip={tooltip}>
-                {count}
+                {count || 0}
             </ColoredData>
         </TableCell>
     );
@@ -261,9 +275,31 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
     return (
         <Card>
             <CardContent>
-                <Typography variant="subtitle2" align="right">
-                    "<NAText />" = not expected for this trial
-                </Typography>
+                <Grid container spacing={1} direction="row-reverse">
+                    <Grid item>
+                        <ColoredData status="success">success</ColoredData>
+                    </Grid>
+                    <Grid item>
+                        <ColoredData status="approved-failure">
+                            success with expected failures
+                        </ColoredData>
+                    </Grid>
+                    <Grid item>
+                        <ColoredData status="unapproved-failure">
+                            pending or has unexpected failures
+                        </ColoredData>
+                    </Grid>
+                    <Grid item>
+                        <ColoredData status="upstream-pending">
+                            awaiting upstream ingestion
+                        </ColoredData>
+                    </Grid>
+                    <Grid item>
+                        <Typography variant="subtitle2" align="right">
+                            "<NAText />" = not expected
+                        </Typography>
+                    </Grid>
+                </Grid>
                 <Chip
                     variant="outlined"
                     label={
