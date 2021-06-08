@@ -1,3 +1,5 @@
+import { Dictionary } from "lodash";
+
 // tslint:disable-next-line:interface-name
 export interface Trial {
     _etag: string;
@@ -31,5 +33,6 @@ export interface ITrialOverview {
     clinical_participants: number;
     total_participants: number;
     total_samples: number;
-    [assay: string]: number | string | string[];
+    excluded_samples: Dictionary<string>;
+    [assay: string]: number | string | string[] | object;
 }
