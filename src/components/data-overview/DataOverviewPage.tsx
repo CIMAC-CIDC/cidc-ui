@@ -22,7 +22,7 @@ import { RouteComponentProps } from "react-router";
 import { theme, useRootStyles } from "../../rootStyles";
 import { formatFileSize } from "../../util/utils";
 import { IDataOverview } from "../../api/api";
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@material-ui/core";
 
 const NONASSAY_FIELDS = [
     "trial_id",
