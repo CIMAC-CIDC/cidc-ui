@@ -64,12 +64,24 @@ it("displays data as expected", async () => {
     expect(queryByText(/wes/i)).toBeInTheDocument();
     expect(queryByText(/1 kb/i)).toBeInTheDocument();
     expect(queryByText(/1 mb/i)).toBeInTheDocument();
-    expect(innerText(getByTestId("data-trial1-h&e"), "11")).toBeInTheDocument();
-    expect(innerText(getByTestId("data-trial1-wes"), "12")).toBeInTheDocument();
-    expect(innerText(getByTestId("data-trial1-ihc"), "0")).toBeInTheDocument();
-    expect(innerText(getByTestId("data-trial2-h&e"), "21")).toBeInTheDocument();
-    expect(innerText(getByTestId("data-trial2-ihc"), "22")).toBeInTheDocument();
-    expect(innerText(getByTestId("na-trial2-wes"), "n/a")).toBeInTheDocument();
+    expect(
+        innerText(getByTestId("data-trial1-h&e-received"), "11")
+    ).toBeInTheDocument();
+    expect(
+        innerText(getByTestId("data-trial1-wes-received"), "12")
+    ).toBeInTheDocument();
+    expect(
+        innerText(getByTestId("data-trial1-ihc-received"), "0")
+    ).toBeInTheDocument();
+    expect(
+        innerText(getByTestId("data-trial2-h&e-received"), "21")
+    ).toBeInTheDocument();
+    expect(
+        innerText(getByTestId("data-trial2-ihc-received"), "22")
+    ).toBeInTheDocument();
+    expect(
+        innerText(getByTestId("na-trial2-wes-received"), "-")
+    ).toBeInTheDocument();
 
     // clinical data is displayed (and colored) as expected
     const partialClinical = queryByText(/1 \/ 2 participants/i);

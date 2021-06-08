@@ -152,7 +152,7 @@ const AssayCell: React.FC<{
         <TableCell
             key={assay}
             align="center"
-            data-testid={`data-${overview.trial_id}-${assay}`}
+            data-testid={`data-${overview.trial_id}-${assay}-${stage}`}
         >
             <ColoredData status={status} tooltip={tooltip}>
                 {count || 0}
@@ -204,7 +204,7 @@ const DataOverviewRow: React.FC<{
                         <TableCell
                             key={assay}
                             align="center"
-                            data-testid={`na-${overview.trial_id}-${assay}`}
+                            data-testid={`na-${overview.trial_id}-${assay}-received`}
                         >
                             <NAText />
                         </TableCell>
@@ -230,7 +230,7 @@ const DataOverviewRow: React.FC<{
                         <TableCell
                             key={assay}
                             align="center"
-                            data-testid={`na-${overview.trial_id}-${assay}`}
+                            data-testid={`na-${overview.trial_id}-${assay}-analyzed`}
                         >
                             <NAText />
                         </TableCell>
