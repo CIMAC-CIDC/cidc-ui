@@ -22,6 +22,7 @@ import { RouteComponentProps } from "react-router";
 import { theme, useRootStyles } from "../../rootStyles";
 import { formatFileSize } from "../../util/utils";
 import { IDataOverview } from "../../api/api";
+import { makeStyles } from "@material-ui/styles";
 
 const NONASSAY_FIELDS = [
     "trial_id",
@@ -65,30 +66,29 @@ const NAText: React.FC = () => (
 
 type IngestionStatus = "success" | "approved-failure" | "unapproved-failure";
 
+const useDataStyles = makeStyles({
+    success: {
+        width: 50,
+        background: `${theme.palette.success.light} !important`
+    },
+    "approved-failure": {
+        width: 50,
+        background: `${theme.palette.primary.light} !important`
+    },
+    "unapproved-failure": {
+        width: 50,
+        background: `${theme.palette.warning.light} !important`
+    }
+});
+
 const ColoredData: React.FC<{
     status: IngestionStatus;
     tooltip: string;
 }> = ({ status, tooltip, children }) => {
-    const background = {
-        success: theme.palette.success.light,
-        "approved-failure": theme.palette.primary.light,
-        "unapproved-failure": theme.palette.warning.light
-    }[status];
-
-    const text = (
-        <Chip
-            style={{
-                background,
-                width: 50,
-                color: theme.palette.getContrastText(background)
-            }}
-            label={children}
-        />
-    );
-
+    const classes = useDataStyles();
     return (
         <Tooltip title={<Typography variant="caption">{tooltip}</Typography>}>
-            {text}
+            <Chip className={classes[status]} label={children} />
         </Tooltip>
     );
 };
@@ -112,7 +112,7 @@ const AssayCell: React.FC<{
             tooltip =
                 count > 0
                     ? "All samples have been received."
-                    : "Samples have not yet been received.";
+                    : "Samples are expected, but none have been received.";
             break;
         case "analyzed":
             count = (assay === "rna"
