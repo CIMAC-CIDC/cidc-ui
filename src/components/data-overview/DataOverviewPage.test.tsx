@@ -34,6 +34,7 @@ it("displays data as expected", async () => {
                         expected_assays: ["wes", "h&e", "ihc"],
                         "h&e": 11,
                         wes: 12,
+                        wes_analysis: 11,
                         ihc: 0
                     },
                     {
@@ -69,6 +70,9 @@ it("displays data as expected", async () => {
     ).toBeInTheDocument();
     expect(
         innerText(getByTestId("data-trial1-wes-received"), "12")
+    ).toBeInTheDocument();
+    expect(
+        innerText(getByTestId("data-trial1-wes-analyzed"), "11")
     ).toBeInTheDocument();
     expect(
         innerText(getByTestId("data-trial1-ihc-received"), "0")
