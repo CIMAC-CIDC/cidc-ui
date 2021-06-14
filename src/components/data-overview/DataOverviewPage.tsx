@@ -87,7 +87,7 @@ const useDataStyles = makeStyles({
 
 const ColoredData: React.FC<{
     status: IngestionStatus;
-    tooltip?: string;
+    tooltip?: string | React.ReactElement;
 }> = ({ status, tooltip, children }) => {
     const classes = useDataStyles();
     const chip = (
@@ -113,7 +113,7 @@ const AssayCell: React.FC<{
 
     let status: IngestionStatus;
     let count: number;
-    let tooltip: string;
+    let tooltip: string | React.ReactElement;
     switch (stage) {
         case "received":
             count = received;
@@ -145,6 +145,23 @@ const AssayCell: React.FC<{
                 "upstream-pending":
                     "Analysis expected once samples are received."
             }[status];
+
+            if (excluded.length > 0) {
+                tooltip = (
+                    <Grid container direction="column" spacing={1}>
+                        <Grid item>
+                            {tooltip} The following samples failed:
+                        </Grid>
+                        {excluded.map(sample => (
+                            <Grid item key={sample.cimac_id}>
+                                <strong>{sample.cimac_id}</strong> -{" "}
+                                {sample.reason_excluded}
+                            </Grid>
+                        ))}
+                    </Grid>
+                );
+            }
+
             break;
     }
 

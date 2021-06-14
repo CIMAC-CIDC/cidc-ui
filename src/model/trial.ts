@@ -33,6 +33,8 @@ export interface ITrialOverview {
     clinical_participants: number;
     total_participants: number;
     total_samples: number;
-    excluded_samples: Dictionary<string>;
+    excluded_samples: {
+        [assay: string]: Array<{ cimac_id: string; reason_excluded: string }>;
+    };
     [assay: string]: number | string | string[] | object;
 }
