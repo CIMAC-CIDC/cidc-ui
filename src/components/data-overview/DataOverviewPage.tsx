@@ -129,7 +129,7 @@ const AssayCell: React.FC<{
                 ? overview.rna_level1_analysis
                 : overview[`${assay}_analysis`]) as number;
             status =
-                count === undefined && received === 0
+                !count && received === 0
                     ? "upstream-pending"
                     : excluded.length === received - count && count > 0
                     ? excluded.length === 0
