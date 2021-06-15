@@ -12,7 +12,9 @@ import {
     CardContent,
     withStyles,
     Chip,
-    Tooltip
+    Tooltip,
+    TableContainer,
+    Divider
 } from "@material-ui/core";
 import { withIdToken } from "../identity/AuthProvider";
 import { ITrialOverview } from "../../model/trial";
@@ -296,82 +298,101 @@ const DataOverviewTable: React.FC = withIdToken(({ token }) => {
     return (
         <Card>
             <CardContent>
-                <Grid container spacing={1} direction="row-reverse">
+                <Grid container direction="column" spacing={1}>
                     <Grid item>
-                        <ColoredData status="success">success</ColoredData>
+                        <Grid container spacing={1} direction="row-reverse">
+                            <Grid item>
+                                <ColoredData status="success">
+                                    success
+                                </ColoredData>
+                            </Grid>
+                            <Grid item>
+                                <ColoredData status="approved-failure">
+                                    success with expected failures
+                                </ColoredData>
+                            </Grid>
+                            <Grid item>
+                                <ColoredData status="unapproved-failure">
+                                    pending or has unexpected failures
+                                </ColoredData>
+                            </Grid>
+                            <Grid item>
+                                <ColoredData status="upstream-pending">
+                                    awaiting upstream ingestion
+                                </ColoredData>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="subtitle2" align="right">
+                                    "<NAText />" = not expected
+                                </Typography>
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Grid item>
-                        <ColoredData status="approved-failure">
-                            success with expected failures
-                        </ColoredData>
+                        <Chip
+                            variant="outlined"
+                            label={
+                                <>
+                                    <Typography
+                                        display="inline"
+                                        style={{ fontWeight: "bold" }}
+                                    >
+                                        Total Data Ingested:{" "}
+                                    </Typography>
+                                    <Typography display="inline">
+                                        {formatFileSize(overview.num_bytes)}
+                                    </Typography>
+                                </>
+                            }
+                        />
                     </Grid>
                     <Grid item>
-                        <ColoredData status="unapproved-failure">
-                            pending or has unexpected failures
-                        </ColoredData>
-                    </Grid>
-                    <Grid item>
-                        <ColoredData status="upstream-pending">
-                            awaiting upstream ingestion
-                        </ColoredData>
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="subtitle2" align="right">
-                            "<NAText />" = not expected
-                        </Typography>
+                        <Divider />
+                        <TableContainer style={{ maxHeight: 600 }}>
+                            <Table size="small" stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell
+                                            style={{ borderBottom: 0 }}
+                                            colSpan={4}
+                                        />
+                                        <TableCell
+                                            colSpan={assays.length}
+                                            align="center"
+                                        >
+                                            # of Samples per Assay
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <HeaderCell>Protocol ID</HeaderCell>
+                                        <HeaderCell>Data Size</HeaderCell>
+                                        <HeaderCell align="center">
+                                            Clinical Data
+                                        </HeaderCell>
+                                        <HeaderCell />
+                                        {assays.map(assay => (
+                                            <HeaderCell
+                                                key={assay}
+                                                align="center"
+                                            >
+                                                {assay}
+                                            </HeaderCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {sortedData.map(row => (
+                                        <DataOverviewRow
+                                            key={row.trial_id}
+                                            overview={row}
+                                            assays={assays}
+                                        />
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
                     </Grid>
                 </Grid>
-                <Chip
-                    variant="outlined"
-                    label={
-                        <>
-                            <Typography
-                                display="inline"
-                                style={{ fontWeight: "bold" }}
-                            >
-                                Total Data Ingested:{" "}
-                            </Typography>
-                            <Typography display="inline">
-                                {formatFileSize(overview.num_bytes)}
-                            </Typography>
-                        </>
-                    }
-                />
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell
-                                style={{ borderBottom: 0 }}
-                                colSpan={3}
-                            />
-                            <TableCell colSpan={assays.length} align="center">
-                                # of Samples per Assay
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <HeaderCell>Protocol ID</HeaderCell>
-                            <HeaderCell>Data Size</HeaderCell>
-                            <HeaderCell align="center">
-                                Clinical Data
-                            </HeaderCell>
-                            <HeaderCell />
-                            {assays.map(assay => (
-                                <HeaderCell key={assay} align="center">
-                                    {assay}
-                                </HeaderCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {sortedData.map(row => (
-                            <DataOverviewRow
-                                key={row.trial_id}
-                                overview={row}
-                                assays={assays}
-                            />
-                        ))}
-                    </TableBody>
-                </Table>
             </CardContent>
         </Card>
     );
