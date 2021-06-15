@@ -4,7 +4,7 @@ import { renderAsRouteComponent } from "../../../test/helpers";
 import { apiFetch } from "../../api/api";
 import { cleanup } from "@testing-library/react-hooks";
 import { createMuiTheme } from "@material-ui/core";
-import { within } from "@testing-library/dom";
+import { fireEvent, getByText, within } from "@testing-library/dom";
 jest.mock("../../api/api");
 
 const theme = createMuiTheme();
@@ -20,6 +20,7 @@ const innerText = (elem: HTMLElement, text: string) =>
     within(elem).queryByText(text);
 
 it("displays data as expected", async () => {
+    const excluded = { cimac_id: "CTTTPP01", reason_excluded: "some reason" };
     apiFetch.mockImplementation(async (url: string) => {
         switch (url) {
             case "/info/data_overview":
@@ -35,7 +36,8 @@ it("displays data as expected", async () => {
                         "h&e": 11,
                         wes: 12,
                         wes_analysis: 11,
-                        ihc: 0
+                        ihc: 0,
+                        excluded_samples: { wes_analysis: [excluded] }
                     },
                     {
                         trial_id: "trial2",
@@ -72,9 +74,6 @@ it("displays data as expected", async () => {
         innerText(getByTestId("data-trial1-wes-received"), "12")
     ).toBeInTheDocument();
     expect(
-        innerText(getByTestId("data-trial1-wes-analyzed"), "11")
-    ).toBeInTheDocument();
-    expect(
         innerText(getByTestId("data-trial1-ihc-received"), "0")
     ).toBeInTheDocument();
     expect(
@@ -85,6 +84,16 @@ it("displays data as expected", async () => {
     ).toBeInTheDocument();
     expect(
         innerText(getByTestId("na-trial2-wes-received"), "-")
+    ).toBeInTheDocument();
+
+    const wesAnalyzed = getByTestId("data-trial1-wes-analyzed");
+    expect(innerText(wesAnalyzed, "11")).toBeInTheDocument();
+
+    // sample exclusions are displayed on hover
+    fireEvent.mouseOver(wesAnalyzed.firstElementChild!);
+    expect(await findByText(excluded.cimac_id)).toBeInTheDocument();
+    expect(
+        queryByText(new RegExp(excluded.reason_excluded, "i"))
     ).toBeInTheDocument();
 
     // clinical data is displayed (and colored) as expected

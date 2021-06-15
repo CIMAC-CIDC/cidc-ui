@@ -108,8 +108,6 @@ const AssayCell: React.FC<{
     stage: "received" | "analyzed";
 }> = ({ overview, assay, stage }) => {
     const received = overview[assay] as number;
-    const excluded =
-        (overview.excluded_samples && overview.excluded_samples[assay]) || [];
 
     let status: IngestionStatus;
     let count: number;
@@ -125,9 +123,14 @@ const AssayCell: React.FC<{
                     : "Samples are expected, but none have been received.";
             break;
         case "analyzed":
-            count = (assay === "rna"
-                ? overview.rna_level1_analysis
-                : overview[`${assay}_analysis`]) as number;
+            const analysis =
+                assay === "rna" ? "rna_level1_analysis" : `${assay}_analysis`;
+            const excluded =
+                (overview.excluded_samples &&
+                    overview.excluded_samples[analysis]) ||
+                [];
+
+            count = overview[analysis] as number;
             status =
                 !count && received === 0
                     ? "upstream-pending"
@@ -150,7 +153,8 @@ const AssayCell: React.FC<{
                 tooltip = (
                     <Grid container direction="column" spacing={1}>
                         <Grid item>
-                            {tooltip} The following samples failed:
+                            {tooltip} The following samples have documented
+                            failures:
                         </Grid>
                         {excluded.map(sample => (
                             <Grid item key={sample.cimac_id}>
