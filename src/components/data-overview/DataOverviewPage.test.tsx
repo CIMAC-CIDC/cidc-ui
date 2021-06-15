@@ -4,7 +4,7 @@ import { renderAsRouteComponent } from "../../../test/helpers";
 import { apiFetch } from "../../api/api";
 import { cleanup } from "@testing-library/react-hooks";
 import { createMuiTheme } from "@material-ui/core";
-import { fireEvent, getByText, within } from "@testing-library/dom";
+import { fireEvent, within } from "@testing-library/dom";
 jest.mock("../../api/api");
 
 const theme = createMuiTheme();
