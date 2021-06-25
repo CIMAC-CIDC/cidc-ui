@@ -308,7 +308,6 @@ const DataOverviewPage: React.FC<RouteComponentProps> = withIdToken(
                 <Grid item>
                     <Grid container justify="space-between" alignItems="center">
                         <Grid item>
-                            {" "}
                             <Chip
                                 variant="outlined"
                                 label={
