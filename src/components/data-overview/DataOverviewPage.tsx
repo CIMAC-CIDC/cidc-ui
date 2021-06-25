@@ -8,8 +8,6 @@ import {
     TableCell,
     Grid,
     Typography,
-    Card,
-    CardContent,
     withStyles,
     Chip,
     Tooltip,
@@ -264,155 +262,150 @@ const DataOverviewRow: React.FC<{
     );
 };
 
-const DataOverviewTable: React.FC = withIdToken(({ token }) => {
-    const { data: overview } = useSWR<IDataOverview>(["/info/data_overview"]);
-    const { data: summary } = useSWR<ITrialOverview[]>([
-        "/trial_metadata/summaries",
-        token
-    ]);
+const DataOverviewPage: React.FC<RouteComponentProps> = withIdToken(
+    ({ token }) => {
+        const classes = useRootStyles();
 
-    if (summary === undefined || overview === undefined) {
+        const { data: overview } = useSWR<IDataOverview>([
+            "/info/data_overview"
+        ]);
+        const { data: summary } = useSWR<ITrialOverview[]>([
+            "/trial_metadata/summaries",
+            token
+        ]);
+
+        if (summary === undefined || overview === undefined) {
+            return (
+                <Grid container justify="center">
+                    <Grid item>
+                        <Loader />
+                    </Grid>
+                </Grid>
+            );
+        }
+
+        if (summary.length === 0) {
+            return <Typography>No data found.</Typography>;
+        }
+
+        const assays = Object.keys(summary[0]).filter(
+            k => !NONASSAY_FIELDS.includes(k) && !k.endsWith("analysis")
+        );
+
+        // List trials with clinical data first, ordered by total file size
+        const sortedData = sortBy(summary, s => [
+            s.clinical_participants > 0,
+            s.file_size_bytes
+        ]).reverse();
+
         return (
-            <Grid container justify="center">
+            <Grid
+                container
+                direction="column"
+                spacing={1}
+                className={classes.centeredPage}
+            >
                 <Grid item>
-                    <Loader />
+                    <Grid container justify="space-between" alignItems="center">
+                        <Grid item>
+                            {" "}
+                            <Chip
+                                variant="outlined"
+                                label={
+                                    <>
+                                        <Typography
+                                            display="inline"
+                                            style={{ fontWeight: "bold" }}
+                                        >
+                                            Total Data Ingested:{" "}
+                                        </Typography>
+                                        <Typography display="inline">
+                                            {formatFileSize(overview.num_bytes)}
+                                        </Typography>
+                                    </>
+                                }
+                            />
+                        </Grid>
+                        <Grid item>
+                            <Grid container spacing={1} direction="row-reverse">
+                                <Grid item>
+                                    <ColoredData status="success">
+                                        success
+                                    </ColoredData>
+                                </Grid>
+                                <Grid item>
+                                    <ColoredData status="approved-failure">
+                                        success with expected failures
+                                    </ColoredData>
+                                </Grid>
+                                <Grid item>
+                                    <ColoredData status="unapproved-failure">
+                                        pending or has unexpected failures
+                                    </ColoredData>
+                                </Grid>
+                                <Grid item>
+                                    <ColoredData status="upstream-pending">
+                                        awaiting upstream ingestion
+                                    </ColoredData>
+                                </Grid>
+                                <Grid item>
+                                    <Typography
+                                        variant="subtitle2"
+                                        align="right"
+                                    >
+                                        "<NAText />" = not expected
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <Grid item>
+                    <Divider />
+                    <TableContainer style={{ maxHeight: 600 }}>
+                        <Table size="small" padding="checkbox" stickyHeader>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell
+                                        style={{ borderBottom: 0 }}
+                                        colSpan={4}
+                                    />
+                                    <TableCell
+                                        colSpan={assays.length}
+                                        align="center"
+                                    >
+                                        # of Samples per Assay
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <HeaderCell>trial</HeaderCell>
+                                    <HeaderCell>data size</HeaderCell>
+                                    <HeaderCell align="center">
+                                        Clinical Data
+                                    </HeaderCell>
+                                    <HeaderCell />
+                                    {assays.map(assay => (
+                                        <HeaderCell key={assay} align="center">
+                                            {assay}
+                                        </HeaderCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {sortedData.map(row => (
+                                    <DataOverviewRow
+                                        key={row.trial_id}
+                                        overview={row}
+                                        assays={assays}
+                                    />
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </Grid>
             </Grid>
         );
     }
-
-    if (summary.length === 0) {
-        return <Typography>No data found.</Typography>;
-    }
-
-    const assays = Object.keys(summary[0]).filter(
-        k => !NONASSAY_FIELDS.includes(k) && !k.endsWith("analysis")
-    );
-
-    // List trials with clinical data first, ordered by total file size
-    const sortedData = sortBy(summary, s => [
-        s.clinical_participants > 0,
-        s.file_size_bytes
-    ]).reverse();
-
-    return (
-        <Card>
-            <CardContent>
-                <Grid container direction="column" spacing={1}>
-                    <Grid item>
-                        <Grid container spacing={1} direction="row-reverse">
-                            <Grid item>
-                                <ColoredData status="success">
-                                    success
-                                </ColoredData>
-                            </Grid>
-                            <Grid item>
-                                <ColoredData status="approved-failure">
-                                    success with expected failures
-                                </ColoredData>
-                            </Grid>
-                            <Grid item>
-                                <ColoredData status="unapproved-failure">
-                                    pending or has unexpected failures
-                                </ColoredData>
-                            </Grid>
-                            <Grid item>
-                                <ColoredData status="upstream-pending">
-                                    awaiting upstream ingestion
-                                </ColoredData>
-                            </Grid>
-                            <Grid item>
-                                <Typography variant="subtitle2" align="right">
-                                    "<NAText />" = not expected
-                                </Typography>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <Grid item>
-                        <Chip
-                            variant="outlined"
-                            label={
-                                <>
-                                    <Typography
-                                        display="inline"
-                                        style={{ fontWeight: "bold" }}
-                                    >
-                                        Total Data Ingested:{" "}
-                                    </Typography>
-                                    <Typography display="inline">
-                                        {formatFileSize(overview.num_bytes)}
-                                    </Typography>
-                                </>
-                            }
-                        />
-                    </Grid>
-                    <Grid item>
-                        <Divider />
-                        <TableContainer style={{ maxHeight: 600 }}>
-                            <Table size="small" stickyHeader>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell
-                                            style={{ borderBottom: 0 }}
-                                            colSpan={4}
-                                        />
-                                        <TableCell
-                                            colSpan={assays.length}
-                                            align="center"
-                                        >
-                                            # of Samples per Assay
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <HeaderCell>Protocol ID</HeaderCell>
-                                        <HeaderCell>Data Size</HeaderCell>
-                                        <HeaderCell align="center">
-                                            Clinical Data
-                                        </HeaderCell>
-                                        <HeaderCell />
-                                        {assays.map(assay => (
-                                            <HeaderCell
-                                                key={assay}
-                                                align="center"
-                                            >
-                                                {assay}
-                                            </HeaderCell>
-                                        ))}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {sortedData.map(row => (
-                                        <DataOverviewRow
-                                            key={row.trial_id}
-                                            overview={row}
-                                            assays={assays}
-                                        />
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Grid>
-                </Grid>
-            </CardContent>
-        </Card>
-    );
-});
-
-const DataOverviewPage: React.FC<RouteComponentProps> = props => {
-    const classes = useRootStyles();
-
-    return (
-        <Grid
-            container
-            className={classes.centeredPage}
-            justify="center"
-            alignItems="center"
-        >
-            <Grid item>
-                <DataOverviewTable />
-            </Grid>
-        </Grid>
-    );
-};
+);
 
 export default DataOverviewPage;
