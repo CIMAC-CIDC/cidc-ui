@@ -37,7 +37,14 @@ const NONASSAY_FIELDS = [
     "cytof_s1609_gd2car"
 ];
 
-const ASSAYS_WITH_ANALYSIS = ["wes", "rna", "tcr", "cytof", "wes_tumor_only"];
+const ASSAYS_WITH_ANALYSIS = [
+    "wes",
+    "rna",
+    "tcr",
+    "cytof",
+    "wes",
+    "wes_tumor_only"
+];
 
 const HeaderCell = withStyles({
     root: {
