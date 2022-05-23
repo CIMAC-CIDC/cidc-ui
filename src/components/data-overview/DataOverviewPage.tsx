@@ -23,6 +23,7 @@ import { theme, useRootStyles } from "../../rootStyles";
 import { formatFileSize } from "../../util/utils";
 import { IDataOverview } from "../../api/api";
 import { makeStyles } from "@material-ui/core";
+import { IFacetsForLinks } from "../../model/file";
 
 const NONASSAY_FIELDS = [
     "trial_id",
@@ -93,11 +94,23 @@ const useDataStyles = makeStyles({
 const ColoredData: React.FC<{
     status: IngestionStatus;
     tooltip?: string | React.ReactElement;
-}> = ({ status, tooltip, children }) => {
+    linkTarget?: string;
+    dataTestId?: string;
+}> = ({ status, tooltip, children, linkTarget, dataTestId }) => {
     const classes = useDataStyles();
-    const chip = (
-        <Chip className={classes[status]} size="small" label={children} />
-    );
+    const chip =
+        linkTarget && dataTestId ? (
+            <Chip
+                className={classes[status]}
+                size="small"
+                label={children}
+                component="a"
+                href={linkTarget}
+                data-testid={dataTestId}
+            />
+        ) : (
+            <Chip className={classes[status]} size="small" label={children} />
+        );
     return tooltip ? (
         <Tooltip title={<Typography variant="caption">{tooltip}</Typography>}>
             {chip}
@@ -111,7 +124,8 @@ const AssayCell: React.FC<{
     overview: ITrialOverview;
     assay: string;
     stage: "received" | "analyzed";
-}> = ({ overview, assay, stage }) => {
+    facets: string[];
+}> = ({ overview, assay, stage, facets }) => {
     const received = overview[assay] as number;
 
     let status: IngestionStatus;
@@ -128,8 +142,13 @@ const AssayCell: React.FC<{
                     : "Samples are expected, but none have been received.";
             break;
         case "analyzed":
-            const analysis =
-                assay === "rna" ? "rna_level1_analysis" : `${assay}_analysis`;
+            let analysis: string;
+            if (assay === "rna") {
+                analysis = "rna_level1_analysis";
+            } else {
+                analysis = `${assay}_analysis`;
+            }
+
             const excluded =
                 (overview.excluded_samples &&
                     overview.excluded_samples[analysis]) ||
@@ -174,13 +193,24 @@ const AssayCell: React.FC<{
             break;
     }
 
+    let linkTarget: string = `/browse-data?file_view=1&trial_ids=${overview.trial_id}`;
+    for (const facet of facets) {
+        linkTarget =
+            linkTarget + `&facets=` + encodeURI(facet).replace("&", "%26");
+    }
+
     return (
         <TableCell
             key={assay}
             align="center"
             data-testid={`data-${overview.trial_id}-${assay}-${stage}`}
         >
-            <ColoredData status={status} tooltip={tooltip}>
+            <ColoredData
+                status={status}
+                tooltip={tooltip}
+                linkTarget={linkTarget}
+                dataTestId={`chip-${overview.trial_id}-${assay}-${stage}`}
+            >
                 {count || 0}
             </ColoredData>
         </TableCell>
@@ -190,7 +220,15 @@ const AssayCell: React.FC<{
 const DataOverviewRow: React.FC<{
     overview: ITrialOverview;
     assays: string[];
-}> = ({ overview, assays }) => {
+    facets: IFacetsForLinks;
+}> = ({ overview, assays, facets }) => {
+    let clinicalLinkTarget: string = `/browse-data?file_view=1&trial_ids=${overview.trial_id}`;
+    for (const facet of facets.facets[`clinical_participants`][`received`]) {
+        clinicalLinkTarget =
+            clinicalLinkTarget +
+            `&facets=` +
+            encodeURI(facet).replace("&", "%26");
+    }
     return (
         <>
             <TableRow>
@@ -200,6 +238,8 @@ const DataOverviewRow: React.FC<{
                 </TableCell>
                 <TableCell rowSpan={3} align="right">
                     <Chip
+                        component="a"
+                        href={clinicalLinkTarget}
                         style={{ width: "100%" }}
                         color={
                             overview.clinical_participants > 0
@@ -208,6 +248,7 @@ const DataOverviewRow: React.FC<{
                         }
                         variant="outlined"
                         label={`${overview.clinical_participants} / ${overview.total_participants} participants`}
+                        data-testid={`chip-${overview.trial_id}-clinical_participants`}
                     />
                 </TableCell>
             </TableRow>
@@ -219,13 +260,14 @@ const DataOverviewRow: React.FC<{
                 </TableCell>
                 {assays.map(assay =>
                     overview.expected_assays.includes(
-                        assay !== "wes_tumor_only" ? assay : "wes"
+                        assay === "wes_tumor_only" ? "wes" : assay
                     ) || overview[assay] > 0 ? (
                         <AssayCell
                             key={assay}
                             assay={assay}
                             overview={overview}
                             stage="received"
+                            facets={facets.facets[assay][`received`]}
                         />
                     ) : (
                         <TableCell
@@ -247,13 +289,14 @@ const DataOverviewRow: React.FC<{
                 {assays.map(assay =>
                     ASSAYS_WITH_ANALYSIS.includes(assay) &&
                     overview.expected_assays.includes(
-                        assay !== "wes_tumor_only" ? assay : "wes"
+                        assay === "wes_tumor_only" ? "wes" : assay
                     ) ? (
                         <AssayCell
                             key={assay}
                             assay={assay}
                             overview={overview}
                             stage="analyzed"
+                            facets={facets.facets[assay][`analyzed`]}
                         />
                     ) : (
                         <TableCell
@@ -281,8 +324,16 @@ const DataOverviewPage: React.FC<RouteComponentProps> = withIdToken(
             "/trial_metadata/summaries",
             token
         ]);
+        const { data: facets } = useSWR<IFacetsForLinks>([
+            "/downloadable_files/facet_groups_for_links",
+            token
+        ]);
 
-        if (summary === undefined || overview === undefined) {
+        if (
+            summary === undefined ||
+            overview === undefined ||
+            facets === undefined
+        ) {
             return (
                 <Grid container justify="center">
                     <Grid item>
@@ -404,6 +455,7 @@ const DataOverviewPage: React.FC<RouteComponentProps> = withIdToken(
                                         key={row.trial_id}
                                         overview={row}
                                         assays={assays}
+                                        facets={facets}
                                     />
                                 ))}
                             </TableBody>

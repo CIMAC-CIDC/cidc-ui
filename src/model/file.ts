@@ -24,3 +24,12 @@ export interface DataFile {
 }
 
 export type IHCPlotData = Array<Dictionary<string | number>>;
+
+export interface IFacetsForLinks {
+    facets: {
+        [assay: string]: {
+            received: string[];
+            analyzed: string[];
+        };
+    };
+}
