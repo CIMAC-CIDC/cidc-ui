@@ -9,6 +9,10 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 9 Jun 2022
+
+- `added` ctDNA to list of assays with analyses
+
 ## 20 May 2022
 
 - `changed` reverted previous "wes" -> "wes_normal" and "wes_tumor_only" -> "wes_tumor"
