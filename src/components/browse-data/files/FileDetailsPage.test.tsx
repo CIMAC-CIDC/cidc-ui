@@ -46,7 +46,7 @@ const mockFetch = (
 ) => {
     apiFetch.mockImplementation(async (url: string) => {
         if (url.includes("related_files")) {
-            return rf;
+            return { _items: rf };
         }
         if (url.includes("download_url")) {
             return dlUrl;

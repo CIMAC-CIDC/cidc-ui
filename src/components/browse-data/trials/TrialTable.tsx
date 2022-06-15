@@ -140,7 +140,7 @@ const AssayButtonTable: React.FC<{
                     </AssayTableCell>
                     <AssayTableCell align="center">
                         <Typography variant="overline" color="textSecondary">
-                            Analysis Files
+                            Analysis Ready Files
                         </Typography>
                     </AssayTableCell>
                 </TableRow>

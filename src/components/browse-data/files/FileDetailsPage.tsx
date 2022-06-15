@@ -40,7 +40,7 @@ import BatchDownloadDialog from "../shared/BatchDownloadDialog";
 import { Skeleton } from "@material-ui/lab";
 import { useRootStyles } from "../../../rootStyles";
 import useSWR from "swr";
-import { apiFetch } from "../../../api/api";
+import { apiFetch, IApiPage } from "../../../api/api";
 import { useUserContext } from "../../identity/UserProvider";
 
 const getDownloadUrl = (token: string, fileId: number) =>
@@ -249,10 +249,11 @@ const RelatedFiles: React.FC<{ file: DataFile; token: string }> = ({
     const [batchDownloadOpen, setBatchDownloadOpen] = React.useState<boolean>(
         false
     );
-    const { data: relatedFiles } = useSWR<DataFile[]>([
+    const { data } = useSWR<IApiPage<DataFile>>([
         `/downloadable_files/${file.id}/related_files`,
         token
     ]);
+    const relatedFiles = data?._items;
 
     const header = (
         <Grid

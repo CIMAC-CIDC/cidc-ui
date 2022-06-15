@@ -9,6 +9,10 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 13 Jun 2022
+
+- `changed` related files call to use IApiPage to correctly pull files out of response _items
+
 ## 9 Jun 2022
 
 - `added` ctDNA to list of assays with analyses
