@@ -1,4 +1,5 @@
 import React from "react";
+import InfoTooltip from "../../generic/InfoTooltip";
 import { DataFile } from "../../../model/file";
 import { colors } from "../../../rootStyles";
 import PaginatedTable, { ISortConfig } from "../../generic/PaginatedTable";
@@ -247,8 +248,18 @@ const FileTable: React.FC<IFileTableProps & { token: string }> = props => {
                                     <TableCell>{row.trial_id}</TableCell>
                                     <TableCell>{row.file_ext}</TableCell>
                                     <TableCell>
-                                        {formatDataCategory(
-                                            row.data_category || ""
+                                        {row.short_description == null ? (
+                                            formatDataCategory(
+                                                row.data_category || ""
+                                            )
+                                        ) : (
+                                            <InfoTooltip
+                                                text={row.short_description}
+                                            >
+                                                {formatDataCategory(
+                                                    row.data_category || ""
+                                                )}
+                                            </InfoTooltip>
                                         )}
                                     </TableCell>
                                     <TableCell>

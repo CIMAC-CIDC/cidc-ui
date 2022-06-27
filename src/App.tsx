@@ -9,10 +9,7 @@ import { CIDCThemeProvider, useRootStyles } from "./rootStyles";
 import { QueryParamProvider } from "use-query-params";
 import NotFoundRoute from "./components/generic/NotFoundRoute";
 import IdentityProvider from "./components/identity/IdentityProvider";
-import {
-    AssayDocsPage,
-    AnalysesDocsPage
-} from "./components/upload-docs/UploadDocsPages";
+import { AnalysesDocsPage } from "./components/upload-docs/UploadDocsPages";
 import { SWRConfig } from "swr";
 import { apiFetch } from "./api/api";
 
@@ -45,6 +42,9 @@ const TransferDataPage = React.lazy(() =>
 const DataOverviewPage = React.lazy(() =>
     import("./components/data-overview/DataOverviewPage")
 );
+const DataExplorationPage = React.lazy(() =>
+    import("./components/data-exploration/DataExplorationPage")
+);
 
 export default function App() {
     const classes = useRootStyles();
@@ -72,12 +72,6 @@ export default function App() {
                                                         exact
                                                         path="/"
                                                         component={HomePage}
-                                                    />
-                                                    <Route
-                                                        path="/assays"
-                                                        component={
-                                                            AssayDocsPage
-                                                        }
                                                     />
                                                     <Route
                                                         path="/analyses"
@@ -111,6 +105,13 @@ export default function App() {
                                                         path="/data-overview"
                                                         component={
                                                             DataOverviewPage
+                                                        }
+                                                    />
+                                                    <Route
+                                                        exact
+                                                        path="/data-exploration"
+                                                        component={
+                                                            DataExplorationPage
                                                         }
                                                     />
                                                     <Route

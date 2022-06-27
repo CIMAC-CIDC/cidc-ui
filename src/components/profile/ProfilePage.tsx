@@ -159,19 +159,6 @@ const ProfilePage: React.FC<{ token: string }> = ({ token }) => {
                         <AdminTrialManager />
                     </Grid>
                     <Grid item>
-                        <Typography variant="h5">Data dashboard</Typography>
-                        <Box height={900}>
-                            <iframe
-                                title="dashboard"
-                                width="1200"
-                                height="900"
-                                src="https://datastudio.google.com/embed/reporting/5687374f-4a08-4c23-b9d7-62b01d73d75f/page/9C0mC"
-                                frameBorder="0"
-                                allowFullScreen
-                            ></iframe>
-                        </Box>
-                    </Grid>
-                    <Grid item>
                         <Typography variant="h5">
                             Successful upload jobs (rendered by Plotly Dash)
                         </Typography>

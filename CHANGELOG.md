@@ -9,6 +9,22 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 17 Jun 2022
+
+- `changed` width of data exploration cards
+- `changed` "Data Exploration" content update
+
+## 16 Jun 2022
+
+- `added` "Data Exploration" tab
+- `added` tooltip to show file short_description in File Browser
+
+
+## 15 Jun 2022
+
+- `removed` transfer assays tab
+- `removed` 'new' chip on tranfer data header tab
+
 ## 13 Jun 2022
 
 - `changed` related files call to use IApiPage to correctly pull files out of response _items

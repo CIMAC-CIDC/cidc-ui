@@ -54,14 +54,7 @@ describe("Header", () => {
         checkVisibility(
             queryByText,
             [],
-            [
-                "browse data",
-                "pipelines",
-                "schema",
-                "manifests",
-                "assays",
-                "analyses"
-            ]
+            ["browse data", "pipelines", "schema", "manifests", "analyses"]
         );
     };
 
@@ -106,18 +99,17 @@ describe("Header", () => {
         checkVisibility(
             q1,
             ["browse data", "pipelines", "schema", "data overview"],
-            ["manifests", "assays", "analyses"]
+            ["manifests", "analyses"]
         );
         cleanup();
 
         // cimac user
         const { queryByText: q2 } = renderWithUserContext({
-            ...user,
-            showAssays: true
+            ...user
         });
         checkVisibility(
             q2,
-            ["browse data", "pipelines", "schema", "assays", "data overview"],
+            ["browse data", "pipelines", "schema", "data overview"],
             ["manifests", "analyses"]
         );
         cleanup();
@@ -136,26 +128,18 @@ describe("Header", () => {
                 "manifests",
                 "data overview"
             ],
-            ["assays", "analyses"]
+            ["analyses"]
         );
         cleanup();
 
         // cidc biofx user
         const { queryByText: q4 } = renderWithUserContext({
             ...user,
-            showAssays: true,
             showAnalyses: true
         });
         checkVisibility(
             q4,
-            [
-                "browse data",
-                "pipelines",
-                "schema",
-                "assays",
-                "analyses",
-                "data overview"
-            ],
+            ["browse data", "pipelines", "schema", "analyses", "data overview"],
             ["manifests"]
         );
         cleanup();
@@ -163,7 +147,6 @@ describe("Header", () => {
         // cidc admin
         const { queryByText: q5 } = renderWithUserContext({
             ...user,
-            showAssays: true,
             showAnalyses: true,
             showManifests: true
         });
@@ -173,7 +156,6 @@ describe("Header", () => {
                 "browse data",
                 "pipelines",
                 "schema",
-                "assays",
                 "analyses",
                 "manifests",
                 "data overview"
@@ -186,7 +168,6 @@ describe("Header", () => {
         history.push("/");
         const { getByText } = renderWithUserContext({
             ...user,
-            showAssays: true,
             showAnalyses: true,
             showManifests: true
         });
@@ -195,7 +176,6 @@ describe("Header", () => {
             "browse-data",
             "pipelines",
             "schema",
-            "assays",
             "analyses",
             "manifests",
             "data-overview"
@@ -212,7 +192,6 @@ describe("Header", () => {
     it("doesn't render on certain pathnames", () => {
         const { queryByTestId } = renderWithUserContext({
             ...user,
-            showAssays: true,
             showAnalyses: true,
             showManifests: true
         });

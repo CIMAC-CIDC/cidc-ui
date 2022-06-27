@@ -10,7 +10,6 @@ import useSWR from "swr";
 
 export interface IAccountWithExtraContext extends Account {
     permissions?: Permission[];
-    showAssays?: boolean;
     showAnalyses?: boolean;
     showManifests?: boolean;
     canDownload?: boolean;
@@ -73,11 +72,6 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
             : null
     );
 
-    const showAssays =
-        user?.role &&
-        ["cimac-biofx-user", "cidc-biofx-user", "cidc-admin"].includes(
-            user.role
-        );
     const showManifests =
         user?.role && ["nci-biobank-user", "cidc-admin"].includes(user.role);
     const showAnalyses =
@@ -90,7 +84,6 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
                   ...authData.userInfo.user,
                   ...user,
                   permissions: permissions._items,
-                  showAssays,
                   showManifests,
                   showAnalyses,
                   canDownload

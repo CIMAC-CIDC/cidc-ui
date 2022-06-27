@@ -55,7 +55,6 @@ jest.mock("./components/identity/IdentityProvider", () => {
                     <UserContext.Provider
                         value={{
                             approval_date: "1/1/1",
-                            showAssays: true,
                             showManifests: true,
                             showAnalyses: true
                         }}
@@ -82,9 +81,6 @@ test("users can navigate to pages as expected", async () => {
 
     fireEvent.click(getByText(/pipelines/i));
     expect(await findByText(/rima/i)).toBeInTheDocument();
-
-    fireEvent.click(getByText(/transfer assays/i));
-    expect(await findByText(/the cidc cli/i)).toBeInTheDocument();
 
     fireEvent.click(getByText(/schema/i));
     expect(await findByTitle(/cidc schema/i)).toBeInTheDocument();

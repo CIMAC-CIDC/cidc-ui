@@ -133,7 +133,6 @@ describe("role-based tab display", () => {
             <div data-testid="results">
                 <p>showAnalyses={user.showAnalyses?.toString()}</p>
                 <p>showManifests={user.showManifests?.toString()}</p>
-                <p>showAssays={user.showAssays?.toString()}</p>
             </div>
         );
     };
@@ -141,10 +140,9 @@ describe("role-based tab display", () => {
     const expectedTabs = [
         { role: "cimac-user", tabs: [] },
         { role: "network-viewer", tabs: [] },
-        { role: "cimac-biofx-user", tabs: ["assays"] },
-        { role: "cidc-biofx-user", tabs: ["assays", "analyses"] },
+        { role: "cidc-biofx-user", tabs: ["analyses"] },
         { role: "nci-biobank-user", tabs: ["manifests"] },
-        { role: "cidc-admin", tabs: ["assays", "analyses", "manifests"] }
+        { role: "cidc-admin", tabs: ["analyses", "manifests"] }
     ];
 
     expectedTabs.forEach(({ role, tabs }) => {
@@ -156,9 +154,6 @@ describe("role-based tab display", () => {
             await findByTestId("results");
             expect(
                 queryByText(`showManifests=${tabs.includes("manifests")}`)
-            ).toBeInTheDocument();
-            expect(
-                queryByText(`showAssays=${tabs.includes("assays")}`)
             ).toBeInTheDocument();
 
             expect(

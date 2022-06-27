@@ -10,7 +10,8 @@ export const colors = {
     LIGHT_GREY: "#cfd0d0",
     DARK_BLUE_GREY: "#3b4856",
     logoLightBlue: "#0C9FEB",
-    logoDarkBlue: "#1E66BE"
+    logoDarkBlue: "#1E66BE",
+    warningDarkRed: "#F93154"
 };
 
 export const widths = {
@@ -26,6 +27,9 @@ export const theme = createMuiTheme({
         primary: {
             main: colors.logoDarkBlue,
             light: colors.logoLightBlue
+        },
+        secondary: {
+            main: colors.warningDarkRed
         }
     },
     props: {

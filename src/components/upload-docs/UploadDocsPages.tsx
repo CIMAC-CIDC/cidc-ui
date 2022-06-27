@@ -22,7 +22,6 @@ interface IDocPathConfig {
     path: string;
     label: string;
     title: string;
-    assays?: boolean;
     analyses?: boolean;
 }
 
@@ -33,71 +32,36 @@ const pathConfigs: Dictionary<IDocPathConfig> = {
         path: "wes",
         label: "WES",
         title: "WES upload",
-        assays: true,
         analyses: true
     },
     atac: {
         path: "atac",
         label: "ATAC",
         title: "ATAC upload",
-        assays: true,
         analyses: true
     },
     rna: {
         path: "rna",
         label: "RNA Expression",
         title: "RNA Expression upload",
-        assays: true,
         analyses: true
     },
     cytof: {
         path: "cytof",
         label: "CyTOF",
         title: "CyTOF upload",
-        assays: true,
         analyses: true
-    },
-    olink: {
-        path: "olink",
-        label: "Olink",
-        title: "Olink upload",
-        assays: true
-    },
-    ihc: {
-        path: "ihc",
-        label: "IHC",
-        title: "IHC upload",
-        assays: true
-    },
-    elisa: {
-        path: "elisa",
-        label: "ELISA",
-        title: "ELISA upload",
-        assays: true
-    },
-    mif: {
-        path: "mif",
-        label: "mIF",
-        title: "mIF upload",
-        assays: true
     },
     tcr: {
         path: "tcr",
         label: "TCR",
         title: "TCR upload",
-        assays: true,
         analyses: true
-    },
-    hande: {
-        path: "hande",
-        label: "H&E",
-        title: "H&E upload",
-        assays: true
     }
 };
 
 export interface IUploadDocsPageProps extends RouteComponentProps {
-    uploadType: "assays" | "analyses";
+    uploadType: "analyses";
 }
 
 const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
@@ -220,10 +184,6 @@ const UploadDocsPage: React.FunctionComponent<IUploadDocsPageProps> = props => {
         </>
     );
 };
-
-export const AssayDocsPage = withRouter(props => (
-    <UploadDocsPage {...props} uploadType="assays" />
-));
 
 export const AnalysesDocsPage = withRouter(props => (
     <UploadDocsPage {...props} uploadType="analyses" />
