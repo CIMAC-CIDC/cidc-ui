@@ -9,6 +9,15 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 11 July 2022
+
+- `fixed` corrected timezone for file time uploaded
+
+
+## 29 Jun 2022
+
+- `fixed` loading for manifest upload
+
 ## 17 Jun 2022
 
 - `changed` width of data exploration cards

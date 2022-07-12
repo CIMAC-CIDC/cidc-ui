@@ -3,7 +3,7 @@ import filesize from "filesize";
 import { reduce } from "lodash";
 
 export const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString(LOCALE, DATE_OPTIONS);
+    return new Date(dateStr + "Z").toLocaleDateString(LOCALE, DATE_OPTIONS);
 };
 
 export const formatFileSize = (

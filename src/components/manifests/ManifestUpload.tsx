@@ -86,6 +86,7 @@ const ManifestUpload: React.FunctionComponent<{ token: string }> = ({
 
     const onSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault();
+        setStatus("loading");
         if (formData) {
             apiCreate<{
                 metadata_json_patch: { protocol_identifier: string };
