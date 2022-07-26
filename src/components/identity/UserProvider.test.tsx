@@ -133,6 +133,7 @@ describe("role-based tab display", () => {
             <div data-testid="results">
                 <p>showAnalyses={user.showAnalyses?.toString()}</p>
                 <p>showManifests={user.showManifests?.toString()}</p>
+                <p>showAssays={user.showAssays?.toString()}</p>
             </div>
         );
     };
@@ -140,9 +141,10 @@ describe("role-based tab display", () => {
     const expectedTabs = [
         { role: "cimac-user", tabs: [] },
         { role: "network-viewer", tabs: [] },
-        { role: "cidc-biofx-user", tabs: ["analyses"] },
+        { role: "cimac-biofx-user", tabs: ["transfer data"] },
+        { role: "cidc-biofx-user", tabs: ["transfer data", "analyses"] },
         { role: "nci-biobank-user", tabs: ["manifests"] },
-        { role: "cidc-admin", tabs: ["analyses", "manifests"] }
+        { role: "cidc-admin", tabs: ["transfer data", "analyses", "manifests"] }
     ];
 
     expectedTabs.forEach(({ role, tabs }) => {

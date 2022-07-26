@@ -9,10 +9,13 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 22 July 2022
+
+- `fixed` allowed cimac-biofx-user to see transfer data tab
+
 ## 11 July 2022
 
 - `fixed` corrected timezone for file time uploaded
-
 
 ## 29 Jun 2022
 

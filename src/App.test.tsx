@@ -55,6 +55,7 @@ jest.mock("./components/identity/IdentityProvider", () => {
                     <UserContext.Provider
                         value={{
                             approval_date: "1/1/1",
+                            showAssays: true,
                             showManifests: true,
                             showAnalyses: true
                         }}

@@ -54,7 +54,14 @@ describe("Header", () => {
         checkVisibility(
             queryByText,
             [],
-            ["browse data", "pipelines", "schema", "manifests", "analyses"]
+            [
+                "browse data",
+                "transfer data",
+                "pipelines",
+                "schema",
+                "manifests",
+                "analyses"
+            ]
         );
     };
 
@@ -99,7 +106,7 @@ describe("Header", () => {
         checkVisibility(
             q1,
             ["browse data", "pipelines", "schema", "data overview"],
-            ["manifests", "analyses"]
+            ["transfer data", "manifests", "analyses"]
         );
         cleanup();
 
@@ -110,7 +117,7 @@ describe("Header", () => {
         checkVisibility(
             q2,
             ["browse data", "pipelines", "schema", "data overview"],
-            ["manifests", "analyses"]
+            ["transfer data", "manifests", "analyses"]
         );
         cleanup();
 
@@ -128,7 +135,7 @@ describe("Header", () => {
                 "manifests",
                 "data overview"
             ],
-            ["analyses"]
+            ["transfer data", "analyses"]
         );
         cleanup();
 
@@ -139,7 +146,14 @@ describe("Header", () => {
         });
         checkVisibility(
             q4,
-            ["browse data", "pipelines", "schema", "analyses", "data overview"],
+            [
+                "browse data",
+                "transfer data",
+                "pipelines",
+                "schema",
+                "analyses",
+                "data overview"
+            ],
             ["manifests"]
         );
         cleanup();
@@ -147,6 +161,7 @@ describe("Header", () => {
         // cidc admin
         const { queryByText: q5 } = renderWithUserContext({
             ...user,
+            showAssays: true,
             showAnalyses: true,
             showManifests: true
         });
@@ -154,6 +169,7 @@ describe("Header", () => {
             q5,
             [
                 "browse data",
+                "transfer data",
                 "pipelines",
                 "schema",
                 "analyses",
@@ -162,12 +178,32 @@ describe("Header", () => {
             ],
             []
         );
+        cleanup();
+
+        // cimac biofx user
+        const { queryByText: q6 } = renderWithUserContext({
+            ...user,
+            showAssays: true
+        });
+        checkVisibility(
+            q6,
+            [
+                "browse data",
+                "transfer data",
+                "pipelines",
+                "schema",
+                "data overview"
+            ],
+            ["manifests", "analyses"]
+        );
+        cleanup();
     });
 
     it("navigates on tab click", () => {
         history.push("/");
         const { getByText } = renderWithUserContext({
             ...user,
+            showAssays: true,
             showAnalyses: true,
             showManifests: true
         });
@@ -192,6 +228,7 @@ describe("Header", () => {
     it("doesn't render on certain pathnames", () => {
         const { queryByTestId } = renderWithUserContext({
             ...user,
+            showAssays: true,
             showAnalyses: true,
             showManifests: true
         });
