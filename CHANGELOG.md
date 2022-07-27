@@ -9,6 +9,10 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 27 July 2022
+
+- test for updated UI prod merging
+
 ## 22 July 2022
 
 - `fixed` allowed cimac-biofx-user to see transfer data tab
