@@ -18,7 +18,7 @@ const WES_PERMISSION = {
     id: 123,
     granted_to_user: GRANTEE.id,
     trial_id: "test-1",
-    upload_type: "wes",
+    upload_type: "wes_fastq",
     _etag: "test-etag"
 };
 const PERMISSIONS = [
@@ -33,21 +33,50 @@ const PERMISSIONS = [
 const INFO = {
     supportedTemplates: {
         assays: [
+            "atacseq_fastq",
+            "clinical_data",
+            "ctdna",
             "cytof",
-            "wes",
-            "atac",
-            "rna",
-            "olink",
-            "ihc",
             "elisa",
+            "hande",
+            "ihc",
+            "microbiome",
             "mif",
-            "tcr",
-            "hande"
+            "misc_data",
+            "nanostring",
+            "olink",
+            "rna_fastq",
+            "rna_bam",
+            "tcr_adaptive",
+            "tcr_fastq",
+            "wes_fastq",
+            "wes_bam"
         ],
-        manifests: [],
-        analyses: []
+        manifests: [
+            "h_and_e",
+            "microbiome_dna",
+            "normal_blood_dna",
+            "normal_tissue_dna",
+            "participants_annotations",
+            "pbmc",
+            "plasma",
+            "tissue_slide",
+            "tumor_tissue_dna",
+            "tumor_tissue_rna",
+            "tumor_normal_pairing"
+        ],
+        analyses: [
+            "atacseq_analysis",
+            "ctdna_analysis",
+            "cytof_analysis",
+            "rna_level1_analysis",
+            "tcr_analysis",
+            "wes_analysis",
+            "wes_tumor_only_analysis",
+            "microbiome_analysis"
+        ]
     },
-    extraDataTypes: []
+    extraDataTypes: ["participants info", "samples info"]
 };
 
 const mockFetch = (trials = TRIALS, perms = PERMISSIONS) => {
@@ -118,7 +147,7 @@ it("handles permission revocation", async () => {
     mockFetch();
     const { findByTestId } = doRender();
     // User has permission to view wes for this trial
-    const checkboxId = `checkbox-${TRIAL.trial_id}-wes`;
+    const checkboxId = `checkbox-${TRIAL.trial_id}-wes_fastq`;
 
     // User has this permission, so box should be checked
     const muiCheckbox = await findByTestId(checkboxId);
@@ -156,10 +185,27 @@ it("handles broad trial permissions", async () => {
         true
     );
 
-    // All upload types are checked for TRIAL.trial_id trial
+    // All upload types are checked and disabled for TRIAL.trial_id trial
+    // except clinical_data, which should be unchecked and enabled
     INFO.supportedTemplates.assays.map(assay => {
-        expect(
-            getNativeCheckbox(getByTestId(`checkbox-test-1-${assay}`)).checked
-        ).toBe(true);
+        if (assay !== "clinical_data") {
+            expect(
+                getNativeCheckbox(getByTestId(`checkbox-test-1-${assay}`))
+                    .checked
+            ).toBe(true);
+            expect(
+                getNativeCheckbox(getByTestId(`checkbox-test-1-${assay}`))
+                    .disabled
+            ).toBe(true);
+        } else {
+            expect(
+                getNativeCheckbox(getByTestId(`checkbox-test-1-${assay}`))
+                    .checked
+            ).toBe(false);
+            expect(
+                getNativeCheckbox(getByTestId(`checkbox-test-1-${assay}`))
+                    .disabled
+            ).toBe(false);
+        }
     });
 });

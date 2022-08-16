@@ -170,10 +170,15 @@ const BatchDownloadDialog: React.FC<IBatchDownloadDialogProps> = ({
                         <CIDCMarkdown
                             source={[
                                 "Batches larger than 100MB must be downloaded via [`gsutil`](https://cloud.google.com/storage/docs/gsutil_install). " +
-                                    'Download the "filelist.tsv" file for this file batch,' +
-                                    "and run this command in the desired download directory:",
+                                    'Download the "filelist.tsv" file for this file batch, ' +
+                                    "and run the following command in the desired download directory.",
+                                "On Mac/Linux:",
                                 "```bash",
                                 "cat filelist.tsv | xargs -n 2 -P 8 gsutil cp",
+                                "```",
+                                "On Windows:",
+                                "```bash",
+                                'for /F "tokens=1,2" %a in (filelist.tsv) do gsutil cp %a %b',
                                 "```",
                                 "If you haven't logged in with `gcloud` recently, you'll " +
                                     "need to run `gcloud auth login` first.",

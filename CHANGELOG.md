@@ -9,11 +9,19 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
-## 22 July 2022
+## 11 Aug 2022
+
+- `changed` clinical data NOT included in cross-assay permissions
+
+## 27 Jul 2022
+
+- `added` Windows batch download command
+
+## 22 Jul 2022
 
 - `fixed` allowed cimac-biofx-user to see transfer data tab
 
-## 11 July 2022
+## 11 Jul 2022
 
 - `fixed` corrected timezone for file time uploaded
 
