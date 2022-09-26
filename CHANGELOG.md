@@ -9,6 +9,10 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 14 Sep 2022
+
+- `changed` template download button to point to /templates/assays not /templates/metadata
+
 ## 11 Aug 2022
 
 - `changed` clinical data NOT included in cross-assay permissions

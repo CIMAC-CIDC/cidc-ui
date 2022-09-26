@@ -9,9 +9,7 @@ export function nameToURL(
     name: string
 ) {
     const fmtedName = name.toLowerCase().replace(" ", "_");
-    // Assay templates have type "metadata" on the server
-    const fixedType = type === "assays" ? "metadata" : type;
-    return `${process.env.REACT_APP_API_URL}/info/templates/${fixedType}/${fmtedName}`;
+    return `${process.env.REACT_APP_API_URL}/info/templates/${type}/${fmtedName}`;
 }
 
 export interface ITemplateDownloadButtonProps extends ButtonProps {
