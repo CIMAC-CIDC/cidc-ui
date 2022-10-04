@@ -8,7 +8,8 @@ type Role =
     | "devops"
     | "nci-biobank-user"
     | "system"
-    | "network-viewer";
+    | "network-viewer"
+    | "pact-user";
 
 type Organization = "CIDC" | "DFCI" | "ICAHN" | "STANFORD" | "ANDERSON";
 

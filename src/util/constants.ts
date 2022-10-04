@@ -14,7 +14,8 @@ export const ROLES = [
     "developer",
     "devops",
     "nci-biobank-user",
-    "network-viewer"
+    "network-viewer",
+    "pact-user"
 ];
 
 export const DATE_OPTIONS = {

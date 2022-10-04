@@ -82,7 +82,8 @@ const UserProvider: React.FunctionComponent<RouteComponentProps> = props => {
         user?.role && ["nci-biobank-user", "cidc-admin"].includes(user.role);
     const showAnalyses =
         user?.role && ["cidc-biofx-user", "cidc-admin"].includes(user.role);
-    const canDownload = user?.role !== "network-viewer";
+    const canDownload =
+        user?.role && !["network-viewer", "pact-user"].includes(user.role);
 
     const value =
         authData.state === "logged-in" && user && permissions

@@ -112,7 +112,7 @@ describe("download access", () => {
 
             expect(
                 await findByText(
-                    role === "network-viewer"
+                    ["network-viewer", "pact-user"].includes(role)
                         ? /cannot download/i
                         : /can download/i
                 )
@@ -140,6 +140,7 @@ describe("role-based tab display", () => {
 
     const expectedTabs = [
         { role: "cimac-user", tabs: [] },
+        { role: "pact-user", tabs: [] },
         { role: "network-viewer", tabs: [] },
         { role: "cimac-biofx-user", tabs: ["transfer data"] },
         { role: "cidc-biofx-user", tabs: ["transfer data", "analyses"] },
