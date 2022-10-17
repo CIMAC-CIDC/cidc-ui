@@ -132,7 +132,11 @@ const InteractiveExplorationPage: React.FC<{
                                     }
                                 ].map(item => (
                                     <li>
-                                        <a href={item.destination}>
+                                        <a
+                                            href={item.destination}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
                                             {item.name}
                                         </a>
                                     </li>

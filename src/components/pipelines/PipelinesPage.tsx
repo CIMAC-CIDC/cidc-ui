@@ -38,10 +38,10 @@ const pipelineMarkdowns = {
             />
         </div>
     ),
-    chips: (
-        <div role="document" id="chips-docs">
+    atacseq: (
+        <div role="document" id="atacseq-docs">
             <CIDCGithubMarkdown
-                path={`cidc-ngs-pipeline-api/master/cidc_ngs_pipeline_api/chips/chips.md`}
+                path={`cidc-ngs-pipeline-api/master/cidc_ngs_pipeline_api/atacseq/atacseq.md`}
             />
         </div>
     )
@@ -75,18 +75,18 @@ const PipelinesPage: React.FC<RouteComponentProps> = props => {
                                 path={`/pipelines/rna`}
                             />
                             <DocsListItem
-                                label={"WES (Whole Exome Sequencing"}
+                                label={"WES (Whole Exome Sequencing) Analysis"}
                                 path={`/pipelines/wes`}
                             />
                             <DocsListItem
                                 label={
-                                    "TCR (T-cell Receptor Repertoire Analysis)"
+                                    "TCR (T-cell Receptor) Repertoire Analysis"
                                 }
                                 path={`/pipelines/tcr`}
                             />
                             <DocsListItem
-                                label={"CHIPS ATAC-seq Analysis"}
-                                path={`/pipelines/chips`}
+                                label={"ATAC-seq Analysis"}
+                                path={`/pipelines/atacseq`}
                             />
                         </List>
                     </Grid>
