@@ -38,7 +38,6 @@ const NONASSAY_FIELDS = [
 
 const ASSAYS_WITH_ANALYSIS = [
     "atacseq",
-    "ctdna",
     "cytof",
     "rna",
     "tcr",

@@ -178,6 +178,9 @@ const Register: React.FC<RouteComponentProps> = ({ history }) => {
                                     <MenuItem value="ANDERSON">
                                         {ORGANIZATION_NAME_MAP.ANDERSON}
                                     </MenuItem>
+                                    <MenuItem value="N/A">
+                                        {ORGANIZATION_NAME_MAP["N/A"]}
+                                    </MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
