@@ -10,7 +10,8 @@ import {
     TableHead,
     Checkbox,
     makeStyles,
-    Grid
+    Grid,
+    Button
 } from "@material-ui/core";
 import { apiCreate, apiDelete, IApiPage } from "../../api/api";
 import { Trial } from "../../model/trial";
@@ -76,29 +77,9 @@ const usePermissions = (token: string, grantee: Account) => {
         `/permissions?user_id=${grantee.id}`,
         token
     ]);
-    const perms = swrResults.data?._items || [];
-
-    const permMap = React.useMemo(
-        () =>
-            mapValues(
-                groupBy(perms, p => String([p.trial_id, p.upload_type])),
-                // there should only be one permission per group
-                ps => ps[0]
-            ),
-        [perms]
-    );
 
     return {
-        ...swrResults,
-        getGranularPermission: (trialId?: string, uploadType?: string) =>
-            permMap[String([trialId, uploadType])],
-        getBroadPermission: (trialId?: string, uploadType?: string) =>
-            uploadType !== "clinical_data"
-                ? permMap[String([trialId, uploadType])] ||
-                  permMap[String([trialId, undefined])] ||
-                  permMap[String([undefined, uploadType])]
-                : permMap[String([trialId, uploadType])] ||
-                  permMap[String([undefined, uploadType])]
+        ...swrResults
     };
 };
 
@@ -110,16 +91,122 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
 }> = props => {
     const classes = useStyles();
 
-    const { data: permBundle, isValidating: loadingPerms } = usePermissions(
-        props.token,
-        props.grantee
-    );
-    const tooManyPerms = (permBundle?._items || []).length >= MAX_PERMS;
+    const {
+        data: permBundle,
+        mutate,
+        isValidating: loadingPerms
+    } = usePermissions(props.token, props.grantee);
 
     const { data: trialBundle } = useSWR<IApiPage<Trial>>(
         props.open ? ["/trial_metadata?page_size=200", props.token] : null
     );
     const trials = trialBundle?._items;
+
+    const blankPermissionList: Permission[] = [];
+    let perms = permBundle?._items || [];
+    const tooManyPerms = (permBundle?._items || []).length >= MAX_PERMS;
+
+    const defaultFormState = {
+        isDirty: false,
+        isSubmitted: false,
+        isSubmitting: false,
+        toAdd: blankPermissionList,
+        toRemove: blankPermissionList
+    };
+    const [formValues, setFormValues] = React.useState(defaultFormState);
+
+    const handleChange: React.ChangeEventHandler<HTMLInputElement> = e => {
+        const thisPerm: Permission = JSON.parse(e.currentTarget.value);
+        let tempToRemove: Permission[] = [];
+        let tempToAdd: Permission[] = [];
+        if (e.currentTarget.checked) {
+            tempToRemove = formValues.toRemove.filter(
+                p =>
+                    p.trial_id !== thisPerm.trial_id ||
+                    p.upload_type !== thisPerm.upload_type
+            );
+
+            tempToAdd = formValues.toAdd;
+            if (tempToRemove.length === formValues.toRemove.length) {
+                tempToAdd = [...tempToAdd, thisPerm];
+            }
+            // remove any overlapping permissions if we're adding a cross-trial or cross-assay
+            // remember that cross-assay single-trial doesn't apply to clinical_data
+            if (!thisPerm.trial_id) {
+                tempToAdd = tempToAdd.filter(
+                    p => p.upload_type !== thisPerm.upload_type
+                );
+            } else if (!thisPerm.upload_type) {
+                tempToAdd = tempToAdd.filter(
+                    p =>
+                        p.trial_id !== thisPerm.trial_id ||
+                        p.upload_type === "clinical_data"
+                );
+            }
+
+            perms = [...perms, thisPerm];
+        } else {
+            tempToAdd = formValues.toAdd.filter(
+                p =>
+                    p.trial_id !== thisPerm.trial_id ||
+                    p.upload_type !== thisPerm.upload_type
+            );
+            tempToRemove = formValues.toRemove;
+            if (tempToAdd.length === formValues.toAdd.length) {
+                tempToRemove = [...tempToRemove, thisPerm];
+            }
+            perms = perms.filter(
+                p =>
+                    p.trial_id !== thisPerm.trial_id ||
+                    p.upload_type !== thisPerm.upload_type
+            );
+        }
+
+        setFormValues({
+            isDirty: tempToAdd.length !== 0 || tempToRemove.length !== 0,
+            isSubmitted: false,
+            isSubmitting: false,
+            toAdd: tempToAdd,
+            toRemove: tempToRemove
+        });
+    };
+
+    const handleSubmit = () => {
+        setFormValues({
+            isDirty: true,
+            isSubmitting: true,
+            isSubmitted: false,
+            toAdd: formValues.toAdd,
+            toRemove: formValues.toRemove
+        });
+
+        if (formValues.toAdd.length) {
+            apiCreate<Permission[]>("/permissions", props.token, {
+                data: formValues.toAdd
+            });
+        }
+        if (formValues.toRemove.length) {
+            apiDelete<Permission[]>(`/permissions`, props.token, {
+                data: formValues.toRemove
+            });
+        }
+
+        console.log(perms);
+        mutate({
+            _items: perms,
+            _meta: { total: perms.length }
+        });
+        perms = permBundle?._items || [];
+        console.log(perms);
+
+        setFormValues({
+            isDirty: false,
+            isSubmitting: false,
+            isSubmitted: true,
+            toAdd: blankPermissionList,
+            toRemove: blankPermissionList
+        });
+    };
 
     return (
         <Dialog
@@ -156,40 +243,15 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
             </DialogTitle>
             <DialogContent>
                 {trials ? (
-                    <Table padding="checkbox" stickyHeader>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell className={classes.trialCell}>
-                                    Trial
-                                </TableCell>
-                                <TableCell
-                                    key={"clinical_data"}
-                                    size="small"
-                                    align="center"
-                                >
-                                    <Grid
-                                        container
-                                        direction="row"
-                                        alignItems="center"
-                                    >
-                                        <Grid item>Clinical</Grid>
-                                        <Grid item>
-                                            <PermCheckbox
-                                                grantee={props.grantee}
-                                                granter={props.granter}
-                                                uploadType={"clinical_data"}
-                                                token={props.token}
-                                                disableIfUnchecked={
-                                                    tooManyPerms
-                                                }
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </TableCell>
-
-                                {props.supportedTypes.map(uploadType => (
+                    <form onSubmit={handleSubmit}>
+                        <Table padding="checkbox" stickyHeader>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell className={classes.trialCell}>
+                                        Trial
+                                    </TableCell>
                                     <TableCell
-                                        key={uploadType}
+                                        key={"clinical_data"}
                                         size="small"
                                         align="center"
                                     >
@@ -198,83 +260,153 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                                             direction="row"
                                             alignItems="center"
                                         >
-                                            <Grid item>{uploadType}</Grid>
+                                            <Grid item>Clinical</Grid>
                                             <Grid item>
                                                 <PermCheckbox
                                                     grantee={props.grantee}
                                                     granter={props.granter}
-                                                    uploadType={uploadType}
-                                                    token={props.token}
+                                                    perms={perms}
+                                                    uploadType={"clinical_data"}
                                                     disableIfUnchecked={
                                                         tooManyPerms
                                                     }
+                                                    loadingPerms={loadingPerms}
+                                                    handleChange={handleChange}
                                                 />
                                             </Grid>
                                         </Grid>
                                     </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {trials.map((trial: Trial) => (
-                                <TableRow key={trial.trial_id}>
-                                    <TableCell className={classes.trialCell}>
-                                        <Grid
-                                            container
-                                            justify="space-between"
-                                            alignItems="center"
-                                            wrap="nowrap"
+
+                                    {props.supportedTypes.map(uploadType => (
+                                        <TableCell
+                                            key={uploadType}
+                                            size="small"
+                                            align="center"
                                         >
-                                            <Grid item>{trial.trial_id}</Grid>
-                                            <Grid item>
-                                                <PermCheckbox
-                                                    grantee={props.grantee}
-                                                    granter={props.granter}
-                                                    trialId={trial.trial_id}
-                                                    token={props.token}
-                                                    disableIfUnchecked={
-                                                        tooManyPerms
-                                                    }
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                    </TableCell>
-                                    <TableCell
-                                        key={"clinical_data" + trial.trial_id}
-                                        align="center"
-                                    >
-                                        <PermCheckbox
-                                            grantee={props.grantee}
-                                            granter={props.granter}
-                                            trialId={trial.trial_id}
-                                            uploadType={"clinical_data"}
-                                            token={props.token}
-                                            disableIfUnchecked={tooManyPerms}
-                                        />
-                                    </TableCell>
-                                    {props.supportedTypes.map(typ => {
-                                        return (
-                                            <TableCell
-                                                key={typ + trial.trial_id}
-                                                align="center"
+                                            <Grid
+                                                container
+                                                direction="row"
+                                                alignItems="center"
                                             >
-                                                <PermCheckbox
-                                                    grantee={props.grantee}
-                                                    granter={props.granter}
-                                                    trialId={trial.trial_id}
-                                                    uploadType={typ}
-                                                    token={props.token}
-                                                    disableIfUnchecked={
-                                                        tooManyPerms
-                                                    }
-                                                />
-                                            </TableCell>
-                                        );
-                                    })}
+                                                <Grid item>{uploadType}</Grid>
+                                                <Grid item>
+                                                    <PermCheckbox
+                                                        grantee={props.grantee}
+                                                        granter={props.granter}
+                                                        perms={perms}
+                                                        uploadType={uploadType}
+                                                        disableIfUnchecked={
+                                                            tooManyPerms
+                                                        }
+                                                        loadingPerms={
+                                                            loadingPerms
+                                                        }
+                                                        handleChange={
+                                                            handleChange
+                                                        }
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                        </TableCell>
+                                    ))}
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHead>
+                            <TableBody>
+                                {trials.map((trial: Trial) => (
+                                    <TableRow key={trial.trial_id}>
+                                        <TableCell
+                                            className={classes.trialCell}
+                                        >
+                                            <Grid
+                                                container
+                                                justify="space-between"
+                                                alignItems="center"
+                                                wrap="nowrap"
+                                            >
+                                                <Grid item>
+                                                    {trial.trial_id}
+                                                </Grid>
+                                                <Grid item>
+                                                    <PermCheckbox
+                                                        grantee={props.grantee}
+                                                        granter={props.granter}
+                                                        perms={perms}
+                                                        trialId={trial.trial_id}
+                                                        disableIfUnchecked={
+                                                            tooManyPerms
+                                                        }
+                                                        loadingPerms={
+                                                            loadingPerms
+                                                        }
+                                                        handleChange={
+                                                            handleChange
+                                                        }
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                        </TableCell>
+                                        <TableCell
+                                            key={
+                                                "clinical_data" + trial.trial_id
+                                            }
+                                            align="center"
+                                        >
+                                            <PermCheckbox
+                                                grantee={props.grantee}
+                                                granter={props.granter}
+                                                perms={perms}
+                                                trialId={trial.trial_id}
+                                                uploadType={"clinical_data"}
+                                                disableIfUnchecked={
+                                                    tooManyPerms
+                                                }
+                                                loadingPerms={loadingPerms}
+                                                handleChange={handleChange}
+                                            />
+                                        </TableCell>
+                                        {props.supportedTypes.map(typ => {
+                                            return (
+                                                <TableCell
+                                                    key={typ + trial.trial_id}
+                                                    align="center"
+                                                >
+                                                    <PermCheckbox
+                                                        grantee={props.grantee}
+                                                        granter={props.granter}
+                                                        perms={perms}
+                                                        trialId={trial.trial_id}
+                                                        uploadType={typ}
+                                                        disableIfUnchecked={
+                                                            tooManyPerms
+                                                        }
+                                                        loadingPerms={
+                                                            loadingPerms
+                                                        }
+                                                        handleChange={
+                                                            handleChange
+                                                        }
+                                                    />
+                                                </TableCell>
+                                            );
+                                        })}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                        <Button
+                            type="submit"
+                            data-testid={`submit`}
+                            variant="contained"
+                            color="primary"
+                            disabled={
+                                !formValues.isDirty || formValues.isSubmitting
+                            }
+                        >
+                            {!formValues.isDirty && formValues.isSubmitted
+                                ? "changes saved!"
+                                : "save changes"}
+                        </Button>
+                    </form>
                 ) : (
                     <Loader />
                 )}
@@ -286,59 +418,64 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
 const PermCheckbox: React.FunctionComponent<{
     grantee: Account;
     granter: Account;
-    token: string;
     trialId?: string;
     uploadType?: string;
+    perms: Permission[];
     disableIfUnchecked: boolean;
-}> = ({ grantee, granter, token, trialId, uploadType, disableIfUnchecked }) => {
-    const {
-        data,
-        mutate,
-        isValidating,
-        getGranularPermission,
-        getBroadPermission
-    } = usePermissions(token, grantee);
-    const granularPerm = getGranularPermission(trialId, uploadType);
-    const broadPerm = getBroadPermission(trialId, uploadType);
+    loadingPerms: boolean;
+    handleChange: React.ChangeEventHandler<HTMLInputElement>;
+}> = ({
+    grantee,
+    granter,
+    trialId,
+    uploadType,
+    perms,
+    disableIfUnchecked,
+    loadingPerms,
+    handleChange
+}) => {
+    const permMap = mapValues(
+        groupBy(perms, p => String([p.trial_id, p.upload_type])),
+        // there should only be one permission per group
+        ps => ps[0]
+    );
+    const granularPerm = permMap[String([trialId, uploadType])];
+    const broadPerm =
+        uploadType !== "clinical_data"
+            ? permMap[String([trialId, uploadType])] ||
+              permMap[String([trialId, null])] ||
+              permMap[String([null, uploadType])]
+            : permMap[String([trialId, uploadType])] ||
+              permMap[String([null, uploadType])];
     const perm = granularPerm || broadPerm;
 
-    const handleChange: React.ChangeEventHandler<HTMLInputElement> = e => {
-        if (e.currentTarget.checked) {
-            const newPerm = {
-                granted_to_user: grantee.id,
-                granted_by_user: granter.id,
-                trial_id: trialId,
-                upload_type: uploadType
-            };
-            apiCreate<Permission>("/permissions", token, {
-                data: newPerm
-            });
-            mutate({
-                _meta: { total: (data?._meta.total || 0) + 1 },
-                // @ts-ignore because newPerm is missing `id` and `_etag` fields
-                _items: [...(data?._items || []), newPerm]
-            });
-        } else if (perm) {
-            apiDelete<Permission>(`/permissions/${perm.id}`, token, {
-                etag: perm._etag
-            });
-            mutate({
-                _items: data?._items.filter(p => p.id !== perm.id) || [],
-                _meta: { total: data?._meta.total || 0 }
-            });
-        }
-    };
+    // Checkbox isChecked if permission exists in map
+    // otherwise, make a shell to keep track of which checkbox triggers handleChange
+    const isChecked: boolean = !!perm;
+    if (!perm) {
+        // @ts-ignore because perm is missing `id` and `_etag` fields
+        perm = {
+            granted_to_user: grantee.id,
+            granted_by_user: granter.id,
+            trial_id: trialId || null,
+            upload_type: uploadType || null
+        };
+    } else {
+        console.log(permMap);
+        console.log(perm);
+    }
 
     return (
         <Checkbox
             data-testid={`checkbox-${trialId}-${uploadType}`}
             disabled={
-                isValidating ||
+                loadingPerms ||
                 (!perm && disableIfUnchecked) ||
                 (!granularPerm && !!broadPerm)
             }
+            value={JSON.stringify(perm)}
             onChange={handleChange}
-            checked={!!perm}
+            checked={isChecked}
         />
     );
 };

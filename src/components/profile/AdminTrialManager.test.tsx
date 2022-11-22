@@ -1,10 +1,7 @@
 import { fireEvent } from "@testing-library/react";
 import React from "react";
-import {
-    getNativeCheckbox,
-    renderWithUserContext
-} from "../../../test/helpers";
-import { apiFetch, apiCreate, apiupdate, apiUpdate } from "../../api/api";
+import { renderWithUserContext } from "../../../test/helpers";
+import { apiFetch, apiCreate, apiUpdate } from "../../api/api";
 import { InfoContext } from "../info/InfoProvider";
 import AdminTrialManager from "./AdminTrialManager";
 jest.mock("../../api/api");
