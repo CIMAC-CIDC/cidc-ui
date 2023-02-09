@@ -32,7 +32,7 @@ export const formatQueryString = (
 
 export const formatFacetType = (facetType: string) => {
     return facetType
-        .replaceAll("&", "and")
+        .replace("&", "and")
         .replace("atac-seq", "atacseq")
         .replace("wes tumor-only", "wes_tumor_only");
 };
