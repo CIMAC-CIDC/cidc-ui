@@ -23,6 +23,7 @@ import InfoTooltip from "../../generic/InfoTooltip";
 import { IFacetInfo } from "./FilterProvider";
 import { Skeleton } from "@material-ui/lab";
 import { theme } from "../../../rootStyles";
+import { formatFacetType } from "../../../util/utils";
 
 const searchBoxMargin = 15;
 
@@ -166,7 +167,9 @@ const PermsAwareCheckbox: React.FC<IPermsAwareCheckboxProps> = ({
             permissions || [],
             p =>
                 p.trial_id === facetType ||
-                p.upload_type?.startsWith(facetType.toLowerCase()) ||
+                p.upload_type?.startsWith(
+                    formatFacetType(facetType.toLowerCase())
+                ) ||
                 // cross-trial permission
                 p.trial_id === null ||
                 // cross-assay permission
