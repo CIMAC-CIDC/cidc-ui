@@ -9,6 +9,14 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 09 Feb 2023
+
+- `fixed` facet bug with files types that contain symbols
+
+## 26 Jan 2023
+
+- `removed` stale GitHub action for automatic prod releases
+
 ## 02 Dec 2022
 
 - `changed` updated google-github-actions/setup-gcloud version to be pinned to v0
