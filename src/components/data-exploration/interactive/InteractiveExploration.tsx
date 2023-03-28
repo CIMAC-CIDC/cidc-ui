@@ -51,7 +51,7 @@ const InteractiveExplorationPage: React.FC<{
                     <CardHeader title="Interactive View Overview" />
                     <CardContent className="markdown-body">
                         <Typography>
-                            Using Google DataStudio we have created a few
+                            Using Google LookerStudio we have created a few
                             interactive dashboards to explore CIMAC-CIDC trial
                             participant- and sample-level metadata.
                         </Typography>
@@ -97,10 +97,10 @@ const InteractiveExplorationPage: React.FC<{
                         </Typography>
 
                         <iframe
-                            title="embedded-datastudio"
+                            title="embedded-lookerstudio"
                             height="475"
                             width="100%"
-                            src="https://datastudio.google.com/embed/reporting/aa4c36b3-381d-4870-8961-777f7fd39f90/page/p_7gryw0ykuc"
+                            src="https://lookerstudio.google.com/embed/reporting/aa4c36b3-381d-4870-8961-777f7fd39f90/page/p_7gryw0ykuc"
                             frameBorder="0"
                             allowFullScreen
                         ></iframe>
@@ -118,17 +118,17 @@ const InteractiveExplorationPage: React.FC<{
                                         name:
                                             "Sample Collection Event Dashboard",
                                         destination:
-                                            "https://datastudio.google.com/reporting/6865f6eb-f7f8-4f7f-87b2-f591403dd813/page/RQ4qC"
+                                            "https://lookerstudio.google.com/reporting/aa4c36b3-381d-4870-8961-777f7fd39f90/page/RQ4qC"
                                     },
                                     {
                                         name: "Assays Dashboard",
                                         destination:
-                                            "https://datastudio.google.com/reporting/6865f6eb-f7f8-4f7f-87b2-f591403dd813/page/p_4edtmds7tc"
+                                            "https://lookerstudio.google.com/reporting/aa4c36b3-381d-4870-8961-777f7fd39f90/page/p_4edtmds7tc"
                                     },
                                     {
                                         name: "Sample Dashboard",
                                         destination:
-                                            "https://datastudio.google.com/reporting/6865f6eb-f7f8-4f7f-87b2-f591403dd813/page/p_4sllxheeuc"
+                                            "https://lookerstudio.google.com/reporting/aa4c36b3-381d-4870-8961-777f7fd39f90/page/p_4sllxheeuc"
                                     }
                                 ].map(item => (
                                     <li>

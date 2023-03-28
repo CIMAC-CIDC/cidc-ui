@@ -9,6 +9,10 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 06 Mar 2023
+
+- `fixed` old looker studio links in data exploration
+
 ## 09 Feb 2023
 
 - `fixed` facet bug with files types that contain symbols
