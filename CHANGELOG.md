@@ -9,6 +9,10 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 24 May 2023
+
+- `removed` MAX_PERMS restriction
+
 ## 06 Mar 2023
 
 - `fixed` old looker studio links in data exploration
