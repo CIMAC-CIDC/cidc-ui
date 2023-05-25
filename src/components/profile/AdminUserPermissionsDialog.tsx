@@ -20,7 +20,6 @@ import { InfoContext } from "../info/InfoProvider";
 import Loader from "../generic/Loader";
 import { UserContext } from "../identity/UserProvider";
 import useSWR from "swr";
-import { Alert } from "@material-ui/lab";
 import { groupBy, mapValues } from "lodash";
 
 export interface IUserPermissionsDialogProps {
@@ -262,8 +261,7 @@ const PermCheckbox: React.FunctionComponent<{
     token: string;
     trialId?: string;
     uploadType?: string;
-    disableIfUnchecked?: boolean;
-}> = ({ grantee, granter, token, trialId, uploadType, disableIfUnchecked }) => {
+}> = ({ grantee, granter, token, trialId, uploadType }) => {
     const {
         data,
         mutate,
