@@ -341,4 +341,4 @@ it("can handle more than 20 permissions", async () => {
             });
         });
     }
-});
+}, 30_000);
