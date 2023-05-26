@@ -20,7 +20,6 @@ import { InfoContext } from "../info/InfoProvider";
 import Loader from "../generic/Loader";
 import { UserContext } from "../identity/UserProvider";
 import useSWR from "swr";
-import { Alert } from "@material-ui/lab";
 import { groupBy, mapValues } from "lodash";
 
 export interface IUserPermissionsDialogProps {
@@ -102,19 +101,16 @@ const usePermissions = (token: string, grantee: Account) => {
     };
 };
 
-const MAX_PERMS = 20;
-
 const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
     supportedTypes: string[];
     granter: Account;
 }> = props => {
     const classes = useStyles();
 
-    const { data: permBundle, isValidating: loadingPerms } = usePermissions(
+    const { isValidating: loadingPerms } = usePermissions(
         props.token,
         props.grantee
     );
-    const tooManyPerms = (permBundle?._items || []).length >= MAX_PERMS;
 
     const { data: trialBundle } = useSWR<IApiPage<Trial>>(
         props.open ? ["/trial_metadata?page_size=200", props.token] : null
@@ -142,17 +138,6 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                     </Grid>
                     <Grid item>{loadingPerms && <Loader size={25} />}</Grid>
                 </Grid>
-                {tooManyPerms && (
-                    <Alert severity="warning">
-                        <strong>
-                            Please remove a permission if you need to add
-                            another.
-                        </strong>{" "}
-                        Due to Google Cloud Storage IAM limitations, a user can
-                        have a maximum of {MAX_PERMS} separate permissions
-                        granted to them.
-                    </Alert>
-                )}
             </DialogTitle>
             <DialogContent>
                 {trials ? (
@@ -179,9 +164,6 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                                                 granter={props.granter}
                                                 uploadType={"clinical_data"}
                                                 token={props.token}
-                                                disableIfUnchecked={
-                                                    tooManyPerms
-                                                }
                                             />
                                         </Grid>
                                     </Grid>
@@ -205,9 +187,6 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                                                     granter={props.granter}
                                                     uploadType={uploadType}
                                                     token={props.token}
-                                                    disableIfUnchecked={
-                                                        tooManyPerms
-                                                    }
                                                 />
                                             </Grid>
                                         </Grid>
@@ -232,9 +211,6 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                                                     granter={props.granter}
                                                     trialId={trial.trial_id}
                                                     token={props.token}
-                                                    disableIfUnchecked={
-                                                        tooManyPerms
-                                                    }
                                                 />
                                             </Grid>
                                         </Grid>
@@ -249,7 +225,6 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                                             trialId={trial.trial_id}
                                             uploadType={"clinical_data"}
                                             token={props.token}
-                                            disableIfUnchecked={tooManyPerms}
                                         />
                                     </TableCell>
                                     {props.supportedTypes.map(typ => {
@@ -264,9 +239,6 @@ const UserPermissionsDialog: React.FC<IUserPermissionsDialogProps & {
                                                     trialId={trial.trial_id}
                                                     uploadType={typ}
                                                     token={props.token}
-                                                    disableIfUnchecked={
-                                                        tooManyPerms
-                                                    }
                                                 />
                                             </TableCell>
                                         );
@@ -289,8 +261,7 @@ const PermCheckbox: React.FunctionComponent<{
     token: string;
     trialId?: string;
     uploadType?: string;
-    disableIfUnchecked: boolean;
-}> = ({ grantee, granter, token, trialId, uploadType, disableIfUnchecked }) => {
+}> = ({ grantee, granter, token, trialId, uploadType }) => {
     const {
         data,
         mutate,
@@ -332,11 +303,7 @@ const PermCheckbox: React.FunctionComponent<{
     return (
         <Checkbox
             data-testid={`checkbox-${trialId}-${uploadType}`}
-            disabled={
-                isValidating ||
-                (!perm && disableIfUnchecked) ||
-                (!granularPerm && !!broadPerm)
-            }
+            disabled={isValidating || (!granularPerm && !!broadPerm)}
             onChange={handleChange}
             checked={!!perm}
         />
