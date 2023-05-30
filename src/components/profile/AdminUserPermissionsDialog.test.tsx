@@ -79,6 +79,114 @@ const INFO = {
     extraDataTypes: ["participants info", "samples info"]
 };
 
+const MORE_THAN_20_PERMS = [
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "tcr_fastq"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "rna_fastq"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "clinical_data"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "olink"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "ctdna"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "atacseq_analysis"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "misc_data"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "wes_bam"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "rna_bam"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "microbiome"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "tcr_adaptive"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "wes_analysis"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "rna_level1_analysis"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "ihc"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "wes_fastq"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "elisa"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "microbiome_analysis"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "cytof_analysis"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "mif"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "ctdna_analysis"
+    },
+    {
+        granted_to_user: GRANTEE.id,
+        trial_id: "trial_1",
+        upload_type: "tcr_analysis"
+    }
+];
+
 const mockFetch = (trials = TRIALS, perms = PERMISSIONS) => {
     apiFetch.mockImplementation(async (url: string) => {
         if (url.includes("/trial_metadata")) {
@@ -209,3 +317,28 @@ it("handles broad trial permissions", async () => {
         }
     });
 });
+
+it("can handle more than 20 permissions", async () => {
+    expect(MORE_THAN_20_PERMS.length).toBeGreaterThan(20);
+    mockFetch([{ trial_id: "trial_1" }] as Trial[]);
+    const { findByTestId } = doRender();
+
+    for (const perm of MORE_THAN_20_PERMS) {
+        const checkbox = await findByTestId(
+            `checkbox-trial_1-${perm.upload_type}`
+        );
+        const nativeCheckbox = getNativeCheckbox(checkbox);
+        expect(nativeCheckbox.checked).toBe(false);
+        fireEvent.click(nativeCheckbox);
+        await waitFor(() => {
+            expect(apiCreate).toHaveBeenCalledWith("/permissions", TOKEN, {
+                data: {
+                    granted_to_user: GRANTEE.id,
+                    granted_by_user: GRANTER.id,
+                    trial_id: "trial_1",
+                    upload_type: perm.upload_type
+                }
+            });
+        });
+    }
+}, 30_000);
