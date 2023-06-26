@@ -24,7 +24,7 @@ export interface IBatchDownloadDialogProps {
 
 const errors = {
     NO_PERMS:
-        "You don't have permission to download the files in this batch. Please contact cidc@jimmy.harvard.edu if you believe this is a mistake.",
+        "You don't have permission to download the files in this batch. Please contact NCICIDCAdmin@mail.nih.gov if you believe this is a mistake.",
     TOO_BIG:
         "This file batch is more than 100MB and cannot be downloaded directly.",
     UNKNOWN: "Encountered an unexpected issue with this download."
