@@ -67,8 +67,8 @@ const CodeBasedExplorationPage: React.FC<{
                             we have a few templates and examples listed below.
                             CIDC enables data access for all approved users.
                             Please contact CIDC at&nbsp;
-                            <a href="mailto:cidc@jimmy.harvard.edu">
-                                cidc@jimmy.harvard.edu
+                            <a href="mailto:NCICIDCAdmin@mail.nih.gov">
+                                NCICIDCAdmin@mail.nih.gov
                             </a>
                             &nbsp; if you have any issues accessing the data
                             tables. The same data restrictions and security
