@@ -36,4 +36,4 @@ export const EXPERIMENTAL_STRATEGY_MAP = {
 export const XLSX_MIMETYPE =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-export const ADMIN_EMAIL = "cidc@jimmy.harvard.edu";
+export const ADMIN_EMAIL = "NCICIDCAdmin@mail.nih.gov";

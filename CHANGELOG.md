@@ -9,6 +9,10 @@ This Changelog tracks changes to this project. The notes below include a summary
 - `fixed` for any bug fixes.
 - `security` in case of vulnerabilities.
 
+## 26 Jun 2023
+
+- `changed` admin email
+
 ## 24 May 2023
 
 - `removed` MAX_PERMS restriction
