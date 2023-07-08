@@ -55,7 +55,7 @@
         "react-markdown": "^4.3.1",
         "react-plotly.js": "^2.4.0",
         "react-router-dom": "^5.1.2",
-        "react-scripts": "^3.4.3",
+        "react-scripts": "^5.0.1",
         "serialize-javascript": "^4.0.0",
         "swr": "^0.3.9",
         "use-query-params": "^0.4.6"
