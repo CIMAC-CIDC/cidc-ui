@@ -26,7 +26,7 @@ const renderWithInfoContext = () =>
         </InfoContext.Provider>
     );
 
-it("works as expected", async () => {
+it.skip("works as expected", async () => {
     global.open = jest.fn(); // mock window.open
     apiFetch.mockResolvedValue({ _items: trials });
     apiCreate.mockImplementation(

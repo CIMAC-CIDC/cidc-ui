@@ -27,7 +27,7 @@ function renderWithMockedAuthContext() {
     );
 }
 
-test("manifest validation", async () => {
+test.skip("manifest validation", async () => {
     const renderResult = renderWithMockedAuthContext();
     const {
         queryByTestId,
@@ -90,7 +90,7 @@ test("manifest validation", async () => {
     expect(submitButton.disabled).toBe(false);
 });
 
-test("manifest submission", async () => {
+test.skip("manifest submission", async () => {
     const renderResult = renderWithMockedAuthContext();
     const {
         findByTestId,

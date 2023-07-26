@@ -297,7 +297,10 @@ const AdminUserManager: React.FC<{ token: string }> = ({ token }) => {
                 avatar={<SupervisorAccount />}
                 title={
                     <Grid container justify="space-between" alignItems="center">
-                        <Typography variant="h6">Manage Users</Typography>
+                        <Typography variant="h6">
+                            Manage Users (
+                            <i>Editing has been temporarily disabled</i>)
+                        </Typography>
                         <Grid item></Grid>
                         <Grid item>
                             <DataAccessReportDownloadButton />
