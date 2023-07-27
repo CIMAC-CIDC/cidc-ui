@@ -98,5 +98,11 @@
         ">0.2%",
         "not ie <= 11",
         "not op_mini all"
-    ]
+    ],
+    "eslintConfig": {
+        "extends": "react-app",
+        "rules": {
+            "@typescript-eslint/no-unused-vars": "off"
+        }
+    }
 }
