@@ -33,6 +33,7 @@ import { Person } from "@material-ui/icons";
 import { ORGANIZATION_NAME_MAP } from "../../util/constants";
 import { AuthContext, login, logout } from "../identity/AuthProvider";
 import FadeInOnMount from "../generic/FadeInOnMount";
+import { Alert } from "@material-ui/lab";
 
 const ENV = process.env.REACT_APP_ENV;
 
@@ -214,6 +215,12 @@ const Header: React.FunctionComponent<RouteComponentProps> = props => {
 
     return (
         <div data-testid="header">
+            <Card square>
+                <Alert severity="warning">
+                    This site is currently under migration. Some features will
+                    not be available during this time.
+                </Alert>
+            </Card>
             <EnvBanner />
             <div className={classes.tabs}>
                 <Grid
