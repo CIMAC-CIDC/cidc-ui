@@ -158,112 +158,11 @@ const ManifestUpload: React.FunctionComponent<{ token: string }> = ({
                 avatar={<CloudUpload />}
                 title={
                     <Typography variant="h6">
-                        Upload a shipping / receiving manifest
+                        Uploading a shipping / receiving manifest has been
+                        temporarily disabled
                     </Typography>
                 }
             />
-            <CardContent>
-                <form onSubmit={onSubmit}>
-                    <Grid
-                        container
-                        direction="row"
-                        justify="space-evenly"
-                        alignItems="center"
-                    >
-                        <Grid item xs={3}>
-                            <FormControl fullWidth>
-                                <FormLabel component="legend">
-                                    Manifest Type
-                                </FormLabel>
-                                <RadioGroup
-                                    name="manifestType"
-                                    value={manifestType || ""}
-                                    onChange={(e: any) =>
-                                        onValueChange(setManifestType)(e)
-                                    }
-                                    row
-                                >
-                                    {info &&
-                                        info.supportedTemplates.manifests.map(
-                                            name => (
-                                                <FormControlLabel
-                                                    key={name}
-                                                    label={name.toUpperCase()}
-                                                    value={name}
-                                                    control={<Radio />}
-                                                    disabled={
-                                                        status === "loading"
-                                                    }
-                                                    data-testid={`radio-${name}`}
-                                                />
-                                            )
-                                        )}
-                                </RadioGroup>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <FormControl fullWidth>
-                                <FormLabel component="legend">
-                                    Select a manifest to upload
-                                </FormLabel>
-                                <Input
-                                    id="uploadInput"
-                                    onClick={() => {
-                                        // Clear the file input onClick to ensure onChange
-                                        // fires on every selection, even if the same file
-                                        // is selected twice.
-                                        if (fileInput.current) {
-                                            fileInput.current.value = "";
-                                        }
-                                        // Also, reset the form state.
-                                        setStatus("unset");
-                                        setErrors([]);
-                                        setFile(undefined);
-                                    }}
-                                    disabled={
-                                        !manifestType ||
-                                        manifestType === "" ||
-                                        status === "loading"
-                                    }
-                                    onChange={() => {
-                                        if (fileInput.current) {
-                                            const files =
-                                                fileInput.current.files;
-                                            if (files && files.length > 0) {
-                                                setFile(files[0]);
-                                            }
-                                        }
-                                    }}
-                                    inputProps={{
-                                        ref: fileInput,
-                                        accept: XLSX_MIMETYPE,
-                                        "data-testid": "manifest-file-input"
-                                    }}
-                                    type="file"
-                                />
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={2}>
-                            <Button
-                                fullWidth
-                                type="submit"
-                                variant="contained"
-                                color="primary"
-                                disabled={status !== "validationSuccess"}
-                                data-testid="submit-button"
-                            >
-                                Upload
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </form>
-                <Divider />
-                <div style={{ margin: "1em" }}>
-                    <Grid container direction="row" alignItems="center">
-                        {feedbackDisplay[status]}
-                    </Grid>
-                </div>
-            </CardContent>
         </Card>
     );
 };

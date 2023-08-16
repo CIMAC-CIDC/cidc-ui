@@ -54,6 +54,10 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
 
     const isLoadingURL = trialId && uploadType && urlInfo === undefined;
 
+    const [createIntakeError, setCreateIntakeError] = React.useState<boolean>(
+        false
+    );
+
     return (
         <Card style={{ maxWidth: 800 }}>
             <CardHeader title="Transfer data" />
@@ -91,7 +95,18 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                                     upload_type: formData.uploadType
                                 }
                             }
-                        ).then(urlInfoRes => setUrlInfo(urlInfoRes));
+                        )
+                            .then(urlInfoRes => setUrlInfo(urlInfoRes))
+                            .catch(error => {
+                                console.error(error);
+                                if (
+                                    error?.response?.status === 503 &&
+                                    error.response.data === "Data Freeze"
+                                ) {
+                                    console.log("DATA FREEZE");
+                                    setCreateIntakeError(true);
+                                }
+                            });
                     })}
                 >
                     <Grid container spacing={3}>
@@ -161,17 +176,27 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                                         variant="contained"
                                         color="primary"
                                         disabled={
-                                            !trialIds || noTrialPermissions
+                                            !trialIds ||
+                                            noTrialPermissions ||
+                                            createIntakeError
                                         }
                                     >
                                         Initiate data transfer
                                     </Button>
                                 </Grid>
-                                {(trialIds === undefined || isLoadingURL) && (
+                                {createIntakeError ? (
+                                    <Typography
+                                        className="mb-0"
+                                        style={{ fontStyle: "italic" }}
+                                    >
+                                        Creating intake buckets has been
+                                        temporarily disabled
+                                    </Typography>
+                                ) : trialIds === undefined || isLoadingURL ? (
                                     <Grid item>
                                         <CircularProgress size={24} />
                                     </Grid>
-                                )}
+                                ) : null}
                             </Grid>
                         </Grid>
                     </Grid>
@@ -188,80 +213,39 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                             </strong>
                             .
                         </Typography>
-                        <Alert severity="warning">
-                            Before proceeding with your data transfer, please
-                            ensure your data and metadata do not contain PHI. In
-                            particular, please include only CIMAC IDs as
-                            identifiers for participants and samples, since
-                            identifiers specific to the{" "}
-                            <strong>{trialId}</strong> trial may contain PHI.
-                            Please <ContactAnAdmin lower /> if you need
-                            assistance.
-                        </Alert>
                         <Box px={2}>
                             <Grid container direction="column" spacing={1}>
                                 <Grid item>
                                     <Typography variant="h3">
-                                        1. Upload your data.
+                                        Uploading data has been temporarily
+                                        disabled, but you can still
+                                        view/download your files.
                                     </Typography>
-                                    <Typography>
-                                        Upload data to your transfer destination
-                                        directly from your browser using the{" "}
-                                        Google Cloud Storage web interface.
-                                        Ensure that files are not compressed in
-                                        any way, and retain the formats
-                                        specified in the metadata spreadsheet.{" "}
-                                        <strong>Note:</strong> be sure to log in
-                                        using the Google email associated with
-                                        your CIDC account.
-                                    </Typography>
-                                    <Box pb={2}>
-                                        <Button
-                                            onClick={() =>
-                                                window.open(
-                                                    urlInfo.console_url,
-                                                    "_blank",
-                                                    "noopener,noreferrer"
-                                                )
-                                            }
-                                            variant="contained"
-                                            color="primary"
-                                            endIcon={<OpenInNew />}
-                                        >
-                                            visit the data upload console
-                                        </Button>
-                                    </Box>
-                                    <Typography>
-                                        If you are comfortable using your
-                                        computer's terminal, you can also use
-                                        GCS's command-line tool{" "}
-                                        <Link
-                                            href="https://cloud.google.com/storage/docs/gsutil_install"
-                                            target="_blank"
-                                            rel="noreferrer nopopener"
-                                        >
-                                            <code>gsutil</code>
-                                        </Link>
-                                        to perform uploads. This method may be
-                                        faster for large uploads. From the root
-                                        of the directory containing the data you
-                                        wish to upload, run a command like:
-                                    </Typography>
-                                    <code className="language-bash">
-                                        gsutil -m cp -r{" "}
-                                        {"<local data directory>"}{" "}
-                                        {urlInfo.gs_url}
-                                    </code>
+                                    <Button
+                                        onClick={() =>
+                                            window.open(
+                                                urlInfo.console_url,
+                                                "_blank",
+                                                "noopener,noreferrer"
+                                            )
+                                        }
+                                        variant="contained"
+                                        color="primary"
+                                        endIcon={<OpenInNew />}
+                                    >
+                                        visit the data upload console
+                                    </Button>
                                 </Grid>
                                 <Grid item>
                                     <Typography variant="h3">
-                                        2. Download an empty metadata template
-                                        and populate it with your upload info.
+                                        You can still download an empty metadata
+                                        template and populate it with your
+                                        upload info while waiting...
                                     </Typography>
                                     <Typography>
                                         Please ensure all filepaths that you
                                         provide are relative to the root of your
-                                        local upload directory.
+                                        local data directory.
                                     </Typography>
                                     <TemplateDownloadButton
                                         verboseLabel
@@ -277,95 +261,6 @@ const TransferDataForm: React.FC = withIdToken(({ token }) => {
                                         color="primary"
                                         endIcon={<CloudDownload />}
                                     />
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="h3">
-                                        3. Upload your metadata spreadsheet,
-                                        along with a brief description of the
-                                        upload.
-                                    </Typography>
-                                    <Typography>
-                                        Filling out this form sends your
-                                        metadata spreadsheet directly to CIDC
-                                        Admins for review. Data included in this
-                                        upload will not appear in the CIDC until
-                                        CIDC Admins finalize its ingestion.
-                                        Admins may reach out via email for
-                                        clarification or feedback during this
-                                        process.
-                                    </Typography>
-                                    <form
-                                        onChange={() => setUploadSuccess(false)}
-                                        onSubmit={e => {
-                                            const formData = new FormData(
-                                                e.currentTarget
-                                            );
-                                            formData.append(
-                                                "trial_id",
-                                                trialId
-                                            );
-                                            formData.append(
-                                                "assay_type",
-                                                uploadType
-                                            );
-                                            apiCreate(
-                                                "/ingestion/intake_metadata",
-                                                token,
-                                                { data: formData }
-                                            ).then(() =>
-                                                setUploadSuccess(true)
-                                            );
-                                            e.preventDefault();
-                                        }}
-                                    >
-                                        <Grid
-                                            container
-                                            direction="column"
-                                            spacing={3}
-                                        >
-                                            <Grid item>
-                                                <FormLabel htmlFor="metadata-file">
-                                                    Metadata Spreadsheet
-                                                </FormLabel>
-                                                <FormControl fullWidth>
-                                                    <Input
-                                                        required
-                                                        id="metadata-file"
-                                                        name="xlsx"
-                                                        type="file"
-                                                        inputProps={{
-                                                            accept: ".xlsx"
-                                                        }}
-                                                    />
-                                                </FormControl>
-                                            </Grid>
-                                            <Grid item>
-                                                <FormLabel htmlFor="upload-description">
-                                                    Description of this upload
-                                                </FormLabel>
-                                                <FormControl fullWidth>
-                                                    <TextField
-                                                        required
-                                                        multiline
-                                                        name="description"
-                                                        id="upload-description"
-                                                    />
-                                                </FormControl>
-                                            </Grid>
-                                            <Grid item>
-                                                <Button
-                                                    type="submit"
-                                                    variant="contained"
-                                                    color="primary"
-                                                    disabled={uploadSuccess}
-                                                >
-                                                    {uploadSuccess
-                                                        ? "upload successful!"
-                                                        : "upload metadata"}
-                                                </Button>
-                                            </Grid>
-                                        </Grid>
-                                    </form>
                                 </Grid>
                             </Grid>
                         </Box>

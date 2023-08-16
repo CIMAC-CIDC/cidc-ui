@@ -66,10 +66,7 @@ it("works as expected", async () => {
     // gsutil command with generated URI should appear
     expect(
         getByText(
-            new RegExp(
-                `gsutil -m cp -r <local data directory> ${urls.gs_url}`,
-                "i"
-            )
+            new RegExp(`Uploading data has been temporarily disabled.`, "i")
         )
     ).toBeInTheDocument();
 
@@ -86,13 +83,13 @@ it("works as expected", async () => {
     expect(templateButton?.closest("button")).not.toBeNull();
 
     // Manifest submission form should work as expected
-    fireEvent.change(getByLabelText(/metadata spreadsheet/i), {
-        target: { files: [metadataFile] }
-    });
-    fireEvent.change(getByLabelText(/description/i), {
-        target: { value: description }
-    });
-    fireEvent.click(getByText(/upload metadata/i));
+    // fireEvent.change(getByLabelText(/metadata spreadsheet/i), {
+    //     target: { files: [metadataFile] }
+    // });
+    // fireEvent.change(getByLabelText(/description/i), {
+    //     target: { value: description }
+    // });
+    // fireEvent.click(getByText(/upload metadata/i));
 
     await waitFor(() => expect(apiCreate).toHaveBeenCalled());
 });

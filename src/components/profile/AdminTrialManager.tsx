@@ -422,6 +422,7 @@ const CreateNewTrial = withIdToken<ICreateNewTrialProps>(
                 color="primary"
                 startIcon={<Add />}
                 onClick={() => setIsCreating(true)}
+                disabled
             >
                 create a new trial
             </Button>
@@ -438,7 +439,12 @@ const TrialManager: React.FC<{ token: string }> = ({ token }) => {
         <Card>
             <CardHeader
                 avatar={<LibraryAdd />}
-                title={<Typography variant="h6">Manage Trials</Typography>}
+                title={
+                    <Typography variant="h6">
+                        Manage Trials{" "}
+                        <i>(creating/editing has been temporarily disabled)</i>
+                    </Typography>
+                }
             />
             <CardContent>
                 <Grid container direction="column" spacing={1}>
